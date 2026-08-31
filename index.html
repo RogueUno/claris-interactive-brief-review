@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CLARIS — Pre-Call Intelligence Dossier</title>
+  <script type="module" crossorigin src="./assets/index-DCtL_jFB.js"></script>
+  <link rel="stylesheet" crossorigin href="./assets/index-DMViWxPY.css">
+</head>
+<body>
+
+  <!-- Layer 1: Atmospheric Canvas (3 Independent Spatial Drift Volumes) -->
+  <div class="atmosphere-canvas">
+    <div class="atmo-volume atmo-volume--north"></div>
+    <div class="atmo-volume atmo-volume--east"></div>
+    <div class="atmo-volume atmo-volume--south"></div>
+  </div>
+
+  <!-- Micro-Grain Texture -->
+  <div class="atmo-grain">
+    <svg><filter id="grain-noise"><feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" stitchTiles="stitch"/></filter><rect width="100%" height="100%" filter="url(#grain-noise)"/></svg>
+  </div>
+
+  <!-- Boot Experience (Word-by-Word 2-Line Intro) -->
+  <div class="assistant-entry-stage" id="assistantEntryStage">
+    <div class="entry-line-1" id="entryLine1"></div>
+    <div class="entry-line-2" id="entryLine2"></div>
+  </div>
+
+  <!-- Signature Connected Vertical Navigation Rail (5 Required Destinations) -->
+  <nav class="claris-signature-rail" id="signatureRail" aria-label="Section Navigation">
+    <div class="rail-luminous-spine"></div>
+    
+    <a class="rail-station-item active" href="#station-dossier" data-station="station-dossier" title="01 Dossier">
+      <span class="rail-station-label">01 Dossier</span>
+      <span class="rail-node-orb"></span>
+    </a>
+    
+    <a class="rail-station-item" href="#station-posture" data-station="station-posture" title="02 Posture">
+      <span class="rail-station-label">02 Posture</span>
+      <span class="rail-node-orb"></span>
+    </a>
+    
+    <a class="rail-station-item" href="#station-gaps" data-station="station-gaps" title="03 Gaps">
+      <span class="rail-station-label">03 Gaps</span>
+      <span class="rail-node-orb"></span>
+    </a>
+    
+    <a class="rail-station-item" href="#station-copilot" data-station="station-copilot" title="04 Copilot">
+      <span class="rail-station-label">04 Copilot</span>
+      <span class="rail-node-orb"></span>
+    </a>
+
+    <a class="rail-station-item" href="#station-sources" data-station="station-sources" title="05 Evidence">
+      <span class="rail-station-label">05 Evidence</span>
+      <span class="rail-node-orb"></span>
+    </a>
+  </nav>
+
+  <!-- Full-Page Viewport Shell -->
+  <main class="viewport-shell" id="viewportShell">
+
+    <!-- Topbar -->
+    <header class="claris-topbar">
+      <div style="display: flex; align-items: center; gap: 12px;">
+        <div class="brand-capsule">
+          <span class="brand-gem"></span>
+          <span>CLARIS</span>
+        </div>
+        <span class="review-mode-indicator-pill" style="display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; border-radius: 9999px; background: rgba(139, 92, 246, 0.08); border: 1px solid rgba(139, 92, 246, 0.2); font-size: 11px; font-weight: 500; color: var(--text-secondary); letter-spacing: -0.01em;">
+          Demo review environment — frozen governed data
+        </span>
+      </div>
+
+      <div class="topbar-controls-row">
+        <div class="case-selector-wrapper">
+          <label for="caseSelect" class="case-selector-label">Prospect Case:</label>
+          <select id="caseSelect" class="case-select-dropdown">
+            <optgroup label="Real-World Prospects (Pure Live)">
+              <option value="real_gitguardian">Real · GitGuardian (B2B Security SaaS)</option>
+              <option value="real_dust">Real · Dust (Enterprise AI Platform)</option>
+              <option value="real_pennylane">Real · Pennylane (Fintech SaaS)</option>
+              <option value="real_koyeb">Real · Koyeb (Serverless Infrastructure)</option>
+            </optgroup>
+            <optgroup label="Canonical Baseline &amp; Synthetic Fixtures">
+              <option value="canonical_noota">Baseline · Noota (Governed Zero-Friction)</option>
+              <option value="case_a_rich">Case A · Rich / High-Signal (EnterpriseCorp)</option>
+              <option value="case_b_sparse">Case B · Sparse / Unknown-Heavy (StealthAI Lab)</option>
+              <option value="case_c_conflict">Case C · Genuine Conflict (FinPay Systems)</option>
+              <option value="case_d_disqualified">Case D · Low / Disqualified Fit (QuickFix Retail)</option>
+              <option value="case_e_unconfirmed_need">Case E · High Fit / Unconfirmed Need (HealthData Cloud)</option>
+            </optgroup>
+          </select>
+        </div>
+
+        <button class="theme-toggle-disc" id="themeToggleDisc" title="Toggle theme">
+          <svg class="sun-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4.5"/><path d="M12 2v2.2M12 19.8V22M4.9 4.9l1.55 1.55M17.55 17.55 19.1 19.1M2 12h2.2M19.8 12H22M4.9 19.1l1.55-1.55M17.55 6.45 19.1 4.9"/></svg>
+          <svg class="moon-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.8A9 9 0 1 1 11.2 3 7 7 0 0 0 21 12.8z"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- ====================================================================
+         SHEET 1: DEPTH 1 — ORIENT (MEETING DOSSIER & HERO)
+         ==================================================================== -->
+    <section class="frosted-optical-sheet" id="station-dossier">
+      
+      <!-- Block 1: Person → Contact Actions → Company Narrative + Prominent Time Lockup -->
+      <div class="person-narrative-grid">
+        
+        <div class="person-narrative-flow">
+          <div class="reveal-block reveal-block-1">
+            <h1 class="person-name" id="personName">Jean-Louis Boudart</h1>
+          </div>
+          
+          <div class="reveal-block reveal-block-2">
+            <div class="person-role-title">
+              <svg aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+              <span id="personRoleTitle">CEO &amp; Co-Founder at Noota</span>
+            </div>
+            
+            <div class="contact-actions-row">
+              <a class="contact-email-badge" id="contactEmailLink" href="mailto:jean-louis@noota.io">
+                <svg aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg>
+                <span id="contactEmailText">jean-louis@noota.io</span>
+              </a>
+
+              <a class="join-call-badge" id="joinMeetingBtn" href="#" target="_blank" rel="noopener noreferrer">
+                <svg aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 10 5-5v14l-5-5"/><rect width="13" height="14" x="2" y="5" rx="2"/></svg>
+                <span>Join Meeting</span>
+              </a>
+
+              <!-- Circular Glass Action Controls (34px optical / 40px touch hit) -->
+              <a class="glass-action-disc" id="contactMailBtn" href="mailto:jean-louis@noota.io" title="Send email">
+                <svg aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+              </a>
+
+              <a class="glass-action-disc" id="contactWebsiteBtn" href="https://noota.io" target="_blank" rel="noopener noreferrer" title="Visit verified website">
+                <svg aria-hidden="true" focusable="false" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+              </a>
+            </div>
+
+            <p class="company-narrative-text" id="companyNarrativeText">
+              Noota is an ai conversation intelligence platform that automatically records, transcribes, and summarizes meetings with active enterprise compliance exposure.
+            </p>
+          </div>
+        </div>
+
+        <!-- Prominent Meeting Time Lockup (1.5-2x bigger than h1) -->
+        <div class="temporal-anchor-flow reveal-block reveal-block-3">
+          <div class="meeting-date-micro" id="meetingDateMicro">Thursday, 28 August</div>
+          <div class="meeting-time-figure" id="meetingTimeFigure">14:00</div>
+          <div class="meeting-meta-line">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            <span id="meetingMetaText">UTC · in 20h</span>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Block 2: Opportunity Assessment + Decision Readiness + Potential Service Fit -->
+      <div class="assessment-and-recommendation-zone reveal-block reveal-block-4">
+        
+        <!-- Row 1: Unified Opportunity Assessment & Decision Readiness Layer -->
+        <div class="opportunity-assessment-unified-row">
+          <div class="assessment-title-lockup">
+            <span class="instrument-label">Opportunity Assessment</span>
+            <div class="assessment-primary-val-row">
+              <span class="assessment-tier-text" id="leadFitValueDisplay">Medium fit · 73/100</span>
+              <div class="workflow-qualify-pill">
+                <span class="status-dot"></span>
+                <span id="workflowBadgeText">QUALIFY</span>
+              </div>
+              <div class="workflow-status-pill">
+                <span id="workflowStatusText">PROVISIONAL</span>
+              </div>
+            </div>
+            <div class="assessment-subnote-line">
+              <span class="assessment-readiness-text" id="decisionReadinessSub">Confidence: Medium · 59% of decision-critical context established</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Row 2: Potential Service Fit (Distinct Recommendation Layer) -->
+        <div class="potential-service-fit-layer">
+          <span class="instrument-label">Potential Service Fit</span>
+          <div class="service-fit-title" id="serviceFitTitle">
+            SOC 2 Readiness &amp; Audit Management
+          </div>
+          <div class="service-fit-subtext" id="serviceFitSubtext">
+            Potential fit — Need not yet confirmed by prospect (UNKNOWN)
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Block 3: Strategic Interpretation (What Matters) -->
+      <div class="strategic-interpretation-block reveal-block reveal-block-4">
+        <span class="what-matters-label">What matters</span>
+        <p class="what-matters-editorial" id="whatMattersEditorial">
+          Noota (organization of unconfirmed scale) booked a discovery call with Jean-Louis Boudart. Zero-Friction intake mode: opportunity qualified as QUALIFY (Match: 73/100, Tier: MEDIUM, Status: PROVISIONAL) pending discovery exploration.
+        </p>
+      </div>
+
+    </section>
+
+    <!-- ====================================================================
+         SHEET 2: DEPTH 2 — PREPARE (3 SEMANTIC LAYERS: CONTEXT + POSTURE + GAPS)
+         ==================================================================== -->
+    <section class="frosted-optical-sheet scroll-reveal" id="station-posture">
+      
+      <div class="section-header-block">
+        <span class="section-tag">Depth 02 · Prepare</span>
+        <h2 class="section-title">Opportunity Context &amp; Current Posture</h2>
+      </div>
+
+      <!-- Layer 1: Opportunity Context (Interpret, Do Not Inventory) -->
+      <div class="prepare-layer-block">
+        <span class="prepare-layer-tag">Opportunity Context</span>
+        <div class="opportunity-context-card">
+          <div class="context-fit-header">
+            <span class="instrument-label">Potential Service Relevance</span>
+            <div class="context-fit-title" id="contextFitTitle">SOC 2 Readiness &amp; Audit Management</div>
+          </div>
+          <div class="context-fit-body">
+            <div class="context-fit-col">
+              <span class="instrument-label">Why It May Fit</span>
+              <p class="context-fit-text" id="contextWhyFitText">
+                Active audit preparation combined with an established security-control environment may indicate meaningful governance and evidence-management workload.
+              </p>
+            </div>
+            <div class="context-fit-col">
+              <span class="instrument-label">Need Status</span>
+              <p class="context-fit-text context-need-status" id="contextNeedStatusText">
+                Potential fit — Need not yet confirmed by prospect (UNKNOWN)
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Layer 2: Current Posture (One Factual Home per Raw Fact) -->
+      <div class="prepare-layer-block">
+        <span class="prepare-layer-tag">Current Posture</span>
+        <div class="current-posture-grid">
+          
+          <div class="posture-domain-card">
+            <div class="domain-header">
+              <span class="domain-icon-dot"></span>
+              <span class="instrument-label">Cloud &amp; Security</span>
+            </div>
+            <p class="domain-content-text" id="postureCloudSecurityText">
+              Google Cloud Platform (GCP) · Google KMS · Cloud IAM
+            </p>
+          </div>
+
+          <div class="posture-domain-card">
+            <div class="domain-header">
+              <span class="domain-icon-dot"></span>
+              <span class="instrument-label">Compliance</span>
+            </div>
+            <p class="domain-content-text" id="postureComplianceText">
+              SOC 2 Type II (Audit in Preparation) · ISO 27001 (Audit in Preparation) · GDPR (Disclosed) · CCPA (Disclosed) · EU AI Act (Disclosed)
+            </p>
+          </div>
+
+          <div class="posture-domain-card">
+            <div class="domain-header">
+              <span class="domain-icon-dot"></span>
+              <span class="instrument-label">External Assurance</span>
+            </div>
+            <p class="domain-content-text" id="postureExternalAssuranceText">
+              Synacktiv (Third-party penetration testing referenced)
+            </p>
+          </div>
+
+        </div>
+
+        <!-- Where the picture breaks: Conflict Callout (Dynamic) -->
+        <div class="posture-conflict-callout" id="postureConflictCallout" style="display: none;">
+          <div class="conflict-header">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            <span id="postureConflictHeader">Where the picture breaks · Evidence Conflict</span>
+          </div>
+          <p class="conflict-body" id="postureConflictBody">
+            Public materials present inconsistent signals between active SOC 2 / ISO 27001 claims and ongoing audit readiness preparation. Reconcile this baseline during discovery.
+          </p>
+        </div>
+      </div>
+
+      <!-- Layer 3: Still Unknown (Turn Missing Data into Discovery Preparation) -->
+      <div class="prepare-layer-block" id="station-gaps">
+        <span class="prepare-layer-tag">Still Unknown Before The Call</span>
+        <div class="discovery-gaps-editorial-list" id="discoveryGapsSequence">
+          <!-- Injected dynamically via JS as clean editorial rows -->
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ====================================================================
+         SHEET 3: DEPTH 3 — CONDUCT (ELEVATED COPILOT OPERATING PLANE)
+         ==================================================================== -->
+    <section class="frosted-optical-sheet frosted-optical-sheet--copilot scroll-reveal" id="station-copilot">
+      
+      <div class="section-header-block">
+        <span class="section-tag">Depth 03 · Conduct</span>
+        <h2 class="section-title">Live Discovery Copilot &amp; Call Tasks</h2>
+      </div>
+
+      <div class="copilot-two-column-layout">
+        
+        <!-- Left: Dominant Research-Aware Discovery Questions -->
+        <div class="copilot-questions-column">
+          <span class="instrument-label">Research-Aware Discovery Questions</span>
+          
+          <div id="discoveryQuestionsList" style="display: flex; flex-direction: column; gap: 24px;">
+            <!-- Questions rendered dynamically with 20px quote visible by default & expandable rationale -->
+          </div>
+        </div>
+
+        <!-- Right: Live Call Verification & Strategy -->
+        <div class="copilot-sidebar-column">
+          
+          <!-- Verification Checklist -->
+          <div class="verification-tasks-block">
+            <span class="instrument-label">Live Call Verification Checklist</span>
+            <div class="verification-tasks-list" id="verificationTasksList">
+              <!-- Checklist tasks rendered dynamically -->
+            </div>
+          </div>
+
+          <!-- Recommended Approach -->
+          <div class="call-strategy-block" id="station-strategy">
+            <span class="instrument-label">Recommended Approach</span>
+            <div class="strategy-heading">Call Direction</div>
+            <p class="strategy-text" id="callDirectionText">
+              Lead with discovery and active listening. Probe what triggered the call without assuming predefined compliance deadlines. Explore whether ongoing vCISO / security-governance support is warranted based on operational burden and ownership gaps.
+            </p>
+            <div class="strategy-next-step" id="strategyNextStepText">
+              <strong>Suggested Next Step:</strong> Summarize discovery findings and send a tailored 1-page compliance roadmap overview.
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </section>
+
+    <!-- ====================================================================
+         SHEET 4: SOURCES & PROVENANCE FOOTER
+         ==================================================================== -->
+    <footer class="sources-provenance-sheet scroll-reveal" id="station-sources">
+      <div class="evidence-metrics-summary-row">
+        <div class="evidence-metric-pill">
+          <span class="evidence-metric-num" id="evidenceCoverageNum">86%</span>
+          <span class="evidence-metric-label">Research Coverage</span>
+        </div>
+        <div class="evidence-metric-pill">
+          <span class="evidence-metric-num" id="evidenceReadinessNum">59%</span>
+          <span class="evidence-metric-label">Decision-Critical Readiness</span>
+        </div>
+        <div class="evidence-metric-pill">
+          <span class="evidence-metric-num" id="evidenceConfidenceNum">MEDIUM</span>
+          <span class="evidence-metric-label">Evidence Confidence</span>
+        </div>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 8px;">
+        <span class="instrument-label">Verified Research Sources</span>
+        <div class="sources-list-row" id="sourcesListRow">
+          <!-- Source chips injected dynamically -->
+        </div>
+      </div>
+
+      <!-- Curated Evidence & Provenance Inspector (Progressive Disclosure) -->
+      <div class="evidence-inspector-block" id="evidenceInspectorBlock">
+        <span class="instrument-label">Curated Evidence &amp; Provenance Inspector</span>
+        <div class="curated-claims-list" id="curatedClaimsList">
+          <!-- Curated claims injected dynamically -->
+        </div>
+      </div>
+
+      <div class="provenance-meta-row" id="provenanceMetaRow">
+        <span>Pipeline Run: <strong id="provenanceRunId">brf_noota_20260830</strong></span>
+        <span id="provenanceSummaryText">Research Mode: Live First-Party &amp; Web Synthesis · Governed Invariants Active</span>
+        <span>Consultant: <strong id="provenanceConsultantFirm">SecureAdvisory LLC</strong></span>
+      </div>
+    </footer>
+
+  </main>
+
+</body>
+</html>
