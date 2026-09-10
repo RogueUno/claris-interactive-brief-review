@@ -1,0 +1,3068 @@
+{
+  "trace": [
+    {
+      "question_id": "q_current_priorities",
+      "raw_answer": {
+        "selected_option_ids": [
+          "opt_trigger_ab62d25b7d33"
+        ],
+        "custom_values": [
+          "Enterprise customer diligence is driving the initiative. Timing is this quarter."
+        ]
+      },
+      "ack": {
+        "status": "success",
+        "session_id": "pis_eed197f4ecac",
+        "question_id": "q_current_priorities",
+        "session_status": "IN_PROGRESS",
+        "remaining_question_count": 2,
+        "remaining_question_ids": [
+          "q_assurance_requirement",
+          "q_technical_scope"
+        ],
+        "current_question_id": "q_assurance_requirement",
+        "is_complete": false,
+        "bundle_id": null
+      }
+    },
+    {
+      "question_id": "q_assurance_requirement",
+      "raw_answer": {
+        "selected_option_ids": [
+          "opt_assurance_fcf6e7e6da5a"
+        ],
+        "custom_values": [
+          "The immediate requirement is a customer security review and trust-assurance process. There is not yet a confirmed SOC 2 or ISO 27001 requirement."
+        ]
+      },
+      "ack": {
+        "status": "success",
+        "session_id": "pis_eed197f4ecac",
+        "question_id": "q_assurance_requirement",
+        "session_status": "IN_PROGRESS",
+        "remaining_question_count": 1,
+        "remaining_question_ids": [
+          "q_technical_scope"
+        ],
+        "current_question_id": "q_technical_scope",
+        "is_complete": false,
+        "bundle_id": null
+      }
+    },
+    {
+      "question_id": "q_technical_scope",
+      "raw_answer": {
+        "selected_option_ids": [
+          "opt_technical_9b3e80478e78",
+          "opt_technical_f45256071588"
+        ],
+        "custom_values": [
+          "The audit should focus on OAuth authorization flows and the APIs used for social-platform integrations."
+        ]
+      },
+      "ack": {
+        "status": "success",
+        "session_id": "pis_eed197f4ecac",
+        "question_id": "q_technical_scope",
+        "session_status": "COMPLETED",
+        "remaining_question_count": 0,
+        "remaining_question_ids": [],
+        "current_question_id": null,
+        "is_complete": true,
+        "bundle_id": "pab_554ffeb7bd94"
+      }
+    }
+  ],
+  "result": {
+    "status": "success",
+    "pipeline_version": "2.0.0-governed",
+    "identity": {
+      "tenant_id": "tenant_northstar_001",
+      "consultant_id": "consultant_northstar_001",
+      "sot_id": "csot_2567f31891c9",
+      "opportunity_id": "opp_537fd8570cd8",
+      "prospect_id": "planoly-live-adaptive-001"
+    },
+    "prospect_id": "planoly-live-adaptive-001",
+    "consultant_id": "consultant_northstar_001",
+    "intake_mode": "MANUAL",
+    "prospect_intake": {
+      "prospect_id": "planoly-live-adaptive-001",
+      "company_name": "Planoly",
+      "domain": "https://www.planoly.com/",
+      "booking_data": {
+        "prospect_name": "Thai Huang",
+        "prospect_email": "thaihuangg@planoly.com",
+        "prospect_company": "Planoly",
+        "meeting_time": "2026-09-15T14:00:00.000Z",
+        "booking_note": "We're looking for API Security Auditing and Compliance & Trust Certification, among other things."
+      }
+    },
+    "governance_mode": "GOVERNED",
+    "decision": "QUALIFY",
+    "assessment_status": "PROVISIONAL",
+    "opportunity_score": null,
+    "icp_fit_tier": null,
+    "user_facing_evidence": {
+      "coverage_score_pct": 95,
+      "material_conflicts": [],
+      "traceability_map": {
+        "potential_service_fit": []
+      },
+      "grounded_display_diagnostics": {
+        "status": "GEMINI_GROUNDED_SYNTHESIS",
+        "gemini_invoked": true,
+        "model": "gemini-flash-lite-latest",
+        "input_evidence_ids": [
+          "ev_s04_ef6907aa8432",
+          "ev_s04_d94b163afd89",
+          "ev_s04_41eb0b7abdbe",
+          "ev_s04_ffd3248bfd5d",
+          "ev_s04_1123ed48d3d9",
+          "ev_s04_7c7cac060ae2",
+          "ev_s04_083f94a93b8c",
+          "ev_s04_2ad647831845",
+          "ev_s04_ef165cd5c7af",
+          "ev_s04_9665e823dac5",
+          "ev_s04_746fdf479e18",
+          "ev_s04_8ed835d70221",
+          "ev_s04_a2a927cad809",
+          "ev_s04_74c973529086",
+          "ev_s04_6585c511f320",
+          "ev_s04_e2f7bdc9539e",
+          "ev_s04_47934f96865a",
+          "ev_s04_ca2cc8b874a5"
+        ],
+        "ranked_sources": [
+          {
+            "evidence_id": "ev_s04_ef6907aa8432",
+            "source_url": "https://www.planoly.com",
+            "source_title": "First-Party Web: / (Homepage)",
+            "source_type": "FIRST_PARTY_PUBLIC",
+            "source_rank": 1,
+            "snippet": "Social Media Planner & Management Tool | Planoly \n\n PRICING Resources LOG IN LOG IN GET STARTED FREE The social media planner that goes way beyond scheduling Manage your entire social media workflow in one place. FREE 14-DAY TRIAL LEARN MORE Stop switching between tools. Planoly handles it all. Features to help you Plan & Create Generate content ideas with AI Get unstuck with post ideas, keyword r"
+          },
+          {
+            "evidence_id": "ev_s04_d94b163afd89",
+            "source_url": "https://www.planoly.com/about-us",
+            "source_title": "About Us",
+            "source_type": "FIRST_PARTY_PUBLIC",
+            "source_rank": 1,
+            "snippet": "# Built for creators, by creators\n\nPlanoly launched in 2016 as the first visual Instagram planner, helping creators curate the perfect grid.\n\n## Social media and the creator economy have evolved, so have we.\n\nToday, Planoly is a suite of tools designed to streamline every aspect of the creator workflow from inspiration to planning, scheduling, and now–making a living.\n\n## Our goal\n\nWe believe that"
+          },
+          {
+            "evidence_id": "ev_s04_41eb0b7abdbe",
+            "source_url": "https://www.planoly.com/acceptable-use-policy",
+            "source_title": "Acceptable Use Policy",
+            "source_type": "FIRST_PARTY_PUBLIC",
+            "source_rank": 1,
+            "snippet": "Use your best efforts to prevent unauthorized access to or use of the Services, including by maintaining a strong password and keeping your password and other login credentials confidential.\n Monitor and control all activity conducted through your Planoly account.\n Notify us promptly if you become aware of our suspect any security breach regarding your account, including any loss, theft, or unauth"
+          },
+          {
+            "evidence_id": "ev_s04_ffd3248bfd5d",
+            "source_url": "https://www.planoly.com/blog/five-planoly-features-you-should-know-about",
+            "source_title": "Five Planoly Features You Should Know About | Planoly",
+            "source_type": "FIRST_PARTY_PUBLIC",
+            "source_rank": 1,
+            "snippet": "‍\n\n# 1. Multi-platform scheduling\n\nWhat it is: A centralized dashboard that lets you manage all of your content in one place. Planoly allows you to schedule content for Instagram, Facebook, TikTok, Pinterest, LinkedIn, YouTube, Threads, and X all at once.\n\n‍\n\nWhy you need it: Gone are the days of logging in and out of five different apps to get your content published. With Planoly, you can set con"
+          },
+          {
+            "evidence_id": "ev_s04_1123ed48d3d9",
+            "source_url": "https://www.planoly.com/privacy-policy",
+            "source_title": "Privacy Policy",
+            "source_type": "FIRST_PARTY_PUBLIC",
+            "source_rank": 1,
+            "snippet": "‍\n\n# Children’s Privacy\n\nOur Services are not intended for general audiences and not for children under the age of 18. No one under age 18 may provide any personal information through any of the Services. We do not knowingly collect personal information from children under 18. If you are under 18, do not use or provide any information through the Services. If we learn we have collected or received"
+          },
+          {
+            "evidence_id": "ev_s04_7c7cac060ae2",
+            "source_url": "https://www.planoly.com/privacy-policy",
+            "source_title": "Privacy Policy",
+            "source_type": "FIRST_PARTY_PUBLIC",
+            "source_rank": 1,
+            "snippet": "If Planoly is acquired by or merged with a third-party entity, Planoly reserves the right to transfer or assign the personal information you provided to us as part of such merger, acquisition, sale, or other change of control to the new entity. In the event of bankruptcy, insolvency, reorganization, receivership, or assignment for the benefit of creditors, or the application of laws or equitable p"
+          },
+          {
+            "evidence_id": "ev_s04_083f94a93b8c",
+            "source_url": "https://www.planoly.com/terms-of-use",
+            "source_title": "Legals",
+            "source_type": "FIRST_PARTY_PUBLIC",
+            "source_rank": 1,
+            "snippet": "These Terms of Use are entered into by and between you and Planogram, LLC, d/b/a “Planoly” (“Planoly”, “Company”, “we”, “our”, or “us”). These Terms of Use govern your access to and use of www.planoly.com and (the “Websites”), the Planoly mobile and/or web application (the “App”), and any content, functionality, and services offered on or through the Websites and the App (collectively, the “Servic"
+          },
+          {
+            "evidence_id": "ev_s04_2ad647831845",
+            "source_url": "https://www.planoly.com/terms-of-use",
+            "source_title": "Legals",
+            "source_type": "FIRST_PARTY_PUBLIC",
+            "source_rank": 1,
+            "snippet": "With Linked Services for third-party integration, Creators may be asked to verify credentials in the future. It is the Creator’s sole responsibility to track, refresh, and monitor credentials. Please see our Privacy Policyfor more information about how Creators can alter the security settings for these Linked Services. Creators acknowledge and agree that Linked Services may add, remove, bifurcate,"
+          },
+          {
+            "evidence_id": "ev_s04_ef165cd5c7af",
+            "source_url": "https://apitracker.io/a/planoly",
+            "source_title": "Planoly API - Developer docs, APIs, SDKs, and auth. | API Tracker",
+            "source_type": "THIRD_PARTY_PUBLIC",
+            "source_rank": 2,
+            "snippet": "# Planoly API\n\n#### Links\n\n#### Customers & developers\n\n#### Alternatives\n\nManage, plan, and schedule your Instagram posts from your computer and mobile phones. Create a cohesive Instagram feed and manage multiple Instagram accounts.\n\n## Planoly API profile\n\nAPI styles\n\n-\n\nDeveloper docs\n\n-\n\nAPI Reference\n\n-\n\nWebhooks\n\nWebhooks management API\n\n-\n\nSandbox environment\n\n-\n\nAuthentication\n\nIdentity pr"
+          },
+          {
+            "evidence_id": "ev_s04_9665e823dac5",
+            "source_url": "https://apps.apple.com/us/app/planoly-social-media-planner/id1014568284",
+            "source_title": "Planoly: Social Media Planner - App Store - Apple",
+            "source_type": "THIRD_PARTY_PUBLIC",
+            "source_rank": 2,
+            "snippet": "place SELL WHAT YOU MAKE Build your Creator Store and sell products and digital services — all from the same account. Whether you're planning an Instagram feed, creating full-time, or running every channel with a team, Planoly helps you post consistently and grow — without the busywork. Download Planoly and take back your time. Privacy Policy: Terms of Use: Support: Instagram / TikTok / X: @planol"
+          },
+          {
+            "evidence_id": "ev_s04_746fdf479e18",
+            "source_url": "https://influencermarketinghub.com/planoly",
+            "source_title": "Planoly Review | Pricing & Features (2025) - Social Media Marketing Platform",
+            "source_type": "THIRD_PARTY_PUBLIC",
+            "source_rank": 2,
+            "snippet": "Planoly has evolved since then, but it still very much keeps its visual focus. The first step in creating every post continues to be uploading an image or video. However, it has also innovated with additional products, like Sellit, a bolt-on to simplify your Instagram social selling.\n\nPlanoly\n\nPLANOLY makes it easy to create, customize, plan and schedule content for Instagram, Pinterest, Facebook,"
+          },
+          {
+            "evidence_id": "ev_s04_8ed835d70221",
+            "source_url": "https://leadiq.com/c/planoly/5a78684d5700005101d3b560",
+            "source_title": "Planoly Company Overview, Contact Details & Competitors | LeadIQ",
+            "source_type": "THIRD_PARTY_PUBLIC",
+            "source_rank": 2,
+            "snippet": "Advertising ServicesTexas, United States11-50 Employees\n\n```\nPlanoly is a social media management platform based in Austin, Texas, serving creators and small businesses within the advertising services industry. The platform provides tools to plan, create, and schedule social content, and it also supports setting up an online storefront to monetize content. It focuses on simplifying content workflo"
+          },
+          {
+            "evidence_id": "ev_s04_a2a927cad809",
+            "source_url": "https://pages.planoly.com/entrepreneurs",
+            "source_title": "Social Media Marketing For Entrepreneurs | PLANOLY",
+            "source_type": "THIRD_PARTY_PUBLIC",
+            "source_rank": 2,
+            "snippet": "Terms of Service\n |\n Privacy Policy\n\n Follow PLANOLY on TikTok\n Follow PLANOLY on Instagram\n Follow PLANOLY on Pinterest\n Watch PLANOLY on YouTube\n Follow PLANOLY on Twitter\n Like PLANOLY on Facebook\n Follow PLANOLY on LinkedIn [...] CREATE FREE ACCOUNT\n\nDownload PLANOLY on the App Store Download PLANOLY on the PlayStore\n\nDOWNLOAD PLANOLY\n\nStories Planner\n\n## More Resources VIEW ALL\n\n##### Our New"
+          },
+          {
+            "evidence_id": "ev_s04_74c973529086",
+            "source_url": "https://pages.planoly.com/social-media-manager",
+            "source_title": "Advanced Social Media Management Tools | PLANOLY",
+            "source_type": "THIRD_PARTY_PUBLIC",
+            "source_rank": 2,
+            "snippet": "##### Our New Favorite Gen Z Marketing Trends\n\n##### New Quiet Mode Feature On Instagram\n\n##### How to Create a Strategy for Cross-Posting\n\nSTART 7-DAY FREE TRIAL\n\nDownload PLANOLY on the App Store Download PLANOLY on the PlayStore\n\nStart 7-Day Free Trial\n\nPricing About Events Newsroom CAREERS PREFERRED PARTNERS Newsletter\n\nVideo Planner IG Planner Reels Planner Content Templates linkit Pin Planne"
+          },
+          {
+            "evidence_id": "ev_s04_6585c511f320",
+            "source_url": "https://play.google.com/store/apps/details?id=com.planoly.android&hl=en_US",
+            "source_title": "Planoly: Social Media Planner - Apps on Google Play",
+            "source_type": "THIRD_PARTY_PUBLIC",
+            "source_rank": 2,
+            "snippet": "Planoly is the social media planner and scheduler trusted by 8 million creators to plan, edit, schedule, and auto-post across every channel — from one app. \n \nPlan your content calendar, preview your Instagram grid, write captions with AI, edit your photos and videos, and let Planoly auto-post to Instagram, TikTok, Threads, LinkedIn, YouTube, Facebook, X, and Pinterest. Build a social media strate"
+          },
+          {
+            "evidence_id": "ev_s04_e2f7bdc9539e",
+            "source_url": "https://www.instagram.com/p/B84EFBZJtjq",
+            "source_title": "Instagram",
+            "source_type": "THIRD_PARTY_PUBLIC",
+            "source_rank": 2,
+            "snippet": "planoly\n\n•\n\nFollow\n\nplanoly's profile picture\n\nplanoly\n\nIs PLANOLY safe to use? 🧐💭 The super-short answer is YES, but today we're explaining exactly why you have no need to worry about the safety of your account. We're here to elevate your business! Tap through 👉 to learn why you can trust us to help you manage your content. \n⠀⠀⠀⠀⠀⠀⠀⠀⠀ \nImportant Takeaways: \n1️⃣ PLANOLY is an official Instagram"
+          },
+          {
+            "evidence_id": "ev_s04_47934f96865a",
+            "source_url": "https://www.linkedin.com/company/planoly",
+            "source_title": "Planoly - Your something is worth building.",
+            "source_type": "THIRD_PARTY_PUBLIC",
+            "source_rank": 2,
+            "snippet": "# Planoly\nYour something is worth building.\nAdvertising Services • Austin, TX • 10,426 followers • 11-50 employees\n\n## Overview\n💸 Build an online storefront in minutes & start earning ✨ Plan, create and schedule your social content\n\n### Website\n\n### Crunchbase\nN/A\n### LinkedIn\nN/A\n\n### Industry\nAdvertising Services\n\n### Company Size\n11-50 employees \n29 associated members (LinkedIn members who've"
+          },
+          {
+            "evidence_id": "ev_s04_ca2cc8b874a5",
+            "source_url": "https://www.trustpilot.com/review/www.planoly.com",
+            "source_title": "Read Customer Service Reviews of www.planoly.com - Trustpilot",
+            "source_type": "THIRD_PARTY_PUBLIC",
+            "source_rank": 2,
+            "snippet": "Image 1: Trustpilot reviews\n\n#### Suggested companies\n\n#### Later later.com•349 reviews #### 1.5#### Metricool metricool.com•653 reviews #### 4.0#### Joybuy www.joybuy.co.uk•17K reviews #### 4.6\n#### Suggested searches\n\nRoofing contractor in United StatesFurniture store in New YorkBest internet marketing serviceInsurance agency in ChicagoCar dealer near me\n\nCategoriesBlogLog inFor businesses\n\nFor"
+          }
+        ],
+        "output_basis": [
+          {
+            "text": "Planoly provides a social media planning, scheduling, and management platform serving creators and small businesses, with multi-platform auto-posting and creator storefront features.",
+            "posture": "SUPPORTED",
+            "source_refs": [
+              "ev_s04_ef6907aa8432",
+              "ev_s04_ffd3248bfd5d",
+              "ev_s04_9665e823dac5",
+              "ev_s04_8ed835d70221",
+              "ev_s04_6585c511f320"
+            ],
+            "consultant_relevance": "Provides foundational product context for understanding their multi-platform integration environment.",
+            "verification_path": "Review public platform capabilities on planoly.com.",
+            "authority": "DISPLAY_ONLY"
+          },
+          {
+            "text": "The prospect has requested API Security Auditing alongside a customer security review and trust-assurance process, with a specific focus on OAuth authorization flows and social-platform integration APIs.",
+            "posture": "SUPPORTED",
+            "source_refs": [
+              "ev_s04_ef165cd5c7af",
+              "ev_s04_2ad647831845"
+            ],
+            "consultant_relevance": "Directly highlights the technical perimeter and integration mechanisms requiring evaluation during the audit.",
+            "verification_path": "Confirm OAuth and integration scopes directly with the prospect during discovery.",
+            "authority": "DISPLAY_ONLY"
+          },
+          {
+            "text": "The accepted company and public technical context gives the booking request a concrete surface to explore, but the actual boundaries and assurance outcome are not established yet; resolve that distinction before shaping an advisory path.",
+            "posture": "INTERPRETATION",
+            "source_refs": [
+              "ev_s04_ef6907aa8432",
+              "ev_s04_ffd3248bfd5d",
+              "ev_s04_9665e823dac5",
+              "ev_s04_8ed835d70221",
+              "ev_s04_6585c511f320",
+              "meeting_context:BOOKING_FORM:CALENDLY",
+              "prospect_answer:PROSPECT_PROVIDED"
+            ],
+            "consultant_relevance": "Connects company context to the stated conversation without treating public signals as confirmed need.",
+            "verification_path": "Confirm the requested boundaries and desired outcome with the prospect.",
+            "authority": "DISPLAY_ONLY"
+          },
+          {
+            "text": "The booking explicitly leaves additional areas unspecified, so the consultant should keep the agenda open and ask what else matters without inferring the missing scope.",
+            "posture": "INTERPRETATION",
+            "source_refs": [
+              "meeting_context:BOOKING_FORM:CALENDLY"
+            ],
+            "consultant_relevance": "Preserves the prospect's open-ended scope signal for live discovery.",
+            "verification_path": "Ask what additional areas the prospect wants covered.",
+            "authority": "DISPLAY_ONLY"
+          },
+          {
+            "text": "The immediate requirement focuses on a customer security review and trust-assurance process, with no confirmed SOC 2 or ISO 27001 requirement yet established.",
+            "posture": "UNKNOWN",
+            "source_refs": [],
+            "consultant_relevance": "Clarifies the compliance baseline so the consultant does not assume formal framework mandates.",
+            "verification_path": "Verify if external customer security questionnaires or enterprise tier requirements are driving the trust-assurance process.",
+            "authority": "DISPLAY_ONLY"
+          },
+          {
+            "text": "The full extent of the 'among other things' scope referenced in the booking form remains unspecified.",
+            "posture": "UNKNOWN",
+            "source_refs": [
+              "meeting_context:BOOKING_FORM:CALENDLY",
+              "prospect_answer:PROSPECT_PROVIDED"
+            ],
+            "consultant_relevance": "Identifies unmapped deliverables that need clarification to prevent scope creep.",
+            "verification_path": "Ask the prospect to itemize the remaining areas included under their open-ended request.",
+            "authority": "DISPLAY_ONLY"
+          },
+          {
+            "text": "Verify whether the customer security review requires specific artifact generation (such as security whitepapers or policy documentation) alongside the API audit.",
+            "posture": "ACTION",
+            "source_refs": [],
+            "consultant_relevance": "Ensures all expected outputs of the trust-assurance process are identified.",
+            "verification_path": "Ask the prospect directly what documentation or deliverables they expect from the trust-assurance review.",
+            "authority": "DISPLAY_ONLY"
+          },
+          {
+            "text": "The prospect explicitly left additional areas unspecified; do not infer what those areas are.",
+            "posture": "UNKNOWN",
+            "source_refs": [
+              "meeting_context:BOOKING_FORM:CALENDLY"
+            ],
+            "consultant_relevance": "Keep additional scope open without inferring unstated needs.",
+            "verification_path": "Ask the prospect what additional areas they want covered.",
+            "authority": "DISPLAY_ONLY"
+          },
+          {
+            "text": "What specific customer security review or trust-assurance milestones are driving this initiative?",
+            "posture": "HYPOTHESIS",
+            "source_refs": [
+              "meeting_context:BOOKING_FORM:CALENDLY",
+              "prospect_answer:PROSPECT_PROVIDED"
+            ],
+            "consultant_relevance": "Ensures alignment on the precise deliverables required for the trust-assurance process.",
+            "verification_path": "Directly inquire about the origin of the trust-assurance requirement.",
+            "authority": "DISPLAY_ONLY"
+          },
+          {
+            "text": "Which social-platform integration APIs and OAuth flows represent the highest priority for the security audit?",
+            "posture": "HYPOTHESIS",
+            "source_refs": [
+              "ev_s04_ef165cd5c7af",
+              "ev_s04_2ad647831845"
+            ],
+            "consultant_relevance": "Helps scope the technical depth of the API security audit accurately.",
+            "verification_path": "Review integration architecture documentation with the technical team.",
+            "authority": "DISPLAY_ONLY"
+          },
+          {
+            "text": "What additional areas are encompassed by your reference to 'among other things' in the booking request?",
+            "posture": "ACTION",
+            "source_refs": [
+              "meeting_context:BOOKING_FORM:CALENDLY",
+              "prospect_answer:PROSPECT_PROVIDED"
+            ],
+            "consultant_relevance": "Prevents missing out-of-band expectations during proposal formulation.",
+            "verification_path": "Prompt the prospect to list any supplementary project objectives.",
+            "authority": "DISPLAY_ONLY"
+          },
+          {
+            "text": "Focus the discovery conversation on defining the exact boundaries of the customer security review, detailing the specific OAuth flows and APIs in scope, and uncovering any additional objectives hidden behind the open-ended booking language.",
+            "posture": "ACTION",
+            "source_refs": [
+              "meeting_context:BOOKING_FORM:CALENDLY",
+              "prospect_answer:PROSPECT_PROVIDED"
+            ],
+            "consultant_relevance": "Maintains a disciplined call structure focused strictly on prospect-provided priorities.",
+            "verification_path": "Execute discovery questions sequentially to validate all scope components.",
+            "authority": "DISPLAY_ONLY"
+          },
+          {
+            "text": "Outline a targeted discovery follow-up plan based on the clarified API integration scope and customer review requirements.",
+            "posture": "ACTION",
+            "source_refs": [],
+            "consultant_relevance": "Provides a clear procedural transition following the discovery conversation.",
+            "verification_path": "Confirm agreement with the prospect on the next engagement phase.",
+            "authority": "DISPLAY_ONLY"
+          }
+        ]
+      }
+    },
+    "briefJson": {
+      "schema_version": "1.0.0-governed",
+      "projection_id": "gbi_173dcb21b1da",
+      "identity": {
+        "tenant_id": "tenant_northstar_001",
+        "consultant_id": "consultant_northstar_001",
+        "opportunity_id": "opp_537fd8570cd8",
+        "prospect_id": "planoly-live-adaptive-001"
+      },
+      "opportunity_source": "MANUAL",
+      "subject": {
+        "company_name": "Planoly",
+        "domain": "planoly.com",
+        "person_name": "Thai Huang",
+        "person_email": "thaihuangg@planoly.com",
+        "role_title": null,
+        "booking_context": {
+          "meeting_time": "2026-09-15T14:00:00.000Z",
+          "meeting_url": null,
+          "event_timezone": null,
+          "booking_source": null
+        }
+      },
+      "meeting_context": {
+        "source_text": "We're looking for API Security Auditing and Compliance & Trust Certification, among other things.",
+        "source_type": "BOOKING_FORM",
+        "source_provider": "CALENDLY",
+        "submitted_by": null,
+        "captured_at": "2026-09-10T13:16:21.985Z"
+      },
+      "consultant_context": {
+        "firm_name": "Priority Stack Advisory",
+        "consultant_name": "Jordan Vale",
+        "display_timezone": null
+      },
+      "executive_summary": "The prospect has requested API Security Auditing alongside a customer security review and trust-assurance process, with a specific focus on OAuth authorization flows and social-platform integration APIs. The accepted company and public technical context gives the booking request a concrete surface to explore, but the actual boundaries and assurance outcome are not established yet; resolve that distinction before shaping an advisory path. The booking explicitly leaves additional areas unspecified, so the consultant should keep the agenda open and ask what else matters without inferring the missing scope.",
+      "opportunity_score": null,
+      "fit_tier": null,
+      "decision": "QUALIFY",
+      "assessment_status": "PROVISIONAL",
+      "preparation_status": "PREP_READY_WITH_OPEN_ITEMS",
+      "score_display_mode": "INSUFFICIENT_EVIDENCE_POSTURE",
+      "confidence_level": "LOW",
+      "is_evidentiary": false,
+      "service_fit_posture": {
+        "primary_service_name": null,
+        "is_service_recommended": false,
+        "secondary_service_name": null,
+        "need_status": "UNKNOWN",
+        "selection_reasoning": "Factual evidence is insufficient to confidently select a primary service recommendation prior to discovery.",
+        "service_catalog_state": null,
+        "service_availability_status": null
+      },
+      "potential_service_fit": "NO_CONFIDENT_SERVICE_FIT_YET",
+      "potential_service_fit_display": "Service direction not established yet",
+      "need_status": "UNKNOWN",
+      "information_classification": {
+        "verified": [
+          {
+            "field": "Prospect Name",
+            "value": "Thai Huang",
+            "source": "candidate_subject"
+          },
+          {
+            "field": "Prospect Email",
+            "value": "thaihuangg@planoly.com",
+            "source": "candidate_subject"
+          },
+          {
+            "field": "Meeting Time",
+            "value": "2026-09-15T14:00:00.000Z",
+            "source": "booking_context"
+          },
+          {
+            "field": "evidence.source_observation",
+            "value": "planoly\n\n•\n\nFollow\n\nplanoly's profile picture\n\nplanoly\n\nIs PLANOLY safe to use? 🧐💭 The super-short answer is YES, but today we're explaining exactly why you have no need to worry about the safety of your account. We're here to elevate your business! Tap through 👉 to learn why you can trust us to help you manage your content. \n⠀⠀⠀⠀⠀⠀⠀⠀⠀ \nImportant Takeaways: \n1️⃣ PLANOLY is an official Instagram",
+            "source": [
+              "THIRD_PARTY_PUBLIC"
+            ]
+          },
+          {
+            "field": "evidence.source_observation",
+            "value": "‍\n\n# Children’s Privacy\n\nOur Services are not intended for general audiences and not for children under the age of 18. No one under age 18 may provide any personal information through any of the Services. We do not knowingly collect personal information from children under 18. If you are under 18, do not use or provide any information through the Services. If we learn we have collected or received",
+            "source": [
+              "FIRST_PARTY_PUBLIC"
+            ]
+          },
+          {
+            "field": "evidence.source_observation",
+            "value": "Image 1: Trustpilot reviews\n\n#### Suggested companies\n\n#### Later later.com•349 reviews #### 1.5#### Metricool metricool.com•653 reviews #### 4.0#### Joybuy www.joybuy.co.uk•17K reviews #### 4.6\n#### Suggested searches\n\nRoofing contractor in United StatesFurniture store in New YorkBest internet marketing serviceInsurance agency in ChicagoCar dealer near me\n\nCategoriesBlogLog inFor businesses\n\nFor",
+            "source": [
+              "THIRD_PARTY_PUBLIC"
+            ]
+          },
+          {
+            "field": "evidence.source_observation",
+            "value": "# Planoly\nYour something is worth building.\nAdvertising Services • Austin, TX • 10,426 followers • 11-50 employees\n\n## Overview\n💸 Build an online storefront in minutes & start earning ✨ Plan, create and schedule your social content\n\n### Website\n\n### Crunchbase\nN/A\n### LinkedIn\nN/A\n\n### Industry\nAdvertising Services\n\n### Company Size\n11-50 employees \n29 associated members (LinkedIn members who've",
+            "source": [
+              "THIRD_PARTY_PUBLIC"
+            ]
+          },
+          {
+            "field": "evidence.source_observation",
+            "value": "place SELL WHAT YOU MAKE Build your Creator Store and sell products and digital services — all from the same account. Whether you're planning an Instagram feed, creating full-time, or running every channel with a team, Planoly helps you post consistently and grow — without the busywork. Download Planoly and take back your time. Privacy Policy: Terms of Use: Support: Instagram / TikTok / X: @planol",
+            "source": [
+              "THIRD_PARTY_PUBLIC"
+            ]
+          },
+          {
+            "field": "evidence.source_observation",
+            "value": "These Terms of Use are entered into by and between you and Planogram, LLC, d/b/a “Planoly” (“Planoly”, “Company”, “we”, “our”, or “us”). These Terms of Use govern your access to and use of www.planoly.com and (the “Websites”), the Planoly mobile and/or web application (the “App”), and any content, functionality, and services offered on or through the Websites and the App (collectively, the “Servic",
+            "source": [
+              "FIRST_PARTY_PUBLIC"
+            ]
+          },
+          {
+            "field": "evidence.source_observation",
+            "value": "Terms of Service\n |\n Privacy Policy\n\n Follow PLANOLY on TikTok\n Follow PLANOLY on Instagram\n Follow PLANOLY on Pinterest\n Watch PLANOLY on YouTube\n Follow PLANOLY on Twitter\n Like PLANOLY on Facebook\n Follow PLANOLY on LinkedIn [...] CREATE FREE ACCOUNT\n\nDownload PLANOLY on the App Store Download PLANOLY on the PlayStore\n\nDOWNLOAD PLANOLY\n\nStories Planner\n\n## More Resources VIEW ALL\n\n##### Our New",
+            "source": [
+              "THIRD_PARTY_PUBLIC"
+            ]
+          },
+          {
+            "field": "evidence.source_observation",
+            "value": "# Built for creators, by creators\n\nPlanoly launched in 2016 as the first visual Instagram planner, helping creators curate the perfect grid.\n\n## Social media and the creator economy have evolved, so have we.\n\nToday, Planoly is a suite of tools designed to streamline every aspect of the creator workflow from inspiration to planning, scheduling, and now–making a living.\n\n## Our goal\n\nWe believe that",
+            "source": [
+              "FIRST_PARTY_PUBLIC"
+            ]
+          },
+          {
+            "field": "evidence.source_observation",
+            "value": "Advertising ServicesTexas, United States11-50 Employees\n\n```\nPlanoly is a social media management platform based in Austin, Texas, serving creators and small businesses within the advertising services industry. The platform provides tools to plan, create, and schedule social content, and it also supports setting up an online storefront to monetize content. It focuses on simplifying content workflo",
+            "source": [
+              "THIRD_PARTY_PUBLIC"
+            ]
+          },
+          {
+            "field": "evidence.source_observation",
+            "value": "# Planoly API\n\n#### Links\n\n#### Customers & developers\n\n#### Alternatives\n\nManage, plan, and schedule your Instagram posts from your computer and mobile phones. Create a cohesive Instagram feed and manage multiple Instagram accounts.\n\n## Planoly API profile\n\nAPI styles\n\n-\n\nDeveloper docs\n\n-\n\nAPI Reference\n\n-\n\nWebhooks\n\nWebhooks management API\n\n-\n\nSandbox environment\n\n-\n\nAuthentication\n\nIdentity pr",
+            "source": [
+              "THIRD_PARTY_PUBLIC"
+            ]
+          },
+          {
+            "field": "evidence.source_observation",
+            "value": "Social Media Planner & Management Tool | Planoly \n\n PRICING Resources LOG IN LOG IN GET STARTED FREE The social media planner that goes way beyond scheduling Manage your entire social media workflow in one place. FREE 14-DAY TRIAL LEARN MORE Stop switching between tools. Planoly handles it all. Features to help you Plan & Create Generate content ideas with AI Get unstuck with post ideas, keyword r",
+            "source": [
+              "FIRST_PARTY_PUBLIC"
+            ]
+          },
+          {
+            "field": "evidence.source_observation",
+            "value": "With Linked Services for third-party integration, Creators may be asked to verify credentials in the future. It is the Creator’s sole responsibility to track, refresh, and monitor credentials. Please see our Privacy Policyfor more information about how Creators can alter the security settings for these Linked Services. Creators acknowledge and agree that Linked Services may add, remove, bifurcate,",
+            "source": [
+              "FIRST_PARTY_PUBLIC"
+            ]
+          },
+          {
+            "field": "evidence.source_observation",
+            "value": "Planoly is the social media planner and scheduler trusted by 8 million creators to plan, edit, schedule, and auto-post across every channel — from one app. \n \nPlan your content calendar, preview your Instagram grid, write captions with AI, edit your photos and videos, and let Planoly auto-post to Instagram, TikTok, Threads, LinkedIn, YouTube, Facebook, X, and Pinterest. Build a social media strate",
+            "source": [
+              "THIRD_PARTY_PUBLIC"
+            ]
+          },
+          {
+            "field": "evidence.source_observation",
+            "value": "If Planoly is acquired by or merged with a third-party entity, Planoly reserves the right to transfer or assign the personal information you provided to us as part of such merger, acquisition, sale, or other change of control to the new entity. In the event of bankruptcy, insolvency, reorganization, receivership, or assignment for the benefit of creditors, or the application of laws or equitable p",
+            "source": [
+              "FIRST_PARTY_PUBLIC"
+            ]
+          },
+          {
+            "field": "evidence.source_observation",
+            "value": "Use your best efforts to prevent unauthorized access to or use of the Services, including by maintaining a strong password and keeping your password and other login credentials confidential.\n Monitor and control all activity conducted through your Planoly account.\n Notify us promptly if you become aware of our suspect any security breach regarding your account, including any loss, theft, or unauth",
+            "source": [
+              "FIRST_PARTY_PUBLIC"
+            ]
+          },
+          {
+            "field": "evidence.source_observation",
+            "value": "‍\n\n# 1. Multi-platform scheduling\n\nWhat it is: A centralized dashboard that lets you manage all of your content in one place. Planoly allows you to schedule content for Instagram, Facebook, TikTok, Pinterest, LinkedIn, YouTube, Threads, and X all at once.\n\n‍\n\nWhy you need it: Gone are the days of logging in and out of five different apps to get your content published. With Planoly, you can set con",
+            "source": [
+              "FIRST_PARTY_PUBLIC"
+            ]
+          },
+          {
+            "field": "evidence.source_observation",
+            "value": "Planoly has evolved since then, but it still very much keeps its visual focus. The first step in creating every post continues to be uploading an image or video. However, it has also innovated with additional products, like Sellit, a bolt-on to simplify your Instagram social selling.\n\nPlanoly\n\nPLANOLY makes it easy to create, customize, plan and schedule content for Instagram, Pinterest, Facebook,",
+            "source": [
+              "THIRD_PARTY_PUBLIC"
+            ]
+          },
+          {
+            "field": "evidence.source_observation",
+            "value": "##### Our New Favorite Gen Z Marketing Trends\n\n##### New Quiet Mode Feature On Instagram\n\n##### How to Create a Strategy for Cross-Posting\n\nSTART 7-DAY FREE TRIAL\n\nDownload PLANOLY on the App Store Download PLANOLY on the PlayStore\n\nStart 7-Day Free Trial\n\nPricing About Events Newsroom CAREERS PREFERRED PARTNERS Newsletter\n\nVideo Planner IG Planner Reels Planner Content Templates linkit Pin Planne",
+            "source": [
+              "THIRD_PARTY_PUBLIC"
+            ]
+          },
+          {
+            "field": "initiative.current_need",
+            "value": "Enterprise customer diligence is driving the initiative. Timing is this quarter., External customer diligence or assurance request",
+            "source": [
+              "PROSPECT_PROVIDED"
+            ]
+          },
+          {
+            "field": "prospect.assurance_requirement",
+            "value": "The immediate requirement is a customer security review and trust-assurance process. There is not yet a confirmed SOC 2 or ISO 27001 requirement.",
+            "source": [
+              "PROSPECT_PROVIDED"
+            ]
+          },
+          {
+            "field": "prospect.technical_scope",
+            "value": "The audit should focus on OAuth authorization flows and the APIs used for social-platform integrations.",
+            "source": [
+              "PROSPECT_PROVIDED"
+            ]
+          }
+        ],
+        "inferred": [],
+        "unavailable": [
+          "Verified total employee headcount and growth stage",
+          "The full extent of the 'among other things' scope referenced in the booking form remains unspecified."
+        ]
+      },
+      "company_context": {
+        "name": "Planoly",
+        "scale": "Scale not established",
+        "cloud_provider": "UNKNOWN",
+        "security_tooling": [],
+        "external_security_signals": [],
+        "compliance_disclosures": []
+      },
+      "publicly_observed": [
+        {
+          "signal_id": "sig_2jvhqt",
+          "source_text": "# Planoly API",
+          "display_text": "# Planoly API",
+          "topic_tag": "TECHNOLOGY",
+          "category": "TECHNOLOGY",
+          "source_url": "https://apitracker.io/a/planoly",
+          "source_urls": [
+            "https://apitracker.io/a/planoly"
+          ],
+          "source_ref": "rcl_4e476c47dc5e",
+          "source_refs": [
+            "rcl_4e476c47dc5e"
+          ],
+          "source_posture": "THIRD-PARTY PUBLIC REPORTING",
+          "observation_posture": "THIRD-PARTY PUBLIC REPORTING",
+          "source_type": "THIRD_PARTY_PUBLIC",
+          "downstream_permission": "PERMIT_CAUTIOUS_DISPLAY_ONLY",
+          "match_authority": false,
+          "question_authorized": false,
+          "resolves_gap": false
+        },
+        {
+          "signal_id": "sig_po5ggr",
+          "source_text": "## Planoly API profile",
+          "display_text": "## Planoly API profile",
+          "topic_tag": "TECHNOLOGY",
+          "category": "TECHNOLOGY",
+          "source_url": "https://apitracker.io/a/planoly",
+          "source_urls": [
+            "https://apitracker.io/a/planoly"
+          ],
+          "source_ref": "rcl_4e476c47dc5e",
+          "source_refs": [
+            "rcl_4e476c47dc5e"
+          ],
+          "source_posture": "THIRD-PARTY PUBLIC REPORTING",
+          "observation_posture": "THIRD-PARTY PUBLIC REPORTING",
+          "source_type": "THIRD_PARTY_PUBLIC",
+          "downstream_permission": "PERMIT_CAUTIOUS_DISPLAY_ONLY",
+          "match_authority": false,
+          "question_authorized": false,
+          "resolves_gap": false
+        },
+        {
+          "signal_id": "sig_ycrp6o",
+          "source_text": "API Reference",
+          "display_text": "API Reference",
+          "topic_tag": "TECHNOLOGY",
+          "category": "TECHNOLOGY",
+          "source_url": "https://apitracker.io/a/planoly",
+          "source_urls": [
+            "https://apitracker.io/a/planoly"
+          ],
+          "source_ref": "rcl_4e476c47dc5e",
+          "source_refs": [
+            "rcl_4e476c47dc5e"
+          ],
+          "source_posture": "THIRD-PARTY PUBLIC REPORTING",
+          "observation_posture": "THIRD-PARTY PUBLIC REPORTING",
+          "source_type": "THIRD_PARTY_PUBLIC",
+          "downstream_permission": "PERMIT_CAUTIOUS_DISPLAY_ONLY",
+          "match_authority": false,
+          "question_authorized": false,
+          "resolves_gap": false
+        },
+        {
+          "signal_id": "sig_ya01ug",
+          "source_text": "Creators acknowledge and agree that Linked Services may add, remove, bifurcate, With Linked Services for third-party integration, Creators may be asked to verify credentials in the future.",
+          "display_text": "Creators acknowledge and agree that Linked Services may add, remove, bifurcate, With Linked Services for third-party integration, Creators may be asked to verify credentials in the future.",
+          "topic_tag": "TECHNOLOGY",
+          "category": "TECHNOLOGY",
+          "source_url": "https://www.planoly.com/terms-of-use",
+          "source_urls": [
+            "https://www.planoly.com/terms-of-use"
+          ],
+          "source_ref": "rcl_5300b8da02cb",
+          "source_refs": [
+            "rcl_5300b8da02cb"
+          ],
+          "source_posture": "FIRST-PARTY PUBLIC STATEMENT",
+          "observation_posture": "FIRST-PARTY PUBLIC STATEMENT",
+          "source_type": "FIRST_PARTY_PUBLIC",
+          "downstream_permission": "PERMIT_CAUTIOUS_DISPLAY_ONLY",
+          "match_authority": false,
+          "question_authorized": false,
+          "resolves_gap": false
+        },
+        {
+          "signal_id": "sig_wmxv7z",
+          "source_text": "Identity pr # Planoly API",
+          "display_text": "Identity pr # Planoly API",
+          "topic_tag": "TECHNOLOGY",
+          "category": "TECHNOLOGY",
+          "source_url": "https://apitracker.io/a/planoly",
+          "source_urls": [
+            "https://apitracker.io/a/planoly"
+          ],
+          "source_ref": "rcl_4e476c47dc5e",
+          "source_refs": [
+            "rcl_4e476c47dc5e"
+          ],
+          "source_posture": "THIRD-PARTY PUBLIC REPORTING",
+          "observation_posture": "THIRD-PARTY PUBLIC REPORTING",
+          "source_type": "THIRD_PARTY_PUBLIC",
+          "downstream_permission": "PERMIT_CAUTIOUS_DISPLAY_ONLY",
+          "match_authority": false,
+          "question_authorized": false,
+          "resolves_gap": false
+        },
+        {
+          "signal_id": "sig_8sdg04",
+          "source_text": "Webhooks management API",
+          "display_text": "Webhooks management API",
+          "topic_tag": "TECHNOLOGY",
+          "category": "TECHNOLOGY",
+          "source_url": "https://apitracker.io/a/planoly",
+          "source_urls": [
+            "https://apitracker.io/a/planoly"
+          ],
+          "source_ref": "rcl_4e476c47dc5e",
+          "source_refs": [
+            "rcl_4e476c47dc5e"
+          ],
+          "source_posture": "THIRD-PARTY PUBLIC REPORTING",
+          "observation_posture": "THIRD-PARTY PUBLIC REPORTING",
+          "source_type": "THIRD_PARTY_PUBLIC",
+          "downstream_permission": "PERMIT_CAUTIOUS_DISPLAY_ONLY",
+          "match_authority": false,
+          "question_authorized": false,
+          "resolves_gap": false
+        },
+        {
+          "signal_id": "sig_2tc14x",
+          "source_text": "With Linked Services for third-party integration, Creators may be asked to verify credentials in the future.",
+          "display_text": "With Linked Services for third-party integration, Creators may be asked to verify credentials in the future.",
+          "topic_tag": "TECHNOLOGY",
+          "category": "TECHNOLOGY",
+          "source_url": "https://www.planoly.com/terms-of-use",
+          "source_urls": [
+            "https://www.planoly.com/terms-of-use"
+          ],
+          "source_ref": "rcl_5300b8da02cb",
+          "source_refs": [
+            "rcl_5300b8da02cb"
+          ],
+          "source_posture": "FIRST-PARTY PUBLIC STATEMENT",
+          "observation_posture": "FIRST-PARTY PUBLIC STATEMENT",
+          "source_type": "FIRST_PARTY_PUBLIC",
+          "downstream_permission": "PERMIT_CAUTIOUS_DISPLAY_ONLY",
+          "match_authority": false,
+          "question_authorized": false,
+          "resolves_gap": false
+        },
+        {
+          "signal_id": "sig_l3snwf",
+          "source_text": "## Social media and the creator economy have evolved, so have we.",
+          "display_text": "## Social media and the creator economy have evolved, so have we.",
+          "topic_tag": "BUSINESS",
+          "category": "BUSINESS",
+          "source_url": "https://www.planoly.com/about-us",
+          "source_urls": [
+            "https://www.planoly.com/about-us"
+          ],
+          "source_ref": "rcl_45a9516c6898",
+          "source_refs": [
+            "rcl_45a9516c6898"
+          ],
+          "source_posture": "FIRST-PARTY PUBLIC STATEMENT",
+          "observation_posture": "FIRST-PARTY PUBLIC STATEMENT",
+          "source_type": "FIRST_PARTY_PUBLIC",
+          "downstream_permission": "PERMIT_CAUTIOUS_DISPLAY_ONLY",
+          "match_authority": false,
+          "question_authorized": false,
+          "resolves_gap": false
+        },
+        {
+          "signal_id": "sig_pafxxl",
+          "source_text": "#### Customers & developers",
+          "display_text": "#### Customers & developers",
+          "topic_tag": "BUSINESS",
+          "category": "BUSINESS",
+          "source_url": "https://apitracker.io/a/planoly",
+          "source_urls": [
+            "https://apitracker.io/a/planoly"
+          ],
+          "source_ref": "rcl_4e476c47dc5e",
+          "source_refs": [
+            "rcl_4e476c47dc5e"
+          ],
+          "source_posture": "THIRD-PARTY PUBLIC REPORTING",
+          "observation_posture": "THIRD-PARTY PUBLIC REPORTING",
+          "source_type": "THIRD_PARTY_PUBLIC",
+          "downstream_permission": "PERMIT_CAUTIOUS_DISPLAY_ONLY",
+          "match_authority": false,
+          "question_authorized": false,
+          "resolves_gap": false
+        },
+        {
+          "signal_id": "sig_lrl73r",
+          "source_text": "🧐💭 The super-short answer is YES, but today we're explaining exactly why you have no need to worry about the safety of your account.",
+          "display_text": "🧐💭 The super-short answer is YES, but today we're explaining exactly why you have no need to worry about the safety of your account.",
+          "topic_tag": "BUSINESS",
+          "category": "BUSINESS",
+          "source_url": "https://www.instagram.com/p/B84EFBZJtjq",
+          "source_urls": [
+            "https://www.instagram.com/p/B84EFBZJtjq"
+          ],
+          "source_ref": "rcl_01ce2a8776e8",
+          "source_refs": [
+            "rcl_01ce2a8776e8"
+          ],
+          "source_posture": "THIRD-PARTY PUBLIC REPORTING",
+          "observation_posture": "THIRD-PARTY PUBLIC REPORTING",
+          "source_type": "THIRD_PARTY_PUBLIC",
+          "downstream_permission": "PERMIT_CAUTIOUS_DISPLAY_ONLY",
+          "match_authority": false,
+          "question_authorized": false,
+          "resolves_gap": false
+        },
+        {
+          "signal_id": "sig_ss0dru",
+          "source_text": "Build a social media strate",
+          "display_text": "Build a social media strate",
+          "topic_tag": "BUSINESS",
+          "category": "BUSINESS",
+          "source_url": "https://play.google.com/store/apps/details?id=com.planoly.android&hl=en_US",
+          "source_urls": [
+            "https://play.google.com/store/apps/details?id=com.planoly.android&hl=en_US"
+          ],
+          "source_ref": "rcl_5bc6d340aec2",
+          "source_refs": [
+            "rcl_5bc6d340aec2"
+          ],
+          "source_posture": "THIRD-PARTY PUBLIC REPORTING",
+          "observation_posture": "THIRD-PARTY PUBLIC REPORTING",
+          "source_type": "THIRD_PARTY_PUBLIC",
+          "downstream_permission": "PERMIT_CAUTIOUS_DISPLAY_ONLY",
+          "match_authority": false,
+          "question_authorized": false,
+          "resolves_gap": false
+        },
+        {
+          "signal_id": "sig_vjy1le",
+          "source_text": "Build a social media strate Planoly is the social media planner and scheduler trusted by 8 million creators to plan, edit, schedule, and auto-post across every channel — from one app.",
+          "display_text": "Build a social media strate Planoly is the social media planner and scheduler trusted by 8 million creators to plan, edit, schedule, and auto-post across every channel — from one app.",
+          "topic_tag": "BUSINESS",
+          "category": "BUSINESS",
+          "source_url": "https://play.google.com/store/apps/details?id=com.planoly.android&hl=en_US",
+          "source_urls": [
+            "https://play.google.com/store/apps/details?id=com.planoly.android&hl=en_US"
+          ],
+          "source_ref": "rcl_5bc6d340aec2",
+          "source_refs": [
+            "rcl_5bc6d340aec2"
+          ],
+          "source_posture": "THIRD-PARTY PUBLIC REPORTING",
+          "observation_posture": "THIRD-PARTY PUBLIC REPORTING",
+          "source_type": "THIRD_PARTY_PUBLIC",
+          "downstream_permission": "PERMIT_CAUTIOUS_DISPLAY_ONLY",
+          "match_authority": false,
+          "question_authorized": false,
+          "resolves_gap": false
+        },
+        {
+          "signal_id": "sig_avhg3t",
+          "source_text": "CategoriesBlogLog inFor businesses",
+          "display_text": "CategoriesBlogLog inFor businesses",
+          "topic_tag": "BUSINESS",
+          "category": "BUSINESS",
+          "source_url": "https://www.trustpilot.com/review/www.planoly.com",
+          "source_urls": [
+            "https://www.trustpilot.com/review/www.planoly.com"
+          ],
+          "source_ref": "rcl_09fc9e6534ed",
+          "source_refs": [
+            "rcl_09fc9e6534ed"
+          ],
+          "source_posture": "THIRD-PARTY PUBLIC REPORTING",
+          "observation_posture": "THIRD-PARTY PUBLIC REPORTING",
+          "source_type": "THIRD_PARTY_PUBLIC",
+          "downstream_permission": "PERMIT_CAUTIOUS_DISPLAY_ONLY",
+          "match_authority": false,
+          "question_authorized": false,
+          "resolves_gap": false
+        },
+        {
+          "signal_id": "sig_hza2lg",
+          "source_text": "Create a cohesive Instagram feed and manage multiple Instagram accounts.",
+          "display_text": "Create a cohesive Instagram feed and manage multiple Instagram accounts.",
+          "topic_tag": "BUSINESS",
+          "category": "BUSINESS",
+          "source_url": "https://apitracker.io/a/planoly",
+          "source_urls": [
+            "https://apitracker.io/a/planoly"
+          ],
+          "source_ref": "rcl_4e476c47dc5e",
+          "source_refs": [
+            "rcl_4e476c47dc5e"
+          ],
+          "source_posture": "THIRD-PARTY PUBLIC REPORTING",
+          "observation_posture": "THIRD-PARTY PUBLIC REPORTING",
+          "source_type": "THIRD_PARTY_PUBLIC",
+          "downstream_permission": "PERMIT_CAUTIOUS_DISPLAY_ONLY",
+          "match_authority": false,
+          "question_authorized": false,
+          "resolves_gap": false
+        },
+        {
+          "signal_id": "sig_em76qt",
+          "source_text": "Features to help you Plan & Create Generate content ideas with AI Get unstuck with post ideas, keyword r Social Media Planner & Management Tool | Planoly",
+          "display_text": "Features to help you Plan & Create Generate content ideas with AI Get unstuck with post ideas, keyword r Social Media Planner & Management Tool | Planoly",
+          "topic_tag": "BUSINESS",
+          "category": "BUSINESS",
+          "source_url": "https://www.planoly.com",
+          "source_urls": [
+            "https://www.planoly.com"
+          ],
+          "source_ref": "rcl_4efcaf4380dd",
+          "source_refs": [
+            "rcl_4efcaf4380dd"
+          ],
+          "source_posture": "FIRST-PARTY PUBLIC STATEMENT",
+          "observation_posture": "FIRST-PARTY PUBLIC STATEMENT",
+          "source_type": "FIRST_PARTY_PUBLIC",
+          "downstream_permission": "PERMIT_CAUTIOUS_DISPLAY_ONLY",
+          "match_authority": false,
+          "question_authorized": false,
+          "resolves_gap": false
+        },
+        {
+          "signal_id": "sig_695osx",
+          "source_text": "Follow PLANOLY on LinkedIn [...] CREATE FREE ACCOUNT",
+          "display_text": "Follow PLANOLY on LinkedIn [...] CREATE FREE ACCOUNT",
+          "topic_tag": "BUSINESS",
+          "category": "BUSINESS",
+          "source_url": "https://pages.planoly.com/entrepreneurs",
+          "source_urls": [
+            "https://pages.planoly.com/entrepreneurs"
+          ],
+          "source_ref": "rcl_228374ffef52",
+          "source_refs": [
+            "rcl_228374ffef52"
+          ],
+          "source_posture": "THIRD-PARTY PUBLIC REPORTING",
+          "observation_posture": "THIRD-PARTY PUBLIC REPORTING",
+          "source_type": "THIRD_PARTY_PUBLIC",
+          "downstream_permission": "PERMIT_CAUTIOUS_DISPLAY_ONLY",
+          "match_authority": false,
+          "question_authorized": false,
+          "resolves_gap": false
+        },
+        {
+          "signal_id": "sig_nkuaeo",
+          "source_text": "Monitor and control all activity conducted through your Planoly account.",
+          "display_text": "Monitor and control all activity conducted through your Planoly account.",
+          "topic_tag": "BUSINESS",
+          "category": "BUSINESS",
+          "source_url": "https://www.planoly.com/acceptable-use-policy",
+          "source_urls": [
+            "https://www.planoly.com/acceptable-use-policy"
+          ],
+          "source_ref": "rcl_96dd84bf1231",
+          "source_refs": [
+            "rcl_96dd84bf1231"
+          ],
+          "source_posture": "FIRST-PARTY PUBLIC STATEMENT",
+          "observation_posture": "FIRST-PARTY PUBLIC STATEMENT",
+          "source_type": "FIRST_PARTY_PUBLIC",
+          "downstream_permission": "PERMIT_CAUTIOUS_DISPLAY_ONLY",
+          "match_authority": false,
+          "question_authorized": false,
+          "resolves_gap": false
+        },
+        {
+          "signal_id": "sig_ho5328",
+          "source_text": "Multi-platform scheduling",
+          "display_text": "Multi-platform scheduling",
+          "topic_tag": "BUSINESS",
+          "category": "BUSINESS",
+          "source_url": "https://www.planoly.com/blog/five-planoly-features-you-should-know-about",
+          "source_urls": [
+            "https://www.planoly.com/blog/five-planoly-features-you-should-know-about"
+          ],
+          "source_ref": "rcl_e42fa36efd2f",
+          "source_refs": [
+            "rcl_e42fa36efd2f"
+          ],
+          "source_posture": "FIRST-PARTY PUBLIC STATEMENT",
+          "observation_posture": "FIRST-PARTY PUBLIC STATEMENT",
+          "source_type": "FIRST_PARTY_PUBLIC",
+          "downstream_permission": "PERMIT_CAUTIOUS_DISPLAY_ONLY",
+          "match_authority": false,
+          "question_authorized": false,
+          "resolves_gap": false
+        },
+        {
+          "signal_id": "sig_6wl2yl",
+          "source_text": "Notify us promptly if you become aware of our suspect any security breach regarding your account, including any loss, theft, or unauth",
+          "display_text": "Notify us promptly if you become aware of our suspect any security breach regarding your account, including any loss, theft, or unauth",
+          "topic_tag": "BUSINESS",
+          "category": "BUSINESS",
+          "source_url": "https://www.planoly.com/acceptable-use-policy",
+          "source_urls": [
+            "https://www.planoly.com/acceptable-use-policy"
+          ],
+          "source_ref": "rcl_96dd84bf1231",
+          "source_refs": [
+            "rcl_96dd84bf1231"
+          ],
+          "source_posture": "FIRST-PARTY PUBLIC STATEMENT",
+          "observation_posture": "FIRST-PARTY PUBLIC STATEMENT",
+          "source_type": "FIRST_PARTY_PUBLIC",
+          "downstream_permission": "PERMIT_CAUTIOUS_DISPLAY_ONLY",
+          "match_authority": false,
+          "question_authorized": false,
+          "resolves_gap": false
+        },
+        {
+          "signal_id": "sig_pj1v4s",
+          "source_text": "Notify us promptly if you become aware of our suspect any security breach regarding your account, including any loss, theft, or unauth Use your best efforts to prevent unauthorized access to or use of the Services, including by maintaining a strong password and keeping your password and other login credentials confidential.",
+          "display_text": "Notify us promptly if you become aware of our suspect any security breach regarding your account, including any loss, theft, or unauth Use your best efforts to prevent unauthorized access to or use of the Services, including by maintaining a strong password and keeping your password and other login credentials confidential.",
+          "topic_tag": "BUSINESS",
+          "category": "BUSINESS",
+          "source_url": "https://www.planoly.com/acceptable-use-policy",
+          "source_urls": [
+            "https://www.planoly.com/acceptable-use-policy"
+          ],
+          "source_ref": "rcl_96dd84bf1231",
+          "source_refs": [
+            "rcl_96dd84bf1231"
+          ],
+          "source_posture": "FIRST-PARTY PUBLIC STATEMENT",
+          "observation_posture": "FIRST-PARTY PUBLIC STATEMENT",
+          "source_type": "FIRST_PARTY_PUBLIC",
+          "downstream_permission": "PERMIT_CAUTIOUS_DISPLAY_ONLY",
+          "match_authority": false,
+          "question_authorized": false,
+          "resolves_gap": false
+        },
+        {
+          "signal_id": "sig_syyvhu",
+          "source_text": "place SELL WHAT YOU MAKE Build your Creator Store and sell products and digital services — all from the same account.",
+          "display_text": "place SELL WHAT YOU MAKE Build your Creator Store and sell products and digital services — all from the same account.",
+          "topic_tag": "BUSINESS",
+          "category": "BUSINESS",
+          "source_url": "https://apps.apple.com/us/app/planoly-social-media-planner/id1014568284",
+          "source_urls": [
+            "https://apps.apple.com/us/app/planoly-social-media-planner/id1014568284"
+          ],
+          "source_ref": "rcl_136c419ed0f9",
+          "source_refs": [
+            "rcl_136c419ed0f9"
+          ],
+          "source_posture": "THIRD-PARTY PUBLIC REPORTING",
+          "observation_posture": "THIRD-PARTY PUBLIC REPORTING",
+          "source_type": "THIRD_PARTY_PUBLIC",
+          "downstream_permission": "PERMIT_CAUTIOUS_DISPLAY_ONLY",
+          "match_authority": false,
+          "question_authorized": false,
+          "resolves_gap": false
+        },
+        {
+          "signal_id": "sig_5u8iy",
+          "source_text": "Planoly is a social media management platform based in Austin, Texas, serving creators and small businesses within the advertising services industry.",
+          "display_text": "Planoly is a social media management platform based in Austin, Texas, serving creators and small businesses within the advertising services industry.",
+          "topic_tag": "BUSINESS",
+          "category": "BUSINESS",
+          "source_url": "https://leadiq.com/c/planoly/5a78684d5700005101d3b560",
+          "source_urls": [
+            "https://leadiq.com/c/planoly/5a78684d5700005101d3b560"
+          ],
+          "source_ref": "rcl_461fefd73362",
+          "source_refs": [
+            "rcl_461fefd73362"
+          ],
+          "source_posture": "THIRD-PARTY PUBLIC REPORTING",
+          "observation_posture": "THIRD-PARTY PUBLIC REPORTING",
+          "source_type": "THIRD_PARTY_PUBLIC",
+          "downstream_permission": "PERMIT_CAUTIOUS_DISPLAY_ONLY",
+          "match_authority": false,
+          "question_authorized": false,
+          "resolves_gap": false
+        },
+        {
+          "signal_id": "sig_u5gcsv",
+          "source_text": "Planoly is the social media planner and scheduler trusted by 8 million creators to plan, edit, schedule, and auto-post across every channel — from one app.",
+          "display_text": "Planoly is the social media planner and scheduler trusted by 8 million creators to plan, edit, schedule, and auto-post across every channel — from one app.",
+          "topic_tag": "BUSINESS",
+          "category": "BUSINESS",
+          "source_url": "https://play.google.com/store/apps/details?id=com.planoly.android&hl=en_US",
+          "source_urls": [
+            "https://play.google.com/store/apps/details?id=com.planoly.android&hl=en_US"
+          ],
+          "source_ref": "rcl_5bc6d340aec2",
+          "source_refs": [
+            "rcl_5bc6d340aec2"
+          ],
+          "source_posture": "THIRD-PARTY PUBLIC REPORTING",
+          "observation_posture": "THIRD-PARTY PUBLIC REPORTING",
+          "source_type": "THIRD_PARTY_PUBLIC",
+          "downstream_permission": "PERMIT_CAUTIOUS_DISPLAY_ONLY",
+          "match_authority": false,
+          "question_authorized": false,
+          "resolves_gap": false
+        },
+        {
+          "signal_id": "sig_7xmi9v",
+          "source_text": "Planoly launched in 2016 as the first visual Instagram planner, helping creators curate the perfect grid.",
+          "display_text": "Planoly launched in 2016 as the first visual Instagram planner, helping creators curate the perfect grid.",
+          "topic_tag": "BUSINESS",
+          "category": "BUSINESS",
+          "source_url": "https://www.planoly.com/about-us",
+          "source_urls": [
+            "https://www.planoly.com/about-us"
+          ],
+          "source_ref": "rcl_45a9516c6898",
+          "source_refs": [
+            "rcl_45a9516c6898"
+          ],
+          "source_posture": "FIRST-PARTY PUBLIC STATEMENT",
+          "observation_posture": "FIRST-PARTY PUBLIC STATEMENT",
+          "source_type": "FIRST_PARTY_PUBLIC",
+          "downstream_permission": "PERMIT_CAUTIOUS_DISPLAY_ONLY",
+          "match_authority": false,
+          "question_authorized": false,
+          "resolves_gap": false
+        },
+        {
+          "signal_id": "sig_yf3l73",
+          "source_text": "PRICING Resources LOG IN LOG IN GET STARTED FREE The social media planner that goes way beyond scheduling Manage your entire social media workflow in one place.",
+          "display_text": "PRICING Resources LOG IN LOG IN GET STARTED FREE The social media planner that goes way beyond scheduling Manage your entire social media workflow in one place.",
+          "topic_tag": "BUSINESS",
+          "category": "BUSINESS",
+          "source_url": "https://www.planoly.com",
+          "source_urls": [
+            "https://www.planoly.com"
+          ],
+          "source_ref": "rcl_4efcaf4380dd",
+          "source_refs": [
+            "rcl_4efcaf4380dd"
+          ],
+          "source_posture": "FIRST-PARTY PUBLIC STATEMENT",
+          "observation_posture": "FIRST-PARTY PUBLIC STATEMENT",
+          "source_type": "FIRST_PARTY_PUBLIC",
+          "downstream_permission": "PERMIT_CAUTIOUS_DISPLAY_ONLY",
+          "match_authority": false,
+          "question_authorized": false,
+          "resolves_gap": false
+        },
+        {
+          "signal_id": "sig_95nnys",
+          "source_text": "Privacy Policy: Terms of Use: Support: Instagram / TikTok / X: @planol place SELL WHAT YOU MAKE Build your Creator Store and sell products and digital services — all from the same account.",
+          "display_text": "Privacy Policy: Terms of Use: Support: Instagram / TikTok / X: @planol place SELL WHAT YOU MAKE Build your Creator Store and sell products and digital services — all from the same account.",
+          "topic_tag": "BUSINESS",
+          "category": "BUSINESS",
+          "source_url": "https://apps.apple.com/us/app/planoly-social-media-planner/id1014568284",
+          "source_urls": [
+            "https://apps.apple.com/us/app/planoly-social-media-planner/id1014568284"
+          ],
+          "source_ref": "rcl_136c419ed0f9",
+          "source_refs": [
+            "rcl_136c419ed0f9"
+          ],
+          "source_posture": "THIRD-PARTY PUBLIC REPORTING",
+          "observation_posture": "THIRD-PARTY PUBLIC REPORTING",
+          "source_type": "THIRD_PARTY_PUBLIC",
+          "downstream_permission": "PERMIT_CAUTIOUS_DISPLAY_ONLY",
+          "match_authority": false,
+          "question_authorized": false,
+          "resolves_gap": false
+        },
+        {
+          "signal_id": "sig_xamzc6",
+          "source_text": "Social Media Planner & Management Tool | Planoly",
+          "display_text": "Social Media Planner & Management Tool | Planoly",
+          "topic_tag": "BUSINESS",
+          "category": "BUSINESS",
+          "source_url": "https://www.planoly.com",
+          "source_urls": [
+            "https://www.planoly.com"
+          ],
+          "source_ref": "rcl_4efcaf4380dd",
+          "source_refs": [
+            "rcl_4efcaf4380dd"
+          ],
+          "source_posture": "FIRST-PARTY PUBLIC STATEMENT",
+          "observation_posture": "FIRST-PARTY PUBLIC STATEMENT",
+          "source_type": "FIRST_PARTY_PUBLIC",
+          "downstream_permission": "PERMIT_CAUTIOUS_DISPLAY_ONLY",
+          "match_authority": false,
+          "question_authorized": false,
+          "resolves_gap": false
+        },
+        {
+          "signal_id": "sig_5m0j7k",
+          "source_text": "Stories Planner",
+          "display_text": "Stories Planner",
+          "topic_tag": "BUSINESS",
+          "category": "BUSINESS",
+          "source_url": "https://pages.planoly.com/entrepreneurs",
+          "source_urls": [
+            "https://pages.planoly.com/entrepreneurs"
+          ],
+          "source_ref": "rcl_228374ffef52",
+          "source_refs": [
+            "rcl_228374ffef52"
+          ],
+          "source_posture": "THIRD-PARTY PUBLIC REPORTING",
+          "observation_posture": "THIRD-PARTY PUBLIC REPORTING",
+          "source_type": "THIRD_PARTY_PUBLIC",
+          "downstream_permission": "PERMIT_CAUTIOUS_DISPLAY_ONLY",
+          "match_authority": false,
+          "question_authorized": false,
+          "resolves_gap": false
+        },
+        {
+          "signal_id": "sig_emjwl9",
+          "source_text": "Today, Planoly is a suite of tools designed to streamline every aspect of the creator workflow from inspiration to planning, scheduling, and now–making a living.",
+          "display_text": "Today, Planoly is a suite of tools designed to streamline every aspect of the creator workflow from inspiration to planning, scheduling, and now–making a living.",
+          "topic_tag": "BUSINESS",
+          "category": "BUSINESS",
+          "source_url": "https://www.planoly.com/about-us",
+          "source_urls": [
+            "https://www.planoly.com/about-us"
+          ],
+          "source_ref": "rcl_45a9516c6898",
+          "source_refs": [
+            "rcl_45a9516c6898"
+          ],
+          "source_posture": "FIRST-PARTY PUBLIC STATEMENT",
+          "observation_posture": "FIRST-PARTY PUBLIC STATEMENT",
+          "source_type": "FIRST_PARTY_PUBLIC",
+          "downstream_permission": "PERMIT_CAUTIOUS_DISPLAY_ONLY",
+          "match_authority": false,
+          "question_authorized": false,
+          "resolves_gap": false
+        },
+        {
+          "signal_id": "sig_qx03ud",
+          "source_text": "Video Planner IG Planner Reels Planner Content Templates linkit Pin Planne",
+          "display_text": "Video Planner IG Planner Reels Planner Content Templates linkit Pin Planne",
+          "topic_tag": "BUSINESS",
+          "category": "BUSINESS",
+          "source_url": "https://pages.planoly.com/social-media-manager",
+          "source_urls": [
+            "https://pages.planoly.com/social-media-manager"
+          ],
+          "source_ref": "rcl_f5c82b0e3c12",
+          "source_refs": [
+            "rcl_f5c82b0e3c12"
+          ],
+          "source_posture": "THIRD-PARTY PUBLIC REPORTING",
+          "observation_posture": "THIRD-PARTY PUBLIC REPORTING",
+          "source_type": "THIRD_PARTY_PUBLIC",
+          "downstream_permission": "PERMIT_CAUTIOUS_DISPLAY_ONLY",
+          "match_authority": false,
+          "question_authorized": false,
+          "resolves_gap": false
+        },
+        {
+          "signal_id": "sig_g4jvo",
+          "source_text": "Video Planner IG Planner Reels Planner Content Templates linkit Pin Planne ##### Our New Favorite Gen Z Marketing Trends",
+          "display_text": "Video Planner IG Planner Reels Planner Content Templates linkit Pin Planne ##### Our New Favorite Gen Z Marketing Trends",
+          "topic_tag": "BUSINESS",
+          "category": "BUSINESS",
+          "source_url": "https://pages.planoly.com/social-media-manager",
+          "source_urls": [
+            "https://pages.planoly.com/social-media-manager"
+          ],
+          "source_ref": "rcl_f5c82b0e3c12",
+          "source_refs": [
+            "rcl_f5c82b0e3c12"
+          ],
+          "source_posture": "THIRD-PARTY PUBLIC REPORTING",
+          "observation_posture": "THIRD-PARTY PUBLIC REPORTING",
+          "source_type": "THIRD_PARTY_PUBLIC",
+          "downstream_permission": "PERMIT_CAUTIOUS_DISPLAY_ONLY",
+          "match_authority": false,
+          "question_authorized": false,
+          "resolves_gap": false
+        }
+      ],
+      "public_observations": [
+        {
+          "signal_id": "sig_2jvhqt",
+          "source_text": "# Planoly API",
+          "display_text": "# Planoly API",
+          "topic_tag": "TECHNOLOGY",
+          "category": "TECHNOLOGY",
+          "source_url": "https://apitracker.io/a/planoly",
+          "source_urls": [
+            "https://apitracker.io/a/planoly"
+          ],
+          "source_ref": "rcl_4e476c47dc5e",
+          "source_refs": [
+            "rcl_4e476c47dc5e"
+          ],
+          "source_posture": "THIRD-PARTY PUBLIC REPORTING",
+          "observation_posture": "THIRD-PARTY PUBLIC REPORTING",
+          "source_type": "THIRD_PARTY_PUBLIC",
+          "downstream_permission": "PERMIT_CAUTIOUS_DISPLAY_ONLY",
+          "match_authority": false,
+          "question_authorized": false,
+          "resolves_gap": false
+        },
+        {
+          "signal_id": "sig_po5ggr",
+          "source_text": "## Planoly API profile",
+          "display_text": "## Planoly API profile",
+          "topic_tag": "TECHNOLOGY",
+          "category": "TECHNOLOGY",
+          "source_url": "https://apitracker.io/a/planoly",
+          "source_urls": [
+            "https://apitracker.io/a/planoly"
+          ],
+          "source_ref": "rcl_4e476c47dc5e",
+          "source_refs": [
+            "rcl_4e476c47dc5e"
+          ],
+          "source_posture": "THIRD-PARTY PUBLIC REPORTING",
+          "observation_posture": "THIRD-PARTY PUBLIC REPORTING",
+          "source_type": "THIRD_PARTY_PUBLIC",
+          "downstream_permission": "PERMIT_CAUTIOUS_DISPLAY_ONLY",
+          "match_authority": false,
+          "question_authorized": false,
+          "resolves_gap": false
+        },
+        {
+          "signal_id": "sig_ycrp6o",
+          "source_text": "API Reference",
+          "display_text": "API Reference",
+          "topic_tag": "TECHNOLOGY",
+          "category": "TECHNOLOGY",
+          "source_url": "https://apitracker.io/a/planoly",
+          "source_urls": [
+            "https://apitracker.io/a/planoly"
+          ],
+          "source_ref": "rcl_4e476c47dc5e",
+          "source_refs": [
+            "rcl_4e476c47dc5e"
+          ],
+          "source_posture": "THIRD-PARTY PUBLIC REPORTING",
+          "observation_posture": "THIRD-PARTY PUBLIC REPORTING",
+          "source_type": "THIRD_PARTY_PUBLIC",
+          "downstream_permission": "PERMIT_CAUTIOUS_DISPLAY_ONLY",
+          "match_authority": false,
+          "question_authorized": false,
+          "resolves_gap": false
+        },
+        {
+          "signal_id": "sig_ya01ug",
+          "source_text": "Creators acknowledge and agree that Linked Services may add, remove, bifurcate, With Linked Services for third-party integration, Creators may be asked to verify credentials in the future.",
+          "display_text": "Creators acknowledge and agree that Linked Services may add, remove, bifurcate, With Linked Services for third-party integration, Creators may be asked to verify credentials in the future.",
+          "topic_tag": "TECHNOLOGY",
+          "category": "TECHNOLOGY",
+          "source_url": "https://www.planoly.com/terms-of-use",
+          "source_urls": [
+            "https://www.planoly.com/terms-of-use"
+          ],
+          "source_ref": "rcl_5300b8da02cb",
+          "source_refs": [
+            "rcl_5300b8da02cb"
+          ],
+          "source_posture": "FIRST-PARTY PUBLIC STATEMENT",
+          "observation_posture": "FIRST-PARTY PUBLIC STATEMENT",
+          "source_type": "FIRST_PARTY_PUBLIC",
+          "downstream_permission": "PERMIT_CAUTIOUS_DISPLAY_ONLY",
+          "match_authority": false,
+          "question_authorized": false,
+          "resolves_gap": false
+        },
+        {
+          "signal_id": "sig_wmxv7z",
+          "source_text": "Identity pr # Planoly API",
+          "display_text": "Identity pr # Planoly API",
+          "topic_tag": "TECHNOLOGY",
+          "category": "TECHNOLOGY",
+          "source_url": "https://apitracker.io/a/planoly",
+          "source_urls": [
+            "https://apitracker.io/a/planoly"
+          ],
+          "source_ref": "rcl_4e476c47dc5e",
+          "source_refs": [
+            "rcl_4e476c47dc5e"
+          ],
+          "source_posture": "THIRD-PARTY PUBLIC REPORTING",
+          "observation_posture": "THIRD-PARTY PUBLIC REPORTING",
+          "source_type": "THIRD_PARTY_PUBLIC",
+          "downstream_permission": "PERMIT_CAUTIOUS_DISPLAY_ONLY",
+          "match_authority": false,
+          "question_authorized": false,
+          "resolves_gap": false
+        },
+        {
+          "signal_id": "sig_8sdg04",
+          "source_text": "Webhooks management API",
+          "display_text": "Webhooks management API",
+          "topic_tag": "TECHNOLOGY",
+          "category": "TECHNOLOGY",
+          "source_url": "https://apitracker.io/a/planoly",
+          "source_urls": [
+            "https://apitracker.io/a/planoly"
+          ],
+          "source_ref": "rcl_4e476c47dc5e",
+          "source_refs": [
+            "rcl_4e476c47dc5e"
+          ],
+          "source_posture": "THIRD-PARTY PUBLIC REPORTING",
+          "observation_posture": "THIRD-PARTY PUBLIC REPORTING",
+          "source_type": "THIRD_PARTY_PUBLIC",
+          "downstream_permission": "PERMIT_CAUTIOUS_DISPLAY_ONLY",
+          "match_authority": false,
+          "question_authorized": false,
+          "resolves_gap": false
+        },
+        {
+          "signal_id": "sig_2tc14x",
+          "source_text": "With Linked Services for third-party integration, Creators may be asked to verify credentials in the future.",
+          "display_text": "With Linked Services for third-party integration, Creators may be asked to verify credentials in the future.",
+          "topic_tag": "TECHNOLOGY",
+          "category": "TECHNOLOGY",
+          "source_url": "https://www.planoly.com/terms-of-use",
+          "source_urls": [
+            "https://www.planoly.com/terms-of-use"
+          ],
+          "source_ref": "rcl_5300b8da02cb",
+          "source_refs": [
+            "rcl_5300b8da02cb"
+          ],
+          "source_posture": "FIRST-PARTY PUBLIC STATEMENT",
+          "observation_posture": "FIRST-PARTY PUBLIC STATEMENT",
+          "source_type": "FIRST_PARTY_PUBLIC",
+          "downstream_permission": "PERMIT_CAUTIOUS_DISPLAY_ONLY",
+          "match_authority": false,
+          "question_authorized": false,
+          "resolves_gap": false
+        },
+        {
+          "signal_id": "sig_l3snwf",
+          "source_text": "## Social media and the creator economy have evolved, so have we.",
+          "display_text": "## Social media and the creator economy have evolved, so have we.",
+          "topic_tag": "BUSINESS",
+          "category": "BUSINESS",
+          "source_url": "https://www.planoly.com/about-us",
+          "source_urls": [
+            "https://www.planoly.com/about-us"
+          ],
+          "source_ref": "rcl_45a9516c6898",
+          "source_refs": [
+            "rcl_45a9516c6898"
+          ],
+          "source_posture": "FIRST-PARTY PUBLIC STATEMENT",
+          "observation_posture": "FIRST-PARTY PUBLIC STATEMENT",
+          "source_type": "FIRST_PARTY_PUBLIC",
+          "downstream_permission": "PERMIT_CAUTIOUS_DISPLAY_ONLY",
+          "match_authority": false,
+          "question_authorized": false,
+          "resolves_gap": false
+        },
+        {
+          "signal_id": "sig_pafxxl",
+          "source_text": "#### Customers & developers",
+          "display_text": "#### Customers & developers",
+          "topic_tag": "BUSINESS",
+          "category": "BUSINESS",
+          "source_url": "https://apitracker.io/a/planoly",
+          "source_urls": [
+            "https://apitracker.io/a/planoly"
+          ],
+          "source_ref": "rcl_4e476c47dc5e",
+          "source_refs": [
+            "rcl_4e476c47dc5e"
+          ],
+          "source_posture": "THIRD-PARTY PUBLIC REPORTING",
+          "observation_posture": "THIRD-PARTY PUBLIC REPORTING",
+          "source_type": "THIRD_PARTY_PUBLIC",
+          "downstream_permission": "PERMIT_CAUTIOUS_DISPLAY_ONLY",
+          "match_authority": false,
+          "question_authorized": false,
+          "resolves_gap": false
+        },
+        {
+          "signal_id": "sig_lrl73r",
+          "source_text": "🧐💭 The super-short answer is YES, but today we're explaining exactly why you have no need to worry about the safety of your account.",
+          "display_text": "🧐💭 The super-short answer is YES, but today we're explaining exactly why you have no need to worry about the safety of your account.",
+          "topic_tag": "BUSINESS",
+          "category": "BUSINESS",
+          "source_url": "https://www.instagram.com/p/B84EFBZJtjq",
+          "source_urls": [
+            "https://www.instagram.com/p/B84EFBZJtjq"
+          ],
+          "source_ref": "rcl_01ce2a8776e8",
+          "source_refs": [
+            "rcl_01ce2a8776e8"
+          ],
+          "source_posture": "THIRD-PARTY PUBLIC REPORTING",
+          "observation_posture": "THIRD-PARTY PUBLIC REPORTING",
+          "source_type": "THIRD_PARTY_PUBLIC",
+          "downstream_permission": "PERMIT_CAUTIOUS_DISPLAY_ONLY",
+          "match_authority": false,
+          "question_authorized": false,
+          "resolves_gap": false
+        },
+        {
+          "signal_id": "sig_ss0dru",
+          "source_text": "Build a social media strate",
+          "display_text": "Build a social media strate",
+          "topic_tag": "BUSINESS",
+          "category": "BUSINESS",
+          "source_url": "https://play.google.com/store/apps/details?id=com.planoly.android&hl=en_US",
+          "source_urls": [
+            "https://play.google.com/store/apps/details?id=com.planoly.android&hl=en_US"
+          ],
+          "source_ref": "rcl_5bc6d340aec2",
+          "source_refs": [
+            "rcl_5bc6d340aec2"
+          ],
+          "source_posture": "THIRD-PARTY PUBLIC REPORTING",
+          "observation_posture": "THIRD-PARTY PUBLIC REPORTING",
+          "source_type": "THIRD_PARTY_PUBLIC",
+          "downstream_permission": "PERMIT_CAUTIOUS_DISPLAY_ONLY",
+          "match_authority": false,
+          "question_authorized": false,
+          "resolves_gap": false
+        },
+        {
+          "signal_id": "sig_vjy1le",
+          "source_text": "Build a social media strate Planoly is the social media planner and scheduler trusted by 8 million creators to plan, edit, schedule, and auto-post across every channel — from one app.",
+          "display_text": "Build a social media strate Planoly is the social media planner and scheduler trusted by 8 million creators to plan, edit, schedule, and auto-post across every channel — from one app.",
+          "topic_tag": "BUSINESS",
+          "category": "BUSINESS",
+          "source_url": "https://play.google.com/store/apps/details?id=com.planoly.android&hl=en_US",
+          "source_urls": [
+            "https://play.google.com/store/apps/details?id=com.planoly.android&hl=en_US"
+          ],
+          "source_ref": "rcl_5bc6d340aec2",
+          "source_refs": [
+            "rcl_5bc6d340aec2"
+          ],
+          "source_posture": "THIRD-PARTY PUBLIC REPORTING",
+          "observation_posture": "THIRD-PARTY PUBLIC REPORTING",
+          "source_type": "THIRD_PARTY_PUBLIC",
+          "downstream_permission": "PERMIT_CAUTIOUS_DISPLAY_ONLY",
+          "match_authority": false,
+          "question_authorized": false,
+          "resolves_gap": false
+        },
+        {
+          "signal_id": "sig_avhg3t",
+          "source_text": "CategoriesBlogLog inFor businesses",
+          "display_text": "CategoriesBlogLog inFor businesses",
+          "topic_tag": "BUSINESS",
+          "category": "BUSINESS",
+          "source_url": "https://www.trustpilot.com/review/www.planoly.com",
+          "source_urls": [
+            "https://www.trustpilot.com/review/www.planoly.com"
+          ],
+          "source_ref": "rcl_09fc9e6534ed",
+          "source_refs": [
+            "rcl_09fc9e6534ed"
+          ],
+          "source_posture": "THIRD-PARTY PUBLIC REPORTING",
+          "observation_posture": "THIRD-PARTY PUBLIC REPORTING",
+          "source_type": "THIRD_PARTY_PUBLIC",
+          "downstream_permission": "PERMIT_CAUTIOUS_DISPLAY_ONLY",
+          "match_authority": false,
+          "question_authorized": false,
+          "resolves_gap": false
+        },
+        {
+          "signal_id": "sig_hza2lg",
+          "source_text": "Create a cohesive Instagram feed and manage multiple Instagram accounts.",
+          "display_text": "Create a cohesive Instagram feed and manage multiple Instagram accounts.",
+          "topic_tag": "BUSINESS",
+          "category": "BUSINESS",
+          "source_url": "https://apitracker.io/a/planoly",
+          "source_urls": [
+            "https://apitracker.io/a/planoly"
+          ],
+          "source_ref": "rcl_4e476c47dc5e",
+          "source_refs": [
+            "rcl_4e476c47dc5e"
+          ],
+          "source_posture": "THIRD-PARTY PUBLIC REPORTING",
+          "observation_posture": "THIRD-PARTY PUBLIC REPORTING",
+          "source_type": "THIRD_PARTY_PUBLIC",
+          "downstream_permission": "PERMIT_CAUTIOUS_DISPLAY_ONLY",
+          "match_authority": false,
+          "question_authorized": false,
+          "resolves_gap": false
+        },
+        {
+          "signal_id": "sig_em76qt",
+          "source_text": "Features to help you Plan & Create Generate content ideas with AI Get unstuck with post ideas, keyword r Social Media Planner & Management Tool | Planoly",
+          "display_text": "Features to help you Plan & Create Generate content ideas with AI Get unstuck with post ideas, keyword r Social Media Planner & Management Tool | Planoly",
+          "topic_tag": "BUSINESS",
+          "category": "BUSINESS",
+          "source_url": "https://www.planoly.com",
+          "source_urls": [
+            "https://www.planoly.com"
+          ],
+          "source_ref": "rcl_4efcaf4380dd",
+          "source_refs": [
+            "rcl_4efcaf4380dd"
+          ],
+          "source_posture": "FIRST-PARTY PUBLIC STATEMENT",
+          "observation_posture": "FIRST-PARTY PUBLIC STATEMENT",
+          "source_type": "FIRST_PARTY_PUBLIC",
+          "downstream_permission": "PERMIT_CAUTIOUS_DISPLAY_ONLY",
+          "match_authority": false,
+          "question_authorized": false,
+          "resolves_gap": false
+        },
+        {
+          "signal_id": "sig_695osx",
+          "source_text": "Follow PLANOLY on LinkedIn [...] CREATE FREE ACCOUNT",
+          "display_text": "Follow PLANOLY on LinkedIn [...] CREATE FREE ACCOUNT",
+          "topic_tag": "BUSINESS",
+          "category": "BUSINESS",
+          "source_url": "https://pages.planoly.com/entrepreneurs",
+          "source_urls": [
+            "https://pages.planoly.com/entrepreneurs"
+          ],
+          "source_ref": "rcl_228374ffef52",
+          "source_refs": [
+            "rcl_228374ffef52"
+          ],
+          "source_posture": "THIRD-PARTY PUBLIC REPORTING",
+          "observation_posture": "THIRD-PARTY PUBLIC REPORTING",
+          "source_type": "THIRD_PARTY_PUBLIC",
+          "downstream_permission": "PERMIT_CAUTIOUS_DISPLAY_ONLY",
+          "match_authority": false,
+          "question_authorized": false,
+          "resolves_gap": false
+        },
+        {
+          "signal_id": "sig_nkuaeo",
+          "source_text": "Monitor and control all activity conducted through your Planoly account.",
+          "display_text": "Monitor and control all activity conducted through your Planoly account.",
+          "topic_tag": "BUSINESS",
+          "category": "BUSINESS",
+          "source_url": "https://www.planoly.com/acceptable-use-policy",
+          "source_urls": [
+            "https://www.planoly.com/acceptable-use-policy"
+          ],
+          "source_ref": "rcl_96dd84bf1231",
+          "source_refs": [
+            "rcl_96dd84bf1231"
+          ],
+          "source_posture": "FIRST-PARTY PUBLIC STATEMENT",
+          "observation_posture": "FIRST-PARTY PUBLIC STATEMENT",
+          "source_type": "FIRST_PARTY_PUBLIC",
+          "downstream_permission": "PERMIT_CAUTIOUS_DISPLAY_ONLY",
+          "match_authority": false,
+          "question_authorized": false,
+          "resolves_gap": false
+        },
+        {
+          "signal_id": "sig_ho5328",
+          "source_text": "Multi-platform scheduling",
+          "display_text": "Multi-platform scheduling",
+          "topic_tag": "BUSINESS",
+          "category": "BUSINESS",
+          "source_url": "https://www.planoly.com/blog/five-planoly-features-you-should-know-about",
+          "source_urls": [
+            "https://www.planoly.com/blog/five-planoly-features-you-should-know-about"
+          ],
+          "source_ref": "rcl_e42fa36efd2f",
+          "source_refs": [
+            "rcl_e42fa36efd2f"
+          ],
+          "source_posture": "FIRST-PARTY PUBLIC STATEMENT",
+          "observation_posture": "FIRST-PARTY PUBLIC STATEMENT",
+          "source_type": "FIRST_PARTY_PUBLIC",
+          "downstream_permission": "PERMIT_CAUTIOUS_DISPLAY_ONLY",
+          "match_authority": false,
+          "question_authorized": false,
+          "resolves_gap": false
+        },
+        {
+          "signal_id": "sig_6wl2yl",
+          "source_text": "Notify us promptly if you become aware of our suspect any security breach regarding your account, including any loss, theft, or unauth",
+          "display_text": "Notify us promptly if you become aware of our suspect any security breach regarding your account, including any loss, theft, or unauth",
+          "topic_tag": "BUSINESS",
+          "category": "BUSINESS",
+          "source_url": "https://www.planoly.com/acceptable-use-policy",
+          "source_urls": [
+            "https://www.planoly.com/acceptable-use-policy"
+          ],
+          "source_ref": "rcl_96dd84bf1231",
+          "source_refs": [
+            "rcl_96dd84bf1231"
+          ],
+          "source_posture": "FIRST-PARTY PUBLIC STATEMENT",
+          "observation_posture": "FIRST-PARTY PUBLIC STATEMENT",
+          "source_type": "FIRST_PARTY_PUBLIC",
+          "downstream_permission": "PERMIT_CAUTIOUS_DISPLAY_ONLY",
+          "match_authority": false,
+          "question_authorized": false,
+          "resolves_gap": false
+        },
+        {
+          "signal_id": "sig_pj1v4s",
+          "source_text": "Notify us promptly if you become aware of our suspect any security breach regarding your account, including any loss, theft, or unauth Use your best efforts to prevent unauthorized access to or use of the Services, including by maintaining a strong password and keeping your password and other login credentials confidential.",
+          "display_text": "Notify us promptly if you become aware of our suspect any security breach regarding your account, including any loss, theft, or unauth Use your best efforts to prevent unauthorized access to or use of the Services, including by maintaining a strong password and keeping your password and other login credentials confidential.",
+          "topic_tag": "BUSINESS",
+          "category": "BUSINESS",
+          "source_url": "https://www.planoly.com/acceptable-use-policy",
+          "source_urls": [
+            "https://www.planoly.com/acceptable-use-policy"
+          ],
+          "source_ref": "rcl_96dd84bf1231",
+          "source_refs": [
+            "rcl_96dd84bf1231"
+          ],
+          "source_posture": "FIRST-PARTY PUBLIC STATEMENT",
+          "observation_posture": "FIRST-PARTY PUBLIC STATEMENT",
+          "source_type": "FIRST_PARTY_PUBLIC",
+          "downstream_permission": "PERMIT_CAUTIOUS_DISPLAY_ONLY",
+          "match_authority": false,
+          "question_authorized": false,
+          "resolves_gap": false
+        },
+        {
+          "signal_id": "sig_syyvhu",
+          "source_text": "place SELL WHAT YOU MAKE Build your Creator Store and sell products and digital services — all from the same account.",
+          "display_text": "place SELL WHAT YOU MAKE Build your Creator Store and sell products and digital services — all from the same account.",
+          "topic_tag": "BUSINESS",
+          "category": "BUSINESS",
+          "source_url": "https://apps.apple.com/us/app/planoly-social-media-planner/id1014568284",
+          "source_urls": [
+            "https://apps.apple.com/us/app/planoly-social-media-planner/id1014568284"
+          ],
+          "source_ref": "rcl_136c419ed0f9",
+          "source_refs": [
+            "rcl_136c419ed0f9"
+          ],
+          "source_posture": "THIRD-PARTY PUBLIC REPORTING",
+          "observation_posture": "THIRD-PARTY PUBLIC REPORTING",
+          "source_type": "THIRD_PARTY_PUBLIC",
+          "downstream_permission": "PERMIT_CAUTIOUS_DISPLAY_ONLY",
+          "match_authority": false,
+          "question_authorized": false,
+          "resolves_gap": false
+        },
+        {
+          "signal_id": "sig_5u8iy",
+          "source_text": "Planoly is a social media management platform based in Austin, Texas, serving creators and small businesses within the advertising services industry.",
+          "display_text": "Planoly is a social media management platform based in Austin, Texas, serving creators and small businesses within the advertising services industry.",
+          "topic_tag": "BUSINESS",
+          "category": "BUSINESS",
+          "source_url": "https://leadiq.com/c/planoly/5a78684d5700005101d3b560",
+          "source_urls": [
+            "https://leadiq.com/c/planoly/5a78684d5700005101d3b560"
+          ],
+          "source_ref": "rcl_461fefd73362",
+          "source_refs": [
+            "rcl_461fefd73362"
+          ],
+          "source_posture": "THIRD-PARTY PUBLIC REPORTING",
+          "observation_posture": "THIRD-PARTY PUBLIC REPORTING",
+          "source_type": "THIRD_PARTY_PUBLIC",
+          "downstream_permission": "PERMIT_CAUTIOUS_DISPLAY_ONLY",
+          "match_authority": false,
+          "question_authorized": false,
+          "resolves_gap": false
+        },
+        {
+          "signal_id": "sig_u5gcsv",
+          "source_text": "Planoly is the social media planner and scheduler trusted by 8 million creators to plan, edit, schedule, and auto-post across every channel — from one app.",
+          "display_text": "Planoly is the social media planner and scheduler trusted by 8 million creators to plan, edit, schedule, and auto-post across every channel — from one app.",
+          "topic_tag": "BUSINESS",
+          "category": "BUSINESS",
+          "source_url": "https://play.google.com/store/apps/details?id=com.planoly.android&hl=en_US",
+          "source_urls": [
+            "https://play.google.com/store/apps/details?id=com.planoly.android&hl=en_US"
+          ],
+          "source_ref": "rcl_5bc6d340aec2",
+          "source_refs": [
+            "rcl_5bc6d340aec2"
+          ],
+          "source_posture": "THIRD-PARTY PUBLIC REPORTING",
+          "observation_posture": "THIRD-PARTY PUBLIC REPORTING",
+          "source_type": "THIRD_PARTY_PUBLIC",
+          "downstream_permission": "PERMIT_CAUTIOUS_DISPLAY_ONLY",
+          "match_authority": false,
+          "question_authorized": false,
+          "resolves_gap": false
+        },
+        {
+          "signal_id": "sig_7xmi9v",
+          "source_text": "Planoly launched in 2016 as the first visual Instagram planner, helping creators curate the perfect grid.",
+          "display_text": "Planoly launched in 2016 as the first visual Instagram planner, helping creators curate the perfect grid.",
+          "topic_tag": "BUSINESS",
+          "category": "BUSINESS",
+          "source_url": "https://www.planoly.com/about-us",
+          "source_urls": [
+            "https://www.planoly.com/about-us"
+          ],
+          "source_ref": "rcl_45a9516c6898",
+          "source_refs": [
+            "rcl_45a9516c6898"
+          ],
+          "source_posture": "FIRST-PARTY PUBLIC STATEMENT",
+          "observation_posture": "FIRST-PARTY PUBLIC STATEMENT",
+          "source_type": "FIRST_PARTY_PUBLIC",
+          "downstream_permission": "PERMIT_CAUTIOUS_DISPLAY_ONLY",
+          "match_authority": false,
+          "question_authorized": false,
+          "resolves_gap": false
+        },
+        {
+          "signal_id": "sig_yf3l73",
+          "source_text": "PRICING Resources LOG IN LOG IN GET STARTED FREE The social media planner that goes way beyond scheduling Manage your entire social media workflow in one place.",
+          "display_text": "PRICING Resources LOG IN LOG IN GET STARTED FREE The social media planner that goes way beyond scheduling Manage your entire social media workflow in one place.",
+          "topic_tag": "BUSINESS",
+          "category": "BUSINESS",
+          "source_url": "https://www.planoly.com",
+          "source_urls": [
+            "https://www.planoly.com"
+          ],
+          "source_ref": "rcl_4efcaf4380dd",
+          "source_refs": [
+            "rcl_4efcaf4380dd"
+          ],
+          "source_posture": "FIRST-PARTY PUBLIC STATEMENT",
+          "observation_posture": "FIRST-PARTY PUBLIC STATEMENT",
+          "source_type": "FIRST_PARTY_PUBLIC",
+          "downstream_permission": "PERMIT_CAUTIOUS_DISPLAY_ONLY",
+          "match_authority": false,
+          "question_authorized": false,
+          "resolves_gap": false
+        },
+        {
+          "signal_id": "sig_95nnys",
+          "source_text": "Privacy Policy: Terms of Use: Support: Instagram / TikTok / X: @planol place SELL WHAT YOU MAKE Build your Creator Store and sell products and digital services — all from the same account.",
+          "display_text": "Privacy Policy: Terms of Use: Support: Instagram / TikTok / X: @planol place SELL WHAT YOU MAKE Build your Creator Store and sell products and digital services — all from the same account.",
+          "topic_tag": "BUSINESS",
+          "category": "BUSINESS",
+          "source_url": "https://apps.apple.com/us/app/planoly-social-media-planner/id1014568284",
+          "source_urls": [
+            "https://apps.apple.com/us/app/planoly-social-media-planner/id1014568284"
+          ],
+          "source_ref": "rcl_136c419ed0f9",
+          "source_refs": [
+            "rcl_136c419ed0f9"
+          ],
+          "source_posture": "THIRD-PARTY PUBLIC REPORTING",
+          "observation_posture": "THIRD-PARTY PUBLIC REPORTING",
+          "source_type": "THIRD_PARTY_PUBLIC",
+          "downstream_permission": "PERMIT_CAUTIOUS_DISPLAY_ONLY",
+          "match_authority": false,
+          "question_authorized": false,
+          "resolves_gap": false
+        },
+        {
+          "signal_id": "sig_xamzc6",
+          "source_text": "Social Media Planner & Management Tool | Planoly",
+          "display_text": "Social Media Planner & Management Tool | Planoly",
+          "topic_tag": "BUSINESS",
+          "category": "BUSINESS",
+          "source_url": "https://www.planoly.com",
+          "source_urls": [
+            "https://www.planoly.com"
+          ],
+          "source_ref": "rcl_4efcaf4380dd",
+          "source_refs": [
+            "rcl_4efcaf4380dd"
+          ],
+          "source_posture": "FIRST-PARTY PUBLIC STATEMENT",
+          "observation_posture": "FIRST-PARTY PUBLIC STATEMENT",
+          "source_type": "FIRST_PARTY_PUBLIC",
+          "downstream_permission": "PERMIT_CAUTIOUS_DISPLAY_ONLY",
+          "match_authority": false,
+          "question_authorized": false,
+          "resolves_gap": false
+        },
+        {
+          "signal_id": "sig_5m0j7k",
+          "source_text": "Stories Planner",
+          "display_text": "Stories Planner",
+          "topic_tag": "BUSINESS",
+          "category": "BUSINESS",
+          "source_url": "https://pages.planoly.com/entrepreneurs",
+          "source_urls": [
+            "https://pages.planoly.com/entrepreneurs"
+          ],
+          "source_ref": "rcl_228374ffef52",
+          "source_refs": [
+            "rcl_228374ffef52"
+          ],
+          "source_posture": "THIRD-PARTY PUBLIC REPORTING",
+          "observation_posture": "THIRD-PARTY PUBLIC REPORTING",
+          "source_type": "THIRD_PARTY_PUBLIC",
+          "downstream_permission": "PERMIT_CAUTIOUS_DISPLAY_ONLY",
+          "match_authority": false,
+          "question_authorized": false,
+          "resolves_gap": false
+        },
+        {
+          "signal_id": "sig_emjwl9",
+          "source_text": "Today, Planoly is a suite of tools designed to streamline every aspect of the creator workflow from inspiration to planning, scheduling, and now–making a living.",
+          "display_text": "Today, Planoly is a suite of tools designed to streamline every aspect of the creator workflow from inspiration to planning, scheduling, and now–making a living.",
+          "topic_tag": "BUSINESS",
+          "category": "BUSINESS",
+          "source_url": "https://www.planoly.com/about-us",
+          "source_urls": [
+            "https://www.planoly.com/about-us"
+          ],
+          "source_ref": "rcl_45a9516c6898",
+          "source_refs": [
+            "rcl_45a9516c6898"
+          ],
+          "source_posture": "FIRST-PARTY PUBLIC STATEMENT",
+          "observation_posture": "FIRST-PARTY PUBLIC STATEMENT",
+          "source_type": "FIRST_PARTY_PUBLIC",
+          "downstream_permission": "PERMIT_CAUTIOUS_DISPLAY_ONLY",
+          "match_authority": false,
+          "question_authorized": false,
+          "resolves_gap": false
+        },
+        {
+          "signal_id": "sig_qx03ud",
+          "source_text": "Video Planner IG Planner Reels Planner Content Templates linkit Pin Planne",
+          "display_text": "Video Planner IG Planner Reels Planner Content Templates linkit Pin Planne",
+          "topic_tag": "BUSINESS",
+          "category": "BUSINESS",
+          "source_url": "https://pages.planoly.com/social-media-manager",
+          "source_urls": [
+            "https://pages.planoly.com/social-media-manager"
+          ],
+          "source_ref": "rcl_f5c82b0e3c12",
+          "source_refs": [
+            "rcl_f5c82b0e3c12"
+          ],
+          "source_posture": "THIRD-PARTY PUBLIC REPORTING",
+          "observation_posture": "THIRD-PARTY PUBLIC REPORTING",
+          "source_type": "THIRD_PARTY_PUBLIC",
+          "downstream_permission": "PERMIT_CAUTIOUS_DISPLAY_ONLY",
+          "match_authority": false,
+          "question_authorized": false,
+          "resolves_gap": false
+        },
+        {
+          "signal_id": "sig_g4jvo",
+          "source_text": "Video Planner IG Planner Reels Planner Content Templates linkit Pin Planne ##### Our New Favorite Gen Z Marketing Trends",
+          "display_text": "Video Planner IG Planner Reels Planner Content Templates linkit Pin Planne ##### Our New Favorite Gen Z Marketing Trends",
+          "topic_tag": "BUSINESS",
+          "category": "BUSINESS",
+          "source_url": "https://pages.planoly.com/social-media-manager",
+          "source_urls": [
+            "https://pages.planoly.com/social-media-manager"
+          ],
+          "source_ref": "rcl_f5c82b0e3c12",
+          "source_refs": [
+            "rcl_f5c82b0e3c12"
+          ],
+          "source_posture": "THIRD-PARTY PUBLIC REPORTING",
+          "observation_posture": "THIRD-PARTY PUBLIC REPORTING",
+          "source_type": "THIRD_PARTY_PUBLIC",
+          "downstream_permission": "PERMIT_CAUTIOUS_DISPLAY_ONLY",
+          "match_authority": false,
+          "question_authorized": false,
+          "resolves_gap": false
+        }
+      ],
+      "consultant_intelligence": {
+        "authority": "DISPLAY_ONLY",
+        "source": "GEMINI_GROUNDED_DISPLAY_SYNTHESIS",
+        "supported_by_source_refs": [
+          "ev_s04_ef6907aa8432",
+          "ev_s04_ffd3248bfd5d",
+          "ev_s04_9665e823dac5",
+          "ev_s04_8ed835d70221",
+          "ev_s04_6585c511f320",
+          "ev_s04_ef165cd5c7af",
+          "ev_s04_2ad647831845",
+          "meeting_context:BOOKING_FORM:CALENDLY",
+          "prospect_answer:PROSPECT_PROVIDED"
+        ],
+        "basis": [
+          {
+            "text": "Planoly provides a social media planning, scheduling, and management platform serving creators and small businesses, with multi-platform auto-posting and creator storefront features.",
+            "posture": "SUPPORTED",
+            "source_refs": [
+              "ev_s04_ef6907aa8432",
+              "ev_s04_ffd3248bfd5d",
+              "ev_s04_9665e823dac5",
+              "ev_s04_8ed835d70221",
+              "ev_s04_6585c511f320"
+            ],
+            "consultant_relevance": "Provides foundational product context for understanding their multi-platform integration environment.",
+            "verification_path": "Review public platform capabilities on planoly.com.",
+            "authority": "DISPLAY_ONLY"
+          },
+          {
+            "text": "The prospect has requested API Security Auditing alongside a customer security review and trust-assurance process, with a specific focus on OAuth authorization flows and social-platform integration APIs.",
+            "posture": "SUPPORTED",
+            "source_refs": [
+              "ev_s04_ef165cd5c7af",
+              "ev_s04_2ad647831845"
+            ],
+            "consultant_relevance": "Directly highlights the technical perimeter and integration mechanisms requiring evaluation during the audit.",
+            "verification_path": "Confirm OAuth and integration scopes directly with the prospect during discovery.",
+            "authority": "DISPLAY_ONLY"
+          },
+          {
+            "text": "The accepted company and public technical context gives the booking request a concrete surface to explore, but the actual boundaries and assurance outcome are not established yet; resolve that distinction before shaping an advisory path.",
+            "posture": "INTERPRETATION",
+            "source_refs": [
+              "ev_s04_ef6907aa8432",
+              "ev_s04_ffd3248bfd5d",
+              "ev_s04_9665e823dac5",
+              "ev_s04_8ed835d70221",
+              "ev_s04_6585c511f320",
+              "meeting_context:BOOKING_FORM:CALENDLY",
+              "prospect_answer:PROSPECT_PROVIDED"
+            ],
+            "consultant_relevance": "Connects company context to the stated conversation without treating public signals as confirmed need.",
+            "verification_path": "Confirm the requested boundaries and desired outcome with the prospect.",
+            "authority": "DISPLAY_ONLY"
+          },
+          {
+            "text": "The booking explicitly leaves additional areas unspecified, so the consultant should keep the agenda open and ask what else matters without inferring the missing scope.",
+            "posture": "INTERPRETATION",
+            "source_refs": [
+              "meeting_context:BOOKING_FORM:CALENDLY"
+            ],
+            "consultant_relevance": "Preserves the prospect's open-ended scope signal for live discovery.",
+            "verification_path": "Ask what additional areas the prospect wants covered.",
+            "authority": "DISPLAY_ONLY"
+          },
+          {
+            "text": "The immediate requirement focuses on a customer security review and trust-assurance process, with no confirmed SOC 2 or ISO 27001 requirement yet established.",
+            "posture": "UNKNOWN",
+            "source_refs": [],
+            "consultant_relevance": "Clarifies the compliance baseline so the consultant does not assume formal framework mandates.",
+            "verification_path": "Verify if external customer security questionnaires or enterprise tier requirements are driving the trust-assurance process.",
+            "authority": "DISPLAY_ONLY"
+          },
+          {
+            "text": "The full extent of the 'among other things' scope referenced in the booking form remains unspecified.",
+            "posture": "UNKNOWN",
+            "source_refs": [
+              "meeting_context:BOOKING_FORM:CALENDLY",
+              "prospect_answer:PROSPECT_PROVIDED"
+            ],
+            "consultant_relevance": "Identifies unmapped deliverables that need clarification to prevent scope creep.",
+            "verification_path": "Ask the prospect to itemize the remaining areas included under their open-ended request.",
+            "authority": "DISPLAY_ONLY"
+          },
+          {
+            "text": "Verify whether the customer security review requires specific artifact generation (such as security whitepapers or policy documentation) alongside the API audit.",
+            "posture": "ACTION",
+            "source_refs": [],
+            "consultant_relevance": "Ensures all expected outputs of the trust-assurance process are identified.",
+            "verification_path": "Ask the prospect directly what documentation or deliverables they expect from the trust-assurance review.",
+            "authority": "DISPLAY_ONLY"
+          },
+          {
+            "text": "The prospect explicitly left additional areas unspecified; do not infer what those areas are.",
+            "posture": "UNKNOWN",
+            "source_refs": [
+              "meeting_context:BOOKING_FORM:CALENDLY"
+            ],
+            "consultant_relevance": "Keep additional scope open without inferring unstated needs.",
+            "verification_path": "Ask the prospect what additional areas they want covered.",
+            "authority": "DISPLAY_ONLY"
+          },
+          {
+            "text": "What specific customer security review or trust-assurance milestones are driving this initiative?",
+            "posture": "HYPOTHESIS",
+            "source_refs": [
+              "meeting_context:BOOKING_FORM:CALENDLY",
+              "prospect_answer:PROSPECT_PROVIDED"
+            ],
+            "consultant_relevance": "Ensures alignment on the precise deliverables required for the trust-assurance process.",
+            "verification_path": "Directly inquire about the origin of the trust-assurance requirement.",
+            "authority": "DISPLAY_ONLY"
+          },
+          {
+            "text": "Which social-platform integration APIs and OAuth flows represent the highest priority for the security audit?",
+            "posture": "HYPOTHESIS",
+            "source_refs": [
+              "ev_s04_ef165cd5c7af",
+              "ev_s04_2ad647831845"
+            ],
+            "consultant_relevance": "Helps scope the technical depth of the API security audit accurately.",
+            "verification_path": "Review integration architecture documentation with the technical team.",
+            "authority": "DISPLAY_ONLY"
+          },
+          {
+            "text": "What additional areas are encompassed by your reference to 'among other things' in the booking request?",
+            "posture": "ACTION",
+            "source_refs": [
+              "meeting_context:BOOKING_FORM:CALENDLY",
+              "prospect_answer:PROSPECT_PROVIDED"
+            ],
+            "consultant_relevance": "Prevents missing out-of-band expectations during proposal formulation.",
+            "verification_path": "Prompt the prospect to list any supplementary project objectives.",
+            "authority": "DISPLAY_ONLY"
+          },
+          {
+            "text": "Focus the discovery conversation on defining the exact boundaries of the customer security review, detailing the specific OAuth flows and APIs in scope, and uncovering any additional objectives hidden behind the open-ended booking language.",
+            "posture": "ACTION",
+            "source_refs": [
+              "meeting_context:BOOKING_FORM:CALENDLY",
+              "prospect_answer:PROSPECT_PROVIDED"
+            ],
+            "consultant_relevance": "Maintains a disciplined call structure focused strictly on prospect-provided priorities.",
+            "verification_path": "Execute discovery questions sequentially to validate all scope components.",
+            "authority": "DISPLAY_ONLY"
+          },
+          {
+            "text": "Outline a targeted discovery follow-up plan based on the clarified API integration scope and customer review requirements.",
+            "posture": "ACTION",
+            "source_refs": [],
+            "consultant_relevance": "Provides a clear procedural transition following the discovery conversation.",
+            "verification_path": "Confirm agreement with the prospect on the next engagement phase.",
+            "authority": "DISPLAY_ONLY"
+          }
+        ],
+        "company_context": [
+          {
+            "text": "Planoly provides a social media planning, scheduling, and management platform serving creators and small businesses, with multi-platform auto-posting and creator storefront features.",
+            "posture": "SUPPORTED",
+            "source_refs": [
+              "ev_s04_ef6907aa8432",
+              "ev_s04_ffd3248bfd5d",
+              "ev_s04_9665e823dac5",
+              "ev_s04_8ed835d70221",
+              "ev_s04_6585c511f320"
+            ],
+            "consultant_relevance": "Provides foundational product context for understanding their multi-platform integration environment.",
+            "verification_path": "Review public platform capabilities on planoly.com.",
+            "authority": "DISPLAY_ONLY"
+          }
+        ],
+        "what_matters_items": [
+          {
+            "text": "The prospect has requested API Security Auditing alongside a customer security review and trust-assurance process, with a specific focus on OAuth authorization flows and social-platform integration APIs.",
+            "posture": "SUPPORTED",
+            "source_refs": [
+              "ev_s04_ef165cd5c7af",
+              "ev_s04_2ad647831845"
+            ],
+            "consultant_relevance": "Directly highlights the technical perimeter and integration mechanisms requiring evaluation during the audit.",
+            "verification_path": "Confirm OAuth and integration scopes directly with the prospect during discovery.",
+            "authority": "DISPLAY_ONLY"
+          },
+          {
+            "text": "The accepted company and public technical context gives the booking request a concrete surface to explore, but the actual boundaries and assurance outcome are not established yet; resolve that distinction before shaping an advisory path.",
+            "posture": "INTERPRETATION",
+            "source_refs": [
+              "ev_s04_ef6907aa8432",
+              "ev_s04_ffd3248bfd5d",
+              "ev_s04_9665e823dac5",
+              "ev_s04_8ed835d70221",
+              "ev_s04_6585c511f320",
+              "meeting_context:BOOKING_FORM:CALENDLY",
+              "prospect_answer:PROSPECT_PROVIDED"
+            ],
+            "consultant_relevance": "Connects company context to the stated conversation without treating public signals as confirmed need.",
+            "verification_path": "Confirm the requested boundaries and desired outcome with the prospect.",
+            "authority": "DISPLAY_ONLY"
+          },
+          {
+            "text": "The booking explicitly leaves additional areas unspecified, so the consultant should keep the agenda open and ask what else matters without inferring the missing scope.",
+            "posture": "INTERPRETATION",
+            "source_refs": [
+              "meeting_context:BOOKING_FORM:CALENDLY"
+            ],
+            "consultant_relevance": "Preserves the prospect's open-ended scope signal for live discovery.",
+            "verification_path": "Ask what additional areas the prospect wants covered.",
+            "authority": "DISPLAY_ONLY"
+          }
+        ],
+        "current_posture": [
+          {
+            "text": "The immediate requirement focuses on a customer security review and trust-assurance process, with no confirmed SOC 2 or ISO 27001 requirement yet established.",
+            "posture": "UNKNOWN",
+            "source_refs": [],
+            "consultant_relevance": "Clarifies the compliance baseline so the consultant does not assume formal framework mandates.",
+            "verification_path": "Verify if external customer security questionnaires or enterprise tier requirements are driving the trust-assurance process.",
+            "authority": "DISPLAY_ONLY"
+          }
+        ],
+        "evidence_summary": [
+          "Planoly provides a social media planning, scheduling, and management platform serving creators and small businesses, with multi-platform auto-posting and creator storefront features."
+        ],
+        "interpretation": "The prospect has requested API Security Auditing alongside a customer security review and trust-assurance process, with a specific focus on OAuth authorization flows and social-platform integration APIs. The accepted company and public technical context gives the booking request a concrete surface to explore, but the actual boundaries and assurance outcome are not established yet; resolve that distinction before shaping an advisory path. The booking explicitly leaves additional areas unspecified, so the consultant should keep the agenda open and ask what else matters without inferring the missing scope.",
+        "uncertainty": [
+          "The full extent of the 'among other things' scope referenced in the booking form remains unspecified."
+        ],
+        "consultant_relevance": "As Jordan Vale representing Priority Stack Advisory, use these synthesized parameters to lead a focused discovery session centered on Planoly's OAuth integration security and trust-assurance needs without making unverified assumptions about formal compliance frameworks.",
+        "suggested_verification": [
+          "Verify whether the customer security review requires specific artifact generation (such as security whitepapers or policy documentation) alongside the API audit."
+        ],
+        "discovery_questions": [
+          {
+            "question": "What specific customer security review or trust-assurance milestones are driving this initiative?",
+            "rationale": "Tests the immediate driver behind the trust-assurance process since formal compliance mandates like SOC 2 or ISO 27001 are not yet confirmed.",
+            "posture": "HYPOTHESIS",
+            "source_refs": [
+              "meeting_context:BOOKING_FORM:CALENDLY",
+              "prospect_answer:PROSPECT_PROVIDED"
+            ],
+            "listen_for": "Specific enterprise customer demands, incoming security questionnaires, or internal risk milestones.",
+            "avoid_assuming": "Do not assume that an active SOC 2 or ISO 27001 audit project is underway.",
+            "tested_hypothesis_or_gap": "Clarifying the trigger for the customer security review.",
+            "consultant_relevance": "Ensures alignment on the precise deliverables required for the trust-assurance process.",
+            "verification_path": "Directly inquire about the origin of the trust-assurance requirement.",
+            "authority": "DISPLAY_ONLY"
+          },
+          {
+            "question": "Which social-platform integration APIs and OAuth flows represent the highest priority for the security audit?",
+            "rationale": "Grounded in the prospect's stated focus on OAuth authorization flows and social-platform integration APIs.",
+            "posture": "HYPOTHESIS",
+            "source_refs": [
+              "ev_s04_ef165cd5c7af",
+              "ev_s04_2ad647831845"
+            ],
+            "listen_for": "Details on specific third-party APIs, token management practices, and integration boundaries.",
+            "avoid_assuming": "Do not assume all social platform integrations carry identical risk profiles or use identical authorization mechanics.",
+            "tested_hypothesis_or_gap": "Pinpointing exact API boundaries for the audit scope.",
+            "consultant_relevance": "Helps scope the technical depth of the API security audit accurately.",
+            "verification_path": "Review integration architecture documentation with the technical team.",
+            "authority": "DISPLAY_ONLY"
+          },
+          {
+            "question": "What additional areas are encompassed by your reference to 'among other things' in the booking request?",
+            "rationale": "Addresses the open-ended scope indicator from the booking form to capture all required workstreams.",
+            "posture": "ACTION",
+            "source_refs": [
+              "meeting_context:BOOKING_FORM:CALENDLY",
+              "prospect_answer:PROSPECT_PROVIDED"
+            ],
+            "listen_for": "Additional technical or process review categories not yet documented.",
+            "avoid_assuming": "Do not assume the scope is limited strictly to API security and trust documentation.",
+            "tested_hypothesis_or_gap": "Uncovering unspecified project scope elements.",
+            "consultant_relevance": "Prevents missing out-of-band expectations during proposal formulation.",
+            "verification_path": "Prompt the prospect to list any supplementary project objectives.",
+            "authority": "DISPLAY_ONLY"
+          }
+        ],
+        "open_ended_scope": {
+          "signal": "OPEN_ENDED_SCOPE",
+          "exact_source_text": "We're looking for API Security Auditing and Compliance & Trust Certification, among other things.",
+          "basis_source_ref": "meeting_context:BOOKING_FORM:CALENDLY",
+          "source_refs": [
+            "meeting_context:BOOKING_FORM:CALENDLY"
+          ],
+          "safe_interpretation": "The prospect explicitly left additional areas unspecified; do not infer what those areas are.",
+          "authority": "DISPLAY_ONLY"
+        },
+        "call_direction": "Focus the discovery conversation on defining the exact boundaries of the customer security review, detailing the specific OAuth flows and APIs in scope, and uncovering any additional objectives hidden behind the open-ended booking language.",
+        "suggested_next_step": "Outline a targeted discovery follow-up plan based on the clarified API integration scope and customer review requirements.",
+        "suggested_next_step_detail": {
+          "recommended_action": "Synthesize discovery findings into a tailored scope of work covering the requested API security auditing and trust-assurance process.",
+          "condition_to_trigger": "Successful completion of the discovery call confirming all technical and trust review parameters.",
+          "reasoning_basis": "Grounded in the prospect's stated need for API security auditing and customer security review support.",
+          "inputs_required": [
+            "Confirmed API and OAuth scope details",
+            "Specific trust-assurance deliverables",
+            "Clarification on any additional 'among other things' requirements"
+          ],
+          "authority": "DISPLAY_ONLY"
+        },
+        "synthesis_metadata": {
+          "model": "gemini-flash-lite-latest",
+          "synthesized_by": "gemini_grounded_display_intelligence",
+          "authority": "DISPLAY_ONLY"
+        }
+      },
+      "consultant_live_discovery_questions": [
+        {
+          "question": "What specific customer security review or trust-assurance milestones are driving this initiative?",
+          "rationale": "Tests the immediate driver behind the trust-assurance process since formal compliance mandates like SOC 2 or ISO 27001 are not yet confirmed.",
+          "listen_for": "Specific enterprise customer demands, incoming security questionnaires, or internal risk milestones.",
+          "avoid_assuming": "Do not assume that an active SOC 2 or ISO 27001 audit project is underway.",
+          "tested_hypothesis_or_gap": "Clarifying the trigger for the customer security review.",
+          "source_refs": [
+            "meeting_context:BOOKING_FORM:CALENDLY",
+            "prospect_answer:PROSPECT_PROVIDED"
+          ],
+          "authority": "DISPLAY_ONLY"
+        },
+        {
+          "question": "Which social-platform integration APIs and OAuth flows represent the highest priority for the security audit?",
+          "rationale": "Grounded in the prospect's stated focus on OAuth authorization flows and social-platform integration APIs.",
+          "listen_for": "Details on specific third-party APIs, token management practices, and integration boundaries.",
+          "avoid_assuming": "Do not assume all social platform integrations carry identical risk profiles or use identical authorization mechanics.",
+          "tested_hypothesis_or_gap": "Pinpointing exact API boundaries for the audit scope.",
+          "source_refs": [
+            "ev_s04_ef165cd5c7af",
+            "ev_s04_2ad647831845"
+          ],
+          "authority": "DISPLAY_ONLY"
+        },
+        {
+          "question": "What additional areas are encompassed by your reference to 'among other things' in the booking request?",
+          "rationale": "Addresses the open-ended scope indicator from the booking form to capture all required workstreams.",
+          "listen_for": "Additional technical or process review categories not yet documented.",
+          "avoid_assuming": "Do not assume the scope is limited strictly to API security and trust documentation.",
+          "tested_hypothesis_or_gap": "Uncovering unspecified project scope elements.",
+          "source_refs": [
+            "meeting_context:BOOKING_FORM:CALENDLY",
+            "prospect_answer:PROSPECT_PROVIDED"
+          ],
+          "authority": "DISPLAY_ONLY"
+        }
+      ],
+      "open_ended_scope": {
+        "signal": "OPEN_ENDED_SCOPE",
+        "exact_source_text": "We're looking for API Security Auditing and Compliance & Trust Certification, among other things.",
+        "basis_source_ref": "meeting_context:BOOKING_FORM:CALENDLY",
+        "source_refs": [
+          "meeting_context:BOOKING_FORM:CALENDLY"
+        ],
+        "safe_interpretation": "The prospect explicitly left additional areas unspecified; do not infer what those areas are.",
+        "authority": "DISPLAY_ONLY"
+      },
+      "discovery_questions": [],
+      "recommended_call_strategy": "Focus the discovery conversation on defining the exact boundaries of the customer security review, detailing the specific OAuth flows and APIs in scope, and uncovering any additional objectives hidden behind the open-ended booking language.",
+      "disqualifier_posture": {
+        "disqualification_triggers": [],
+        "potential_disqualifiers_to_verify": [
+          "Advisory consideration: B2C companies",
+          "Advisory consideration: Hardware-only engagements"
+        ],
+        "polished_disqualifiers": [
+          "Advisory consideration: B2C companies",
+          "Advisory consideration: Hardware-only engagements"
+        ]
+      },
+      "user_facing_evidence": {
+        "coverage_score_pct": 95,
+        "material_conflicts": [],
+        "traceability_map": {
+          "potential_service_fit": []
+        },
+        "grounded_display_diagnostics": {
+          "status": "GEMINI_GROUNDED_SYNTHESIS",
+          "gemini_invoked": true,
+          "model": "gemini-flash-lite-latest",
+          "input_evidence_ids": [
+            "ev_s04_ef6907aa8432",
+            "ev_s04_d94b163afd89",
+            "ev_s04_41eb0b7abdbe",
+            "ev_s04_ffd3248bfd5d",
+            "ev_s04_1123ed48d3d9",
+            "ev_s04_7c7cac060ae2",
+            "ev_s04_083f94a93b8c",
+            "ev_s04_2ad647831845",
+            "ev_s04_ef165cd5c7af",
+            "ev_s04_9665e823dac5",
+            "ev_s04_746fdf479e18",
+            "ev_s04_8ed835d70221",
+            "ev_s04_a2a927cad809",
+            "ev_s04_74c973529086",
+            "ev_s04_6585c511f320",
+            "ev_s04_e2f7bdc9539e",
+            "ev_s04_47934f96865a",
+            "ev_s04_ca2cc8b874a5"
+          ],
+          "ranked_sources": [
+            {
+              "evidence_id": "ev_s04_ef6907aa8432",
+              "source_url": "https://www.planoly.com",
+              "source_title": "First-Party Web: / (Homepage)",
+              "source_type": "FIRST_PARTY_PUBLIC",
+              "source_rank": 1,
+              "snippet": "Social Media Planner & Management Tool | Planoly \n\n PRICING Resources LOG IN LOG IN GET STARTED FREE The social media planner that goes way beyond scheduling Manage your entire social media workflow in one place. FREE 14-DAY TRIAL LEARN MORE Stop switching between tools. Planoly handles it all. Features to help you Plan & Create Generate content ideas with AI Get unstuck with post ideas, keyword r"
+            },
+            {
+              "evidence_id": "ev_s04_d94b163afd89",
+              "source_url": "https://www.planoly.com/about-us",
+              "source_title": "About Us",
+              "source_type": "FIRST_PARTY_PUBLIC",
+              "source_rank": 1,
+              "snippet": "# Built for creators, by creators\n\nPlanoly launched in 2016 as the first visual Instagram planner, helping creators curate the perfect grid.\n\n## Social media and the creator economy have evolved, so have we.\n\nToday, Planoly is a suite of tools designed to streamline every aspect of the creator workflow from inspiration to planning, scheduling, and now–making a living.\n\n## Our goal\n\nWe believe that"
+            },
+            {
+              "evidence_id": "ev_s04_41eb0b7abdbe",
+              "source_url": "https://www.planoly.com/acceptable-use-policy",
+              "source_title": "Acceptable Use Policy",
+              "source_type": "FIRST_PARTY_PUBLIC",
+              "source_rank": 1,
+              "snippet": "Use your best efforts to prevent unauthorized access to or use of the Services, including by maintaining a strong password and keeping your password and other login credentials confidential.\n Monitor and control all activity conducted through your Planoly account.\n Notify us promptly if you become aware of our suspect any security breach regarding your account, including any loss, theft, or unauth"
+            },
+            {
+              "evidence_id": "ev_s04_ffd3248bfd5d",
+              "source_url": "https://www.planoly.com/blog/five-planoly-features-you-should-know-about",
+              "source_title": "Five Planoly Features You Should Know About | Planoly",
+              "source_type": "FIRST_PARTY_PUBLIC",
+              "source_rank": 1,
+              "snippet": "‍\n\n# 1. Multi-platform scheduling\n\nWhat it is: A centralized dashboard that lets you manage all of your content in one place. Planoly allows you to schedule content for Instagram, Facebook, TikTok, Pinterest, LinkedIn, YouTube, Threads, and X all at once.\n\n‍\n\nWhy you need it: Gone are the days of logging in and out of five different apps to get your content published. With Planoly, you can set con"
+            },
+            {
+              "evidence_id": "ev_s04_1123ed48d3d9",
+              "source_url": "https://www.planoly.com/privacy-policy",
+              "source_title": "Privacy Policy",
+              "source_type": "FIRST_PARTY_PUBLIC",
+              "source_rank": 1,
+              "snippet": "‍\n\n# Children’s Privacy\n\nOur Services are not intended for general audiences and not for children under the age of 18. No one under age 18 may provide any personal information through any of the Services. We do not knowingly collect personal information from children under 18. If you are under 18, do not use or provide any information through the Services. If we learn we have collected or received"
+            },
+            {
+              "evidence_id": "ev_s04_7c7cac060ae2",
+              "source_url": "https://www.planoly.com/privacy-policy",
+              "source_title": "Privacy Policy",
+              "source_type": "FIRST_PARTY_PUBLIC",
+              "source_rank": 1,
+              "snippet": "If Planoly is acquired by or merged with a third-party entity, Planoly reserves the right to transfer or assign the personal information you provided to us as part of such merger, acquisition, sale, or other change of control to the new entity. In the event of bankruptcy, insolvency, reorganization, receivership, or assignment for the benefit of creditors, or the application of laws or equitable p"
+            },
+            {
+              "evidence_id": "ev_s04_083f94a93b8c",
+              "source_url": "https://www.planoly.com/terms-of-use",
+              "source_title": "Legals",
+              "source_type": "FIRST_PARTY_PUBLIC",
+              "source_rank": 1,
+              "snippet": "These Terms of Use are entered into by and between you and Planogram, LLC, d/b/a “Planoly” (“Planoly”, “Company”, “we”, “our”, or “us”). These Terms of Use govern your access to and use of www.planoly.com and (the “Websites”), the Planoly mobile and/or web application (the “App”), and any content, functionality, and services offered on or through the Websites and the App (collectively, the “Servic"
+            },
+            {
+              "evidence_id": "ev_s04_2ad647831845",
+              "source_url": "https://www.planoly.com/terms-of-use",
+              "source_title": "Legals",
+              "source_type": "FIRST_PARTY_PUBLIC",
+              "source_rank": 1,
+              "snippet": "With Linked Services for third-party integration, Creators may be asked to verify credentials in the future. It is the Creator’s sole responsibility to track, refresh, and monitor credentials. Please see our Privacy Policyfor more information about how Creators can alter the security settings for these Linked Services. Creators acknowledge and agree that Linked Services may add, remove, bifurcate,"
+            },
+            {
+              "evidence_id": "ev_s04_ef165cd5c7af",
+              "source_url": "https://apitracker.io/a/planoly",
+              "source_title": "Planoly API - Developer docs, APIs, SDKs, and auth. | API Tracker",
+              "source_type": "THIRD_PARTY_PUBLIC",
+              "source_rank": 2,
+              "snippet": "# Planoly API\n\n#### Links\n\n#### Customers & developers\n\n#### Alternatives\n\nManage, plan, and schedule your Instagram posts from your computer and mobile phones. Create a cohesive Instagram feed and manage multiple Instagram accounts.\n\n## Planoly API profile\n\nAPI styles\n\n-\n\nDeveloper docs\n\n-\n\nAPI Reference\n\n-\n\nWebhooks\n\nWebhooks management API\n\n-\n\nSandbox environment\n\n-\n\nAuthentication\n\nIdentity pr"
+            },
+            {
+              "evidence_id": "ev_s04_9665e823dac5",
+              "source_url": "https://apps.apple.com/us/app/planoly-social-media-planner/id1014568284",
+              "source_title": "Planoly: Social Media Planner - App Store - Apple",
+              "source_type": "THIRD_PARTY_PUBLIC",
+              "source_rank": 2,
+              "snippet": "place SELL WHAT YOU MAKE Build your Creator Store and sell products and digital services — all from the same account. Whether you're planning an Instagram feed, creating full-time, or running every channel with a team, Planoly helps you post consistently and grow — without the busywork. Download Planoly and take back your time. Privacy Policy: Terms of Use: Support: Instagram / TikTok / X: @planol"
+            },
+            {
+              "evidence_id": "ev_s04_746fdf479e18",
+              "source_url": "https://influencermarketinghub.com/planoly",
+              "source_title": "Planoly Review | Pricing & Features (2025) - Social Media Marketing Platform",
+              "source_type": "THIRD_PARTY_PUBLIC",
+              "source_rank": 2,
+              "snippet": "Planoly has evolved since then, but it still very much keeps its visual focus. The first step in creating every post continues to be uploading an image or video. However, it has also innovated with additional products, like Sellit, a bolt-on to simplify your Instagram social selling.\n\nPlanoly\n\nPLANOLY makes it easy to create, customize, plan and schedule content for Instagram, Pinterest, Facebook,"
+            },
+            {
+              "evidence_id": "ev_s04_8ed835d70221",
+              "source_url": "https://leadiq.com/c/planoly/5a78684d5700005101d3b560",
+              "source_title": "Planoly Company Overview, Contact Details & Competitors | LeadIQ",
+              "source_type": "THIRD_PARTY_PUBLIC",
+              "source_rank": 2,
+              "snippet": "Advertising ServicesTexas, United States11-50 Employees\n\n```\nPlanoly is a social media management platform based in Austin, Texas, serving creators and small businesses within the advertising services industry. The platform provides tools to plan, create, and schedule social content, and it also supports setting up an online storefront to monetize content. It focuses on simplifying content workflo"
+            },
+            {
+              "evidence_id": "ev_s04_a2a927cad809",
+              "source_url": "https://pages.planoly.com/entrepreneurs",
+              "source_title": "Social Media Marketing For Entrepreneurs | PLANOLY",
+              "source_type": "THIRD_PARTY_PUBLIC",
+              "source_rank": 2,
+              "snippet": "Terms of Service\n |\n Privacy Policy\n\n Follow PLANOLY on TikTok\n Follow PLANOLY on Instagram\n Follow PLANOLY on Pinterest\n Watch PLANOLY on YouTube\n Follow PLANOLY on Twitter\n Like PLANOLY on Facebook\n Follow PLANOLY on LinkedIn [...] CREATE FREE ACCOUNT\n\nDownload PLANOLY on the App Store Download PLANOLY on the PlayStore\n\nDOWNLOAD PLANOLY\n\nStories Planner\n\n## More Resources VIEW ALL\n\n##### Our New"
+            },
+            {
+              "evidence_id": "ev_s04_74c973529086",
+              "source_url": "https://pages.planoly.com/social-media-manager",
+              "source_title": "Advanced Social Media Management Tools | PLANOLY",
+              "source_type": "THIRD_PARTY_PUBLIC",
+              "source_rank": 2,
+              "snippet": "##### Our New Favorite Gen Z Marketing Trends\n\n##### New Quiet Mode Feature On Instagram\n\n##### How to Create a Strategy for Cross-Posting\n\nSTART 7-DAY FREE TRIAL\n\nDownload PLANOLY on the App Store Download PLANOLY on the PlayStore\n\nStart 7-Day Free Trial\n\nPricing About Events Newsroom CAREERS PREFERRED PARTNERS Newsletter\n\nVideo Planner IG Planner Reels Planner Content Templates linkit Pin Planne"
+            },
+            {
+              "evidence_id": "ev_s04_6585c511f320",
+              "source_url": "https://play.google.com/store/apps/details?id=com.planoly.android&hl=en_US",
+              "source_title": "Planoly: Social Media Planner - Apps on Google Play",
+              "source_type": "THIRD_PARTY_PUBLIC",
+              "source_rank": 2,
+              "snippet": "Planoly is the social media planner and scheduler trusted by 8 million creators to plan, edit, schedule, and auto-post across every channel — from one app. \n \nPlan your content calendar, preview your Instagram grid, write captions with AI, edit your photos and videos, and let Planoly auto-post to Instagram, TikTok, Threads, LinkedIn, YouTube, Facebook, X, and Pinterest. Build a social media strate"
+            },
+            {
+              "evidence_id": "ev_s04_e2f7bdc9539e",
+              "source_url": "https://www.instagram.com/p/B84EFBZJtjq",
+              "source_title": "Instagram",
+              "source_type": "THIRD_PARTY_PUBLIC",
+              "source_rank": 2,
+              "snippet": "planoly\n\n•\n\nFollow\n\nplanoly's profile picture\n\nplanoly\n\nIs PLANOLY safe to use? 🧐💭 The super-short answer is YES, but today we're explaining exactly why you have no need to worry about the safety of your account. We're here to elevate your business! Tap through 👉 to learn why you can trust us to help you manage your content. \n⠀⠀⠀⠀⠀⠀⠀⠀⠀ \nImportant Takeaways: \n1️⃣ PLANOLY is an official Instagram"
+            },
+            {
+              "evidence_id": "ev_s04_47934f96865a",
+              "source_url": "https://www.linkedin.com/company/planoly",
+              "source_title": "Planoly - Your something is worth building.",
+              "source_type": "THIRD_PARTY_PUBLIC",
+              "source_rank": 2,
+              "snippet": "# Planoly\nYour something is worth building.\nAdvertising Services • Austin, TX • 10,426 followers • 11-50 employees\n\n## Overview\n💸 Build an online storefront in minutes & start earning ✨ Plan, create and schedule your social content\n\n### Website\n\n### Crunchbase\nN/A\n### LinkedIn\nN/A\n\n### Industry\nAdvertising Services\n\n### Company Size\n11-50 employees \n29 associated members (LinkedIn members who've"
+            },
+            {
+              "evidence_id": "ev_s04_ca2cc8b874a5",
+              "source_url": "https://www.trustpilot.com/review/www.planoly.com",
+              "source_title": "Read Customer Service Reviews of www.planoly.com - Trustpilot",
+              "source_type": "THIRD_PARTY_PUBLIC",
+              "source_rank": 2,
+              "snippet": "Image 1: Trustpilot reviews\n\n#### Suggested companies\n\n#### Later later.com•349 reviews #### 1.5#### Metricool metricool.com•653 reviews #### 4.0#### Joybuy www.joybuy.co.uk•17K reviews #### 4.6\n#### Suggested searches\n\nRoofing contractor in United StatesFurniture store in New YorkBest internet marketing serviceInsurance agency in ChicagoCar dealer near me\n\nCategoriesBlogLog inFor businesses\n\nFor"
+            }
+          ],
+          "output_basis": [
+            {
+              "text": "Planoly provides a social media planning, scheduling, and management platform serving creators and small businesses, with multi-platform auto-posting and creator storefront features.",
+              "posture": "SUPPORTED",
+              "source_refs": [
+                "ev_s04_ef6907aa8432",
+                "ev_s04_ffd3248bfd5d",
+                "ev_s04_9665e823dac5",
+                "ev_s04_8ed835d70221",
+                "ev_s04_6585c511f320"
+              ],
+              "consultant_relevance": "Provides foundational product context for understanding their multi-platform integration environment.",
+              "verification_path": "Review public platform capabilities on planoly.com.",
+              "authority": "DISPLAY_ONLY"
+            },
+            {
+              "text": "The prospect has requested API Security Auditing alongside a customer security review and trust-assurance process, with a specific focus on OAuth authorization flows and social-platform integration APIs.",
+              "posture": "SUPPORTED",
+              "source_refs": [
+                "ev_s04_ef165cd5c7af",
+                "ev_s04_2ad647831845"
+              ],
+              "consultant_relevance": "Directly highlights the technical perimeter and integration mechanisms requiring evaluation during the audit.",
+              "verification_path": "Confirm OAuth and integration scopes directly with the prospect during discovery.",
+              "authority": "DISPLAY_ONLY"
+            },
+            {
+              "text": "The accepted company and public technical context gives the booking request a concrete surface to explore, but the actual boundaries and assurance outcome are not established yet; resolve that distinction before shaping an advisory path.",
+              "posture": "INTERPRETATION",
+              "source_refs": [
+                "ev_s04_ef6907aa8432",
+                "ev_s04_ffd3248bfd5d",
+                "ev_s04_9665e823dac5",
+                "ev_s04_8ed835d70221",
+                "ev_s04_6585c511f320",
+                "meeting_context:BOOKING_FORM:CALENDLY",
+                "prospect_answer:PROSPECT_PROVIDED"
+              ],
+              "consultant_relevance": "Connects company context to the stated conversation without treating public signals as confirmed need.",
+              "verification_path": "Confirm the requested boundaries and desired outcome with the prospect.",
+              "authority": "DISPLAY_ONLY"
+            },
+            {
+              "text": "The booking explicitly leaves additional areas unspecified, so the consultant should keep the agenda open and ask what else matters without inferring the missing scope.",
+              "posture": "INTERPRETATION",
+              "source_refs": [
+                "meeting_context:BOOKING_FORM:CALENDLY"
+              ],
+              "consultant_relevance": "Preserves the prospect's open-ended scope signal for live discovery.",
+              "verification_path": "Ask what additional areas the prospect wants covered.",
+              "authority": "DISPLAY_ONLY"
+            },
+            {
+              "text": "The immediate requirement focuses on a customer security review and trust-assurance process, with no confirmed SOC 2 or ISO 27001 requirement yet established.",
+              "posture": "UNKNOWN",
+              "source_refs": [],
+              "consultant_relevance": "Clarifies the compliance baseline so the consultant does not assume formal framework mandates.",
+              "verification_path": "Verify if external customer security questionnaires or enterprise tier requirements are driving the trust-assurance process.",
+              "authority": "DISPLAY_ONLY"
+            },
+            {
+              "text": "The full extent of the 'among other things' scope referenced in the booking form remains unspecified.",
+              "posture": "UNKNOWN",
+              "source_refs": [
+                "meeting_context:BOOKING_FORM:CALENDLY",
+                "prospect_answer:PROSPECT_PROVIDED"
+              ],
+              "consultant_relevance": "Identifies unmapped deliverables that need clarification to prevent scope creep.",
+              "verification_path": "Ask the prospect to itemize the remaining areas included under their open-ended request.",
+              "authority": "DISPLAY_ONLY"
+            },
+            {
+              "text": "Verify whether the customer security review requires specific artifact generation (such as security whitepapers or policy documentation) alongside the API audit.",
+              "posture": "ACTION",
+              "source_refs": [],
+              "consultant_relevance": "Ensures all expected outputs of the trust-assurance process are identified.",
+              "verification_path": "Ask the prospect directly what documentation or deliverables they expect from the trust-assurance review.",
+              "authority": "DISPLAY_ONLY"
+            },
+            {
+              "text": "The prospect explicitly left additional areas unspecified; do not infer what those areas are.",
+              "posture": "UNKNOWN",
+              "source_refs": [
+                "meeting_context:BOOKING_FORM:CALENDLY"
+              ],
+              "consultant_relevance": "Keep additional scope open without inferring unstated needs.",
+              "verification_path": "Ask the prospect what additional areas they want covered.",
+              "authority": "DISPLAY_ONLY"
+            },
+            {
+              "text": "What specific customer security review or trust-assurance milestones are driving this initiative?",
+              "posture": "HYPOTHESIS",
+              "source_refs": [
+                "meeting_context:BOOKING_FORM:CALENDLY",
+                "prospect_answer:PROSPECT_PROVIDED"
+              ],
+              "consultant_relevance": "Ensures alignment on the precise deliverables required for the trust-assurance process.",
+              "verification_path": "Directly inquire about the origin of the trust-assurance requirement.",
+              "authority": "DISPLAY_ONLY"
+            },
+            {
+              "text": "Which social-platform integration APIs and OAuth flows represent the highest priority for the security audit?",
+              "posture": "HYPOTHESIS",
+              "source_refs": [
+                "ev_s04_ef165cd5c7af",
+                "ev_s04_2ad647831845"
+              ],
+              "consultant_relevance": "Helps scope the technical depth of the API security audit accurately.",
+              "verification_path": "Review integration architecture documentation with the technical team.",
+              "authority": "DISPLAY_ONLY"
+            },
+            {
+              "text": "What additional areas are encompassed by your reference to 'among other things' in the booking request?",
+              "posture": "ACTION",
+              "source_refs": [
+                "meeting_context:BOOKING_FORM:CALENDLY",
+                "prospect_answer:PROSPECT_PROVIDED"
+              ],
+              "consultant_relevance": "Prevents missing out-of-band expectations during proposal formulation.",
+              "verification_path": "Prompt the prospect to list any supplementary project objectives.",
+              "authority": "DISPLAY_ONLY"
+            },
+            {
+              "text": "Focus the discovery conversation on defining the exact boundaries of the customer security review, detailing the specific OAuth flows and APIs in scope, and uncovering any additional objectives hidden behind the open-ended booking language.",
+              "posture": "ACTION",
+              "source_refs": [
+                "meeting_context:BOOKING_FORM:CALENDLY",
+                "prospect_answer:PROSPECT_PROVIDED"
+              ],
+              "consultant_relevance": "Maintains a disciplined call structure focused strictly on prospect-provided priorities.",
+              "verification_path": "Execute discovery questions sequentially to validate all scope components.",
+              "authority": "DISPLAY_ONLY"
+            },
+            {
+              "text": "Outline a targeted discovery follow-up plan based on the clarified API integration scope and customer review requirements.",
+              "posture": "ACTION",
+              "source_refs": [],
+              "consultant_relevance": "Provides a clear procedural transition following the discovery conversation.",
+              "verification_path": "Confirm agreement with the prospect on the next engagement phase.",
+              "authority": "DISPLAY_ONLY"
+            }
+          ]
+        }
+      },
+      "generated_at": "2026-09-10T13:17:04.541Z",
+      "grounded_display_diagnostics": {
+        "status": "GEMINI_GROUNDED_SYNTHESIS",
+        "gemini_invoked": true,
+        "model": "gemini-flash-lite-latest",
+        "input_evidence_ids": [
+          "ev_s04_ef6907aa8432",
+          "ev_s04_d94b163afd89",
+          "ev_s04_41eb0b7abdbe",
+          "ev_s04_ffd3248bfd5d",
+          "ev_s04_1123ed48d3d9",
+          "ev_s04_7c7cac060ae2",
+          "ev_s04_083f94a93b8c",
+          "ev_s04_2ad647831845",
+          "ev_s04_ef165cd5c7af",
+          "ev_s04_9665e823dac5",
+          "ev_s04_746fdf479e18",
+          "ev_s04_8ed835d70221",
+          "ev_s04_a2a927cad809",
+          "ev_s04_74c973529086",
+          "ev_s04_6585c511f320",
+          "ev_s04_e2f7bdc9539e",
+          "ev_s04_47934f96865a",
+          "ev_s04_ca2cc8b874a5"
+        ],
+        "ranked_sources": [
+          {
+            "evidence_id": "ev_s04_ef6907aa8432",
+            "source_url": "https://www.planoly.com",
+            "source_title": "First-Party Web: / (Homepage)",
+            "source_type": "FIRST_PARTY_PUBLIC",
+            "source_rank": 1,
+            "snippet": "Social Media Planner & Management Tool | Planoly \n\n PRICING Resources LOG IN LOG IN GET STARTED FREE The social media planner that goes way beyond scheduling Manage your entire social media workflow in one place. FREE 14-DAY TRIAL LEARN MORE Stop switching between tools. Planoly handles it all. Features to help you Plan & Create Generate content ideas with AI Get unstuck with post ideas, keyword r"
+          },
+          {
+            "evidence_id": "ev_s04_d94b163afd89",
+            "source_url": "https://www.planoly.com/about-us",
+            "source_title": "About Us",
+            "source_type": "FIRST_PARTY_PUBLIC",
+            "source_rank": 1,
+            "snippet": "# Built for creators, by creators\n\nPlanoly launched in 2016 as the first visual Instagram planner, helping creators curate the perfect grid.\n\n## Social media and the creator economy have evolved, so have we.\n\nToday, Planoly is a suite of tools designed to streamline every aspect of the creator workflow from inspiration to planning, scheduling, and now–making a living.\n\n## Our goal\n\nWe believe that"
+          },
+          {
+            "evidence_id": "ev_s04_41eb0b7abdbe",
+            "source_url": "https://www.planoly.com/acceptable-use-policy",
+            "source_title": "Acceptable Use Policy",
+            "source_type": "FIRST_PARTY_PUBLIC",
+            "source_rank": 1,
+            "snippet": "Use your best efforts to prevent unauthorized access to or use of the Services, including by maintaining a strong password and keeping your password and other login credentials confidential.\n Monitor and control all activity conducted through your Planoly account.\n Notify us promptly if you become aware of our suspect any security breach regarding your account, including any loss, theft, or unauth"
+          },
+          {
+            "evidence_id": "ev_s04_ffd3248bfd5d",
+            "source_url": "https://www.planoly.com/blog/five-planoly-features-you-should-know-about",
+            "source_title": "Five Planoly Features You Should Know About | Planoly",
+            "source_type": "FIRST_PARTY_PUBLIC",
+            "source_rank": 1,
+            "snippet": "‍\n\n# 1. Multi-platform scheduling\n\nWhat it is: A centralized dashboard that lets you manage all of your content in one place. Planoly allows you to schedule content for Instagram, Facebook, TikTok, Pinterest, LinkedIn, YouTube, Threads, and X all at once.\n\n‍\n\nWhy you need it: Gone are the days of logging in and out of five different apps to get your content published. With Planoly, you can set con"
+          },
+          {
+            "evidence_id": "ev_s04_1123ed48d3d9",
+            "source_url": "https://www.planoly.com/privacy-policy",
+            "source_title": "Privacy Policy",
+            "source_type": "FIRST_PARTY_PUBLIC",
+            "source_rank": 1,
+            "snippet": "‍\n\n# Children’s Privacy\n\nOur Services are not intended for general audiences and not for children under the age of 18. No one under age 18 may provide any personal information through any of the Services. We do not knowingly collect personal information from children under 18. If you are under 18, do not use or provide any information through the Services. If we learn we have collected or received"
+          },
+          {
+            "evidence_id": "ev_s04_7c7cac060ae2",
+            "source_url": "https://www.planoly.com/privacy-policy",
+            "source_title": "Privacy Policy",
+            "source_type": "FIRST_PARTY_PUBLIC",
+            "source_rank": 1,
+            "snippet": "If Planoly is acquired by or merged with a third-party entity, Planoly reserves the right to transfer or assign the personal information you provided to us as part of such merger, acquisition, sale, or other change of control to the new entity. In the event of bankruptcy, insolvency, reorganization, receivership, or assignment for the benefit of creditors, or the application of laws or equitable p"
+          },
+          {
+            "evidence_id": "ev_s04_083f94a93b8c",
+            "source_url": "https://www.planoly.com/terms-of-use",
+            "source_title": "Legals",
+            "source_type": "FIRST_PARTY_PUBLIC",
+            "source_rank": 1,
+            "snippet": "These Terms of Use are entered into by and between you and Planogram, LLC, d/b/a “Planoly” (“Planoly”, “Company”, “we”, “our”, or “us”). These Terms of Use govern your access to and use of www.planoly.com and (the “Websites”), the Planoly mobile and/or web application (the “App”), and any content, functionality, and services offered on or through the Websites and the App (collectively, the “Servic"
+          },
+          {
+            "evidence_id": "ev_s04_2ad647831845",
+            "source_url": "https://www.planoly.com/terms-of-use",
+            "source_title": "Legals",
+            "source_type": "FIRST_PARTY_PUBLIC",
+            "source_rank": 1,
+            "snippet": "With Linked Services for third-party integration, Creators may be asked to verify credentials in the future. It is the Creator’s sole responsibility to track, refresh, and monitor credentials. Please see our Privacy Policyfor more information about how Creators can alter the security settings for these Linked Services. Creators acknowledge and agree that Linked Services may add, remove, bifurcate,"
+          },
+          {
+            "evidence_id": "ev_s04_ef165cd5c7af",
+            "source_url": "https://apitracker.io/a/planoly",
+            "source_title": "Planoly API - Developer docs, APIs, SDKs, and auth. | API Tracker",
+            "source_type": "THIRD_PARTY_PUBLIC",
+            "source_rank": 2,
+            "snippet": "# Planoly API\n\n#### Links\n\n#### Customers & developers\n\n#### Alternatives\n\nManage, plan, and schedule your Instagram posts from your computer and mobile phones. Create a cohesive Instagram feed and manage multiple Instagram accounts.\n\n## Planoly API profile\n\nAPI styles\n\n-\n\nDeveloper docs\n\n-\n\nAPI Reference\n\n-\n\nWebhooks\n\nWebhooks management API\n\n-\n\nSandbox environment\n\n-\n\nAuthentication\n\nIdentity pr"
+          },
+          {
+            "evidence_id": "ev_s04_9665e823dac5",
+            "source_url": "https://apps.apple.com/us/app/planoly-social-media-planner/id1014568284",
+            "source_title": "Planoly: Social Media Planner - App Store - Apple",
+            "source_type": "THIRD_PARTY_PUBLIC",
+            "source_rank": 2,
+            "snippet": "place SELL WHAT YOU MAKE Build your Creator Store and sell products and digital services — all from the same account. Whether you're planning an Instagram feed, creating full-time, or running every channel with a team, Planoly helps you post consistently and grow — without the busywork. Download Planoly and take back your time. Privacy Policy: Terms of Use: Support: Instagram / TikTok / X: @planol"
+          },
+          {
+            "evidence_id": "ev_s04_746fdf479e18",
+            "source_url": "https://influencermarketinghub.com/planoly",
+            "source_title": "Planoly Review | Pricing & Features (2025) - Social Media Marketing Platform",
+            "source_type": "THIRD_PARTY_PUBLIC",
+            "source_rank": 2,
+            "snippet": "Planoly has evolved since then, but it still very much keeps its visual focus. The first step in creating every post continues to be uploading an image or video. However, it has also innovated with additional products, like Sellit, a bolt-on to simplify your Instagram social selling.\n\nPlanoly\n\nPLANOLY makes it easy to create, customize, plan and schedule content for Instagram, Pinterest, Facebook,"
+          },
+          {
+            "evidence_id": "ev_s04_8ed835d70221",
+            "source_url": "https://leadiq.com/c/planoly/5a78684d5700005101d3b560",
+            "source_title": "Planoly Company Overview, Contact Details & Competitors | LeadIQ",
+            "source_type": "THIRD_PARTY_PUBLIC",
+            "source_rank": 2,
+            "snippet": "Advertising ServicesTexas, United States11-50 Employees\n\n```\nPlanoly is a social media management platform based in Austin, Texas, serving creators and small businesses within the advertising services industry. The platform provides tools to plan, create, and schedule social content, and it also supports setting up an online storefront to monetize content. It focuses on simplifying content workflo"
+          },
+          {
+            "evidence_id": "ev_s04_a2a927cad809",
+            "source_url": "https://pages.planoly.com/entrepreneurs",
+            "source_title": "Social Media Marketing For Entrepreneurs | PLANOLY",
+            "source_type": "THIRD_PARTY_PUBLIC",
+            "source_rank": 2,
+            "snippet": "Terms of Service\n |\n Privacy Policy\n\n Follow PLANOLY on TikTok\n Follow PLANOLY on Instagram\n Follow PLANOLY on Pinterest\n Watch PLANOLY on YouTube\n Follow PLANOLY on Twitter\n Like PLANOLY on Facebook\n Follow PLANOLY on LinkedIn [...] CREATE FREE ACCOUNT\n\nDownload PLANOLY on the App Store Download PLANOLY on the PlayStore\n\nDOWNLOAD PLANOLY\n\nStories Planner\n\n## More Resources VIEW ALL\n\n##### Our New"
+          },
+          {
+            "evidence_id": "ev_s04_74c973529086",
+            "source_url": "https://pages.planoly.com/social-media-manager",
+            "source_title": "Advanced Social Media Management Tools | PLANOLY",
+            "source_type": "THIRD_PARTY_PUBLIC",
+            "source_rank": 2,
+            "snippet": "##### Our New Favorite Gen Z Marketing Trends\n\n##### New Quiet Mode Feature On Instagram\n\n##### How to Create a Strategy for Cross-Posting\n\nSTART 7-DAY FREE TRIAL\n\nDownload PLANOLY on the App Store Download PLANOLY on the PlayStore\n\nStart 7-Day Free Trial\n\nPricing About Events Newsroom CAREERS PREFERRED PARTNERS Newsletter\n\nVideo Planner IG Planner Reels Planner Content Templates linkit Pin Planne"
+          },
+          {
+            "evidence_id": "ev_s04_6585c511f320",
+            "source_url": "https://play.google.com/store/apps/details?id=com.planoly.android&hl=en_US",
+            "source_title": "Planoly: Social Media Planner - Apps on Google Play",
+            "source_type": "THIRD_PARTY_PUBLIC",
+            "source_rank": 2,
+            "snippet": "Planoly is the social media planner and scheduler trusted by 8 million creators to plan, edit, schedule, and auto-post across every channel — from one app. \n \nPlan your content calendar, preview your Instagram grid, write captions with AI, edit your photos and videos, and let Planoly auto-post to Instagram, TikTok, Threads, LinkedIn, YouTube, Facebook, X, and Pinterest. Build a social media strate"
+          },
+          {
+            "evidence_id": "ev_s04_e2f7bdc9539e",
+            "source_url": "https://www.instagram.com/p/B84EFBZJtjq",
+            "source_title": "Instagram",
+            "source_type": "THIRD_PARTY_PUBLIC",
+            "source_rank": 2,
+            "snippet": "planoly\n\n•\n\nFollow\n\nplanoly's profile picture\n\nplanoly\n\nIs PLANOLY safe to use? 🧐💭 The super-short answer is YES, but today we're explaining exactly why you have no need to worry about the safety of your account. We're here to elevate your business! Tap through 👉 to learn why you can trust us to help you manage your content. \n⠀⠀⠀⠀⠀⠀⠀⠀⠀ \nImportant Takeaways: \n1️⃣ PLANOLY is an official Instagram"
+          },
+          {
+            "evidence_id": "ev_s04_47934f96865a",
+            "source_url": "https://www.linkedin.com/company/planoly",
+            "source_title": "Planoly - Your something is worth building.",
+            "source_type": "THIRD_PARTY_PUBLIC",
+            "source_rank": 2,
+            "snippet": "# Planoly\nYour something is worth building.\nAdvertising Services • Austin, TX • 10,426 followers • 11-50 employees\n\n## Overview\n💸 Build an online storefront in minutes & start earning ✨ Plan, create and schedule your social content\n\n### Website\n\n### Crunchbase\nN/A\n### LinkedIn\nN/A\n\n### Industry\nAdvertising Services\n\n### Company Size\n11-50 employees \n29 associated members (LinkedIn members who've"
+          },
+          {
+            "evidence_id": "ev_s04_ca2cc8b874a5",
+            "source_url": "https://www.trustpilot.com/review/www.planoly.com",
+            "source_title": "Read Customer Service Reviews of www.planoly.com - Trustpilot",
+            "source_type": "THIRD_PARTY_PUBLIC",
+            "source_rank": 2,
+            "snippet": "Image 1: Trustpilot reviews\n\n#### Suggested companies\n\n#### Later later.com•349 reviews #### 1.5#### Metricool metricool.com•653 reviews #### 4.0#### Joybuy www.joybuy.co.uk•17K reviews #### 4.6\n#### Suggested searches\n\nRoofing contractor in United StatesFurniture store in New YorkBest internet marketing serviceInsurance agency in ChicagoCar dealer near me\n\nCategoriesBlogLog inFor businesses\n\nFor"
+          }
+        ],
+        "output_basis": [
+          {
+            "text": "Planoly provides a social media planning, scheduling, and management platform serving creators and small businesses, with multi-platform auto-posting and creator storefront features.",
+            "posture": "SUPPORTED",
+            "source_refs": [
+              "ev_s04_ef6907aa8432",
+              "ev_s04_ffd3248bfd5d",
+              "ev_s04_9665e823dac5",
+              "ev_s04_8ed835d70221",
+              "ev_s04_6585c511f320"
+            ],
+            "consultant_relevance": "Provides foundational product context for understanding their multi-platform integration environment.",
+            "verification_path": "Review public platform capabilities on planoly.com.",
+            "authority": "DISPLAY_ONLY"
+          },
+          {
+            "text": "The prospect has requested API Security Auditing alongside a customer security review and trust-assurance process, with a specific focus on OAuth authorization flows and social-platform integration APIs.",
+            "posture": "SUPPORTED",
+            "source_refs": [
+              "ev_s04_ef165cd5c7af",
+              "ev_s04_2ad647831845"
+            ],
+            "consultant_relevance": "Directly highlights the technical perimeter and integration mechanisms requiring evaluation during the audit.",
+            "verification_path": "Confirm OAuth and integration scopes directly with the prospect during discovery.",
+            "authority": "DISPLAY_ONLY"
+          },
+          {
+            "text": "The accepted company and public technical context gives the booking request a concrete surface to explore, but the actual boundaries and assurance outcome are not established yet; resolve that distinction before shaping an advisory path.",
+            "posture": "INTERPRETATION",
+            "source_refs": [
+              "ev_s04_ef6907aa8432",
+              "ev_s04_ffd3248bfd5d",
+              "ev_s04_9665e823dac5",
+              "ev_s04_8ed835d70221",
+              "ev_s04_6585c511f320",
+              "meeting_context:BOOKING_FORM:CALENDLY",
+              "prospect_answer:PROSPECT_PROVIDED"
+            ],
+            "consultant_relevance": "Connects company context to the stated conversation without treating public signals as confirmed need.",
+            "verification_path": "Confirm the requested boundaries and desired outcome with the prospect.",
+            "authority": "DISPLAY_ONLY"
+          },
+          {
+            "text": "The booking explicitly leaves additional areas unspecified, so the consultant should keep the agenda open and ask what else matters without inferring the missing scope.",
+            "posture": "INTERPRETATION",
+            "source_refs": [
+              "meeting_context:BOOKING_FORM:CALENDLY"
+            ],
+            "consultant_relevance": "Preserves the prospect's open-ended scope signal for live discovery.",
+            "verification_path": "Ask what additional areas the prospect wants covered.",
+            "authority": "DISPLAY_ONLY"
+          },
+          {
+            "text": "The immediate requirement focuses on a customer security review and trust-assurance process, with no confirmed SOC 2 or ISO 27001 requirement yet established.",
+            "posture": "UNKNOWN",
+            "source_refs": [],
+            "consultant_relevance": "Clarifies the compliance baseline so the consultant does not assume formal framework mandates.",
+            "verification_path": "Verify if external customer security questionnaires or enterprise tier requirements are driving the trust-assurance process.",
+            "authority": "DISPLAY_ONLY"
+          },
+          {
+            "text": "The full extent of the 'among other things' scope referenced in the booking form remains unspecified.",
+            "posture": "UNKNOWN",
+            "source_refs": [
+              "meeting_context:BOOKING_FORM:CALENDLY",
+              "prospect_answer:PROSPECT_PROVIDED"
+            ],
+            "consultant_relevance": "Identifies unmapped deliverables that need clarification to prevent scope creep.",
+            "verification_path": "Ask the prospect to itemize the remaining areas included under their open-ended request.",
+            "authority": "DISPLAY_ONLY"
+          },
+          {
+            "text": "Verify whether the customer security review requires specific artifact generation (such as security whitepapers or policy documentation) alongside the API audit.",
+            "posture": "ACTION",
+            "source_refs": [],
+            "consultant_relevance": "Ensures all expected outputs of the trust-assurance process are identified.",
+            "verification_path": "Ask the prospect directly what documentation or deliverables they expect from the trust-assurance review.",
+            "authority": "DISPLAY_ONLY"
+          },
+          {
+            "text": "The prospect explicitly left additional areas unspecified; do not infer what those areas are.",
+            "posture": "UNKNOWN",
+            "source_refs": [
+              "meeting_context:BOOKING_FORM:CALENDLY"
+            ],
+            "consultant_relevance": "Keep additional scope open without inferring unstated needs.",
+            "verification_path": "Ask the prospect what additional areas they want covered.",
+            "authority": "DISPLAY_ONLY"
+          },
+          {
+            "text": "What specific customer security review or trust-assurance milestones are driving this initiative?",
+            "posture": "HYPOTHESIS",
+            "source_refs": [
+              "meeting_context:BOOKING_FORM:CALENDLY",
+              "prospect_answer:PROSPECT_PROVIDED"
+            ],
+            "consultant_relevance": "Ensures alignment on the precise deliverables required for the trust-assurance process.",
+            "verification_path": "Directly inquire about the origin of the trust-assurance requirement.",
+            "authority": "DISPLAY_ONLY"
+          },
+          {
+            "text": "Which social-platform integration APIs and OAuth flows represent the highest priority for the security audit?",
+            "posture": "HYPOTHESIS",
+            "source_refs": [
+              "ev_s04_ef165cd5c7af",
+              "ev_s04_2ad647831845"
+            ],
+            "consultant_relevance": "Helps scope the technical depth of the API security audit accurately.",
+            "verification_path": "Review integration architecture documentation with the technical team.",
+            "authority": "DISPLAY_ONLY"
+          },
+          {
+            "text": "What additional areas are encompassed by your reference to 'among other things' in the booking request?",
+            "posture": "ACTION",
+            "source_refs": [
+              "meeting_context:BOOKING_FORM:CALENDLY",
+              "prospect_answer:PROSPECT_PROVIDED"
+            ],
+            "consultant_relevance": "Prevents missing out-of-band expectations during proposal formulation.",
+            "verification_path": "Prompt the prospect to list any supplementary project objectives.",
+            "authority": "DISPLAY_ONLY"
+          },
+          {
+            "text": "Focus the discovery conversation on defining the exact boundaries of the customer security review, detailing the specific OAuth flows and APIs in scope, and uncovering any additional objectives hidden behind the open-ended booking language.",
+            "posture": "ACTION",
+            "source_refs": [
+              "meeting_context:BOOKING_FORM:CALENDLY",
+              "prospect_answer:PROSPECT_PROVIDED"
+            ],
+            "consultant_relevance": "Maintains a disciplined call structure focused strictly on prospect-provided priorities.",
+            "verification_path": "Execute discovery questions sequentially to validate all scope components.",
+            "authority": "DISPLAY_ONLY"
+          },
+          {
+            "text": "Outline a targeted discovery follow-up plan based on the clarified API integration scope and customer review requirements.",
+            "posture": "ACTION",
+            "source_refs": [],
+            "consultant_relevance": "Provides a clear procedural transition following the discovery conversation.",
+            "verification_path": "Confirm agreement with the prospect on the next engagement phase.",
+            "authority": "DISPLAY_ONLY"
+          }
+        ]
+      }
+    },
+    "renderedBrief": "# CLARIS DEAL BRIEF — PLANOLY\n\n**Meeting Schedule:** 2026-09-15T14:00:00.000Z  \n**Meeting URL:** None  \n**Prospect:** Thai Huang (thaihuangg@planoly.com)  \n**Consultant Source of Truth:** Priority Stack Advisory  \n**Assessment:** `QUALIFY` | **Fit:** Not enough verified context to assign a fit tier | **Status:** `PROVISIONAL` | **Preparation:** `READY WITH OPEN ITEMS` | **Confidence:** Still being established\n\n---\n\n## 1. OPPORTUNITY SNAPSHOT\n\n| Metric | Value | Detail |\n|:---|:---|:---|\n| **Opportunity Score** | **Not enough verified context to score confidently** | Awaiting prospect context |\n| **Pipeline Decision** | **`QUALIFY`** | Qualification posture |\n| **Confidence** | **Still being established** | Evidence completeness |\n| **Potential Service Fit** | **Service direction not established yet** | Need status: Still unknown |\n\n---\n\n## 2. EXECUTIVE SUMMARY\n\n> The prospect has requested API Security Auditing alongside a customer security review and trust-assurance process, with a specific focus on OAuth authorization flows and social-platform integration APIs. The accepted company and public technical context gives the booking request a concrete surface to explore, but the actual boundaries and assurance outcome are not established yet; resolve that distinction before shaping an advisory path. The booking explicitly leaves additional areas unspecified, so the consultant should keep the agenda open and ask what else matters without inferring the missing scope.\n\n---\n\n## 3. WHAT MATTERS\n\n- The prospect has requested API Security Auditing alongside a customer security review and trust-assurance process, with a specific focus on OAuth authorization flows and social-platform integration APIs. (SUPPORTED) [ev_s04_ef165cd5c7af, ev_s04_2ad647831845]\n- The accepted company and public technical context gives the booking request a concrete surface to explore, but the actual boundaries and assurance outcome are not established yet; resolve that distinction before shaping an advisory path. (INTERPRETATION) [ev_s04_ef6907aa8432, ev_s04_ffd3248bfd5d, ev_s04_9665e823dac5, ev_s04_8ed835d70221, ev_s04_6585c511f320, meeting_context:BOOKING_FORM:CALENDLY, prospect_answer:PROSPECT_PROVIDED]\n- The booking explicitly leaves additional areas unspecified, so the consultant should keep the agenda open and ask what else matters without inferring the missing scope. (INTERPRETATION) [meeting_context:BOOKING_FORM:CALENDLY]\n\n**Consultant relevance:** As Jordan Vale representing Priority Stack Advisory, use these synthesized parameters to lead a focused discovery session centered on Planoly's OAuth integration security and trust-assurance needs without making unverified assumptions about formal compliance frameworks.\n\n---\n\n## 4. OPPORTUNITY CONTEXT & CURRENT POSTURE\n\n### Company Context\n\n- Planoly provides a social media planning, scheduling, and management platform serving creators and small businesses, with multi-platform auto-posting and creator storefront features. (SUPPORTED) [ev_s04_ef6907aa8432, ev_s04_ffd3248bfd5d, ev_s04_9665e823dac5, ev_s04_8ed835d70221, ev_s04_6585c511f320]\n\n### Current Posture\n\n- The immediate requirement focuses on a customer security review and trust-assurance process, with no confirmed SOC 2 or ISO 27001 requirement yet established. (UNKNOWN)\n\n• Cloud Infrastructure: Primary cloud hosting provider not confirmed in reviewed evidence\n\n• Public Compliance Disclosures: No public badges advertised (Absence != gap)\n\n---\n\n## MEETING CONTEXT\n\n> We're looking for API Security Auditing and Compliance & Trust Certification, among other things.\n- Source Type: BOOKING_FORM\n- Source Provider: CALENDLY\n- Captured At: 2026-09-10T13:16:21.985Z\n\n---\n\n## PUBLIC SIGNALS\n\n> Public-source context for call preparation. These observations are not prospect-confirmed requirements.\n\n### Technology & Infrastructure\n• “Creators acknowledge and agree that Linked Services may add, remove, bifurcate, With Linked Services for third-party integration, Creators may be asked to verify credentials in the future.”\n  www.planoly.com/terms-of-use\n\n### Business Context\n• “Features to help you Plan & Create Generate content ideas with AI Get unstuck with post ideas, keyword r Social Media Planner & Management Tool | Planoly”\n  www.planoly.com\n• “Monitor and control all activity conducted through your Planoly account.”\n  www.planoly.com/acceptable-use-policy\n• “Planoly launched in 2016 as the first visual Instagram planner, helping creators curate the perfect grid.”\n  www.planoly.com/about-us\n• “🧐💭 The super-short answer is YES, but today we're explaining exactly why you have no need to worry about the safety of your account.”\n  www.instagram.com/p/B84EFBZJtjq (Third-party reporting)\n• “Build a social media strate Planoly is the social media planner and scheduler trusted by 8 million creators to plan, edit, schedule, and auto-post across every channel — from one app.”\n  play.google.com/store/apps/details?id=com.planoly.android&hl=en_US (Third-party reporting)\n\n---\n\n## 5. STILL UNKNOWN BEFORE THE CALL\n\n\n- [ ] Verified total employee headcount and growth stage\n- [ ] The full extent of the 'among other things' scope referenced in the booking form remains unspecified.\n\n---\n\n## 6. RESEARCH-AWARE DISCOVERY QUESTIONS\n\n**Q1:** What specific customer security review or trust-assurance milestones are driving this initiative?\n\nWhy CLARIS is asking this: Tests the immediate driver behind the trust-assurance process since formal compliance mandates like SOC 2 or ISO 27001 are not yet confirmed.\n\nListen for: Specific enterprise customer demands, incoming security questionnaires, or internal risk milestones.\n\nAvoid assuming: Do not assume that an active SOC 2 or ISO 27001 audit project is underway.\n\nTests: Clarifying the trigger for the customer security review.\n\n**Q2:** Which social-platform integration APIs and OAuth flows represent the highest priority for the security audit?\n\nWhy CLARIS is asking this: Grounded in the prospect's stated focus on OAuth authorization flows and social-platform integration APIs.\n\nListen for: Details on specific third-party APIs, token management practices, and integration boundaries.\n\nAvoid assuming: Do not assume all social platform integrations carry identical risk profiles or use identical authorization mechanics.\n\nTests: Pinpointing exact API boundaries for the audit scope.\n\n**Q3:** What additional areas are encompassed by your reference to 'among other things' in the booking request?\n\nWhy CLARIS is asking this: Addresses the open-ended scope indicator from the booking form to capture all required workstreams.\n\nListen for: Additional technical or process review categories not yet documented.\n\nAvoid assuming: Do not assume the scope is limited strictly to API security and trust documentation.\n\nTests: Uncovering unspecified project scope elements.\n\n---\n\n## 7. RECOMMENDED APPROACH / CALL DIRECTION\n\nFocus the discovery conversation on defining the exact boundaries of the customer security review, detailing the specific OAuth flows and APIs in scope, and uncovering any additional objectives hidden behind the open-ended booking language.\n\n**Suggested next step:** Outline a targeted discovery follow-up plan based on the clarified API integration scope and customer review requirements.\n\n\nCondition to trigger: Successful completion of the discovery call confirming all technical and trust review parameters.\n",
+    "renderedMarkdown": "# CLARIS DEAL BRIEF — PLANOLY\n\n**Meeting Schedule:** 2026-09-15T14:00:00.000Z  \n**Meeting URL:** None  \n**Prospect:** Thai Huang (thaihuangg@planoly.com)  \n**Consultant Source of Truth:** Priority Stack Advisory  \n**Assessment:** `QUALIFY` | **Fit:** Not enough verified context to assign a fit tier | **Status:** `PROVISIONAL` | **Preparation:** `READY WITH OPEN ITEMS` | **Confidence:** Still being established\n\n---\n\n## 1. OPPORTUNITY SNAPSHOT\n\n| Metric | Value | Detail |\n|:---|:---|:---|\n| **Opportunity Score** | **Not enough verified context to score confidently** | Awaiting prospect context |\n| **Pipeline Decision** | **`QUALIFY`** | Qualification posture |\n| **Confidence** | **Still being established** | Evidence completeness |\n| **Potential Service Fit** | **Service direction not established yet** | Need status: Still unknown |\n\n---\n\n## 2. EXECUTIVE SUMMARY\n\n> The prospect has requested API Security Auditing alongside a customer security review and trust-assurance process, with a specific focus on OAuth authorization flows and social-platform integration APIs. The accepted company and public technical context gives the booking request a concrete surface to explore, but the actual boundaries and assurance outcome are not established yet; resolve that distinction before shaping an advisory path. The booking explicitly leaves additional areas unspecified, so the consultant should keep the agenda open and ask what else matters without inferring the missing scope.\n\n---\n\n## 3. WHAT MATTERS\n\n- The prospect has requested API Security Auditing alongside a customer security review and trust-assurance process, with a specific focus on OAuth authorization flows and social-platform integration APIs. (SUPPORTED) [ev_s04_ef165cd5c7af, ev_s04_2ad647831845]\n- The accepted company and public technical context gives the booking request a concrete surface to explore, but the actual boundaries and assurance outcome are not established yet; resolve that distinction before shaping an advisory path. (INTERPRETATION) [ev_s04_ef6907aa8432, ev_s04_ffd3248bfd5d, ev_s04_9665e823dac5, ev_s04_8ed835d70221, ev_s04_6585c511f320, meeting_context:BOOKING_FORM:CALENDLY, prospect_answer:PROSPECT_PROVIDED]\n- The booking explicitly leaves additional areas unspecified, so the consultant should keep the agenda open and ask what else matters without inferring the missing scope. (INTERPRETATION) [meeting_context:BOOKING_FORM:CALENDLY]\n\n**Consultant relevance:** As Jordan Vale representing Priority Stack Advisory, use these synthesized parameters to lead a focused discovery session centered on Planoly's OAuth integration security and trust-assurance needs without making unverified assumptions about formal compliance frameworks.\n\n---\n\n## 4. OPPORTUNITY CONTEXT & CURRENT POSTURE\n\n### Company Context\n\n- Planoly provides a social media planning, scheduling, and management platform serving creators and small businesses, with multi-platform auto-posting and creator storefront features. (SUPPORTED) [ev_s04_ef6907aa8432, ev_s04_ffd3248bfd5d, ev_s04_9665e823dac5, ev_s04_8ed835d70221, ev_s04_6585c511f320]\n\n### Current Posture\n\n- The immediate requirement focuses on a customer security review and trust-assurance process, with no confirmed SOC 2 or ISO 27001 requirement yet established. (UNKNOWN)\n\n• Cloud Infrastructure: Primary cloud hosting provider not confirmed in reviewed evidence\n\n• Public Compliance Disclosures: No public badges advertised (Absence != gap)\n\n---\n\n## MEETING CONTEXT\n\n> We're looking for API Security Auditing and Compliance & Trust Certification, among other things.\n- Source Type: BOOKING_FORM\n- Source Provider: CALENDLY\n- Captured At: 2026-09-10T13:16:21.985Z\n\n---\n\n## PUBLIC SIGNALS\n\n> Public-source context for call preparation. These observations are not prospect-confirmed requirements.\n\n### Technology & Infrastructure\n• “Creators acknowledge and agree that Linked Services may add, remove, bifurcate, With Linked Services for third-party integration, Creators may be asked to verify credentials in the future.”\n  www.planoly.com/terms-of-use\n\n### Business Context\n• “Features to help you Plan & Create Generate content ideas with AI Get unstuck with post ideas, keyword r Social Media Planner & Management Tool | Planoly”\n  www.planoly.com\n• “Monitor and control all activity conducted through your Planoly account.”\n  www.planoly.com/acceptable-use-policy\n• “Planoly launched in 2016 as the first visual Instagram planner, helping creators curate the perfect grid.”\n  www.planoly.com/about-us\n• “🧐💭 The super-short answer is YES, but today we're explaining exactly why you have no need to worry about the safety of your account.”\n  www.instagram.com/p/B84EFBZJtjq (Third-party reporting)\n• “Build a social media strate Planoly is the social media planner and scheduler trusted by 8 million creators to plan, edit, schedule, and auto-post across every channel — from one app.”\n  play.google.com/store/apps/details?id=com.planoly.android&hl=en_US (Third-party reporting)\n\n---\n\n## 5. STILL UNKNOWN BEFORE THE CALL\n\n\n- [ ] Verified total employee headcount and growth stage\n- [ ] The full extent of the 'among other things' scope referenced in the booking form remains unspecified.\n\n---\n\n## 6. RESEARCH-AWARE DISCOVERY QUESTIONS\n\n**Q1:** What specific customer security review or trust-assurance milestones are driving this initiative?\n\nWhy CLARIS is asking this: Tests the immediate driver behind the trust-assurance process since formal compliance mandates like SOC 2 or ISO 27001 are not yet confirmed.\n\nListen for: Specific enterprise customer demands, incoming security questionnaires, or internal risk milestones.\n\nAvoid assuming: Do not assume that an active SOC 2 or ISO 27001 audit project is underway.\n\nTests: Clarifying the trigger for the customer security review.\n\n**Q2:** Which social-platform integration APIs and OAuth flows represent the highest priority for the security audit?\n\nWhy CLARIS is asking this: Grounded in the prospect's stated focus on OAuth authorization flows and social-platform integration APIs.\n\nListen for: Details on specific third-party APIs, token management practices, and integration boundaries.\n\nAvoid assuming: Do not assume all social platform integrations carry identical risk profiles or use identical authorization mechanics.\n\nTests: Pinpointing exact API boundaries for the audit scope.\n\n**Q3:** What additional areas are encompassed by your reference to 'among other things' in the booking request?\n\nWhy CLARIS is asking this: Addresses the open-ended scope indicator from the booking form to capture all required workstreams.\n\nListen for: Additional technical or process review categories not yet documented.\n\nAvoid assuming: Do not assume the scope is limited strictly to API security and trust documentation.\n\nTests: Uncovering unspecified project scope elements.\n\n---\n\n## 7. RECOMMENDED APPROACH / CALL DIRECTION\n\nFocus the discovery conversation on defining the exact boundaries of the customer security review, detailing the specific OAuth flows and APIs in scope, and uncovering any additional objectives hidden behind the open-ended booking language.\n\n**Suggested next step:** Outline a targeted discovery follow-up plan based on the clarified API integration scope and customer review requirements.\n\n\nCondition to trigger: Successful completion of the discovery call confirming all technical and trust review parameters.\n",
+    "docTemplateData": {
+      "doc_title": "CLARIS — PRE-CALL BRIEF: PLANOLY",
+      "company_name": "Planoly",
+      "prospect_name": "Thai Huang",
+      "prospect_email": "thaihuangg@planoly.com",
+      "meeting_time": "2026-09-15T14:00:00.000Z",
+      "meeting_context": {
+        "source_text": "We're looking for API Security Auditing and Compliance & Trust Certification, among other things.",
+        "source_type": "BOOKING_FORM",
+        "source_provider": "CALENDLY",
+        "submitted_by": null,
+        "captured_at": "2026-09-10T13:16:21.985Z"
+      },
+      "decision_badge": "QUALIFY",
+      "fit_badge": "Not enough verified context to score confidently",
+      "confidence_summary": "Awaiting prospect context (PROVISIONAL)",
+      "opportunity_fit": "• Potential Service Fit: Service direction not established yet\n• Confirmed Need: Still unknown\n• Fit Assessment: Not enough verified context to score confidently — PROVISIONAL\n• Consultant Relevance: Matches consultant Source of Truth.",
+      "what_we_know": "• Cloud Infrastructure: Primary cloud hosting provider not confirmed in reviewed evidence\n• Public Compliance Disclosures: No public badges advertised (Absence != gap)",
+      "publicly_observed": "• [TECHNOLOGY] “# Planoly API”\n• [TECHNOLOGY] “## Planoly API profile”\n• [TECHNOLOGY] “API Reference”\n• [TECHNOLOGY] “Creators acknowledge and agree that Linked Services may add, remove, bifurcate, With Linked Services for third-party integration, Creators may be asked to verify credentials in the future.”\n• [TECHNOLOGY] “Identity pr # Planoly API”\n• [TECHNOLOGY] “Webhooks management API”\n• [TECHNOLOGY] “With Linked Services for third-party integration, Creators may be asked to verify credentials in the future.”\n• [BUSINESS] “## Social media and the creator economy have evolved, so have we.”\n• [BUSINESS] “#### Customers & developers”\n• [BUSINESS] “🧐💭 The super-short answer is YES, but today we're explaining exactly why you have no need to worry about the safety of your account.”\n• [BUSINESS] “Build a social media strate”\n• [BUSINESS] “Build a social media strate Planoly is the social media planner and scheduler trusted by 8 million creators to plan, edit, schedule, and auto-post across every channel — from one app.”\n• [BUSINESS] “CategoriesBlogLog inFor businesses”\n• [BUSINESS] “Create a cohesive Instagram feed and manage multiple Instagram accounts.”\n• [BUSINESS] “Features to help you Plan & Create Generate content ideas with AI Get unstuck with post ideas, keyword r Social Media Planner & Management Tool | Planoly”\n• [BUSINESS] “Follow PLANOLY on LinkedIn [...] CREATE FREE ACCOUNT”\n• [BUSINESS] “Monitor and control all activity conducted through your Planoly account.”\n• [BUSINESS] “Multi-platform scheduling”\n• [BUSINESS] “Notify us promptly if you become aware of our suspect any security breach regarding your account, including any loss, theft, or unauth”\n• [BUSINESS] “Notify us promptly if you become aware of our suspect any security breach regarding your account, including any loss, theft, or unauth Use your best efforts to prevent unauthorized access to or use of the Services, including by maintaining a strong password and keeping your password and other login credentials confidential.”\n• [BUSINESS] “place SELL WHAT YOU MAKE Build your Creator Store and sell products and digital services — all from the same account.”\n• [BUSINESS] “Planoly is a social media management platform based in Austin, Texas, serving creators and small businesses within the advertising services industry.”\n• [BUSINESS] “Planoly is the social media planner and scheduler trusted by 8 million creators to plan, edit, schedule, and auto-post across every channel — from one app.”\n• [BUSINESS] “Planoly launched in 2016 as the first visual Instagram planner, helping creators curate the perfect grid.”\n• [BUSINESS] “PRICING Resources LOG IN LOG IN GET STARTED FREE The social media planner that goes way beyond scheduling Manage your entire social media workflow in one place.”\n• [BUSINESS] “Privacy Policy: Terms of Use: Support: Instagram / TikTok / X: @planol place SELL WHAT YOU MAKE Build your Creator Store and sell products and digital services — all from the same account.”\n• [BUSINESS] “Social Media Planner & Management Tool | Planoly”\n• [BUSINESS] “Stories Planner”\n• [BUSINESS] “Today, Planoly is a suite of tools designed to streamline every aspect of the creator workflow from inspiration to planning, scheduling, and now–making a living.”\n• [BUSINESS] “Video Planner IG Planner Reels Planner Content Templates linkit Pin Planne”\n• [BUSINESS] “Video Planner IG Planner Reels Planner Content Templates linkit Pin Planne ##### Our New Favorite Gen Z Marketing Trends”",
+      "what_to_verify": "[ ] Verified total employee headcount and growth stage\n[ ] The full extent of the 'among other things' scope referenced in the booking form remains unspecified.",
+      "discovery_questions": "Q1: What specific customer security review or trust-assurance milestones are driving this initiative?\nWhy CLARIS is asking this: Tests the immediate driver behind the trust-assurance process since formal compliance mandates like SOC 2 or ISO 27001 are not yet confirmed.\n\nQ2: Which social-platform integration APIs and OAuth flows represent the highest priority for the security audit?\nWhy CLARIS is asking this: Grounded in the prospect's stated focus on OAuth authorization flows and social-platform integration APIs.\n\nQ3: What additional areas are encompassed by your reference to 'among other things' in the booking request?\nWhy CLARIS is asking this: Addresses the open-ended scope indicator from the booking form to capture all required workstreams.",
+      "call_strategy": "• Direction: Focus the discovery conversation on defining the exact boundaries of the customer security review, detailing the specific OAuth flows and APIs in scope, and uncovering any additional objectives hidden behind the open-ended booking language.\n• Suggested Next Step: Summarize discovery findings and outline tailored next steps.",
+      "sources_evidence": "Governed Evidence"
+    },
+    "execution_metrics": {
+      "duration_ms": 42563,
+      "overall_evidence_coverage_pct": null,
+      "decision_dimension_coverage_pct": 23,
+      "assessment_status": "PROVISIONAL",
+      "research_mode": "governed_stage04_acquisition"
+    },
+    "executed_at": "2026-09-10T13:17:04.548Z"
+  }
+}
