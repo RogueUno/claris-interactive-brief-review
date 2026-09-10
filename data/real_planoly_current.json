@@ -214,25 +214,25 @@
       ],
       "output_basis": [
         {
-          "text": "Planoly operates as a visual social media planning and management platform based in Austin, Texas, serving creators, small businesses, and social media managers.",
+          "text": "Planoly operates as a social media planning and management platform serving creators and small businesses.",
           "posture": "SUPPORTED",
           "source_refs": [
             "ev_s04_07102b07f5d0",
             "ev_s04_8195da6178b7"
           ],
-          "consultant_relevance": "Establishes the core operational platform context for the discovery conversation.",
-          "verification_path": "Review public platform overview and business profile.",
+          "consultant_relevance": "Provides the baseline understanding of the prospect's product domain and operating model.",
+          "verification_path": "Review public company profiles and positioning.",
           "authority": "DISPLAY_ONLY"
         },
         {
-          "text": "The prospect has booked a discovery discussion focusing on API security auditing, compliance, a customer security review, and a trust-assurance process, with specific emphasis on OAuth authorization flows and social-platform integration APIs.",
+          "text": "The prospect has explicitly requested focus on customer security reviews, trust-assurance processes, OAuth authorization flows, and APIs used for social-platform integrations.",
           "posture": "SUPPORTED",
           "source_refs": [
             "meeting_context:BOOKING_FORM:CALENDLY",
             "prospect_answer:PROSPECT_PROVIDED"
           ],
-          "consultant_relevance": "Directly defines the functional priorities and technical surfaces requested by the prospect.",
-          "verification_path": "Confirm exact scope requirements during initial discovery.",
+          "consultant_relevance": "Directly defines the technical and procedural boundaries for the upcoming discovery conversation.",
+          "verification_path": "Confirm requirements directly with the prospect during the call.",
           "authority": "DISPLAY_ONLY"
         },
         {
@@ -259,29 +259,30 @@
           "authority": "DISPLAY_ONLY"
         },
         {
-          "text": "There is no confirmed SOC 2 or ISO 27001 requirement currently established.",
+          "text": "There is an immediate requirement for a customer security review and trust-assurance process, though formal SOC 2 or ISO 27001 requirements are not yet confirmed.",
           "posture": "UNKNOWN",
           "source_refs": [],
-          "consultant_relevance": "Prevents assuming formalized framework readiness or compliance obligations.",
-          "verification_path": "Inquire about drivers behind the trust-assurance process without presuming framework adoption.",
+          "consultant_relevance": "Prevents assuming a formal compliance framework mandate before the prospect validates one.",
+          "verification_path": "Ask the prospect to clarify their current compliance drivers.",
           "authority": "DISPLAY_ONLY"
         },
         {
-          "text": "The prospect explicitly left additional areas unspecified; do not infer what those areas are.",
+          "text": "The exact nature of the unspecified areas included in the booking request remains unknown.",
           "posture": "UNKNOWN",
           "source_refs": [
-            "meeting_context:BOOKING_FORM:CALENDLY"
+            "meeting_context:BOOKING_FORM:CALENDLY",
+            "prospect_answer:PROSPECT_PROVIDED"
           ],
-          "consultant_relevance": "Keep the unspecified part of the booking visible for live discovery.",
-          "verification_path": "Ask the prospect what additional areas they want covered.",
+          "consultant_relevance": "Highlights a boundary that requires direct questioning rather than speculation.",
+          "verification_path": "Inquire about the 'among other things' mention during discovery.",
           "authority": "DISPLAY_ONLY"
         },
         {
-          "text": "Verify whether the customer security review involves specific third-party questionnaires or standard vendor assessment frameworks.",
+          "text": "Verify whether the lack of a confirmed SOC 2 or ISO 27001 requirement means they want to evaluate readiness or if they only require point-in-time trust artifacts.",
           "posture": "ACTION",
           "source_refs": [],
-          "consultant_relevance": "Ensures precise preparation for trust-assurance deliverables.",
-          "verification_path": "Ask prospect for sample security review documentation if applicable.",
+          "consultant_relevance": "Clarifies compliance intent without presuming a certification timeline.",
+          "verification_path": "Directly ask about long-term compliance roadmap milestones.",
           "authority": "DISPLAY_ONLY"
         },
         {
@@ -295,36 +296,25 @@
           "authority": "DISPLAY_ONLY"
         },
         {
-          "text": "What specific customer security review or trust-assurance milestones are driving your timeline for this engagement?",
+          "text": "What specific customer security review or trust-assurance questionnaire formats are driving your current timeline?",
           "posture": "HYPOTHESIS",
           "source_refs": [
             "meeting_context:BOOKING_FORM:CALENDLY",
             "prospect_answer:PROSPECT_PROVIDED"
           ],
-          "consultant_relevance": "Ensures alignment on the true triggers for trust-assurance work.",
-          "verification_path": "Discuss compliance drivers directly with the prospect.",
+          "consultant_relevance": "Directly addresses the stated requirement for trust assurance.",
+          "verification_path": "Listen for customer names or deal sizes mentioned during the response.",
           "authority": "DISPLAY_ONLY"
         },
         {
-          "text": "Can you share more about the specific social-platform integration APIs and OAuth flows that require auditing?",
+          "text": "How are OAuth authorization tokens and credential handoffs managed across your social-platform integrations today?",
           "posture": "HYPOTHESIS",
           "source_refs": [
             "meeting_context:BOOKING_FORM:CALENDLY",
             "prospect_answer:PROSPECT_PROVIDED"
           ],
-          "consultant_relevance": "Directly informs the technical depth required for the API security audit.",
-          "verification_path": "Review API architecture documentation with the engineering team.",
-          "authority": "DISPLAY_ONLY"
-        },
-        {
-          "text": "What additional priority areas fall under the other items you are looking to address?",
-          "posture": "ACTION",
-          "source_refs": [
-            "meeting_context:BOOKING_FORM:CALENDLY",
-            "prospect_answer:PROSPECT_PROVIDED"
-          ],
-          "consultant_relevance": "Identifies full project boundaries before defining deliverables.",
-          "verification_path": "Prompt the prospect to list remaining items of interest.",
+          "consultant_relevance": "Focuses the technical discussion on the specified integration layer.",
+          "verification_path": "Examine technical descriptions of API authentication mechanisms.",
           "authority": "DISPLAY_ONLY"
         },
         {
@@ -338,25 +328,25 @@
           "authority": "DISPLAY_ONLY"
         },
         {
-          "text": "Start the call by acknowledging the prospect's focus on customer trust-assurance and API security auditing for social-platform integrations. Prompt them to elaborate on the specific compliance milestones or customer inquiries prompting this review, and clarify what additional areas are covered under their open-ended scope.",
+          "text": "Start by acknowledging the stated focus on customer security reviews and OAuth API flows, then explore what 'among other things' encompasses before discussing potential advisory paths.",
           "posture": "ACTION",
           "source_refs": [
             "meeting_context:BOOKING_FORM:CALENDLY",
             "prospect_answer:PROSPECT_PROVIDED"
           ],
-          "consultant_relevance": "Provides Jordan Vale with a structured opening strategy grounded entirely in provided inputs.",
-          "verification_path": "Execute discovery flow aligned with intake notes.",
+          "consultant_relevance": "Keeps the conversation grounded in the prospect's exact wording.",
+          "verification_path": "Monitor agenda coverage during the call.",
           "authority": "DISPLAY_ONLY"
         },
         {
-          "text": "If the prospect confirms specific OAuth evaluation targets and trust-assurance deliverables during the call, outline a targeted scoping session conditioned on receiving architecture diagrams for the social-platform integration APIs.",
+          "text": "Conditioned on confirming the scope of the OAuth review and specific trust deliverables during the call, outline a targeted assessment outline and required technical access inputs for a follow-up proposal.",
           "posture": "ACTION",
           "source_refs": [
             "meeting_context:BOOKING_FORM:CALENDLY",
             "prospect_answer:PROSPECT_PROVIDED"
           ],
-          "consultant_relevance": "Defines a concrete, conditional transition to next phases.",
-          "verification_path": "Agree on follow-up criteria during closing discussion.",
+          "consultant_relevance": "Provides a concrete, conditional transition to next steps.",
+          "verification_path": "Verify prospect agreement on scope parameters before closing the meeting.",
           "authority": "DISPLAY_ONLY"
         }
       ]
@@ -364,7 +354,7 @@
   },
   "briefJson": {
     "schema_version": "1.0.0-governed",
-    "projection_id": "gbi_7b50fb5446e5",
+    "projection_id": "gbi_ba1d588348a3",
     "identity": {
       "tenant_id": "tenant_northstar_001",
       "consultant_id": "consultant_northstar_001",
@@ -390,14 +380,14 @@
       "source_type": "BOOKING_FORM",
       "source_provider": "CALENDLY",
       "submitted_by": null,
-      "captured_at": "2026-09-10T16:25:26.093Z"
+      "captured_at": "2026-09-10T16:27:26.980Z"
     },
     "consultant_context": {
       "firm_name": "Priority Stack Advisory",
       "consultant_name": "Jordan Vale",
       "display_timezone": null
     },
-    "executive_summary": "The prospect has booked a discovery discussion focusing on API security auditing, compliance, a customer security review, and a trust-assurance process, with specific emphasis on OAuth authorization flows and social-platform integration APIs. The accepted company and public technical context gives the booking request a concrete surface to explore, but the actual boundaries and assurance outcome are not established yet; resolve that distinction before shaping an advisory path. The booking explicitly leaves additional areas unspecified, so you should keep the agenda open and ask what else matters without inferring the missing scope.",
+    "executive_summary": "The prospect has explicitly requested focus on customer security reviews, trust-assurance processes, OAuth authorization flows, and APIs used for social-platform integrations. The accepted company and public technical context gives the booking request a concrete surface to explore, but the actual boundaries and assurance outcome are not established yet; resolve that distinction before shaping an advisory path. The booking explicitly leaves additional areas unspecified, so you should keep the agenda open and ask what else matters without inferring the missing scope.",
     "opportunity_score": null,
     "fit_tier": null,
     "decision": "QUALIFY",
@@ -593,7 +583,7 @@
       "inferred": [],
       "unavailable": [
         "Verified total employee headcount and growth stage",
-        "The prospect explicitly left additional areas unspecified; do not infer what those areas are."
+        "The exact nature of the unspecified areas included in the booking request remains unknown."
       ]
     },
     "company_context": {
@@ -2247,25 +2237,25 @@
       ],
       "basis": [
         {
-          "text": "Planoly operates as a visual social media planning and management platform based in Austin, Texas, serving creators, small businesses, and social media managers.",
+          "text": "Planoly operates as a social media planning and management platform serving creators and small businesses.",
           "posture": "SUPPORTED",
           "source_refs": [
             "ev_s04_07102b07f5d0",
             "ev_s04_8195da6178b7"
           ],
-          "consultant_relevance": "Establishes the core operational platform context for the discovery conversation.",
-          "verification_path": "Review public platform overview and business profile.",
+          "consultant_relevance": "Provides the baseline understanding of the prospect's product domain and operating model.",
+          "verification_path": "Review public company profiles and positioning.",
           "authority": "DISPLAY_ONLY"
         },
         {
-          "text": "The prospect has booked a discovery discussion focusing on API security auditing, compliance, a customer security review, and a trust-assurance process, with specific emphasis on OAuth authorization flows and social-platform integration APIs.",
+          "text": "The prospect has explicitly requested focus on customer security reviews, trust-assurance processes, OAuth authorization flows, and APIs used for social-platform integrations.",
           "posture": "SUPPORTED",
           "source_refs": [
             "meeting_context:BOOKING_FORM:CALENDLY",
             "prospect_answer:PROSPECT_PROVIDED"
           ],
-          "consultant_relevance": "Directly defines the functional priorities and technical surfaces requested by the prospect.",
-          "verification_path": "Confirm exact scope requirements during initial discovery.",
+          "consultant_relevance": "Directly defines the technical and procedural boundaries for the upcoming discovery conversation.",
+          "verification_path": "Confirm requirements directly with the prospect during the call.",
           "authority": "DISPLAY_ONLY"
         },
         {
@@ -2292,29 +2282,30 @@
           "authority": "DISPLAY_ONLY"
         },
         {
-          "text": "There is no confirmed SOC 2 or ISO 27001 requirement currently established.",
+          "text": "There is an immediate requirement for a customer security review and trust-assurance process, though formal SOC 2 or ISO 27001 requirements are not yet confirmed.",
           "posture": "UNKNOWN",
           "source_refs": [],
-          "consultant_relevance": "Prevents assuming formalized framework readiness or compliance obligations.",
-          "verification_path": "Inquire about drivers behind the trust-assurance process without presuming framework adoption.",
+          "consultant_relevance": "Prevents assuming a formal compliance framework mandate before the prospect validates one.",
+          "verification_path": "Ask the prospect to clarify their current compliance drivers.",
           "authority": "DISPLAY_ONLY"
         },
         {
-          "text": "The prospect explicitly left additional areas unspecified; do not infer what those areas are.",
+          "text": "The exact nature of the unspecified areas included in the booking request remains unknown.",
           "posture": "UNKNOWN",
           "source_refs": [
-            "meeting_context:BOOKING_FORM:CALENDLY"
+            "meeting_context:BOOKING_FORM:CALENDLY",
+            "prospect_answer:PROSPECT_PROVIDED"
           ],
-          "consultant_relevance": "Keep the unspecified part of the booking visible for live discovery.",
-          "verification_path": "Ask the prospect what additional areas they want covered.",
+          "consultant_relevance": "Highlights a boundary that requires direct questioning rather than speculation.",
+          "verification_path": "Inquire about the 'among other things' mention during discovery.",
           "authority": "DISPLAY_ONLY"
         },
         {
-          "text": "Verify whether the customer security review involves specific third-party questionnaires or standard vendor assessment frameworks.",
+          "text": "Verify whether the lack of a confirmed SOC 2 or ISO 27001 requirement means they want to evaluate readiness or if they only require point-in-time trust artifacts.",
           "posture": "ACTION",
           "source_refs": [],
-          "consultant_relevance": "Ensures precise preparation for trust-assurance deliverables.",
-          "verification_path": "Ask prospect for sample security review documentation if applicable.",
+          "consultant_relevance": "Clarifies compliance intent without presuming a certification timeline.",
+          "verification_path": "Directly ask about long-term compliance roadmap milestones.",
           "authority": "DISPLAY_ONLY"
         },
         {
@@ -2328,36 +2319,25 @@
           "authority": "DISPLAY_ONLY"
         },
         {
-          "text": "What specific customer security review or trust-assurance milestones are driving your timeline for this engagement?",
+          "text": "What specific customer security review or trust-assurance questionnaire formats are driving your current timeline?",
           "posture": "HYPOTHESIS",
           "source_refs": [
             "meeting_context:BOOKING_FORM:CALENDLY",
             "prospect_answer:PROSPECT_PROVIDED"
           ],
-          "consultant_relevance": "Ensures alignment on the true triggers for trust-assurance work.",
-          "verification_path": "Discuss compliance drivers directly with the prospect.",
+          "consultant_relevance": "Directly addresses the stated requirement for trust assurance.",
+          "verification_path": "Listen for customer names or deal sizes mentioned during the response.",
           "authority": "DISPLAY_ONLY"
         },
         {
-          "text": "Can you share more about the specific social-platform integration APIs and OAuth flows that require auditing?",
+          "text": "How are OAuth authorization tokens and credential handoffs managed across your social-platform integrations today?",
           "posture": "HYPOTHESIS",
           "source_refs": [
             "meeting_context:BOOKING_FORM:CALENDLY",
             "prospect_answer:PROSPECT_PROVIDED"
           ],
-          "consultant_relevance": "Directly informs the technical depth required for the API security audit.",
-          "verification_path": "Review API architecture documentation with the engineering team.",
-          "authority": "DISPLAY_ONLY"
-        },
-        {
-          "text": "What additional priority areas fall under the other items you are looking to address?",
-          "posture": "ACTION",
-          "source_refs": [
-            "meeting_context:BOOKING_FORM:CALENDLY",
-            "prospect_answer:PROSPECT_PROVIDED"
-          ],
-          "consultant_relevance": "Identifies full project boundaries before defining deliverables.",
-          "verification_path": "Prompt the prospect to list remaining items of interest.",
+          "consultant_relevance": "Focuses the technical discussion on the specified integration layer.",
+          "verification_path": "Examine technical descriptions of API authentication mechanisms.",
           "authority": "DISPLAY_ONLY"
         },
         {
@@ -2371,51 +2351,51 @@
           "authority": "DISPLAY_ONLY"
         },
         {
-          "text": "Start the call by acknowledging the prospect's focus on customer trust-assurance and API security auditing for social-platform integrations. Prompt them to elaborate on the specific compliance milestones or customer inquiries prompting this review, and clarify what additional areas are covered under their open-ended scope.",
+          "text": "Start by acknowledging the stated focus on customer security reviews and OAuth API flows, then explore what 'among other things' encompasses before discussing potential advisory paths.",
           "posture": "ACTION",
           "source_refs": [
             "meeting_context:BOOKING_FORM:CALENDLY",
             "prospect_answer:PROSPECT_PROVIDED"
           ],
-          "consultant_relevance": "Provides Jordan Vale with a structured opening strategy grounded entirely in provided inputs.",
-          "verification_path": "Execute discovery flow aligned with intake notes.",
+          "consultant_relevance": "Keeps the conversation grounded in the prospect's exact wording.",
+          "verification_path": "Monitor agenda coverage during the call.",
           "authority": "DISPLAY_ONLY"
         },
         {
-          "text": "If the prospect confirms specific OAuth evaluation targets and trust-assurance deliverables during the call, outline a targeted scoping session conditioned on receiving architecture diagrams for the social-platform integration APIs.",
+          "text": "Conditioned on confirming the scope of the OAuth review and specific trust deliverables during the call, outline a targeted assessment outline and required technical access inputs for a follow-up proposal.",
           "posture": "ACTION",
           "source_refs": [
             "meeting_context:BOOKING_FORM:CALENDLY",
             "prospect_answer:PROSPECT_PROVIDED"
           ],
-          "consultant_relevance": "Defines a concrete, conditional transition to next phases.",
-          "verification_path": "Agree on follow-up criteria during closing discussion.",
+          "consultant_relevance": "Provides a concrete, conditional transition to next steps.",
+          "verification_path": "Verify prospect agreement on scope parameters before closing the meeting.",
           "authority": "DISPLAY_ONLY"
         }
       ],
       "company_context": [
         {
-          "text": "Planoly operates as a visual social media planning and management platform based in Austin, Texas, serving creators, small businesses, and social media managers.",
+          "text": "Planoly operates as a social media planning and management platform serving creators and small businesses.",
           "posture": "SUPPORTED",
           "source_refs": [
             "ev_s04_07102b07f5d0",
             "ev_s04_8195da6178b7"
           ],
-          "consultant_relevance": "Establishes the core operational platform context for the discovery conversation.",
-          "verification_path": "Review public platform overview and business profile.",
+          "consultant_relevance": "Provides the baseline understanding of the prospect's product domain and operating model.",
+          "verification_path": "Review public company profiles and positioning.",
           "authority": "DISPLAY_ONLY"
         }
       ],
       "what_matters_items": [
         {
-          "text": "The prospect has booked a discovery discussion focusing on API security auditing, compliance, a customer security review, and a trust-assurance process, with specific emphasis on OAuth authorization flows and social-platform integration APIs.",
+          "text": "The prospect has explicitly requested focus on customer security reviews, trust-assurance processes, OAuth authorization flows, and APIs used for social-platform integrations.",
           "posture": "SUPPORTED",
           "source_refs": [
             "meeting_context:BOOKING_FORM:CALENDLY",
             "prospect_answer:PROSPECT_PROVIDED"
           ],
-          "consultant_relevance": "Directly defines the functional priorities and technical surfaces requested by the prospect.",
-          "verification_path": "Confirm exact scope requirements during initial discovery.",
+          "consultant_relevance": "Directly defines the technical and procedural boundaries for the upcoming discovery conversation.",
+          "verification_path": "Confirm requirements directly with the prospect during the call.",
           "authority": "DISPLAY_ONLY"
         },
         {
@@ -2444,69 +2424,54 @@
       ],
       "current_posture": [
         {
-          "text": "There is no confirmed SOC 2 or ISO 27001 requirement currently established.",
+          "text": "There is an immediate requirement for a customer security review and trust-assurance process, though formal SOC 2 or ISO 27001 requirements are not yet confirmed.",
           "posture": "UNKNOWN",
           "source_refs": [],
-          "consultant_relevance": "Prevents assuming formalized framework readiness or compliance obligations.",
-          "verification_path": "Inquire about drivers behind the trust-assurance process without presuming framework adoption.",
+          "consultant_relevance": "Prevents assuming a formal compliance framework mandate before the prospect validates one.",
+          "verification_path": "Ask the prospect to clarify their current compliance drivers.",
           "authority": "DISPLAY_ONLY"
         }
       ],
       "evidence_summary": [
-        "Planoly operates as a visual social media planning and management platform based in Austin, Texas, serving creators, small businesses, and social media managers."
+        "Planoly operates as a social media planning and management platform serving creators and small businesses."
       ],
-      "interpretation": "The prospect has booked a discovery discussion focusing on API security auditing, compliance, a customer security review, and a trust-assurance process, with specific emphasis on OAuth authorization flows and social-platform integration APIs. The accepted company and public technical context gives the booking request a concrete surface to explore, but the actual boundaries and assurance outcome are not established yet; resolve that distinction before shaping an advisory path. The booking explicitly leaves additional areas unspecified, so you should keep the agenda open and ask what else matters without inferring the missing scope.",
+      "interpretation": "The prospect has explicitly requested focus on customer security reviews, trust-assurance processes, OAuth authorization flows, and APIs used for social-platform integrations. The accepted company and public technical context gives the booking request a concrete surface to explore, but the actual boundaries and assurance outcome are not established yet; resolve that distinction before shaping an advisory path. The booking explicitly leaves additional areas unspecified, so you should keep the agenda open and ask what else matters without inferring the missing scope.",
       "uncertainty": [
-        "The prospect explicitly left additional areas unspecified; do not infer what those areas are."
+        "The exact nature of the unspecified areas included in the booking request remains unknown."
       ],
-      "consultant_relevance": "Pre-call research synthesis for Jordan Vale at Priority Stack Advisory regarding Planoly's discovery booking.",
+      "consultant_relevance": "Ensure Jordan Vale maintains strict adherence to the prospect's stated scope and avoids introducing unverified compliance frameworks during the discovery call with Planoly.",
       "suggested_verification": [
-        "Verify whether the customer security review involves specific third-party questionnaires or standard vendor assessment frameworks."
+        "Verify whether the lack of a confirmed SOC 2 or ISO 27001 requirement means they want to evaluate readiness or if they only require point-in-time trust artifacts."
       ],
       "discovery_questions": [
         {
-          "question": "What specific customer security review or trust-assurance milestones are driving your timeline for this engagement?",
-          "rationale": "Clarifies the immediate business drivers behind the trust process since formal frameworks are not yet confirmed.",
+          "question": "What specific customer security review or trust-assurance questionnaire formats are driving your current timeline?",
+          "rationale": "Uncovers the specific reporting or documentation burden the prospect faces without assuming a standard enterprise vendor assessment template.",
           "posture": "HYPOTHESIS",
           "source_refs": [
             "meeting_context:BOOKING_FORM:CALENDLY",
             "prospect_answer:PROSPECT_PROVIDED"
           ],
-          "listen_for": "Specific enterprise customer demands, partner requirements, or upcoming deal milestones.",
-          "avoid_assuming": "Do not assume an active mandate for SOC 2 or ISO 27001 certification.",
-          "tested_hypothesis_or_gap": "Unconfirmed compliance framework requirements.",
-          "consultant_relevance": "Ensures alignment on the true triggers for trust-assurance work.",
-          "verification_path": "Discuss compliance drivers directly with the prospect.",
+          "listen_for": "Specific third-party risk management portals, custom security questionnaires, or enterprise customer demands.",
+          "avoid_assuming": "Do not assume a specific tier of enterprise customer is demanding the review.",
+          "tested_hypothesis_or_gap": "Customer security review drivers and documentation format expectations.",
+          "consultant_relevance": "Directly addresses the stated requirement for trust assurance.",
+          "verification_path": "Listen for customer names or deal sizes mentioned during the response.",
           "authority": "DISPLAY_ONLY"
         },
         {
-          "question": "Can you share more about the specific social-platform integration APIs and OAuth flows that require auditing?",
-          "rationale": "Focuses the technical conversation on the exact integration surfaces and token management mechanisms noted in the intake.",
+          "question": "How are OAuth authorization tokens and credential handoffs managed across your social-platform integrations today?",
+          "rationale": "Pinpoints the exact technical mechanism mentioned in the prospect's notes regarding social-platform APIs.",
           "posture": "HYPOTHESIS",
           "source_refs": [
             "meeting_context:BOOKING_FORM:CALENDLY",
             "prospect_answer:PROSPECT_PROVIDED"
           ],
-          "listen_for": "Details on token exchange mechanisms, webhook handlers, and third-party platform dependencies.",
-          "avoid_assuming": "Do not assume a uniform architecture across all social media integrations.",
-          "tested_hypothesis_or_gap": "Scope and complexity of OAuth and API integration auditing.",
-          "consultant_relevance": "Directly informs the technical depth required for the API security audit.",
-          "verification_path": "Review API architecture documentation with the engineering team.",
-          "authority": "DISPLAY_ONLY"
-        },
-        {
-          "question": "What additional priority areas fall under the other items you are looking to address?",
-          "rationale": "Explores the open-ended scope indicated in the booking form without making assumptions about missing services.",
-          "posture": "ACTION",
-          "source_refs": [
-            "meeting_context:BOOKING_FORM:CALENDLY",
-            "prospect_answer:PROSPECT_PROVIDED"
-          ],
-          "listen_for": "Additional technical or governance topics not yet captured.",
-          "avoid_assuming": "Do not infer what additional services or security domains are intended.",
-          "tested_hypothesis_or_gap": "Unspecified scope elements indicated by 'among other things'.",
-          "consultant_relevance": "Identifies full project boundaries before defining deliverables.",
-          "verification_path": "Prompt the prospect to list remaining items of interest.",
+          "listen_for": "Token storage practices, expiration handling, scope limitations, and third-party credential refreshing.",
+          "avoid_assuming": "Do not assume a specific architectural flaw or token storage mechanism exists.",
+          "tested_hypothesis_or_gap": "OAuth flow security posture and token lifecycle management.",
+          "consultant_relevance": "Focuses the technical discussion on the specified integration layer.",
+          "verification_path": "Examine technical descriptions of API authentication mechanisms.",
           "authority": "DISPLAY_ONLY"
         },
         {
@@ -2534,7 +2499,7 @@
         "safe_interpretation": "The prospect explicitly left additional areas unspecified; do not infer what those areas are.",
         "authority": "DISPLAY_ONLY"
       },
-      "call_direction": "Start the call by acknowledging the prospect's focus on customer trust-assurance and API security auditing for social-platform integrations. Prompt them to elaborate on the specific compliance milestones or customer inquiries prompting this review, and clarify what additional areas are covered under their open-ended scope.",
+      "call_direction": "Start by acknowledging the stated focus on customer security reviews and OAuth API flows, then explore what 'among other things' encompasses before discussing potential advisory paths.",
       "suggested_next_step": "If the call confirms defined API/OAuth and security-review boundaries and a concrete assurance objective, schedule a technical scoping session with the relevant security or API owner to define assessment scope, evidence needs, and expected deliverables.",
       "suggested_next_step_detail": {
         "recommended_action": "If the call confirms defined API/OAuth and security-review boundaries and a concrete assurance objective, schedule a technical scoping session with the relevant security or API owner to define assessment scope, evidence needs, and expected deliverables.",
@@ -2555,11 +2520,11 @@
     },
     "consultant_live_discovery_questions": [
       {
-        "question": "What specific customer security review or trust-assurance milestones are driving your timeline for this engagement?",
-        "rationale": "Clarifies the immediate business drivers behind the trust process since formal frameworks are not yet confirmed.",
-        "listen_for": "Specific enterprise customer demands, partner requirements, or upcoming deal milestones.",
-        "avoid_assuming": "Do not assume an active mandate for SOC 2 or ISO 27001 certification.",
-        "tested_hypothesis_or_gap": "Unconfirmed compliance framework requirements.",
+        "question": "What specific customer security review or trust-assurance questionnaire formats are driving your current timeline?",
+        "rationale": "Uncovers the specific reporting or documentation burden the prospect faces without assuming a standard enterprise vendor assessment template.",
+        "listen_for": "Specific third-party risk management portals, custom security questionnaires, or enterprise customer demands.",
+        "avoid_assuming": "Do not assume a specific tier of enterprise customer is demanding the review.",
+        "tested_hypothesis_or_gap": "Customer security review drivers and documentation format expectations.",
         "source_refs": [
           "meeting_context:BOOKING_FORM:CALENDLY",
           "prospect_answer:PROSPECT_PROVIDED"
@@ -2567,23 +2532,11 @@
         "authority": "DISPLAY_ONLY"
       },
       {
-        "question": "Can you share more about the specific social-platform integration APIs and OAuth flows that require auditing?",
-        "rationale": "Focuses the technical conversation on the exact integration surfaces and token management mechanisms noted in the intake.",
-        "listen_for": "Details on token exchange mechanisms, webhook handlers, and third-party platform dependencies.",
-        "avoid_assuming": "Do not assume a uniform architecture across all social media integrations.",
-        "tested_hypothesis_or_gap": "Scope and complexity of OAuth and API integration auditing.",
-        "source_refs": [
-          "meeting_context:BOOKING_FORM:CALENDLY",
-          "prospect_answer:PROSPECT_PROVIDED"
-        ],
-        "authority": "DISPLAY_ONLY"
-      },
-      {
-        "question": "What additional priority areas fall under the other items you are looking to address?",
-        "rationale": "Explores the open-ended scope indicated in the booking form without making assumptions about missing services.",
-        "listen_for": "Additional technical or governance topics not yet captured.",
-        "avoid_assuming": "Do not infer what additional services or security domains are intended.",
-        "tested_hypothesis_or_gap": "Unspecified scope elements indicated by 'among other things'.",
+        "question": "How are OAuth authorization tokens and credential handoffs managed across your social-platform integrations today?",
+        "rationale": "Pinpoints the exact technical mechanism mentioned in the prospect's notes regarding social-platform APIs.",
+        "listen_for": "Token storage practices, expiration handling, scope limitations, and third-party credential refreshing.",
+        "avoid_assuming": "Do not assume a specific architectural flaw or token storage mechanism exists.",
+        "tested_hypothesis_or_gap": "OAuth flow security posture and token lifecycle management.",
         "source_refs": [
           "meeting_context:BOOKING_FORM:CALENDLY",
           "prospect_answer:PROSPECT_PROVIDED"
@@ -2613,7 +2566,7 @@
       "authority": "DISPLAY_ONLY"
     },
     "discovery_questions": [],
-    "recommended_call_strategy": "Start the call by acknowledging the prospect's focus on customer trust-assurance and API security auditing for social-platform integrations. Prompt them to elaborate on the specific compliance milestones or customer inquiries prompting this review, and clarify what additional areas are covered under their open-ended scope.",
+    "recommended_call_strategy": "Start by acknowledging the stated focus on customer security reviews and OAuth API flows, then explore what 'among other things' encompasses before discussing potential advisory paths.",
     "disqualifier_posture": {
       "disqualification_triggers": [],
       "potential_disqualifiers_to_verify": [
@@ -2812,25 +2765,25 @@
         ],
         "output_basis": [
           {
-            "text": "Planoly operates as a visual social media planning and management platform based in Austin, Texas, serving creators, small businesses, and social media managers.",
+            "text": "Planoly operates as a social media planning and management platform serving creators and small businesses.",
             "posture": "SUPPORTED",
             "source_refs": [
               "ev_s04_07102b07f5d0",
               "ev_s04_8195da6178b7"
             ],
-            "consultant_relevance": "Establishes the core operational platform context for the discovery conversation.",
-            "verification_path": "Review public platform overview and business profile.",
+            "consultant_relevance": "Provides the baseline understanding of the prospect's product domain and operating model.",
+            "verification_path": "Review public company profiles and positioning.",
             "authority": "DISPLAY_ONLY"
           },
           {
-            "text": "The prospect has booked a discovery discussion focusing on API security auditing, compliance, a customer security review, and a trust-assurance process, with specific emphasis on OAuth authorization flows and social-platform integration APIs.",
+            "text": "The prospect has explicitly requested focus on customer security reviews, trust-assurance processes, OAuth authorization flows, and APIs used for social-platform integrations.",
             "posture": "SUPPORTED",
             "source_refs": [
               "meeting_context:BOOKING_FORM:CALENDLY",
               "prospect_answer:PROSPECT_PROVIDED"
             ],
-            "consultant_relevance": "Directly defines the functional priorities and technical surfaces requested by the prospect.",
-            "verification_path": "Confirm exact scope requirements during initial discovery.",
+            "consultant_relevance": "Directly defines the technical and procedural boundaries for the upcoming discovery conversation.",
+            "verification_path": "Confirm requirements directly with the prospect during the call.",
             "authority": "DISPLAY_ONLY"
           },
           {
@@ -2857,29 +2810,30 @@
             "authority": "DISPLAY_ONLY"
           },
           {
-            "text": "There is no confirmed SOC 2 or ISO 27001 requirement currently established.",
+            "text": "There is an immediate requirement for a customer security review and trust-assurance process, though formal SOC 2 or ISO 27001 requirements are not yet confirmed.",
             "posture": "UNKNOWN",
             "source_refs": [],
-            "consultant_relevance": "Prevents assuming formalized framework readiness or compliance obligations.",
-            "verification_path": "Inquire about drivers behind the trust-assurance process without presuming framework adoption.",
+            "consultant_relevance": "Prevents assuming a formal compliance framework mandate before the prospect validates one.",
+            "verification_path": "Ask the prospect to clarify their current compliance drivers.",
             "authority": "DISPLAY_ONLY"
           },
           {
-            "text": "The prospect explicitly left additional areas unspecified; do not infer what those areas are.",
+            "text": "The exact nature of the unspecified areas included in the booking request remains unknown.",
             "posture": "UNKNOWN",
             "source_refs": [
-              "meeting_context:BOOKING_FORM:CALENDLY"
+              "meeting_context:BOOKING_FORM:CALENDLY",
+              "prospect_answer:PROSPECT_PROVIDED"
             ],
-            "consultant_relevance": "Keep the unspecified part of the booking visible for live discovery.",
-            "verification_path": "Ask the prospect what additional areas they want covered.",
+            "consultant_relevance": "Highlights a boundary that requires direct questioning rather than speculation.",
+            "verification_path": "Inquire about the 'among other things' mention during discovery.",
             "authority": "DISPLAY_ONLY"
           },
           {
-            "text": "Verify whether the customer security review involves specific third-party questionnaires or standard vendor assessment frameworks.",
+            "text": "Verify whether the lack of a confirmed SOC 2 or ISO 27001 requirement means they want to evaluate readiness or if they only require point-in-time trust artifacts.",
             "posture": "ACTION",
             "source_refs": [],
-            "consultant_relevance": "Ensures precise preparation for trust-assurance deliverables.",
-            "verification_path": "Ask prospect for sample security review documentation if applicable.",
+            "consultant_relevance": "Clarifies compliance intent without presuming a certification timeline.",
+            "verification_path": "Directly ask about long-term compliance roadmap milestones.",
             "authority": "DISPLAY_ONLY"
           },
           {
@@ -2893,36 +2847,25 @@
             "authority": "DISPLAY_ONLY"
           },
           {
-            "text": "What specific customer security review or trust-assurance milestones are driving your timeline for this engagement?",
+            "text": "What specific customer security review or trust-assurance questionnaire formats are driving your current timeline?",
             "posture": "HYPOTHESIS",
             "source_refs": [
               "meeting_context:BOOKING_FORM:CALENDLY",
               "prospect_answer:PROSPECT_PROVIDED"
             ],
-            "consultant_relevance": "Ensures alignment on the true triggers for trust-assurance work.",
-            "verification_path": "Discuss compliance drivers directly with the prospect.",
+            "consultant_relevance": "Directly addresses the stated requirement for trust assurance.",
+            "verification_path": "Listen for customer names or deal sizes mentioned during the response.",
             "authority": "DISPLAY_ONLY"
           },
           {
-            "text": "Can you share more about the specific social-platform integration APIs and OAuth flows that require auditing?",
+            "text": "How are OAuth authorization tokens and credential handoffs managed across your social-platform integrations today?",
             "posture": "HYPOTHESIS",
             "source_refs": [
               "meeting_context:BOOKING_FORM:CALENDLY",
               "prospect_answer:PROSPECT_PROVIDED"
             ],
-            "consultant_relevance": "Directly informs the technical depth required for the API security audit.",
-            "verification_path": "Review API architecture documentation with the engineering team.",
-            "authority": "DISPLAY_ONLY"
-          },
-          {
-            "text": "What additional priority areas fall under the other items you are looking to address?",
-            "posture": "ACTION",
-            "source_refs": [
-              "meeting_context:BOOKING_FORM:CALENDLY",
-              "prospect_answer:PROSPECT_PROVIDED"
-            ],
-            "consultant_relevance": "Identifies full project boundaries before defining deliverables.",
-            "verification_path": "Prompt the prospect to list remaining items of interest.",
+            "consultant_relevance": "Focuses the technical discussion on the specified integration layer.",
+            "verification_path": "Examine technical descriptions of API authentication mechanisms.",
             "authority": "DISPLAY_ONLY"
           },
           {
@@ -2936,31 +2879,31 @@
             "authority": "DISPLAY_ONLY"
           },
           {
-            "text": "Start the call by acknowledging the prospect's focus on customer trust-assurance and API security auditing for social-platform integrations. Prompt them to elaborate on the specific compliance milestones or customer inquiries prompting this review, and clarify what additional areas are covered under their open-ended scope.",
+            "text": "Start by acknowledging the stated focus on customer security reviews and OAuth API flows, then explore what 'among other things' encompasses before discussing potential advisory paths.",
             "posture": "ACTION",
             "source_refs": [
               "meeting_context:BOOKING_FORM:CALENDLY",
               "prospect_answer:PROSPECT_PROVIDED"
             ],
-            "consultant_relevance": "Provides Jordan Vale with a structured opening strategy grounded entirely in provided inputs.",
-            "verification_path": "Execute discovery flow aligned with intake notes.",
+            "consultant_relevance": "Keeps the conversation grounded in the prospect's exact wording.",
+            "verification_path": "Monitor agenda coverage during the call.",
             "authority": "DISPLAY_ONLY"
           },
           {
-            "text": "If the prospect confirms specific OAuth evaluation targets and trust-assurance deliverables during the call, outline a targeted scoping session conditioned on receiving architecture diagrams for the social-platform integration APIs.",
+            "text": "Conditioned on confirming the scope of the OAuth review and specific trust deliverables during the call, outline a targeted assessment outline and required technical access inputs for a follow-up proposal.",
             "posture": "ACTION",
             "source_refs": [
               "meeting_context:BOOKING_FORM:CALENDLY",
               "prospect_answer:PROSPECT_PROVIDED"
             ],
-            "consultant_relevance": "Defines a concrete, conditional transition to next phases.",
-            "verification_path": "Agree on follow-up criteria during closing discussion.",
+            "consultant_relevance": "Provides a concrete, conditional transition to next steps.",
+            "verification_path": "Verify prospect agreement on scope parameters before closing the meeting.",
             "authority": "DISPLAY_ONLY"
           }
         ]
       }
     },
-    "generated_at": "2026-09-10T16:26:03.331Z",
+    "generated_at": "2026-09-10T16:28:14.785Z",
     "grounded_display_diagnostics": {
       "status": "GEMINI_GROUNDED_SYNTHESIS",
       "gemini_invoked": true,
@@ -3142,25 +3085,25 @@
       ],
       "output_basis": [
         {
-          "text": "Planoly operates as a visual social media planning and management platform based in Austin, Texas, serving creators, small businesses, and social media managers.",
+          "text": "Planoly operates as a social media planning and management platform serving creators and small businesses.",
           "posture": "SUPPORTED",
           "source_refs": [
             "ev_s04_07102b07f5d0",
             "ev_s04_8195da6178b7"
           ],
-          "consultant_relevance": "Establishes the core operational platform context for the discovery conversation.",
-          "verification_path": "Review public platform overview and business profile.",
+          "consultant_relevance": "Provides the baseline understanding of the prospect's product domain and operating model.",
+          "verification_path": "Review public company profiles and positioning.",
           "authority": "DISPLAY_ONLY"
         },
         {
-          "text": "The prospect has booked a discovery discussion focusing on API security auditing, compliance, a customer security review, and a trust-assurance process, with specific emphasis on OAuth authorization flows and social-platform integration APIs.",
+          "text": "The prospect has explicitly requested focus on customer security reviews, trust-assurance processes, OAuth authorization flows, and APIs used for social-platform integrations.",
           "posture": "SUPPORTED",
           "source_refs": [
             "meeting_context:BOOKING_FORM:CALENDLY",
             "prospect_answer:PROSPECT_PROVIDED"
           ],
-          "consultant_relevance": "Directly defines the functional priorities and technical surfaces requested by the prospect.",
-          "verification_path": "Confirm exact scope requirements during initial discovery.",
+          "consultant_relevance": "Directly defines the technical and procedural boundaries for the upcoming discovery conversation.",
+          "verification_path": "Confirm requirements directly with the prospect during the call.",
           "authority": "DISPLAY_ONLY"
         },
         {
@@ -3187,29 +3130,30 @@
           "authority": "DISPLAY_ONLY"
         },
         {
-          "text": "There is no confirmed SOC 2 or ISO 27001 requirement currently established.",
+          "text": "There is an immediate requirement for a customer security review and trust-assurance process, though formal SOC 2 or ISO 27001 requirements are not yet confirmed.",
           "posture": "UNKNOWN",
           "source_refs": [],
-          "consultant_relevance": "Prevents assuming formalized framework readiness or compliance obligations.",
-          "verification_path": "Inquire about drivers behind the trust-assurance process without presuming framework adoption.",
+          "consultant_relevance": "Prevents assuming a formal compliance framework mandate before the prospect validates one.",
+          "verification_path": "Ask the prospect to clarify their current compliance drivers.",
           "authority": "DISPLAY_ONLY"
         },
         {
-          "text": "The prospect explicitly left additional areas unspecified; do not infer what those areas are.",
+          "text": "The exact nature of the unspecified areas included in the booking request remains unknown.",
           "posture": "UNKNOWN",
           "source_refs": [
-            "meeting_context:BOOKING_FORM:CALENDLY"
+            "meeting_context:BOOKING_FORM:CALENDLY",
+            "prospect_answer:PROSPECT_PROVIDED"
           ],
-          "consultant_relevance": "Keep the unspecified part of the booking visible for live discovery.",
-          "verification_path": "Ask the prospect what additional areas they want covered.",
+          "consultant_relevance": "Highlights a boundary that requires direct questioning rather than speculation.",
+          "verification_path": "Inquire about the 'among other things' mention during discovery.",
           "authority": "DISPLAY_ONLY"
         },
         {
-          "text": "Verify whether the customer security review involves specific third-party questionnaires or standard vendor assessment frameworks.",
+          "text": "Verify whether the lack of a confirmed SOC 2 or ISO 27001 requirement means they want to evaluate readiness or if they only require point-in-time trust artifacts.",
           "posture": "ACTION",
           "source_refs": [],
-          "consultant_relevance": "Ensures precise preparation for trust-assurance deliverables.",
-          "verification_path": "Ask prospect for sample security review documentation if applicable.",
+          "consultant_relevance": "Clarifies compliance intent without presuming a certification timeline.",
+          "verification_path": "Directly ask about long-term compliance roadmap milestones.",
           "authority": "DISPLAY_ONLY"
         },
         {
@@ -3223,36 +3167,25 @@
           "authority": "DISPLAY_ONLY"
         },
         {
-          "text": "What specific customer security review or trust-assurance milestones are driving your timeline for this engagement?",
+          "text": "What specific customer security review or trust-assurance questionnaire formats are driving your current timeline?",
           "posture": "HYPOTHESIS",
           "source_refs": [
             "meeting_context:BOOKING_FORM:CALENDLY",
             "prospect_answer:PROSPECT_PROVIDED"
           ],
-          "consultant_relevance": "Ensures alignment on the true triggers for trust-assurance work.",
-          "verification_path": "Discuss compliance drivers directly with the prospect.",
+          "consultant_relevance": "Directly addresses the stated requirement for trust assurance.",
+          "verification_path": "Listen for customer names or deal sizes mentioned during the response.",
           "authority": "DISPLAY_ONLY"
         },
         {
-          "text": "Can you share more about the specific social-platform integration APIs and OAuth flows that require auditing?",
+          "text": "How are OAuth authorization tokens and credential handoffs managed across your social-platform integrations today?",
           "posture": "HYPOTHESIS",
           "source_refs": [
             "meeting_context:BOOKING_FORM:CALENDLY",
             "prospect_answer:PROSPECT_PROVIDED"
           ],
-          "consultant_relevance": "Directly informs the technical depth required for the API security audit.",
-          "verification_path": "Review API architecture documentation with the engineering team.",
-          "authority": "DISPLAY_ONLY"
-        },
-        {
-          "text": "What additional priority areas fall under the other items you are looking to address?",
-          "posture": "ACTION",
-          "source_refs": [
-            "meeting_context:BOOKING_FORM:CALENDLY",
-            "prospect_answer:PROSPECT_PROVIDED"
-          ],
-          "consultant_relevance": "Identifies full project boundaries before defining deliverables.",
-          "verification_path": "Prompt the prospect to list remaining items of interest.",
+          "consultant_relevance": "Focuses the technical discussion on the specified integration layer.",
+          "verification_path": "Examine technical descriptions of API authentication mechanisms.",
           "authority": "DISPLAY_ONLY"
         },
         {
@@ -3266,32 +3199,32 @@
           "authority": "DISPLAY_ONLY"
         },
         {
-          "text": "Start the call by acknowledging the prospect's focus on customer trust-assurance and API security auditing for social-platform integrations. Prompt them to elaborate on the specific compliance milestones or customer inquiries prompting this review, and clarify what additional areas are covered under their open-ended scope.",
+          "text": "Start by acknowledging the stated focus on customer security reviews and OAuth API flows, then explore what 'among other things' encompasses before discussing potential advisory paths.",
           "posture": "ACTION",
           "source_refs": [
             "meeting_context:BOOKING_FORM:CALENDLY",
             "prospect_answer:PROSPECT_PROVIDED"
           ],
-          "consultant_relevance": "Provides Jordan Vale with a structured opening strategy grounded entirely in provided inputs.",
-          "verification_path": "Execute discovery flow aligned with intake notes.",
+          "consultant_relevance": "Keeps the conversation grounded in the prospect's exact wording.",
+          "verification_path": "Monitor agenda coverage during the call.",
           "authority": "DISPLAY_ONLY"
         },
         {
-          "text": "If the prospect confirms specific OAuth evaluation targets and trust-assurance deliverables during the call, outline a targeted scoping session conditioned on receiving architecture diagrams for the social-platform integration APIs.",
+          "text": "Conditioned on confirming the scope of the OAuth review and specific trust deliverables during the call, outline a targeted assessment outline and required technical access inputs for a follow-up proposal.",
           "posture": "ACTION",
           "source_refs": [
             "meeting_context:BOOKING_FORM:CALENDLY",
             "prospect_answer:PROSPECT_PROVIDED"
           ],
-          "consultant_relevance": "Defines a concrete, conditional transition to next phases.",
-          "verification_path": "Agree on follow-up criteria during closing discussion.",
+          "consultant_relevance": "Provides a concrete, conditional transition to next steps.",
+          "verification_path": "Verify prospect agreement on scope parameters before closing the meeting.",
           "authority": "DISPLAY_ONLY"
         }
       ]
     }
   },
-  "renderedBrief": "# CLARIS DEAL BRIEF — PLANOLY\n\n**Meeting Schedule:** 2026-09-15T14:00:00.000Z  \n**Meeting URL:** None  \n**Prospect:** Thai Huang (thaihuangg@planoly.com)  \n**Consultant Source of Truth:** Priority Stack Advisory  \n**Assessment:** `QUALIFY` | **Fit:** Not enough verified context to assign a fit tier | **Status:** `PROVISIONAL` | **Preparation:** `READY WITH OPEN ITEMS` | **Confidence:** Still being established\n\n---\n\n## 1. OPPORTUNITY SNAPSHOT\n\n| Metric | Value | Detail |\n|:---|:---|:---|\n| **Opportunity Score** | **Not enough verified context to score confidently** | Awaiting prospect context |\n| **Pipeline Decision** | **`QUALIFY`** | Qualification posture |\n| **Confidence** | **Still being established** | Evidence completeness |\n| **Potential Service Fit** | **Service direction not established yet** | Need status: Still unknown |\n\n---\n\n## 2. EXECUTIVE SUMMARY\n\n> The prospect has booked a discovery discussion focusing on API security auditing, compliance, a customer security review, and a trust-assurance process, with specific emphasis on OAuth authorization flows and social-platform integration APIs. The accepted company and public technical context gives the booking request a concrete surface to explore, but the actual boundaries and assurance outcome are not established yet; resolve that distinction before shaping an advisory path. The booking explicitly leaves additional areas unspecified, so you should keep the agenda open and ask what else matters without inferring the missing scope.\n\n---\n\n## 3. WHAT MATTERS\n\n- The prospect has booked a discovery discussion focusing on API security auditing, compliance, a customer security review, and a trust-assurance process, with specific emphasis on OAuth authorization flows and social-platform integration APIs. (SUPPORTED · PROSPECT_PROVIDED) [meeting_context:BOOKING_FORM:CALENDLY, prospect_answer:PROSPECT_PROVIDED]\n- The accepted company and public technical context gives the booking request a concrete surface to explore, but the actual boundaries and assurance outcome are not established yet; resolve that distinction before shaping an advisory path. (INTERPRETATION · PROSPECT_PROVIDED) [ev_s04_07102b07f5d0, ev_s04_8195da6178b7, meeting_context:BOOKING_FORM:CALENDLY, prospect_answer:PROSPECT_PROVIDED]\n- The booking explicitly leaves additional areas unspecified, so you should keep the agenda open and ask what else matters without inferring the missing scope. (INTERPRETATION · PROSPECT_PROVIDED) [meeting_context:BOOKING_FORM:CALENDLY]\n\n**Consultant relevance:** Pre-call research synthesis for Jordan Vale at Priority Stack Advisory regarding Planoly's discovery booking.\n\n---\n\n## 4. OPPORTUNITY CONTEXT & CURRENT POSTURE\n\n### Company Context\n\n- Planoly operates as a visual social media planning and management platform based in Austin, Texas, serving creators, small businesses, and social media managers. (SUPPORTED · PUBLIC_EVIDENCE) [ev_s04_07102b07f5d0, ev_s04_8195da6178b7]\n\n### Current Posture\n\n- There is no confirmed SOC 2 or ISO 27001 requirement currently established. (UNKNOWN · UNKNOWN)\n\n• Cloud Infrastructure: Primary cloud hosting provider not confirmed in reviewed evidence\n\n• Public Compliance Disclosures: No public badges advertised (Absence != gap)\n\n---\n\n## MEETING CONTEXT\n\n> We're looking for API Security Auditing and Compliance & Trust Certification, among other things.\n- Source Type: BOOKING_FORM\n- Source Provider: CALENDLY\n- Captured At: 2026-09-10T16:25:26.093Z\n\n---\n\n## PUBLIC SIGNALS\n\n> Public-source context for call preparation. Full excerpts and source traceability remain available in the Evidence Inspector.\n\n- BUSINESS · Public first-party · https://planoly.com\n- BUSINESS · Public first-party · https://www.planoly.com/acceptable-use-policy\n- BUSINESS · Public first-party · https://www.planoly.com/product\n- TECHNOLOGY · Public first-party · https://www.planoly.com/terms-of-use\n\n---\n\n## 5. STILL UNKNOWN BEFORE THE CALL\n\n\n- [ ] The prospect explicitly left additional areas unspecified; do not infer what those areas are.\n\n---\n\n## 6. RESEARCH-AWARE DISCOVERY QUESTIONS\n\n**Q1:** What specific customer security review or trust-assurance milestones are driving your timeline for this engagement?\n\nWhy CLARIS is asking this: Clarifies the immediate business drivers behind the trust process since formal frameworks are not yet confirmed.\n\nListen for: Specific enterprise customer demands, partner requirements, or upcoming deal milestones.\n\nAvoid assuming: Do not assume an active mandate for SOC 2 or ISO 27001 certification.\n\nTests: Unconfirmed compliance framework requirements.\n\n**Q2:** Can you share more about the specific social-platform integration APIs and OAuth flows that require auditing?\n\nWhy CLARIS is asking this: Focuses the technical conversation on the exact integration surfaces and token management mechanisms noted in the intake.\n\nListen for: Details on token exchange mechanisms, webhook handlers, and third-party platform dependencies.\n\nAvoid assuming: Do not assume a uniform architecture across all social media integrations.\n\nTests: Scope and complexity of OAuth and API integration auditing.\n\n**Q3:** What additional priority areas fall under the other items you are looking to address?\n\nWhy CLARIS is asking this: Explores the open-ended scope indicated in the booking form without making assumptions about missing services.\n\nListen for: Additional technical or governance topics not yet captured.\n\nAvoid assuming: Do not infer what additional services or security domains are intended.\n\nTests: Unspecified scope elements indicated by 'among other things'.\n\n**Q4:** You mentioned there are a few other things you'd like to cover - what else should we make sure to address?\n\nWhy CLARIS is asking this: Keeps the explicitly open-ended booking scope visible without guessing what the additional workstreams are.\n\nListen for: Additional technical, assurance, or process areas that are not yet documented.\n\nAvoid assuming: Do not infer what the unspecified areas are before the prospect describes them.\n\nTests: The booking leaves part of the requested scope unspecified.\n\n---\n\n## 7. RECOMMENDED APPROACH / CALL DIRECTION\n\nStart the call by acknowledging the prospect's focus on customer trust-assurance and API security auditing for social-platform integrations. Prompt them to elaborate on the specific compliance milestones or customer inquiries prompting this review, and clarify what additional areas are covered under their open-ended scope.\n\n**Suggested next step:** If the call confirms defined API/OAuth and security-review boundaries and a concrete assurance objective, schedule a technical scoping session with the relevant security or API owner to define assessment scope, evidence needs, and expected deliverables.\n\n\nCondition to trigger: The prospect confirms defined API/OAuth and security-review boundaries, the intended assurance outcome, and the people who need to participate in scoping.\n\nReasoning basis: A conditional scoping step keeps service direction provisional until the prospect confirms the work boundary and expected outcome.\n\nInputs required: Confirmed technical boundary; Specific assurance outcome or deliverables; Relevant technical or security owner\n",
-  "renderedMarkdown": "# CLARIS DEAL BRIEF — PLANOLY\n\n**Meeting Schedule:** 2026-09-15T14:00:00.000Z  \n**Meeting URL:** None  \n**Prospect:** Thai Huang (thaihuangg@planoly.com)  \n**Consultant Source of Truth:** Priority Stack Advisory  \n**Assessment:** `QUALIFY` | **Fit:** Not enough verified context to assign a fit tier | **Status:** `PROVISIONAL` | **Preparation:** `READY WITH OPEN ITEMS` | **Confidence:** Still being established\n\n---\n\n## 1. OPPORTUNITY SNAPSHOT\n\n| Metric | Value | Detail |\n|:---|:---|:---|\n| **Opportunity Score** | **Not enough verified context to score confidently** | Awaiting prospect context |\n| **Pipeline Decision** | **`QUALIFY`** | Qualification posture |\n| **Confidence** | **Still being established** | Evidence completeness |\n| **Potential Service Fit** | **Service direction not established yet** | Need status: Still unknown |\n\n---\n\n## 2. EXECUTIVE SUMMARY\n\n> The prospect has booked a discovery discussion focusing on API security auditing, compliance, a customer security review, and a trust-assurance process, with specific emphasis on OAuth authorization flows and social-platform integration APIs. The accepted company and public technical context gives the booking request a concrete surface to explore, but the actual boundaries and assurance outcome are not established yet; resolve that distinction before shaping an advisory path. The booking explicitly leaves additional areas unspecified, so you should keep the agenda open and ask what else matters without inferring the missing scope.\n\n---\n\n## 3. WHAT MATTERS\n\n- The prospect has booked a discovery discussion focusing on API security auditing, compliance, a customer security review, and a trust-assurance process, with specific emphasis on OAuth authorization flows and social-platform integration APIs. (SUPPORTED · PROSPECT_PROVIDED) [meeting_context:BOOKING_FORM:CALENDLY, prospect_answer:PROSPECT_PROVIDED]\n- The accepted company and public technical context gives the booking request a concrete surface to explore, but the actual boundaries and assurance outcome are not established yet; resolve that distinction before shaping an advisory path. (INTERPRETATION · PROSPECT_PROVIDED) [ev_s04_07102b07f5d0, ev_s04_8195da6178b7, meeting_context:BOOKING_FORM:CALENDLY, prospect_answer:PROSPECT_PROVIDED]\n- The booking explicitly leaves additional areas unspecified, so you should keep the agenda open and ask what else matters without inferring the missing scope. (INTERPRETATION · PROSPECT_PROVIDED) [meeting_context:BOOKING_FORM:CALENDLY]\n\n**Consultant relevance:** Pre-call research synthesis for Jordan Vale at Priority Stack Advisory regarding Planoly's discovery booking.\n\n---\n\n## 4. OPPORTUNITY CONTEXT & CURRENT POSTURE\n\n### Company Context\n\n- Planoly operates as a visual social media planning and management platform based in Austin, Texas, serving creators, small businesses, and social media managers. (SUPPORTED · PUBLIC_EVIDENCE) [ev_s04_07102b07f5d0, ev_s04_8195da6178b7]\n\n### Current Posture\n\n- There is no confirmed SOC 2 or ISO 27001 requirement currently established. (UNKNOWN · UNKNOWN)\n\n• Cloud Infrastructure: Primary cloud hosting provider not confirmed in reviewed evidence\n\n• Public Compliance Disclosures: No public badges advertised (Absence != gap)\n\n---\n\n## MEETING CONTEXT\n\n> We're looking for API Security Auditing and Compliance & Trust Certification, among other things.\n- Source Type: BOOKING_FORM\n- Source Provider: CALENDLY\n- Captured At: 2026-09-10T16:25:26.093Z\n\n---\n\n## PUBLIC SIGNALS\n\n> Public-source context for call preparation. Full excerpts and source traceability remain available in the Evidence Inspector.\n\n- BUSINESS · Public first-party · https://planoly.com\n- BUSINESS · Public first-party · https://www.planoly.com/acceptable-use-policy\n- BUSINESS · Public first-party · https://www.planoly.com/product\n- TECHNOLOGY · Public first-party · https://www.planoly.com/terms-of-use\n\n---\n\n## 5. STILL UNKNOWN BEFORE THE CALL\n\n\n- [ ] The prospect explicitly left additional areas unspecified; do not infer what those areas are.\n\n---\n\n## 6. RESEARCH-AWARE DISCOVERY QUESTIONS\n\n**Q1:** What specific customer security review or trust-assurance milestones are driving your timeline for this engagement?\n\nWhy CLARIS is asking this: Clarifies the immediate business drivers behind the trust process since formal frameworks are not yet confirmed.\n\nListen for: Specific enterprise customer demands, partner requirements, or upcoming deal milestones.\n\nAvoid assuming: Do not assume an active mandate for SOC 2 or ISO 27001 certification.\n\nTests: Unconfirmed compliance framework requirements.\n\n**Q2:** Can you share more about the specific social-platform integration APIs and OAuth flows that require auditing?\n\nWhy CLARIS is asking this: Focuses the technical conversation on the exact integration surfaces and token management mechanisms noted in the intake.\n\nListen for: Details on token exchange mechanisms, webhook handlers, and third-party platform dependencies.\n\nAvoid assuming: Do not assume a uniform architecture across all social media integrations.\n\nTests: Scope and complexity of OAuth and API integration auditing.\n\n**Q3:** What additional priority areas fall under the other items you are looking to address?\n\nWhy CLARIS is asking this: Explores the open-ended scope indicated in the booking form without making assumptions about missing services.\n\nListen for: Additional technical or governance topics not yet captured.\n\nAvoid assuming: Do not infer what additional services or security domains are intended.\n\nTests: Unspecified scope elements indicated by 'among other things'.\n\n**Q4:** You mentioned there are a few other things you'd like to cover - what else should we make sure to address?\n\nWhy CLARIS is asking this: Keeps the explicitly open-ended booking scope visible without guessing what the additional workstreams are.\n\nListen for: Additional technical, assurance, or process areas that are not yet documented.\n\nAvoid assuming: Do not infer what the unspecified areas are before the prospect describes them.\n\nTests: The booking leaves part of the requested scope unspecified.\n\n---\n\n## 7. RECOMMENDED APPROACH / CALL DIRECTION\n\nStart the call by acknowledging the prospect's focus on customer trust-assurance and API security auditing for social-platform integrations. Prompt them to elaborate on the specific compliance milestones or customer inquiries prompting this review, and clarify what additional areas are covered under their open-ended scope.\n\n**Suggested next step:** If the call confirms defined API/OAuth and security-review boundaries and a concrete assurance objective, schedule a technical scoping session with the relevant security or API owner to define assessment scope, evidence needs, and expected deliverables.\n\n\nCondition to trigger: The prospect confirms defined API/OAuth and security-review boundaries, the intended assurance outcome, and the people who need to participate in scoping.\n\nReasoning basis: A conditional scoping step keeps service direction provisional until the prospect confirms the work boundary and expected outcome.\n\nInputs required: Confirmed technical boundary; Specific assurance outcome or deliverables; Relevant technical or security owner\n",
+  "renderedBrief": "# CLARIS DEAL BRIEF — PLANOLY\n\n**Meeting Schedule:** 2026-09-15T14:00:00.000Z  \n**Meeting URL:** None  \n**Prospect:** Thai Huang (thaihuangg@planoly.com)  \n**Consultant Source of Truth:** Priority Stack Advisory  \n**Assessment:** `QUALIFY` | **Fit:** Not enough verified context to assign a fit tier | **Status:** `PROVISIONAL` | **Preparation:** `READY WITH OPEN ITEMS` | **Confidence:** Still being established\n\n---\n\n## 1. OPPORTUNITY SNAPSHOT\n\n| Metric | Value | Detail |\n|:---|:---|:---|\n| **Opportunity Score** | **Not enough verified context to score confidently** | Awaiting prospect context |\n| **Pipeline Decision** | **`QUALIFY`** | Qualification posture |\n| **Confidence** | **Still being established** | Evidence completeness |\n| **Potential Service Fit** | **Service direction not established yet** | Need status: Still unknown |\n\n---\n\n## 2. EXECUTIVE SUMMARY\n\n> The prospect has explicitly requested focus on customer security reviews, trust-assurance processes, OAuth authorization flows, and APIs used for social-platform integrations. The accepted company and public technical context gives the booking request a concrete surface to explore, but the actual boundaries and assurance outcome are not established yet; resolve that distinction before shaping an advisory path. The booking explicitly leaves additional areas unspecified, so you should keep the agenda open and ask what else matters without inferring the missing scope.\n\n---\n\n## 3. WHAT MATTERS\n\n- The prospect has explicitly requested focus on customer security reviews, trust-assurance processes, OAuth authorization flows, and APIs used for social-platform integrations. (SUPPORTED · PROSPECT_PROVIDED) [meeting_context:BOOKING_FORM:CALENDLY, prospect_answer:PROSPECT_PROVIDED]\n- The accepted company and public technical context gives the booking request a concrete surface to explore, but the actual boundaries and assurance outcome are not established yet; resolve that distinction before shaping an advisory path. (INTERPRETATION · PROSPECT_PROVIDED) [ev_s04_07102b07f5d0, ev_s04_8195da6178b7, meeting_context:BOOKING_FORM:CALENDLY, prospect_answer:PROSPECT_PROVIDED]\n- The booking explicitly leaves additional areas unspecified, so you should keep the agenda open and ask what else matters without inferring the missing scope. (INTERPRETATION · PROSPECT_PROVIDED) [meeting_context:BOOKING_FORM:CALENDLY]\n\n**Consultant relevance:** Ensure Jordan Vale maintains strict adherence to the prospect's stated scope and avoids introducing unverified compliance frameworks during the discovery call with Planoly.\n\n---\n\n## 4. OPPORTUNITY CONTEXT & CURRENT POSTURE\n\n### Company Context\n\n- Planoly operates as a social media planning and management platform serving creators and small businesses. (SUPPORTED · PUBLIC_EVIDENCE) [ev_s04_07102b07f5d0, ev_s04_8195da6178b7]\n\n### Current Posture\n\n- There is an immediate requirement for a customer security review and trust-assurance process, though formal SOC 2 or ISO 27001 requirements are not yet confirmed. (UNKNOWN · UNKNOWN)\n\n• Cloud Infrastructure: Primary cloud hosting provider not confirmed in reviewed evidence\n\n• Public Compliance Disclosures: No public badges advertised (Absence != gap)\n\n---\n\n## MEETING CONTEXT\n\n> We're looking for API Security Auditing and Compliance & Trust Certification, among other things.\n- Source Type: BOOKING_FORM\n- Source Provider: CALENDLY\n- Captured At: 2026-09-10T16:27:26.980Z\n\n---\n\n## PUBLIC SIGNALS\n\n> Public-source context for call preparation. Full excerpts and source traceability remain available in the Evidence Inspector.\n\n- BUSINESS · Public first-party · https://planoly.com\n- BUSINESS · Public first-party · https://www.planoly.com/acceptable-use-policy\n- BUSINESS · Public first-party · https://www.planoly.com/product\n- TECHNOLOGY · Public first-party · https://www.planoly.com/terms-of-use\n\n---\n\n## 5. STILL UNKNOWN BEFORE THE CALL\n\n\n- [ ] The exact nature of the unspecified areas included in the booking request remains unknown.\n\n---\n\n## 6. RESEARCH-AWARE DISCOVERY QUESTIONS\n\n**Q1:** What specific customer security review or trust-assurance questionnaire formats are driving your current timeline?\n\nWhy CLARIS is asking this: Uncovers the specific reporting or documentation burden the prospect faces without assuming a standard enterprise vendor assessment template.\n\nListen for: Specific third-party risk management portals, custom security questionnaires, or enterprise customer demands.\n\nAvoid assuming: Do not assume a specific tier of enterprise customer is demanding the review.\n\nTests: Customer security review drivers and documentation format expectations.\n\n**Q2:** How are OAuth authorization tokens and credential handoffs managed across your social-platform integrations today?\n\nWhy CLARIS is asking this: Pinpoints the exact technical mechanism mentioned in the prospect's notes regarding social-platform APIs.\n\nListen for: Token storage practices, expiration handling, scope limitations, and third-party credential refreshing.\n\nAvoid assuming: Do not assume a specific architectural flaw or token storage mechanism exists.\n\nTests: OAuth flow security posture and token lifecycle management.\n\n**Q3:** You mentioned there are a few other things you'd like to cover - what else should we make sure to address?\n\nWhy CLARIS is asking this: Keeps the explicitly open-ended booking scope visible without guessing what the additional workstreams are.\n\nListen for: Additional technical, assurance, or process areas that are not yet documented.\n\nAvoid assuming: Do not infer what the unspecified areas are before the prospect describes them.\n\nTests: The booking leaves part of the requested scope unspecified.\n\n---\n\n## 7. RECOMMENDED APPROACH / CALL DIRECTION\n\nStart by acknowledging the stated focus on customer security reviews and OAuth API flows, then explore what 'among other things' encompasses before discussing potential advisory paths.\n\n**Suggested next step:** If the call confirms defined API/OAuth and security-review boundaries and a concrete assurance objective, schedule a technical scoping session with the relevant security or API owner to define assessment scope, evidence needs, and expected deliverables.\n\n\nCondition to trigger: The prospect confirms defined API/OAuth and security-review boundaries, the intended assurance outcome, and the people who need to participate in scoping.\n\nReasoning basis: A conditional scoping step keeps service direction provisional until the prospect confirms the work boundary and expected outcome.\n\nInputs required: Confirmed technical boundary; Specific assurance outcome or deliverables; Relevant technical or security owner\n",
+  "renderedMarkdown": "# CLARIS DEAL BRIEF — PLANOLY\n\n**Meeting Schedule:** 2026-09-15T14:00:00.000Z  \n**Meeting URL:** None  \n**Prospect:** Thai Huang (thaihuangg@planoly.com)  \n**Consultant Source of Truth:** Priority Stack Advisory  \n**Assessment:** `QUALIFY` | **Fit:** Not enough verified context to assign a fit tier | **Status:** `PROVISIONAL` | **Preparation:** `READY WITH OPEN ITEMS` | **Confidence:** Still being established\n\n---\n\n## 1. OPPORTUNITY SNAPSHOT\n\n| Metric | Value | Detail |\n|:---|:---|:---|\n| **Opportunity Score** | **Not enough verified context to score confidently** | Awaiting prospect context |\n| **Pipeline Decision** | **`QUALIFY`** | Qualification posture |\n| **Confidence** | **Still being established** | Evidence completeness |\n| **Potential Service Fit** | **Service direction not established yet** | Need status: Still unknown |\n\n---\n\n## 2. EXECUTIVE SUMMARY\n\n> The prospect has explicitly requested focus on customer security reviews, trust-assurance processes, OAuth authorization flows, and APIs used for social-platform integrations. The accepted company and public technical context gives the booking request a concrete surface to explore, but the actual boundaries and assurance outcome are not established yet; resolve that distinction before shaping an advisory path. The booking explicitly leaves additional areas unspecified, so you should keep the agenda open and ask what else matters without inferring the missing scope.\n\n---\n\n## 3. WHAT MATTERS\n\n- The prospect has explicitly requested focus on customer security reviews, trust-assurance processes, OAuth authorization flows, and APIs used for social-platform integrations. (SUPPORTED · PROSPECT_PROVIDED) [meeting_context:BOOKING_FORM:CALENDLY, prospect_answer:PROSPECT_PROVIDED]\n- The accepted company and public technical context gives the booking request a concrete surface to explore, but the actual boundaries and assurance outcome are not established yet; resolve that distinction before shaping an advisory path. (INTERPRETATION · PROSPECT_PROVIDED) [ev_s04_07102b07f5d0, ev_s04_8195da6178b7, meeting_context:BOOKING_FORM:CALENDLY, prospect_answer:PROSPECT_PROVIDED]\n- The booking explicitly leaves additional areas unspecified, so you should keep the agenda open and ask what else matters without inferring the missing scope. (INTERPRETATION · PROSPECT_PROVIDED) [meeting_context:BOOKING_FORM:CALENDLY]\n\n**Consultant relevance:** Ensure Jordan Vale maintains strict adherence to the prospect's stated scope and avoids introducing unverified compliance frameworks during the discovery call with Planoly.\n\n---\n\n## 4. OPPORTUNITY CONTEXT & CURRENT POSTURE\n\n### Company Context\n\n- Planoly operates as a social media planning and management platform serving creators and small businesses. (SUPPORTED · PUBLIC_EVIDENCE) [ev_s04_07102b07f5d0, ev_s04_8195da6178b7]\n\n### Current Posture\n\n- There is an immediate requirement for a customer security review and trust-assurance process, though formal SOC 2 or ISO 27001 requirements are not yet confirmed. (UNKNOWN · UNKNOWN)\n\n• Cloud Infrastructure: Primary cloud hosting provider not confirmed in reviewed evidence\n\n• Public Compliance Disclosures: No public badges advertised (Absence != gap)\n\n---\n\n## MEETING CONTEXT\n\n> We're looking for API Security Auditing and Compliance & Trust Certification, among other things.\n- Source Type: BOOKING_FORM\n- Source Provider: CALENDLY\n- Captured At: 2026-09-10T16:27:26.980Z\n\n---\n\n## PUBLIC SIGNALS\n\n> Public-source context for call preparation. Full excerpts and source traceability remain available in the Evidence Inspector.\n\n- BUSINESS · Public first-party · https://planoly.com\n- BUSINESS · Public first-party · https://www.planoly.com/acceptable-use-policy\n- BUSINESS · Public first-party · https://www.planoly.com/product\n- TECHNOLOGY · Public first-party · https://www.planoly.com/terms-of-use\n\n---\n\n## 5. STILL UNKNOWN BEFORE THE CALL\n\n\n- [ ] The exact nature of the unspecified areas included in the booking request remains unknown.\n\n---\n\n## 6. RESEARCH-AWARE DISCOVERY QUESTIONS\n\n**Q1:** What specific customer security review or trust-assurance questionnaire formats are driving your current timeline?\n\nWhy CLARIS is asking this: Uncovers the specific reporting or documentation burden the prospect faces without assuming a standard enterprise vendor assessment template.\n\nListen for: Specific third-party risk management portals, custom security questionnaires, or enterprise customer demands.\n\nAvoid assuming: Do not assume a specific tier of enterprise customer is demanding the review.\n\nTests: Customer security review drivers and documentation format expectations.\n\n**Q2:** How are OAuth authorization tokens and credential handoffs managed across your social-platform integrations today?\n\nWhy CLARIS is asking this: Pinpoints the exact technical mechanism mentioned in the prospect's notes regarding social-platform APIs.\n\nListen for: Token storage practices, expiration handling, scope limitations, and third-party credential refreshing.\n\nAvoid assuming: Do not assume a specific architectural flaw or token storage mechanism exists.\n\nTests: OAuth flow security posture and token lifecycle management.\n\n**Q3:** You mentioned there are a few other things you'd like to cover - what else should we make sure to address?\n\nWhy CLARIS is asking this: Keeps the explicitly open-ended booking scope visible without guessing what the additional workstreams are.\n\nListen for: Additional technical, assurance, or process areas that are not yet documented.\n\nAvoid assuming: Do not infer what the unspecified areas are before the prospect describes them.\n\nTests: The booking leaves part of the requested scope unspecified.\n\n---\n\n## 7. RECOMMENDED APPROACH / CALL DIRECTION\n\nStart by acknowledging the stated focus on customer security reviews and OAuth API flows, then explore what 'among other things' encompasses before discussing potential advisory paths.\n\n**Suggested next step:** If the call confirms defined API/OAuth and security-review boundaries and a concrete assurance objective, schedule a technical scoping session with the relevant security or API owner to define assessment scope, evidence needs, and expected deliverables.\n\n\nCondition to trigger: The prospect confirms defined API/OAuth and security-review boundaries, the intended assurance outcome, and the people who need to participate in scoping.\n\nReasoning basis: A conditional scoping step keeps service direction provisional until the prospect confirms the work boundary and expected outcome.\n\nInputs required: Confirmed technical boundary; Specific assurance outcome or deliverables; Relevant technical or security owner\n",
   "docTemplateData": {
     "doc_title": "CLARIS — PRE-CALL BRIEF: PLANOLY",
     "company_name": "Planoly",
@@ -3303,7 +3236,7 @@
       "source_type": "BOOKING_FORM",
       "source_provider": "CALENDLY",
       "submitted_by": null,
-      "captured_at": "2026-09-10T16:25:26.093Z"
+      "captured_at": "2026-09-10T16:27:26.980Z"
     },
     "decision_badge": "QUALIFY",
     "fit_badge": "Not enough verified context to score confidently",
@@ -3311,17 +3244,17 @@
     "opportunity_fit": "• Potential Service Fit: Service direction not established yet\n• Confirmed Need: Still unknown\n• Fit Assessment: Not enough verified context to score confidently — PROVISIONAL\n• Consultant Relevance: Matches consultant Source of Truth.",
     "what_we_know": "• Cloud Infrastructure: Primary cloud hosting provider not confirmed in reviewed evidence\n• Public Compliance Disclosures: No public badges advertised (Absence != gap)",
     "publicly_observed": "• [TECHNOLOGY] “# Planoly API”\n• [TECHNOLOGY] “## Planoly API profile”\n• [TECHNOLOGY] “API Reference”\n• [TECHNOLOGY] “Creators acknowledge and agree that Linked Services may add, remove, bifurcate, With Linked Services for third-party integration, Creators may be asked to verify credentials in the future.”\n• [TECHNOLOGY] “Identity pr # Planoly API”\n• [TECHNOLOGY] “Webhooks management API”\n• [TECHNOLOGY] “With Linked Services for third-party integration, Creators may be asked to verify credentials in the future.”\n• [BUSINESS] “# A social media planner that does so much more than scheduling”\n• [BUSINESS] “## Everything you need to succeed on social media.”\n• [BUSINESS] “## Ready to simplify your social media?”\n• [BUSINESS] “#### Customers & developers”\n• [BUSINESS] “A cloud-based platform for visually planning, scheduling, and managing social media content across”\n• [BUSINESS] “A cloud-based platform for visually planning, scheduling, and managing social media content across PLANOLY is the visual social media planner on the market.”\n• [BUSINESS] “Accounts using third-party apps on Instagram already happened to be banned for a certain period of time or even suspended for good.”\n• [BUSINESS] “Build a social media strate”\n• [BUSINESS] “Build a social media strate Planoly is the social media planner and scheduler trusted by 8 million creators to plan, edit, schedule, and auto-post across every channel — from one app.”\n• [BUSINESS] “CategoriesBlogLog inFor businesses”\n• [BUSINESS] “Create a cohesive Instagram feed and manage multiple Instagram accounts.”\n• [BUSINESS] “Features to help you Plan & Create Generate content ideas with AI Get unstuck with post ideas, keyword r Social Media Planner & Management Tool | Planoly”\n• [BUSINESS] “Follow PLANOLY on LinkedIn [...] CREATE FREE ACCOUNT”\n• [BUSINESS] “Getting Started · Planoly Now, your testimonials will be displayed alongside your product, helping build trust and credibility with potential customers!”\n• [BUSINESS] “Monitor and control all activity conducted through your Planoly account.”\n• [BUSINESS] “No app s # A social media planner that does so much more than scheduling”\n• [BUSINESS] “Notify us promptly if you become aware of our suspect any security breach regarding your account, including any loss, theft, or unauth”\n• [BUSINESS] “Notify us promptly if you become aware of our suspect any security breach regarding your account, including any loss, theft, or unauth Use your best efforts to prevent unauthorized access to or use of the Services, including by maintaining a strong password and keeping your password and other login credentials confidential.”\n• [BUSINESS] “Now, your testimonials will be displayed alongside your product, helping build trust and credibility with potential customers!”\n• [BUSINESS] “One tool for planning, scheduling, automating, and monetizing.”\n• [BUSINESS] “Plan, automate, and manage your entire social media workflow in one place.”\n• [BUSINESS] “Planoly is a social media management platform based in Austin, Texas, serving creators and small businesses within the advertising services industry.”\n• [BUSINESS] “Planoly is the social media planner and scheduler trusted by 8 million creators to plan, edit, schedule, and auto-post across every channel — from one app.”\n• [BUSINESS] “PLANOLY is the visual social media planner on the market.”\n• [BUSINESS] “PRICING Resources LOG IN LOG IN GET STARTED FREE The social media planner that goes way beyond scheduling Manage your entire social media workflow in one place.”\n• [BUSINESS] “Social Media Planner & Management Tool | Planoly”\n• [BUSINESS] “Stories Planner”\n• [BUSINESS] “Thousands of creators, small businesses, and social media managers trust Planoly to keep their social media running smoothly.”\n• [BUSINESS] “Video Planner IG Planner Reels Planner Content Templates linkit Pin Planne”\n• [BUSINESS] “Video Planner IG Planner Reels Planner Content Templates linkit Pin Planne ##### Our New Favorite Gen Z Marketing Trends”",
-    "what_to_verify": "[ ] The prospect explicitly left additional areas unspecified; do not infer what those areas are.",
-    "discovery_questions": "Q1: What specific customer security review or trust-assurance milestones are driving your timeline for this engagement?\nWhy CLARIS is asking this: Clarifies the immediate business drivers behind the trust process since formal frameworks are not yet confirmed.\n\nQ2: Can you share more about the specific social-platform integration APIs and OAuth flows that require auditing?\nWhy CLARIS is asking this: Focuses the technical conversation on the exact integration surfaces and token management mechanisms noted in the intake.\n\nQ3: What additional priority areas fall under the other items you are looking to address?\nWhy CLARIS is asking this: Explores the open-ended scope indicated in the booking form without making assumptions about missing services.\n\nQ4: You mentioned there are a few other things you'd like to cover - what else should we make sure to address?\nWhy CLARIS is asking this: Keeps the explicitly open-ended booking scope visible without guessing what the additional workstreams are.",
-    "call_strategy": "• Direction: Start the call by acknowledging the prospect's focus on customer trust-assurance and API security auditing for social-platform integrations. Prompt them to elaborate on the specific compliance milestones or customer inquiries prompting this review, and clarify what additional areas are covered under their open-ended scope.\n• Suggested Next Step: Summarize discovery findings and outline tailored next steps.",
+    "what_to_verify": "[ ] The exact nature of the unspecified areas included in the booking request remains unknown.",
+    "discovery_questions": "Q1: What specific customer security review or trust-assurance questionnaire formats are driving your current timeline?\nWhy CLARIS is asking this: Uncovers the specific reporting or documentation burden the prospect faces without assuming a standard enterprise vendor assessment template.\n\nQ2: How are OAuth authorization tokens and credential handoffs managed across your social-platform integrations today?\nWhy CLARIS is asking this: Pinpoints the exact technical mechanism mentioned in the prospect's notes regarding social-platform APIs.\n\nQ3: You mentioned there are a few other things you'd like to cover - what else should we make sure to address?\nWhy CLARIS is asking this: Keeps the explicitly open-ended booking scope visible without guessing what the additional workstreams are.",
+    "call_strategy": "• Direction: Start by acknowledging the stated focus on customer security reviews and OAuth API flows, then explore what 'among other things' encompasses before discussing potential advisory paths.\n• Suggested Next Step: Summarize discovery findings and outline tailored next steps.",
     "sources_evidence": "Governed Evidence"
   },
   "execution_metrics": {
-    "duration_ms": 37245,
+    "duration_ms": 47809,
     "overall_evidence_coverage_pct": null,
     "decision_dimension_coverage_pct": 23,
     "assessment_status": "PROVISIONAL",
     "research_mode": "governed_stage04_acquisition"
   },
-  "executed_at": "2026-09-10T16:26:03.340Z"
+  "executed_at": "2026-09-10T16:28:14.790Z"
 }
