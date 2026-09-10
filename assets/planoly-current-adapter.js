@@ -87,6 +87,7 @@
     const email = brief.subject?.person_email || '';
     return {
       brief_id: currentCase,
+      preparation_status: brief.preparation_status || null,
       generated_at: brief.generated_at || result.executed_at,
       metadata: { benchmark_label: 'CURRENT CLARIS · LIVE ADAPTIVE-LIGHT BENCHMARK' },
       consultant: {
@@ -169,7 +170,7 @@
     setText('personName', data.prospect.name); setText('contactEmailText', data.prospect.email); setText('companyNarrativeText', data.prospect.company_description); setText('bookingContextText', data.booking_context_text);
     setText('meetingDateMicro', data.meeting.display_date); setText('meetingTimeFigure', data.meeting.display_time); setText('meetingMetaText', `${data.meeting.timezone_abbr} · ${data.meeting.time_relative}`);
     setText('leadFitValueDisplay', 'Insufficient Evidence Posture'); setText('workflowBadgeText', data.opportunity.decision); setText('workflowStatusText', data.opportunity.assessment_status);
-    setText('decisionReadinessSub', `Preparation: ${brief.preparation_status === 'PREP_READY' ? 'READY' : brief.preparation_status === 'PREP_LIMITED' ? 'LIMITED' : 'READY WITH OPEN ITEMS'} · Current generic engine`); setText('serviceFitTitle', data.engagement_fit.potential_service_fit); setText('serviceFitSubtext', data.engagement_fit.need_summary_text); setText('whatMattersEditorial', data.opportunity.strategic_take);
+    setText('decisionReadinessSub', `Preparation: ${data.preparation_status === 'PREP_READY' ? 'READY' : data.preparation_status === 'PREP_LIMITED' ? 'LIMITED' : 'READY WITH OPEN ITEMS'} · Current generic engine`); setText('serviceFitTitle', data.engagement_fit.potential_service_fit); setText('serviceFitSubtext', data.engagement_fit.need_summary_text); setText('whatMattersEditorial', data.opportunity.strategic_take);
     setText('contextFitTitle', data.engagement_fit.potential_service_fit); setText('contextWhyFitText', data.engagement_fit.service_fit_hypothesis); setText('contextNeedStatusText', data.engagement_fit.need_status_display);
     setText('postureCloudSecurityText', 'Primary cloud hosting provider not confirmed in reviewed evidence'); setText('postureComplianceText', 'No public badges advertised (Absence != gap)'); setText('postureExternalAssuranceText', 'Not established from reviewed public evidence');
     setText('callDirectionText', data.copilot.call_strategy.direction); setText('strategyNextStepText', data.copilot.call_strategy.suggested_next_step);
@@ -199,10 +200,15 @@
       if (metric) metric.style.display = 'none';
     });
     const metrics = document.querySelector('.evidence-metrics-summary-row');
-    if (metrics) metrics.style.display = 'none';
-    setText('provenanceRunId', result.identity?.opportunity_id || result.prospect_id || currentCase);
+    if (metrics) metrics.remove();
+    setText('provenanceRunId', data.brief_id || currentCase);
     setText('provenanceSummaryText', data.evidence.provenance_summary);
     setText('provenanceConsultantFirm', data.consultant.firm_name);
+    if (select) {
+      [...select.options].forEach((option) => {
+        if (option.value !== currentCase) option.remove();
+      });
+    }
 
     const questions = document.getElementById('discoveryQuestionsList');
     if (questions) {
