@@ -42,7 +42,7 @@
       : 'Not provided';
     const companyContext = intelligence.company_context?.[0]?.text || 'Company context was not generated in the current live artifact.';
     const consultantRelevance = /^(?:Provides|Ensure)\b/i.test(String(intelligence.consultant_relevance || ''))
-      ? 'Use the call to clarify the requested security and assurance boundaries, what remains unconfirmed, and which outcome would make a follow-up useful.'
+      ? `The prospect has explicitly raised the security and assurance work named in the booking, which overlaps with ${(consultant.firm_name || 'the advisory practice')}'s relevant capabilities. The engagement shape remains unconfirmed until the technical boundary and intended assurance outcome are clarified.`
       : (intelligence.consultant_relevance || 'Use the call to clarify what remains unconfirmed and which outcome would make a follow-up useful.');
     const seenSources = new Set();
     const sourceTier = (source) => {
@@ -185,7 +185,7 @@
     setText('leadFitValueDisplay', 'Insufficient Evidence Posture'); setText('workflowBadgeText', data.opportunity.decision); setText('workflowStatusText', data.opportunity.assessment_status);
     setText('decisionReadinessSub', `Preparation: ${data.preparation_status === 'PREP_READY' ? 'READY' : data.preparation_status === 'PREP_LIMITED' ? 'LIMITED' : 'READY WITH OPEN ITEMS'} · Current generic engine`); setText('serviceFitTitle', data.engagement_fit.potential_service_fit); setText('serviceFitSubtext', data.engagement_fit.need_summary_text); setText('whatMattersEditorial', data.opportunity.strategic_take);
     setText('contextFitTitle', data.engagement_fit.potential_service_fit); setText('contextWhyFitText', data.engagement_fit.service_fit_hypothesis); setText('contextNeedStatusText', data.engagement_fit.need_status_display);
-    setText('postureCloudSecurityText', 'Primary cloud hosting provider not confirmed in reviewed evidence'); setText('postureComplianceText', 'No public badges advertised (Absence != gap)'); setText('postureExternalAssuranceText', 'Not established from reviewed public evidence');
+    setText('postureCloudSecurityText', 'Primary cloud hosting provider not confirmed in reviewed evidence'); setText('postureComplianceText', 'No relevant public certification or external-assurance evidence was confirmed in the reviewed sources.'); setText('postureExternalAssuranceText', 'Not established from reviewed public evidence');
     setText('callDirectionText', data.copilot.call_strategy.direction); setText('strategyNextStepText', data.copilot.call_strategy.suggested_next_step);
 
     const emailLink = document.getElementById('contactEmailLink');
