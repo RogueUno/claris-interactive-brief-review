@@ -41,14 +41,15 @@
       ? new Intl.DateTimeFormat('en-US', { hour: 'numeric', minute: '2-digit', timeZone: 'UTC' }).format(meetingDate)
       : 'Not provided';
     const companyContext = intelligence.company_context?.[0]?.text || 'Company context was not generated in the current live artifact.';
-    const consultantRelevance = /^(?:Provides|Ensure)\b/i.test(String(intelligence.consultant_relevance || ''))
+    const rawConsultantRelevance = String(intelligence.consultant_relevance || '');
+    const consultantRelevance = /^(?:Provides|Ensure|Pre-call research synthesis|Synthesizes inbound booking signals)\b/i.test(rawConsultantRelevance)
       ? `The prospect has explicitly raised the security and assurance work named in the booking, which overlaps with ${(consultant.firm_name || 'the advisory practice')}'s relevant capabilities. The engagement shape remains unconfirmed until the technical boundary and intended assurance outcome are clarified.`
-      : (intelligence.consultant_relevance || 'Use the call to clarify what remains unconfirmed and which outcome would make a follow-up useful.');
+      : (rawConsultantRelevance || 'Use the call to clarify what remains unconfirmed and which outcome would make a follow-up useful.');
     const seenSources = new Set();
     const sourceTier = (source) => {
       if (source.source_type === 'FIRST_PARTY_PUBLIC') return 1;
       const value = `${source.source_title || ''} ${source.source_url || ''}`.toLowerCase();
-      return /trustpilot|linkedin|crunchbase|appstore|play\.google|directory|review|social profile/.test(value) ? 3 : 2;
+      return /trustpilot|linkedin|crunchbase|appstore|play\.google|mcpservers|directory|review|social profile/.test(value) ? 3 : 2;
     };
     const sources = rankedSources.filter((source) => {
       const key = `${String(source.source_url || '').toLowerCase().replace(/\/$/, '')}|${String(source.source_title || '').toLowerCase().replace(/\s+/g, ' ').trim()}`;
@@ -68,13 +69,13 @@
     const claims = (intelligence.basis || []).filter((item) => item?.text).map((item, index) => {
       const ref = (item.source_refs || []).find((candidate) => sourceIds.has(candidate));
       const source = rankedSources.find((candidate) => candidate.evidence_id === ref);
-      const origin = item.source_refs?.some((candidate) => /^(meeting_context|prospect_answer):/i.test(candidate))
-        ? 'Prospect provided'
-        : item.posture === 'HYPOTHESIS' ? 'Hypothesis'
-          : item.posture === 'UNKNOWN' ? 'Unknown'
-            : item.posture === 'ACTION' ? 'Action'
-              : item.posture === 'INTERPRETATION' ? 'CLARIS interpretation'
-                : source?.source_type === 'FIRST_PARTY_PUBLIC' ? 'Public first-party' : 'Public third-party';
+      const hasProspectBasis = item.source_refs?.some((candidate) => /^(meeting_context|prospect_answer):/i.test(candidate));
+      const hasPublicBasis = item.source_refs?.some((candidate) => rankedSources.find((entry) => entry.evidence_id === candidate)?.source_type === 'FIRST_PARTY_PUBLIC' || rankedSources.find((entry) => entry.evidence_id === candidate)?.source_type === 'THIRD_PARTY_PUBLIC');
+      const origin = item.posture === 'ACTION' ? 'CLARIS guidance'
+        : item.posture === 'UNKNOWN' ? (hasProspectBasis ? 'raised by prospect wording' : 'not established')
+          : item.posture === 'HYPOTHESIS' ? (hasProspectBasis && hasPublicBasis ? 'based on public + prospect context' : hasProspectBasis ? 'based on prospect response' : hasPublicBasis ? 'based on public evidence' : 'based on unresolved context')
+            : item.posture === 'INTERPRETATION' ? (hasProspectBasis && hasPublicBasis ? 'based on public + prospect context' : hasProspectBasis ? 'based on prospect response' : hasPublicBasis ? 'based on public evidence' : 'based on available evidence')
+              : hasProspectBasis ? 'Prospect provided' : source?.source_type === 'FIRST_PARTY_PUBLIC' ? 'Public first-party' : 'Public third-party';
       return {
         evidence_id: `current_planoly_basis_${index + 1}`,
         claim: item.text,
@@ -168,11 +169,12 @@
   };
 
   const currentDataPromise = readArtifact().then(buildCase).catch((error) => {
-    window.addEventListener('DOMContentLoaded', () => { document.body.dataset.planolyAdapterError = error.message; });
+    if (document.body) document.body.dataset.planolyAdapterError = error.message;
+    else window.addEventListener('DOMContentLoaded', () => { document.body.dataset.planolyAdapterError = error.message; });
     return null;
   });
 
-  window.setTimeout(async () => {
+  const applyCurrentCase = async () => {
     const data = await currentDataPromise;
     if (!data) return;
     const setText = (id, value) => { const node = document.getElementById(id); if (node) node.textContent = value || '—'; };
@@ -230,6 +232,8 @@
     }
     const tasks = document.getElementById('verificationTasksList');
     if (tasks) tasks.innerHTML = data.copilot.verification_checklist.map((item) => `<div class="verification-task-item" data-task-id="${escapeHtml(item.id)}" tabindex="0" role="checkbox" aria-checked="false"><div class="task-checkbox-box"><span aria-hidden="true">✓</span></div><span class="task-label-text">${escapeHtml(item.label)}</span></div>`).join('');
+    const gapSequence = document.getElementById('discoveryGapsSequence');
+    if (gapSequence) gapSequence.innerHTML = data.copilot.verification_checklist.map((item, index) => `<div class="discovery-gap-editorial-item"><span class="gap-num">${String(index + 1).padStart(2, '0')}</span><span class="gap-label-text">${escapeHtml(item.label)}</span><span class="gap-desc-text">Open item for live discovery.</span><span class="gap-status-badge unknown">UNKNOWN</span></div>`).join('');
     const sourceList = document.getElementById('sourcesListRow');
     if (sourceList) sourceList.innerHTML = data.evidence.sources.map((source) => { const url = safeUrl(source.url); const body = `<span class="source-badge ${source.classification.toLowerCase()}">${escapeHtml(source.presentation_label)}</span><span>${escapeHtml(source.title)}</span>`; return url ? `<a class="source-link-chip" href="${url}" target="_blank" rel="noopener noreferrer">${body}</a>` : `<span class="source-link-chip">${body}</span>`; }).join('');
     const claims = document.getElementById('curatedClaimsList');
@@ -237,5 +241,12 @@
       claims.innerHTML = data.evidence.curated_claims.map((claim) => { const url = safeUrl(claim.source_url); return `<div class="curated-claim-card"><div class="claim-header-row"><span class="claim-title-text">${escapeHtml(claim.claim)}</span><span class="epistemic-badge">${escapeHtml(claim.epistemic_status)} · ${escapeHtml(claim.origin)}</span></div><button class="claim-expand-trigger" aria-expanded="false"><span>Why does CLARIS think this?</span><span aria-hidden="true">⌄</span></button><div class="claim-drawer-content"><div class="claim-drawer-field"><span class="claim-drawer-label">Commercial Relevance (Why it Matters)</span><p class="claim-drawer-text">${escapeHtml(claim.why_it_matters)}</p></div><div class="claim-drawer-field"><span class="claim-drawer-label">Discovery Verification Angle</span><p class="claim-drawer-text">${escapeHtml(claim.what_to_verify)}</p></div><div class="claim-drawer-field"><span class="claim-drawer-label">Source Citation</span><p class="claim-drawer-text">${url ? `<a href="${url}" target="_blank" rel="noopener noreferrer">${escapeHtml(claim.source_title)}</a>` : escapeHtml(claim.source_title)}</p></div>${claim.supporting_sentence ? `<div class="claim-drawer-field"><span class="claim-drawer-label">Supporting Excerpt</span><p class="claim-drawer-text">"${escapeHtml(claim.supporting_sentence)}"</p></div>` : ''}</div></div>`; }).join('');
       claims.querySelectorAll('.claim-expand-trigger').forEach((button) => button.addEventListener('click', () => { const expanded = button.closest('.curated-claim-card').classList.toggle('expanded'); button.setAttribute('aria-expanded', String(expanded)); }));
     }
-  }, 1000);
+  };
+  let applyAttempts = 0;
+  const applyRepeatedly = () => {
+    applyAttempts += 1;
+    applyCurrentCase();
+    if (applyAttempts < 40) window.setTimeout(applyRepeatedly, 500);
+  };
+  window.setTimeout(applyRepeatedly, 100);
 })();
