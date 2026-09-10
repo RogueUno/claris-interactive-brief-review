@@ -82,6 +82,7 @@
         company_description: companyContext,
         verified_website_url: brief.subject?.domain || null
       },
+      booking_context_text: meeting.source_text || '',
       meeting: {
         raw_iso_time: meeting.meeting_time || 'Not provided', scheduled_time_utc: meeting.meeting_time || 'Not provided',
         display_date: 'Tuesday, September 15, 2026', derived_weekday: 'Tuesday', display_time: '16:00',
@@ -139,7 +140,7 @@
     const setText = (id, value) => { const node = document.getElementById(id); if (node) node.textContent = value || '—'; };
     const pill = document.querySelector('.review-mode-indicator-pill'); if (pill) pill.textContent = 'Current generic engine · live research snapshot · acceptance not qualified';
     const select = document.getElementById('caseSelect'); if (select) select.value = currentCase;
-    setText('personName', data.prospect.name); setText('contactEmailText', data.prospect.email); setText('companyNarrativeText', data.prospect.company_description);
+    setText('personName', data.prospect.name); setText('contactEmailText', data.prospect.email); setText('companyNarrativeText', data.prospect.company_description); setText('bookingContextText', data.booking_context_text);
     setText('meetingDateMicro', data.meeting.display_date); setText('meetingTimeFigure', data.meeting.display_time); setText('meetingMetaText', `${data.meeting.timezone_abbr} · ${data.meeting.time_relative}`);
     setText('leadFitValueDisplay', 'Insufficient Evidence Posture'); setText('workflowBadgeText', data.opportunity.decision); setText('workflowStatusText', data.opportunity.assessment_status);
     setText('decisionReadinessSub', 'Preparation: READY WITH OPEN ITEMS · Current generic engine'); setText('serviceFitTitle', data.engagement_fit.potential_service_fit); setText('serviceFitSubtext', data.engagement_fit.need_summary_text); setText('whatMattersEditorial', data.opportunity.strategic_take);
