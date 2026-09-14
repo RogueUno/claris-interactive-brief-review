@@ -1,5 +1,5 @@
 import { loadState, saveState, resetState, greeting } from './state.js';
-import { addShell, setChapter, questionScene, showInsight, choice, primary, el, wireGlass, formatMoney } from './ui.js';
+import { addShell, setChapter, questionScene, revealWords, showInsight, choice, primary, iconButton, expandableInput, el, wireGlass, formatMoney } from './ui.js';
 
 const root = document.getElementById('calibration-root');
 let state = loadState();
@@ -13,6 +13,7 @@ const beats = [
   () => 'I’ve already reviewed what I can.',
   () => 'So I’ll only ask about what actually matters.'
 ];
+const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 function render() {
   const stage = addShell(root);
@@ -25,132 +26,194 @@ function render() {
   renderReview(stage);
 }
 
-function renderBoot(stage) {
+async function renderBoot(stage) {
   setChapter('', false);
   const scene = el('div', 'scene boot-scene');
   const copy = el('div', 'boot-copy');
+  const line = el('h1', 'hero-line');
   const index = Math.min(state.bootIndex, beats.length - 1);
-  copy.appendChild(el('h1', 'hero-line', beats[index]()));
+  const duration = revealWords(line, beats[index](), index === 0 ? 155 : 145);
+  copy.appendChild(line);
   scene.appendChild(copy);
   stage.appendChild(scene);
-  const advance = () => {
-    if (state.bootIndex < beats.length - 1) state.bootIndex += 1;
-    else { state.phase = 'calibration'; state.currentStep = 0; }
-    saveState(state); render();
-  };
-  if (index === beats.length - 1) scene.appendChild(primary('Begin calibration →', advance));
-  else setTimeout(() => state.phase === 'boot' && state.bootIndex === index && advance(), index === 0 ? 1400 : 1650);
+
+  if (index === beats.length - 1) {
+    await wait(duration + 380);
+    if (state.phase !== 'boot' || state.bootIndex !== index) return;
+    const start = primary('Begin calibration', () => startCalibration(scene));
+    start.classList.add('boot-action');
+    scene.appendChild(start);
+    requestAnimationFrame(() => start.classList.add('is-visible'));
+    return;
+  }
+
+  await wait(duration + 620);
+  if (state.phase !== 'boot' || state.bootIndex !== index) return;
+  scene.classList.add('is-exiting');
+  await wait(560);
+  if (state.phase !== 'boot' || state.bootIndex !== index) return;
+  state.bootIndex += 1;
+  saveState(state);
+  render();
 }
 
-function next(message) {
-  if (message) showInsight(root, message);
-  state.currentStep = Math.min(state.currentStep + 1, flow.length - 1);
+function startCalibration(scene) {
+  state.phase = 'calibration';
+  state.currentStep = 0;
   saveState(state);
-  setTimeout(render, message ? 520 : 120);
+  scene.classList.add('is-exiting');
+  setChapter('Practice', true);
+  setTimeout(render, 720);
 }
+
+function transitionTo(nextIndex, message = '') {
+  if (message) showInsight(root, message);
+  document.querySelector('#stage .scene')?.classList.add('is-exiting');
+  state.currentStep = Math.max(0, Math.min(nextIndex, flow.length - 1));
+  saveState(state);
+  setChapter(chapters[flow[state.currentStep]], true);
+  setTimeout(render, 720);
+}
+
+function next(message) { transitionTo(state.currentStep + 1, message); }
 
 function back(scene) {
   if (state.currentStep === 0) return;
-  const button = el('button', 'back-action', '← Back');
-  button.addEventListener('click', () => { state.currentStep -= 1; saveState(state); render(); });
-  scene.appendChild(button);
-}
-
-function addCustom(zone, placeholder, commit) {
-  if (zone.querySelector('.custom-row')) return;
-  const row = wireGlass(el('div', 'custom-row glass'));
-  const input = el('input');
-  input.placeholder = placeholder;
-  const button = el('button', 'icon-button', '→');
-  const submit = () => { const value = input.value.trim(); if (value) commit(value); };
-  button.addEventListener('click', submit);
-  input.addEventListener('keydown', e => e.key === 'Enter' && submit());
-  row.append(input, button); zone.appendChild(row); input.focus();
+  scene.appendChild(iconButton('arrow-left', 'Back', () => transitionTo(state.currentStep - 1), 'back-action'));
 }
 
 function renderServices(stage) {
-  const scene = questionScene(stage, `I found ${state.services.length} services in ${state.firm}’s public material.`, 'Which are you actively taking on right now?', 'I’ll keep your operating profile separate from what your website happens to advertise.');
-  const zone = el('div', 'answer-zone');
-  const grid = el('div', 'choice-grid');
-  state.services.forEach(service => grid.appendChild(choice(service.name, service.selected, button => {
-    service.selected = !service.selected;
-    button.setAttribute('aria-pressed', String(service.selected));
-    saveState(state);
-  })));
-  grid.appendChild(choice('+  Add another', false, () => addCustom(zone, 'Service name', name => {
+  const scene = questionScene(stage,
+    `I found ${state.services.length} services in ${state.firm}’s public material.`,
+    'Which are you actively taking on right now?',
+    'Your operating profile can differ from what the website happens to advertise.'
+  );
+  const zone = el('div', 'answer-zone answer-zone--stack');
+  const list = el('div', 'choice-list choice-list--stack');
+  state.services.forEach((service) => {
+    list.appendChild(choice(service.name, service.selected, (button) => {
+      service.selected = !service.selected;
+      button.setAttribute('aria-pressed', String(service.selected));
+      saveState(state);
+    }));
+  });
+  const tools = el('div', 'answer-tools');
+  tools.appendChild(expandableInput('Add a service', (name) => {
     const slug = name.toUpperCase().replace(/[^A-Z0-9]+/g, '_').replace(/^_|_$/g, '');
-    state.services.push({ service_id:`SVC_${slug}`, name, selected:true, state:'ACTIVE', preference:'CORE' });
-    saveState(state); render();
-  })));
-  zone.appendChild(grid);
-  zone.appendChild(primary('Continue →', () => {
-    const active = state.services.filter(item => item.selected);
-    if (!active.length) return showInsight(root, 'I need at least one active service before I can calibrate service fit.');
-    next(active.length === 1 ? 'That’s enough—I don’t need a separate service-priority question.' : 'Service model established.');
+    state.services.push({ service_id: `SVC_${slug}`, name, selected: true, state: 'ACTIVE', preference: 'CORE' });
+    saveState(state);
+    render();
+  }));
+  zone.append(list, tools);
+  zone.appendChild(primary('Continue', () => {
+    const active = state.services.filter((item) => item.selected);
+    if (!active.length) return showInsight(root, 'Select at least one active service so I can calibrate service fit.');
+    next(active.length === 1 ? 'That answer is specific enough. I can skip a separate priority question.' : 'I’ve got the active service set.');
   }));
   scene.appendChild(zone);
 }
 
 function renderIcp(stage) {
-  const scene = questionScene(stage, 'Your public positioning points mostly toward B2B technology companies.', 'How should I understand your actual target market today?', 'Choose everything that belongs in your core profile. You can add your own.');
-  const candidates = ['B2B SaaS','Software','FinTech','HealthTech','AI / Cloud infrastructure'];
+  const scene = questionScene(stage,
+    'Your public positioning points mostly toward B2B technology companies.',
+    'How should I understand your actual target market today?',
+    'Choose the company types that belong in the core profile.'
+  );
+  const candidates = ['B2B SaaS', 'Software', 'FinTech', 'HealthTech', 'AI / Cloud infrastructure'];
   const selected = new Set([...(state.companyTypes || []), ...(state.customCompanyTypes || [])]);
-  const zone = el('div', 'answer-zone');
-  const grid = el('div', 'choice-grid');
-  candidates.forEach(value => grid.appendChild(choice(value, selected.has(value), button => {
-    selected.has(value) ? selected.delete(value) : selected.add(value);
-    state.companyTypes = candidates.filter(item => selected.has(item));
-    state.customCompanyTypes = [...selected].filter(item => !candidates.includes(item));
-    button.setAttribute('aria-pressed', String(selected.has(value))); saveState(state);
-  })));
-  (state.customCompanyTypes || []).forEach(value => grid.appendChild(choice(value, true, () => {
-    state.customCompanyTypes = state.customCompanyTypes.filter(item => item !== value); saveState(state); render();
-  })));
-  grid.appendChild(choice('+  Add another', false, () => addCustom(zone, 'Company type or market', value => {
-    state.customCompanyTypes = [...new Set([...(state.customCompanyTypes || []), value])]; saveState(state); render();
-  })));
-  zone.appendChild(grid);
-  zone.appendChild(primary('Continue →', () => {
-    if (!(state.companyTypes.length + state.customCompanyTypes.length)) return showInsight(root, 'I need at least one company type to define the operating ICP.');
-    next('Best-fit opportunity model established.');
+  const zone = el('div', 'answer-zone answer-zone--grid');
+  const grid = el('div', 'choice-list choice-list--grid');
+  candidates.forEach((value) => {
+    grid.appendChild(choice(value, selected.has(value), (button) => {
+      selected.has(value) ? selected.delete(value) : selected.add(value);
+      state.companyTypes = candidates.filter((item) => selected.has(item));
+      state.customCompanyTypes = [...selected].filter((item) => !candidates.includes(item));
+      button.setAttribute('aria-pressed', String(selected.has(value)));
+      saveState(state);
+    }));
+  });
+  (state.customCompanyTypes || []).forEach((value) => {
+    grid.appendChild(choice(value, true, () => {
+      state.customCompanyTypes = state.customCompanyTypes.filter((item) => item !== value);
+      saveState(state);
+      render();
+    }));
+  });
+  const tools = el('div', 'answer-tools');
+  tools.appendChild(expandableInput('Add a company type', (value) => {
+    state.customCompanyTypes = [...new Set([...(state.customCompanyTypes || []), value])];
+    saveState(state);
+    render();
   }));
-  scene.appendChild(zone); back(scene);
+  zone.append(grid, tools);
+  zone.appendChild(primary('Continue', () => {
+    if (!(state.companyTypes.length + state.customCompanyTypes.length)) return showInsight(root, 'Choose at least one company type for the operating ICP.');
+    next('That gives me a cleaner best-fit opportunity model.');
+  }));
+  scene.appendChild(zone);
+  back(scene);
 }
 
 function renderEconomics(stage) {
-  const scene = questionScene(stage, 'One commercial rule.', 'What is the smallest engagement that is commercially worth taking on?', 'I’ll use this as your rule. I still won’t infer a prospect’s budget without direct evidence.');
-  const zone = el('div', 'answer-zone');
+  const scene = questionScene(stage,
+    'One commercial guardrail.',
+    'What is the smallest engagement that is commercially worth taking on?',
+    'I’ll use your floor without inferring a prospect’s budget from weak signals.'
+  );
+  const zone = el('div', 'answer-zone answer-zone--stack');
   const control = wireGlass(el('div', 'money-control glass'));
-  control.appendChild(el('span', 'currency', state.currency));
-  const input = el('input'); input.type='number'; input.value=state.minimumEngagement || ''; input.placeholder='7500';
-  input.addEventListener('input', () => { state.minimumEngagement = Number(input.value || 0); saveState(state); });
-  control.appendChild(input); control.appendChild(el('span', 'currency', 'minimum')); zone.appendChild(control);
-  zone.appendChild(primary('Review calibration →', () => {
+  control.appendChild(el('span', 'currency-label', state.currency));
+  const input = el('input');
+  input.type = 'number';
+  input.inputMode = 'numeric';
+  input.value = state.minimumEngagement || '';
+  input.placeholder = '7500';
+  input.setAttribute('aria-label', 'Minimum viable engagement');
+  input.addEventListener('input', () => {
+    state.minimumEngagement = Number(input.value || 0);
+    saveState(state);
+  });
+  control.appendChild(input);
+  control.appendChild(el('span', 'money-caption', 'minimum'));
+  zone.appendChild(control);
+  zone.appendChild(primary('Review calibration', () => {
     if (!Number(state.minimumEngagement)) return showInsight(root, 'Add the commercial floor you want CLARIS to use.');
-    next(`Got it. I’ll treat ${formatMoney(state.minimumEngagement, state.currency)} as the commercial floor.`);
+    next(`I’ll treat ${formatMoney(state.minimumEngagement, state.currency)} as the commercial floor.`);
   }));
-  scene.appendChild(zone); back(scene);
+  scene.appendChild(zone);
+  back(scene);
 }
 
 function renderReview(stage) {
-  const scene = el('div', 'scene');
-  scene.appendChild(el('h1', 'review-title', `Calibration complete, ${state.firstName}.`));
-  scene.appendChild(el('p', 'review-sub', `Here’s the operating model I’ll use when I prepare opportunities for ${state.firm}.`));
+  const scene = el('div', 'scene review-scene');
+  const head = el('div', 'review-head');
+  head.appendChild(el('p', 'review-eyebrow', 'Operating profile'));
+  head.appendChild(el('h1', 'review-title', `Calibration complete, ${state.firstName}.`));
+  head.appendChild(el('p', 'review-sub', `Here’s the model I’ll use when I prepare opportunities for ${state.firm}.`));
+  scene.appendChild(head);
   const grid = el('div', 'review-grid');
-  const active = state.services.filter(item => item.selected);
-  grid.append(reviewCard('Practice', active.map(item => item.name).join(' · '), `${active.length} confirmed active services`));
-  grid.append(reviewCard('Best-fit opportunity', [...state.companyTypes, ...state.customCompanyTypes].join(' · '), 'Consultant-confirmed operating ICP'));
-  grid.append(reviewCard('Commercial guardrail', formatMoney(state.minimumEngagement, state.currency), 'Budget remains direct-evidence only'));
+  const active = state.services.filter((item) => item.selected);
+  grid.append(
+    reviewCard('Practice', active.map((item) => item.name).join(' · '), `${active.length} confirmed active services`),
+    reviewCard('Best-fit opportunity', [...state.companyTypes, ...state.customCompanyTypes].join(' · '), 'Consultant-confirmed operating ICP'),
+    reviewCard('Commercial guardrail', formatMoney(state.minimumEngagement, state.currency), 'Budget remains direct-evidence only')
+  );
   scene.appendChild(grid);
-  const lock = primary(state.lockedAt ? 'Operating profile locked ✓' : 'Lock operating profile', () => {
-    state.lockedAt = new Date().toISOString(); saveState(state); showInsight(root, 'Done. I’ll use this profile when I prepare your opportunities.'); setTimeout(render, 450);
+  const lock = primary(state.lockedAt ? 'Operating profile locked' : 'Lock operating profile', () => {
+    state.lockedAt = new Date().toISOString();
+    saveState(state);
+    showInsight(root, 'Done. I’ll use this profile when I prepare your opportunities.');
+    setTimeout(render, 460);
   });
-  lock.disabled = Boolean(state.lockedAt); scene.appendChild(lock); back(scene); stage.appendChild(scene);
+  lock.disabled = Boolean(state.lockedAt);
+  scene.appendChild(lock);
+  back(scene);
+  stage.appendChild(scene);
 }
 
 function reviewCard(title, value, meta) {
-  const card = wireGlass(el('article', 'review-card glass'));
-  card.append(el('h3','',title), el('p','review-value',value || 'Still open'), el('p','review-meta',meta));
+  const card = el('article', 'review-card');
+  card.append(el('h3', '', title), el('p', 'review-value', value || 'Still open'), el('p', 'review-meta', meta));
   return card;
 }
 
