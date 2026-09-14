@@ -1,4 +1,4 @@
-export const STORAGE_KEY = 'claris_calibration_v2_public_preview';
+export const STORAGE_KEY = 'claris_calibration_v2_2_public_preview';
 
 export const fixture = {
   consultantId: 'consultant_prototype_sarah',
