@@ -56,7 +56,16 @@ export function addShell(root) {
   }
 
   const topbar = el('header', 'calibration-topbar');
-  topbar.appendChild(el('div', 'wordmark', 'CLARIS'));
+  const logo = el('img', 'wordmark');
+  logo.src = './claris-logo.svg';
+  logo.alt = 'CLARIS';
+  logo.width = 72;
+  logo.height = 23;
+  logo.style.width = '72px';
+  logo.style.height = 'auto';
+  logo.style.transform = 'translate(-6px, -7px)';
+  logo.style.display = 'block';
+  topbar.appendChild(logo);
   const chapter = el('div', 'chapter-identity');
   chapter.id = 'chapterIdentity';
   chapter.appendChild(el('span', 'chapter-title', ''));
