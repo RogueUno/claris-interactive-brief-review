@@ -14,6 +14,7 @@ const beats = [
   () => 'So I’ll only ask about what actually matters.'
 ];
 const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+let transitioning = false;
 
 function render() {
   const stage = addShell(root);
@@ -66,20 +67,40 @@ function startCalibration(scene) {
   setTimeout(render, 720);
 }
 
-function transitionTo(nextIndex, message = '') {
-  if (message) showInsight(root, message);
+async function transitionTo(nextIndex, message = '') {
+  if (transitioning) return;
+  transitioning = true;
+
   document.querySelector('#stage .scene')?.classList.add('is-exiting');
   state.currentStep = Math.max(0, Math.min(nextIndex, flow.length - 1));
   saveState(state);
   setChapter(chapters[flow[state.currentStep]], true);
-  setTimeout(render, 720);
+
+  await wait(610);
+
+  if (message) {
+    const stage = addShell(root);
+    const transition = el('div', 'scene transition-scene');
+    transition.appendChild(el('p', 'transition-thought', message));
+    stage.appendChild(transition);
+    await wait(1080);
+    transition.classList.add('is-exiting');
+    await wait(560);
+  }
+
+  transitioning = false;
+  render();
 }
 
 function next(message) { transitionTo(state.currentStep + 1, message); }
 
-function back(scene) {
-  if (state.currentStep === 0) return;
-  scene.appendChild(iconButton('arrow-left', 'Back', () => transitionTo(state.currentStep - 1), 'back-action'));
+function appendActions(zone, label, onContinue) {
+  const row = el('div', 'answer-actions');
+  if (state.currentStep > 0) {
+    row.appendChild(iconButton('arrow-left', 'Back', () => transitionTo(state.currentStep - 1), 'back-action'));
+  }
+  row.appendChild(primary(label, onContinue));
+  zone.appendChild(row);
 }
 
 function renderServices(stage) {
@@ -105,11 +126,11 @@ function renderServices(stage) {
     render();
   }));
   zone.append(list, tools);
-  zone.appendChild(primary('Continue', () => {
+  appendActions(zone, 'Continue', () => {
     const active = state.services.filter((item) => item.selected);
     if (!active.length) return showInsight(root, 'Select at least one active service so I can calibrate service fit.');
     next(active.length === 1 ? 'That answer is specific enough. I can skip a separate priority question.' : 'I’ve got the active service set.');
-  }));
+  });
   scene.appendChild(zone);
 }
 
@@ -146,12 +167,11 @@ function renderIcp(stage) {
     render();
   }));
   zone.append(grid, tools);
-  zone.appendChild(primary('Continue', () => {
+  appendActions(zone, 'Continue', () => {
     if (!(state.companyTypes.length + state.customCompanyTypes.length)) return showInsight(root, 'Choose at least one company type for the operating ICP.');
     next('That gives me a cleaner best-fit opportunity model.');
-  }));
+  });
   scene.appendChild(zone);
-  back(scene);
 }
 
 function renderEconomics(stage) {
@@ -176,12 +196,11 @@ function renderEconomics(stage) {
   control.appendChild(input);
   control.appendChild(el('span', 'money-caption', 'minimum'));
   zone.appendChild(control);
-  zone.appendChild(primary('Review calibration', () => {
+  appendActions(zone, 'Review calibration', () => {
     if (!Number(state.minimumEngagement)) return showInsight(root, 'Add the commercial floor you want CLARIS to use.');
     next(`I’ll treat ${formatMoney(state.minimumEngagement, state.currency)} as the commercial floor.`);
-  }));
+  });
   scene.appendChild(zone);
-  back(scene);
 }
 
 function renderReview(stage) {
@@ -199,6 +218,9 @@ function renderReview(stage) {
     reviewCard('Commercial guardrail', formatMoney(state.minimumEngagement, state.currency), 'Budget remains direct-evidence only')
   );
   scene.appendChild(grid);
+
+  const actions = el('div', 'review-actions');
+  actions.appendChild(iconButton('arrow-left', 'Back', () => transitionTo(state.currentStep - 1), 'back-action'));
   const lock = primary(state.lockedAt ? 'Operating profile locked' : 'Lock operating profile', () => {
     state.lockedAt = new Date().toISOString();
     saveState(state);
@@ -206,8 +228,8 @@ function renderReview(stage) {
     setTimeout(render, 460);
   });
   lock.disabled = Boolean(state.lockedAt);
-  scene.appendChild(lock);
-  back(scene);
+  actions.appendChild(lock);
+  scene.appendChild(actions);
   stage.appendChild(scene);
 }
 
