@@ -117,7 +117,7 @@ function startCalibration(scene) {
   saveState(state);
   scene.classList.add('is-exiting');
   setChapter('Practice', true);
-  setTimeout(render, 720);
+  setTimeout(render, 900);
 }
 
 async function transitionTo(nextIndex, message = '') {
@@ -131,16 +131,16 @@ async function transitionTo(nextIndex, message = '') {
   const nextStep = flow()[state.currentStep] || 'review';
   setChapter(chapterFor(nextStep), true);
 
-  await wait(610);
+  await wait(780);
 
   if (message) {
     const stage = addShell(root);
     const transition = el('div', 'scene transition-scene');
     transition.appendChild(el('p', 'transition-thought', message));
     stage.appendChild(transition);
-    await wait(1080);
+    await wait(1500);
     transition.classList.add('is-exiting');
-    await wait(560);
+    await wait(700);
   }
 
   transitioning = false;
@@ -387,17 +387,29 @@ function renderEconomics(stage) {
   scene.appendChild(zone);
 }
 
-function practiceReviewValue() {
-  const current = currentServices();
-  return current.map((service) => `${service.name}${service.state === 'SELECTIVE' ? ' · selective' : ''}`).join(' · ');
+function serviceStateLabel(service) {
+  const labels = {
+    ACTIVE: 'Active',
+    SELECTIVE: 'Selective',
+    PAUSED: 'Paused',
+    NO_LONGER: 'No longer offered'
+  };
+  return labels[service.state] || service.state;
 }
 
-function practiceReviewMeta() {
+function pausedPolicyLabel(service) {
+  const value = state.pausedPolicies?.[service.service_id] || 'EXPLICIT_ONLY';
+  return value === 'HIDE'
+    ? 'Keep out of opportunity briefs'
+    : 'Only surface on explicit prospect request';
+}
+
+function practiceLeadValue() {
   const current = currentServices();
   const lead = current.find((service) => service.service_id === state.leadServiceId);
-  if (lead) return `Lead with ${lead.name} when multiple services genuinely fit`;
-  if (current.length === 1) return 'Single current service anchor';
-  return 'No default lead service — follow the opportunity';
+  if (lead) return lead.name;
+  if (current.length === 1) return `${current[0].name} · single service anchor`;
+  return 'No default — follow the opportunity';
 }
 
 function renderReview(stage) {
@@ -409,8 +421,18 @@ function renderReview(stage) {
   scene.appendChild(head);
 
   const grid = el('div', 'review-grid');
+  const serviceSummary = selectedServices()
+    .map((service) => `${service.name} · ${serviceStateLabel(service)}`)
+    .join(' · ');
+  const paused = pausedServices();
+  const pausedSummary = paused.length
+    ? paused.map((service) => `${service.name} · ${pausedPolicyLabel(service)}`).join(' · ')
+    : 'No paused-service exceptions';
+
   grid.append(
-    reviewCard('Practice', practiceReviewValue(), practiceReviewMeta()),
+    reviewCard('Current services', serviceSummary, 'Consultant-confirmed service states'),
+    reviewCard('Service hierarchy', practiceLeadValue(), 'Used only when more than one service genuinely fits'),
+    reviewCard('Paused service handling', pausedSummary, 'Paused services never count as normal fit signals'),
     reviewCard('Best-fit opportunity', [...state.companyTypes, ...state.customCompanyTypes].join(' · '), 'Consultant-confirmed operating ICP'),
     reviewCard('Commercial guardrail', formatMoney(state.minimumEngagement, state.currency), 'Budget remains direct-evidence only')
   );
