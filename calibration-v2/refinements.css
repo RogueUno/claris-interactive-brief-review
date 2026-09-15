@@ -85,15 +85,18 @@
 .review-actions .back-action {
   position: static;
   inset: auto;
-  flex: 0 0 40px;
-  width: 40px;
-  height: 40px;
+  flex: 0 0 45px;
+  width: 45px;
+  height: 45px;
+  min-width: 45px;
+  min-height: 45px;
   margin: 0;
 }
 
 /* Continue remains a single button—no button-inside-button treatment. */
 .primary-action {
-  min-height: 52px;
+  height: 45px;
+  min-height: 45px;
   padding: 0 18px;
   color: rgba(255,255,255,.96);
   transition: transform .52s var(--premium-ease), background .5s var(--premium-ease-soft), box-shadow .5s var(--premium-ease-soft);
