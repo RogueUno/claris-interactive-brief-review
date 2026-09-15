@@ -47,6 +47,24 @@ export function wireGlass(node) {
   return node;
 }
 
+function clarisWordmark() {
+  const logo = el('span', 'wordmark', 'CLARIS');
+  logo.setAttribute('role', 'img');
+  logo.setAttribute('aria-label', 'CLARIS');
+  logo.style.display = 'block';
+  logo.style.width = '72px';
+  logo.style.fontFamily = 'InterVariable, Inter, sans-serif';
+  logo.style.fontSize = '17px';
+  logo.style.fontWeight = '400';
+  logo.style.lineHeight = '1';
+  logo.style.letterSpacing = '0.29em';
+  logo.style.color = '#fff';
+  logo.style.whiteSpace = 'nowrap';
+  logo.style.transform = 'translate(-1px, -1px)';
+  logo.style.fontFeatureSettings = '"liga" 0, "calt" 0';
+  return logo;
+}
+
 export function addShell(root) {
   root.className = 'claris-shell';
   let stage = root.querySelector('#stage');
@@ -56,16 +74,7 @@ export function addShell(root) {
   }
 
   const topbar = el('header', 'calibration-topbar');
-  const logo = el('img', 'wordmark');
-  logo.src = './claris-logo.svg';
-  logo.alt = 'CLARIS';
-  logo.width = 72;
-  logo.height = 23;
-  logo.style.width = '72px';
-  logo.style.height = 'auto';
-  logo.style.transform = 'translate(-6px, -7px)';
-  logo.style.display = 'block';
-  topbar.appendChild(logo);
+  topbar.appendChild(clarisWordmark());
   const chapter = el('div', 'chapter-identity');
   chapter.id = 'chapterIdentity';
   chapter.appendChild(el('span', 'chapter-title', ''));
@@ -99,114 +108,127 @@ export function setChapter(label, animate = true) {
   }
 
   wrapper.className = 'chapter-identity is-leaving';
-  setTimeout(() => {
+  window.setTimeout(() => {
     title.textContent = label || '';
     wrapper.className = 'chapter-identity is-entering';
     requestAnimationFrame(() => requestAnimationFrame(() => {
       wrapper.className = 'chapter-identity is-settled';
     }));
-  }, 460);
+  }, 360);
 }
 
-export function questionScene(stage, context, title, helper = '') {
+export function revealWords(node, text, cadence = 145) {
+  node.textContent = '';
+  const words = text.split(' ');
+  words.forEach((word, index) => {
+    const span = el('span', 'reveal-word', `${word}${index === words.length - 1 ? '' : ' '}`);
+    span.style.animationDelay = `${index * cadence}ms`;
+    node.appendChild(span);
+  });
+  return Math.max(480, words.length * cadence + 340);
+}
+
+export function questionScene(stage, eyebrow, prompt, support = '') {
   const scene = el('div', 'scene question-scene');
-  const copy = el('div', 'question-copy');
-  if (context) copy.appendChild(el('p', 'question-context', context));
-  copy.appendChild(el('h1', 'question-title', title));
-  if (helper) copy.appendChild(el('p', 'question-helper', helper));
-  scene.appendChild(copy);
+  const frame = el('div', 'question-frame');
+  if (eyebrow) frame.appendChild(el('p', 'question-eyebrow', eyebrow));
+  frame.appendChild(el('h1', 'question-title', prompt));
+  if (support) frame.appendChild(el('p', 'question-support', support));
+  scene.appendChild(frame);
   stage.appendChild(scene);
   return scene;
 }
 
-export function revealWords(node, text, stagger = 145) {
-  const words = text.trim().split(/\s+/);
-  let delay = 0;
-  words.forEach((word, index) => {
-    const span = el('span', 'intro-word', word);
-    span.style.setProperty('--word-delay', `${delay}ms`);
-    node.appendChild(span);
-    if (index < words.length - 1) node.appendChild(document.createTextNode(' '));
-    delay += stagger;
-    if (/[,.!?—:]$/.test(word)) delay += 170;
-  });
-  return delay + 760;
-}
-
-export function showInsight(root, text) {
-  root.querySelector('.insight')?.remove();
-  const insight = el('div', 'insight', text);
-  root.appendChild(insight);
-  setTimeout(() => insight.remove(), 3000);
+export function showInsight(text, timeout = 1800) {
+  const host = document.getElementById('insightHost');
+  if (!host) return;
+  clear(host);
+  const insight = el('div', 'insight-toast glass', text);
+  host.appendChild(insight);
+  wireGlass(insight);
+  requestAnimationFrame(() => insight.classList.add('is-visible'));
+  window.setTimeout(() => insight.classList.remove('is-visible'), timeout);
 }
 
 export function choice(label, selected, onClick) {
-  const button = el('button', 'choice-row');
+  const button = el('button', `choice-pill glass${selected ? ' is-selected' : ''}`);
   button.type = 'button';
-  button.setAttribute('aria-pressed', String(Boolean(selected)));
-  const marker = el('span', 'choice-marker');
-  marker.appendChild(svgIcon('check'));
-  button.append(marker, el('span', 'choice-label', label));
-  button.addEventListener('click', () => onClick(button));
-  return button;
+  button.setAttribute('aria-pressed', String(selected));
+  button.appendChild(el('span', 'choice-label', label));
+  const indicator = el('span', 'choice-indicator');
+  indicator.appendChild(svgIcon('check'));
+  button.appendChild(indicator);
+  button.addEventListener('click', () => {
+    onClick(button);
+    button.classList.toggle('is-selected', button.getAttribute('aria-pressed') === 'true');
+  });
+  return wireGlass(button);
 }
 
 export function primary(label, onClick) {
-  const button = wireGlass(el('button', 'primary-action glass'));
+  const button = el('button', 'primary-action glass');
   button.type = 'button';
-  button.append(el('span', 'primary-label', label), svgIcon('arrow-right'));
+  button.appendChild(el('span', '', label));
+  button.appendChild(svgIcon('arrow-right'));
   button.addEventListener('click', onClick);
-  return button;
+  return wireGlass(button);
 }
 
-export function iconButton(name, label, onClick, className = '') {
-  const button = el('button', `icon-only ${className}`.trim());
+export function iconButton(icon, label, onClick, className = '') {
+  const button = el('button', `icon-action glass ${className}`.trim());
   button.type = 'button';
   button.setAttribute('aria-label', label);
   button.title = label;
-  button.appendChild(svgIcon(name));
+  button.appendChild(svgIcon(icon));
   button.addEventListener('click', onClick);
-  return button;
+  return wireGlass(button);
 }
 
-export function expandableInput(placeholder, onSubmit) {
-  const shell = wireGlass(el('div', 'add-expand glass'));
-  const toggle = iconButton('plus', 'Add another', () => {
-    shell.classList.add('is-open');
-    setTimeout(() => input.focus(), 280);
-  }, 'add-toggle');
-  const input = el('input', 'add-input');
+export function expandableInput({ placeholder = 'Add another', onCommit }) {
+  const wrap = el('div', 'expandable-input');
+  const trigger = el('button', 'add-trigger');
+  trigger.type = 'button';
+  trigger.appendChild(svgIcon('plus'));
+  trigger.appendChild(el('span', '', placeholder));
+  const input = el('input', 'quiet-input glass');
+  input.type = 'text';
   input.placeholder = placeholder;
-  input.setAttribute('aria-label', placeholder);
-  const submit = iconButton('arrow-right', 'Add', () => commit(), 'add-submit');
+  input.hidden = true;
 
   const commit = () => {
     const value = input.value.trim();
     if (!value) return;
-    onSubmit(value);
+    onCommit(value);
+    input.value = '';
   };
-
+  trigger.addEventListener('click', () => {
+    trigger.hidden = true;
+    input.hidden = false;
+    input.focus();
+  });
   input.addEventListener('keydown', (event) => {
     if (event.key === 'Enter') commit();
     if (event.key === 'Escape') {
       input.value = '';
-      shell.classList.remove('is-open');
-      toggle.focus();
+      input.hidden = true;
+      trigger.hidden = false;
     }
   });
-
-  shell.append(toggle, input, submit);
-  return shell;
+  input.addEventListener('blur', () => {
+    if (input.value.trim()) commit();
+    input.hidden = true;
+    trigger.hidden = false;
+  });
+  wrap.append(trigger, input);
+  return wrap;
 }
 
-export function formatMoney(amount, currency = 'USD') {
+export function formatMoney(amount, currency) {
   try {
-    return new Intl.NumberFormat(undefined, {
-      style: 'currency',
-      currency,
-      maximumFractionDigits: 0
-    }).format(Number(amount));
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency', currency, maximumFractionDigits: 0
+    }).format(amount);
   } catch {
-    return `${currency} ${Number(amount).toLocaleString()}`;
+    return `${currency} ${amount}`;
   }
 }
