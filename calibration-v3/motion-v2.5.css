@@ -1,0 +1,84 @@
+/* CLARIS Calibration V2.5 — motion + legibility layer.
+   Intentionally additive: preserves the known-good base/refinement CSS. */
+
+/* The smaller premise is part of the question, not disabled metadata. */
+.question-context {
+  color: rgba(250, 251, 248, .98);
+  font-weight: 340;
+}
+
+/* Give the scene itself a slightly slower, calmer arrival/departure. */
+.scene:not(.boot-scene) {
+  animation-duration: 1.04s;
+  transition-duration: .82s, .94s, .78s;
+}
+
+/* Three-beat question choreography:
+   1) question block
+   2) answer content
+   3) navigation controls
+   The intro sequence is deliberately excluded. */
+.question-scene .question-copy {
+  opacity: 0;
+  transform: translate3d(0, 15px, 0);
+  filter: blur(5px);
+  animation: claris-fog-rise 1.02s var(--premium-ease) .08s forwards;
+}
+
+/* Neutralize the older whole-answer-zone animation so its children can sequence. */
+.question-scene .answer-zone {
+  opacity: 1 !important;
+  transform: none !important;
+  filter: none !important;
+  animation: none !important;
+}
+
+.question-scene .answer-zone > :not(.answer-actions) {
+  opacity: 0;
+  transform: translate3d(0, 13px, 0);
+  filter: blur(4px);
+  animation: claris-fog-rise 1.04s var(--premium-ease) .42s forwards;
+}
+
+.question-scene .answer-actions {
+  opacity: 0;
+  transform: translate3d(0, 11px, 0);
+  filter: blur(3px);
+  animation: claris-fog-rise .98s var(--premium-ease) .82s forwards;
+}
+
+@keyframes claris-fog-rise {
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 15px, 0);
+    filter: blur(5px);
+  }
+  46% { opacity: .7; }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+    filter: blur(0);
+  }
+}
+
+/* Transitional thoughts get enough room to read as a thought, not a toast. */
+.transition-thought {
+  animation-duration: 1s;
+  animation-timing-function: var(--premium-ease);
+}
+
+/* Five-card review remains airy rather than turning into a dashboard grid. */
+.review-grid {
+  row-gap: 18px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .question-scene .question-copy,
+  .question-scene .answer-zone > :not(.answer-actions),
+  .question-scene .answer-actions {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+    filter: none !important;
+  }
+}
