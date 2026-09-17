@@ -8,6 +8,7 @@ const API = Object.freeze({
 
 const SERVER_HOST_RE = /\.vercel\.app$/i;
 const SAVE_DEBOUNCE_MS = 900;
+const LIFECYCLE_STORAGE_PREFIX = 'claris_profile_lifecycle_v1:';
 
 function onServerHost() {
   return SERVER_HOST_RE.test(window.location.hostname) || window.location.hostname === 'localhost';
@@ -26,6 +27,14 @@ function writeLocalState(value) {
   window.localStorage.setItem(STORAGE_KEY, JSON.stringify({ ...value, schemaVersion: SCHEMA_VERSION }));
 }
 
+function clearStaleLocalConsultantData() {
+  const local = readLocalState();
+  const consultantId = String(local?.consultantId || '');
+  if (!consultantId || consultantId.startsWith('consultant_prototype_')) return;
+  window.localStorage.removeItem(STORAGE_KEY);
+  window.localStorage.removeItem(`${LIFECYCLE_STORAGE_PREFIX}${consultantId}`);
+}
+
 function inviteFromFragment() {
   const raw = window.location.hash.startsWith('#') ? window.location.hash.slice(1) : '';
   if (!raw) return null;
@@ -40,10 +49,11 @@ function clearFragment() {
 }
 
 async function requestJson(url, options = {}) {
+  const { headers = {}, ...rest } = options;
   const response = await fetch(url, {
+    ...rest,
     credentials: 'same-origin',
-    headers: { 'Content-Type': 'application/json', ...(options.headers || {}) },
-    ...options
+    headers: { 'Content-Type': 'application/json', ...headers }
   });
   let body = null;
   try { body = await response.json(); } catch { body = null; }
@@ -84,28 +94,36 @@ export async function bootstrapProductionSession() {
   const inviteToken = inviteFromFragment();
   let result = null;
 
-  if (inviteToken) {
-    result = await requestJson(API.resolve, {
-      method: 'POST',
-      body: JSON.stringify({ invite_token: inviteToken })
-    });
-    if (!result.ok) {
-      status.error = result.body?.error || `INVITE_RESOLVE_${result.status}`;
-      status.mode = 'invite-error';
-      return status;
-    }
-    clearFragment();
-  } else {
-    result = await requestJson(API.profile, { method: 'GET', headers: {} });
-    if (!result.ok) {
-      if (result.status === 401) {
-        status.mode = 'preview';
+  try {
+    if (inviteToken) {
+      clearFragment();
+      clearStaleLocalConsultantData();
+      result = await requestJson(API.resolve, {
+        method: 'POST',
+        body: JSON.stringify({ invite_token: inviteToken })
+      });
+      if (!result.ok) {
+        status.error = result.body?.error || `INVITE_RESOLVE_${result.status}`;
+        status.mode = 'invite-error';
         return status;
       }
-      status.error = result.body?.error || `PROFILE_LOAD_${result.status}`;
-      status.mode = 'server-error';
-      return status;
+    } else {
+      result = await requestJson(API.profile, { method: 'GET' });
+      if (!result.ok) {
+        if (result.status === 401) {
+          clearStaleLocalConsultantData();
+          status.mode = 'preview';
+          return status;
+        }
+        status.error = result.body?.error || `PROFILE_LOAD_${result.status}`;
+        status.mode = 'server-error';
+        return status;
+      }
     }
+  } catch (error) {
+    status.error = error?.message || 'NETWORK_ERROR';
+    status.mode = inviteToken ? 'invite-error' : 'server-error';
+    return status;
   }
 
   const payload = result.body || {};
@@ -136,12 +154,23 @@ export function startProductionPersistence(sessionStatus) {
   let inFlight = Promise.resolve();
   let lockAttemptedFor = '';
 
+  function expireLocalSession() {
+    clearStaleLocalConsultantData();
+    window.setTimeout(() => window.location.reload(), 120);
+  }
+
   async function save(state) {
     const result = await requestJson(API.profile, {
       method: 'PUT',
       body: JSON.stringify({ calibration_state: state })
     });
-    if (!result.ok) throw new Error(result.body?.error || `PROFILE_SAVE_${result.status}`);
+    if (!result.ok) {
+      if (result.status === 401) expireLocalSession();
+      if (result.status === 409 && result.body?.error === 'PROFILE_LOCKED') {
+        window.setTimeout(() => window.location.reload(), 120);
+      }
+      throw new Error(result.body?.error || `PROFILE_SAVE_${result.status}`);
+    }
     lastSaved = fingerprint(state);
     emit('claris:server-profile-saved', { result: result.body });
   }
@@ -151,7 +180,10 @@ export function startProductionPersistence(sessionStatus) {
       method: 'POST',
       body: JSON.stringify({ calibration_state: state })
     });
-    if (!result.ok) throw new Error(result.body?.error || `PROFILE_LOCK_${result.status}`);
+    if (!result.ok) {
+      if (result.status === 401) expireLocalSession();
+      throw new Error(result.body?.error || `PROFILE_LOCK_${result.status}`);
+    }
     const lockedState = { ...state, lockedAt: result.body?.locked_at || state.lockedAt };
     writeLocalState(lockedState);
     lastSeen = fingerprint(lockedState);
@@ -165,7 +197,7 @@ export function startProductionPersistence(sessionStatus) {
     });
   }
 
-  function scheduleSave(state) {
+  function scheduleSave() {
     if (timer) window.clearTimeout(timer);
     timer = window.setTimeout(() => {
       timer = null;
@@ -207,7 +239,7 @@ export function startProductionPersistence(sessionStatus) {
       return;
     }
 
-    scheduleSave(state);
+    scheduleSave();
   }, 400);
 
   return () => {
