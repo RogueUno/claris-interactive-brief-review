@@ -40,7 +40,19 @@ export function createCalibrationService({ repository, sessionSecret, buildLifec
         expires_at: now + SESSION_TTL_MS
       };
       const session_token = signSession(sessionPayload, sessionSecret);
-      const existing = await repository.loadProfileEnvelope(identity.consultant_id);
+      let existing = await repository.loadProfileEnvelope(identity.consultant_id);
+
+      if (!existing && resolved.invite.seed_state) {
+        const seededAt = new Date(now).toISOString();
+        const seededState = bindIdentity({ ...resolved.invite.seed_state, lockedAt: null }, identity);
+        const lifecycle = buildLifecycleRecord(seededState, { persistedAt: seededAt });
+        existing = await repository.saveProfileEnvelope(identity.consultant_id, {
+          calibration_state: seededState,
+          lifecycle_record: lifecycle,
+          updated_at: seededAt
+        });
+      }
+
       return {
         ok: true,
         session_token,
