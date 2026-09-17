@@ -1,0 +1,107 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://claris.local/contracts/consultant_operating_profile_v1.schema.json",
+  "title": "CLARIS Consultant Operating Profile V1",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["profile_schema_version", "consultant", "practice", "opportunity", "commercial", "judgment", "strategy", "exceptions", "locked_at"],
+  "properties": {
+    "profile_schema_version": { "const": "consultant_operating_profile_v1" },
+    "consultant": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["consultant_id", "first_name", "full_name", "firm"],
+      "properties": {
+        "consultant_id": { "type": "string", "minLength": 1 },
+        "first_name": { "type": "string", "minLength": 1 },
+        "full_name": { "type": "string", "minLength": 1 },
+        "firm": { "type": "string", "minLength": 1 }
+      }
+    },
+    "practice": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["services", "lead_service_id", "paused_policies"],
+      "properties": {
+        "services": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["service_id", "name", "selected", "state", "preference"],
+            "properties": {
+              "service_id": { "type": "string", "minLength": 1 },
+              "name": { "type": "string", "minLength": 1 },
+              "selected": { "type": "boolean" },
+              "state": { "enum": ["ACTIVE", "SELECTIVE", "PAUSED", "NO_LONGER"] },
+              "preference": { "type": "string", "minLength": 1 }
+            }
+          }
+        },
+        "lead_service_id": { "type": ["string", "null"] },
+        "paused_policies": {
+          "type": "object",
+          "additionalProperties": { "enum": ["EXPLICIT_ONLY", "HIDE"] }
+        }
+      }
+    },
+    "opportunity": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["company_types", "buyer_roles", "company_stage", "geography_matters", "geographies"],
+      "properties": {
+        "company_types": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 }, "uniqueItems": true },
+        "buyer_roles": { "type": "array", "items": { "type": "string", "minLength": 1 }, "uniqueItems": true },
+        "company_stage": { "type": "string" },
+        "geography_matters": { "type": "boolean" },
+        "geographies": { "type": "array", "items": { "type": "string", "minLength": 1 }, "uniqueItems": true }
+      }
+    },
+    "commercial": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["minimum_engagement", "engagement_models", "budget_required_before_first_call", "hard_disqualifiers", "hard_disqualifiers_confirmed", "caution_signals"],
+      "properties": {
+        "minimum_engagement": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["amount", "currency"],
+          "properties": {
+            "amount": { "type": "number", "exclusiveMinimum": 0 },
+            "currency": { "type": "string", "pattern": "^[A-Z]{3}$" }
+          }
+        },
+        "engagement_models": { "type": "array", "items": { "type": "string", "minLength": 1 }, "uniqueItems": true },
+        "budget_required_before_first_call": { "type": "boolean" },
+        "hard_disqualifiers": { "type": "array", "items": { "type": "string", "minLength": 1 }, "uniqueItems": true },
+        "hard_disqualifiers_confirmed": { "type": "boolean" },
+        "caution_signals": { "type": "array", "items": { "type": "string", "minLength": 1 }, "uniqueItems": true }
+      }
+    },
+    "judgment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["first_call_rules", "positive_signals", "vanity_signals"],
+      "properties": {
+        "first_call_rules": { "type": "array", "minItems": 1, "items": { "type": "string", "minLength": 1 }, "uniqueItems": true },
+        "positive_signals": { "type": "array", "items": { "type": "string", "minLength": 1 }, "uniqueItems": true },
+        "vanity_signals": { "type": "array", "items": { "type": "string", "minLength": 1 }, "uniqueItems": true }
+      }
+    },
+    "strategy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["discovery_style", "brief_density", "preferred_next_move", "proof_points", "avoid_push"],
+      "properties": {
+        "discovery_style": { "type": "string" },
+        "brief_density": { "type": "string" },
+        "preferred_next_move": { "type": "string" },
+        "proof_points": { "type": "array", "items": { "type": "string", "minLength": 1 }, "uniqueItems": true },
+        "avoid_push": { "type": "array", "items": { "type": "string", "minLength": 1 }, "uniqueItems": true }
+      }
+    },
+    "exceptions": { "type": "array", "items": { "type": "string", "minLength": 1 }, "uniqueItems": true },
+    "locked_at": { "type": ["string", "null"], "format": "date-time" }
+  }
+}
