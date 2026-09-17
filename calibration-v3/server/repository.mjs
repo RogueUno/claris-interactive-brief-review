@@ -10,6 +10,12 @@ function assertConsultantId(value) {
   return id;
 }
 
+function cloneSeedState(value) {
+  if (value == null) return null;
+  if (!value || typeof value !== 'object' || Array.isArray(value)) throw new Error('INVITE_SEED_INVALID');
+  return JSON.parse(JSON.stringify(value));
+}
+
 function invitePath(hash) { return `claris/invites/${hash}.json`; }
 function identityPath(id) { return `claris/consultants/${assertConsultantId(id)}/identity.json`; }
 function profilePath(id) { return `claris/consultants/${assertConsultantId(id)}/profile.json`; }
@@ -18,13 +24,14 @@ export function createProfileRepository(storage) {
   if (!storage?.getJson || !storage?.putJson) throw new Error('JSON_STORAGE_ADAPTER_REQUIRED');
 
   return {
-    async createInvite(identity, { now = Date.now(), ttlMs = 14 * 24 * 60 * 60 * 1000 } = {}) {
+    async createInvite(identity, { now = Date.now(), ttlMs = 14 * 24 * 60 * 60 * 1000, seedState = null } = {}) {
       const consultantId = assertConsultantId(identity?.consultant_id);
       const firstName = String(identity?.first_name || '').trim();
       const fullName = String(identity?.full_name || '').trim();
       const firm = String(identity?.firm || '').trim();
       if (!firstName || !fullName || !firm) throw new Error('INVITE_IDENTITY_INCOMPLETE');
       if (!Number.isFinite(ttlMs) || ttlMs <= 0) throw new Error('INVITE_TTL_INVALID');
+      const approvedSeedState = cloneSeedState(seedState);
 
       const token = createOpaqueToken(32);
       const tokenHash = hashOpaqueToken(token);
@@ -36,7 +43,8 @@ export function createProfileRepository(storage) {
         created_at: new Date(now).toISOString(),
         expires_at: new Date(now + ttlMs).toISOString(),
         last_resolved_at: null,
-        identity: { consultant_id: consultantId, first_name: firstName, full_name: fullName, firm }
+        identity: { consultant_id: consultantId, first_name: firstName, full_name: fullName, firm },
+        seed_state: approvedSeedState
       };
       await storage.putJson(invitePath(tokenHash), invite);
       return { token, invite };
