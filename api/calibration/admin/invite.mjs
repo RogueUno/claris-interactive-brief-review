@@ -10,14 +10,18 @@ export default {
     if (!parsed.ok) return parsed.response;
     const days = Math.max(1, Math.min(30, Number(parsed.value?.ttl_days || 14)));
     try {
-      const created = await serverContext().repository.createInvite(parsed.value?.identity, { ttlMs: days * 24 * 60 * 60 * 1000 });
+      const created = await serverContext().repository.createInvite(parsed.value?.identity, {
+        ttlMs: days * 24 * 60 * 60 * 1000,
+        seedState: parsed.value?.seed_state ?? null
+      });
       const base = String(process.env.CLARIS_CALIBRATION_BASE_URL || '').replace(/\/?$/, '/');
       return json({
         ok: true,
         invite_token: created.token,
         invite_url: base ? `${base}#invite=${encodeURIComponent(created.token)}` : null,
         expires_at: created.invite.expires_at,
-        consultant_id: created.invite.consultant_id
+        consultant_id: created.invite.consultant_id,
+        seeded: Boolean(created.invite.seed_state)
       }, 201);
     } catch (error) {
       return json({ ok: false, error: error?.message || 'INVITE_CREATE_FAILED' }, 400);
