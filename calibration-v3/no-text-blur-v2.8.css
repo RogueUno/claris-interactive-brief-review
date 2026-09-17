@@ -1,0 +1,60 @@
+/* CLARIS Calibration V3.2 — text clarity guard.
+   Loaded last so legacy blur keyframes cannot affect copy. Motion remains opacity + translation. */
+
+/* Parent scene blur affects all descendants, so neutralize it at the scene level first. */
+.scene,
+.scene.is-exiting,
+.boot-scene,
+.question-scene,
+.transition-scene,
+.review-scene {
+  filter: none !important;
+}
+
+/* Text and text-bearing controls must never use blur as part of their entrance/exit. */
+.hero-line,
+.intro-word,
+.chapter-identity,
+.chapter-title,
+.question-copy,
+.question-context,
+.question-title,
+.question-helper,
+.answer-zone,
+.choice-row,
+.choice-label,
+.answer-tools,
+.add-toggle,
+.add-input,
+.add-submit,
+.primary-action,
+.back-action,
+.insight,
+.transition-thought,
+.review-head,
+.review-eyebrow,
+.review-title,
+.review-sub,
+.review-grid,
+.review-card,
+.review-card h3,
+.review-value,
+.review-meta,
+.money-control,
+.currency-label,
+.money-caption,
+.claris-reasoning-bridge,
+.claris-reasoning-bridge__inner,
+.claris-reasoning-bridge__eyebrow,
+.claris-reasoning-bridge__conclusion,
+.claris-reasoning-bridge__reason {
+  filter: none !important;
+}
+
+/* Keep exits clean: transparency + translation only. */
+.scene.is-exiting,
+.transition-scene.is-exiting .transition-thought,
+.claris-reasoning-bridge.is-leaving,
+.claris-reasoning-bridge.is-leaving .claris-reasoning-bridge__inner {
+  filter: none !important;
+}
