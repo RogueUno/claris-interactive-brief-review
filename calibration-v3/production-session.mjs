@@ -85,7 +85,6 @@ export async function bootstrapProductionSession() {
   let result = null;
 
   if (inviteToken) {
-    clearFragment();
     result = await requestJson(API.resolve, {
       method: 'POST',
       body: JSON.stringify({ invite_token: inviteToken })
@@ -95,6 +94,7 @@ export async function bootstrapProductionSession() {
       status.mode = 'invite-error';
       return status;
     }
+    clearFragment();
   } else {
     result = await requestJson(API.profile, { method: 'GET', headers: {} });
     if (!result.ok) {
