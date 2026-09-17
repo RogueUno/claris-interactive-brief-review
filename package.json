@@ -1,0 +1,10 @@
+{
+  "name": "claris-calibration-server",
+  "private": true,
+  "type": "module",
+  "engines": { "node": ">=22" },
+  "dependencies": { "@vercel/blob": "2.8.0" },
+  "scripts": {
+    "test:server": "node --test calibration-v3/server/tests/*.test.mjs"
+  }
+}
