@@ -204,7 +204,8 @@ test('tampered prospect session cannot load opportunity data', async () => {
   const { service } = serviceFixture();
   const created = await service.createPackage(basePackage(), { now: 8_000_000, ttlMs: 60_000 });
   const resolved = await service.resolveInvite(created.invite_token, { now: 8_001_000 });
-  const tampered = `${resolved.session_token.slice(0, -1)}x`;
+  const last = resolved.session_token.slice(-1);
+  const tampered = `${resolved.session_token.slice(0, -1)}${last === 'x' ? 'y' : 'x'}`;
   const result = await service.load(tampered, { now: 8_002_000 });
   assert.equal(result.ok, false);
   assert.equal(result.error, 'SESSION_TOKEN_INVALID_SIGNATURE');
