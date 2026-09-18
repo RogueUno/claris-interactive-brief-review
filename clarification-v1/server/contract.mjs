@@ -119,7 +119,7 @@ export function publicClarificationPackage(pkg) {
   };
 }
 
-export function normalizeProspectAnswers(pkg, input) {
+function answerMap(pkg, input) {
   if (!pkg || pkg.status !== 'OPEN') throw new Error('CLARIFICATION_NOT_OPEN');
   const values = Array.isArray(input) ? input : [];
   const byId = new Map();
@@ -134,37 +134,56 @@ export function normalizeProspectAnswers(pkg, input) {
       throw new Error('ANSWER_UNKNOWN_QUESTION');
     }
   }
+  return byId;
+}
+
+function normalizeAnswer(question, raw) {
+  const missing = raw == null || raw === '' || (Array.isArray(raw) && raw.length === 0);
+  if (missing) return null;
+
+  let value;
+  if (question.response_type === 'MULTI_CHOICE') {
+    if (!Array.isArray(raw)) throw new Error(`ANSWER_TYPE_INVALID:${question.question_id}`);
+    value = [...new Set(raw.map((item) => String(item).trim()).filter(Boolean))];
+    if (!value.length || value.some((item) => !question.options.includes(item))) {
+      throw new Error(`ANSWER_OPTION_INVALID:${question.question_id}`);
+    }
+  } else if (question.response_type === 'SINGLE_CHOICE') {
+    value = String(raw).trim();
+    if (!question.options.includes(value)) throw new Error(`ANSWER_OPTION_INVALID:${question.question_id}`);
+  } else {
+    value = String(raw).trim();
+    const max = question.response_type === 'SHORT_TEXT' ? 500 : 1500;
+    if (!value || value.length > max) throw new Error(`ANSWER_TEXT_INVALID:${question.question_id}`);
+  }
+
+  return {
+    question_id: question.question_id,
+    mode: question.mode,
+    source_class: 'PROSPECT_REPORTED',
+    value
+  };
+}
+
+export function normalizeProspectProgress(pkg, input) {
+  const byId = answerMap(pkg, input);
+  return pkg.questions.flatMap((question) => {
+    if (!byId.has(question.question_id)) return [];
+    const answer = normalizeAnswer(question, byId.get(question.question_id));
+    return answer ? [answer] : [];
+  });
+}
+
+export function normalizeProspectAnswers(pkg, input) {
+  const byId = answerMap(pkg, input);
 
   return pkg.questions.flatMap((question) => {
-    const raw = byId.get(question.question_id);
-    const missing = raw == null || raw === '' || (Array.isArray(raw) && raw.length === 0);
-    if (missing) {
+    const answer = normalizeAnswer(question, byId.get(question.question_id));
+    if (!answer) {
       if (question.required) throw new Error(`ANSWER_REQUIRED:${question.question_id}`);
       return [];
     }
-
-    let value;
-    if (question.response_type === 'MULTI_CHOICE') {
-      if (!Array.isArray(raw)) throw new Error(`ANSWER_TYPE_INVALID:${question.question_id}`);
-      value = [...new Set(raw.map((item) => String(item).trim()).filter(Boolean))];
-      if (!value.length || value.some((item) => !question.options.includes(item))) {
-        throw new Error(`ANSWER_OPTION_INVALID:${question.question_id}`);
-      }
-    } else if (question.response_type === 'SINGLE_CHOICE') {
-      value = String(raw).trim();
-      if (!question.options.includes(value)) throw new Error(`ANSWER_OPTION_INVALID:${question.question_id}`);
-    } else {
-      value = String(raw).trim();
-      const max = question.response_type === 'SHORT_TEXT' ? 500 : 1500;
-      if (!value || value.length > max) throw new Error(`ANSWER_TEXT_INVALID:${question.question_id}`);
-    }
-
-    return [{
-      question_id: question.question_id,
-      mode: question.mode,
-      source_class: 'PROSPECT_REPORTED',
-      value
-    }];
+    return [answer];
   });
 }
 
