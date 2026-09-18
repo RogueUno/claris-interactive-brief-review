@@ -93,6 +93,7 @@ export async function bootstrapProductionSession() {
     mode: onServerHost() ? 'server-capable' : 'preview',
     authenticated: false,
     profileStatus: null,
+    profileVersion: null,
     runtimeV3: null,
     error: null
   };
@@ -147,6 +148,7 @@ export async function bootstrapProductionSession() {
   status.mode = 'authenticated';
   status.authenticated = true;
   status.profileStatus = payload.profile_status || 'NEW';
+  status.profileVersion = payload.profile_version || null;
   status.runtimeV3 = payload.runtime_v3 || null;
   emit('claris:server-session-ready', { status, identity: payload.identity || null });
   return status;
@@ -157,6 +159,7 @@ export function startProductionPersistence(sessionStatus) {
 
   let lastSeen = fingerprint(readLocalState());
   let lastSaved = lastSeen;
+  let serverVersion = sessionStatus.profileVersion || null;
   let timer = null;
   let stopped = false;
   let inFlight = Promise.resolve();
@@ -167,18 +170,54 @@ export function startProductionPersistence(sessionStatus) {
     window.setTimeout(() => window.location.reload(), 120);
   }
 
+  async function recoverServerConflict(stage, versionHint = null) {
+    stopped = true;
+    if (timer) {
+      window.clearTimeout(timer);
+      timer = null;
+    }
+
+    const latest = await requestJson(API.profile, { method: 'GET' });
+    if (latest.ok && latest.body?.ok && latest.body?.resume_state) {
+      const serverState = bindCanonicalIdentity(latest.body.resume_state, latest.body.identity || {});
+      writeLocalState(serverState);
+      lastSeen = fingerprint(serverState);
+      lastSaved = lastSeen;
+      serverVersion = latest.body.profile_version || versionHint || serverVersion;
+      sessionStatus.profileVersion = serverVersion;
+    }
+
+    emit('claris:server-profile-conflict', {
+      stage,
+      profile_version: serverVersion
+    });
+    window.setTimeout(() => window.location.reload(), 1100);
+  }
+
   async function save(state) {
     const result = await requestJson(API.profile, {
       method: 'PUT',
-      body: JSON.stringify({ calibration_state: state })
+      body: JSON.stringify({
+        calibration_state: state,
+        profile_version: serverVersion
+      })
     });
     if (!result.ok) {
-      if (result.status === 401) expireLocalSession();
-      if (result.status === 409 && result.body?.error === 'PROFILE_LOCKED') {
-        window.setTimeout(() => window.location.reload(), 120);
+      if (result.status === 401) {
+        expireLocalSession();
+        return;
+      }
+      if (
+        result.status === 409 &&
+        ['PROFILE_LOCKED', 'PROFILE_CONFLICT'].includes(result.body?.error)
+      ) {
+        await recoverServerConflict('save', result.body?.profile_version || null);
+        return;
       }
       throw new Error(result.body?.error || `PROFILE_SAVE_${result.status}`);
     }
+    serverVersion = result.body?.profile_version || serverVersion;
+    sessionStatus.profileVersion = serverVersion;
     lastSaved = fingerprint(state);
     emit('claris:server-profile-saved', { result: result.body });
   }
@@ -186,12 +225,27 @@ export function startProductionPersistence(sessionStatus) {
   async function lock(state) {
     const result = await requestJson(API.lock, {
       method: 'POST',
-      body: JSON.stringify({ calibration_state: state })
+      body: JSON.stringify({
+        calibration_state: state,
+        profile_version: serverVersion
+      })
     });
     if (!result.ok) {
-      if (result.status === 401) expireLocalSession();
+      if (result.status === 401) {
+        expireLocalSession();
+        return;
+      }
+      if (
+        result.status === 409 &&
+        ['PROFILE_LOCKED', 'PROFILE_CONFLICT'].includes(result.body?.error)
+      ) {
+        await recoverServerConflict('lock', result.body?.profile_version || null);
+        return;
+      }
       throw new Error(result.body?.error || `PROFILE_LOCK_${result.status}`);
     }
+    serverVersion = result.body?.profile_version || serverVersion;
+    sessionStatus.profileVersion = serverVersion;
     const lockedState = { ...state, lockedAt: result.body?.locked_at || state.lockedAt };
     writeLocalState(lockedState);
     lastSeen = fingerprint(lockedState);
