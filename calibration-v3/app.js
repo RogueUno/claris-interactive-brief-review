@@ -31,8 +31,11 @@ function readSessionFlag(key) {
   catch { return false; }
 }
 
-let reviewEditMode = readSessionFlag(REVIEW_EDIT_SESSION_KEY);
-let reviewCorrectionMode = readSessionFlag(REVIEW_CORRECTION_SESSION_KEY) || reviewEditMode;
+let reviewEditMode = state._uiReviewMode === 'EDIT' || readSessionFlag(REVIEW_EDIT_SESSION_KEY);
+let reviewCorrectionMode =
+  state._uiReviewMode === 'CORRECTION' ||
+  reviewEditMode ||
+  readSessionFlag(REVIEW_CORRECTION_SESSION_KEY);
 
 function setSessionFlag(key, enabled) {
   try {
@@ -44,11 +47,15 @@ function setSessionFlag(key, enabled) {
 function setReviewEditMode(enabled) {
   reviewEditMode = Boolean(enabled);
   setSessionFlag(REVIEW_EDIT_SESSION_KEY, reviewEditMode);
+  if (reviewEditMode) state._uiReviewMode = 'EDIT';
+  else if (state._uiReviewMode === 'EDIT') state._uiReviewMode = reviewCorrectionMode ? 'CORRECTION' : null;
 }
 
 function setReviewCorrectionMode(enabled) {
   reviewCorrectionMode = Boolean(enabled);
   setSessionFlag(REVIEW_CORRECTION_SESSION_KEY, reviewCorrectionMode);
+  if (reviewCorrectionMode && !reviewEditMode) state._uiReviewMode = 'CORRECTION';
+  if (!reviewCorrectionMode && !reviewEditMode) state._uiReviewMode = null;
 }
 
 const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -1135,6 +1142,7 @@ function renderReview(stage) {
     reviewCorrectionMode ? 'Done reviewing' : 'Not quite yet',
     () => {
       setReviewCorrectionMode(!reviewCorrectionMode);
+      saveState(state);
       render();
     }
   );
@@ -1153,9 +1161,9 @@ function renderReview(stage) {
       }
 
       state.lockedAt = new Date().toISOString();
-      saveState(state);
       setReviewEditMode(false);
       setReviewCorrectionMode(false);
+      saveState(state);
       showInsight(root, 'Done. I’ll use this operating profile when I prepare your opportunities.');
       setTimeout(render, 460);
     }
@@ -1248,6 +1256,8 @@ function profileSnapshot() {
 window.__CLARIS_CALIBRATION_V3_PREVIEW__ = {
   reset() {
     state = resetState();
+    setReviewEditMode(false);
+    setReviewCorrectionMode(false);
     render();
   },
   profile() {
