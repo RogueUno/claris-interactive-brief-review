@@ -61,6 +61,67 @@ export function createClarificationRepository(storage) {
       return { envelope, etag: saved?.etag || null, token };
     },
 
+    async reissueInvite(opportunityId, { now = Date.now(), expiresAt } = {}) {
+      const id = assertOpportunityId(opportunityId);
+      const loaded = await this.loadEnvelopeWithMeta(id);
+      const envelope = loaded.envelope;
+      if (!envelope) return { ok: false, error: 'CLARIFICATION_NOT_FOUND' };
+      if (envelope.response || envelope.package?.status === 'SUBMITTED') {
+        return { ok: false, error: 'CLARIFICATION_ALREADY_SUBMITTED' };
+      }
+      if (envelope.package?.status !== 'OPEN') return { ok: false, error: 'CLARIFICATION_NOT_OPEN' };
+
+      const expiry = Date.parse(expiresAt);
+      if (!Number.isFinite(expiry) || expiry <= now) return { ok: false, error: 'INVITE_EXPIRY_INVALID' };
+
+      const previousHash = envelope.package.invite_hash || null;
+      const token = createClarificationToken(32);
+      const tokenHash = hashClarificationToken(token);
+      await storage.putJson(invitePath(tokenHash), {
+        schema_version: INVITE_VERSION,
+        token_hash: tokenHash,
+        opportunity_id: id,
+        status: 'ACTIVE',
+        created_at: new Date(now).toISOString(),
+        expires_at: new Date(expiry).toISOString(),
+        last_resolved_at: null
+      });
+
+      const nextEnvelope = {
+        ...envelope,
+        package: {
+          ...envelope.package,
+          invite_hash: tokenHash,
+          expires_at: new Date(expiry).toISOString()
+        },
+        updated_at: new Date(now).toISOString()
+      };
+
+      let saved;
+      try {
+        saved = await this.saveEnvelopeWithMeta(id, nextEnvelope, { ifMatch: loaded.etag });
+      } catch (error) {
+        if (error?.code === 'BLOB_PRECONDITION_FAILED' || error?.message === 'BLOB_PRECONDITION_FAILED') {
+          return { ok: false, error: 'CLARIFICATION_CONFLICT' };
+        }
+        throw error;
+      }
+
+      if (previousHash) {
+        const previous = await storage.getJson(invitePath(previousHash));
+        if (previous?.schema_version === INVITE_VERSION) {
+          await storage.putJson(invitePath(previousHash), {
+            ...previous,
+            status: 'REVOKED',
+            revoked_at: new Date(now).toISOString(),
+            replaced_by_hash: tokenHash
+          });
+        }
+      }
+
+      return { ok: true, token, envelope: saved.envelope, etag: saved.etag };
+    },
+
     async resolveInvite(token, { now = Date.now() } = {}) {
       let hash;
       try { hash = hashClarificationToken(token); }
