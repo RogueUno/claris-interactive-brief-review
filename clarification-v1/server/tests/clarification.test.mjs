@@ -42,6 +42,7 @@ function basePackage(overrides = {}) {
     },
     prospect: {
       first_name: 'Alex',
+      role: 'VP Engineering',
       company: 'Acme'
     },
     intro_context: 'A few public signals need clarification.',
@@ -54,7 +55,7 @@ function basePackage(overrides = {}) {
         response_type: 'SINGLE_CHOICE',
         options: ['Yes', 'No', 'Not decided'],
         required: true,
-        evidence_refs: [{ source_type: 'PUBLIC_WEB', ref: 'https://acme.example/security' }]
+        evidence_refs: [{ source_type: 'PUBLIC_WEB', subject: 'COMPANY', ref: 'https://acme.example/security' }]
       }
     ],
     ...overrides
@@ -128,6 +129,7 @@ test('invite resolution exposes safe dynamic content but not evidence refs', asy
   const resolved = await service.resolveInvite(created.invite_token, { now: 3_001_000 });
   assert.equal(resolved.ok, true);
   assert.equal(resolved.clarification.prospect.company, 'Acme');
+  assert.equal(resolved.clarification.prospect.role, 'VP Engineering');
   assert.equal(resolved.clarification.questions[0].mode, 'CONFIRM');
   assert.equal('evidence_refs' in resolved.clarification.questions[0], false);
   assert.ok(resolved.session_token);
@@ -160,6 +162,7 @@ test('valid submission is immutable and exported as PROSPECT_REPORTED beside evi
   assert.equal(result.clarification_result.source_class, 'PROSPECT_REPORTED');
   assert.equal(result.clarification_result.answers[0].value, 'Yes');
   assert.equal(result.clarification_result.answers[0].evidence_refs[0].source_type, 'PUBLIC_WEB');
+  assert.equal(result.clarification_result.answers[0].evidence_refs[0].subject, 'COMPANY');
 });
 
 test('stale opportunity version fails closed', async () => {
