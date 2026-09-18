@@ -10,7 +10,7 @@ const previewPackage = {
   schema_version: 'claris_clarification_package_v1',
   opportunity_id: 'opp_preview_acme',
   consultant: { first_name: 'Sarah', firm: 'Northstar Security' },
-  prospect: { first_name: 'Alex', company: 'Acme' },
+  prospect: { first_name: 'Alex', role: 'VP Engineering', company: 'Acme' },
   intro_context: 'I found a few public signals about Acme’s security program. These questions only clarify what is still uncertain before the conversation.',
   status: 'OPEN',
   expires_at: '2099-01-01T00:00:00.000Z',
