@@ -242,6 +242,10 @@ function next(message = '') {
 }
 
 function previous() {
+  // Back means “discard the draft on this screen”, not “accept it”.
+  // Rehydrate the last committed state before moving backward so only
+  // Continue advances and commits an answer.
+  state = loadState();
   transitionTo(state.currentStep - 1);
 }
 
@@ -309,7 +313,6 @@ function renderMultiChoice({
     if (customField) {
       state[customField] = [...selected].filter((value) => !canonical.includes(value));
     }
-    persist();
   };
 
   canonical.forEach((value) => {
@@ -339,7 +342,6 @@ function renderMultiChoice({
       if (!clean) return;
       selected.add(clean);
       state[customField] = [...new Set([...(state[customField] || []), clean])];
-      persist();
       render();
     }));
     zone.appendChild(tools);
@@ -374,7 +376,6 @@ function renderSingleChoice({
 
   zone.appendChild(singleChoiceList(options, value, (selected) => {
     onSelect(selected);
-    persist();
   }, grid));
 
   appendActions(zone, continueLabel, () => {
@@ -433,7 +434,6 @@ function renderPracticeServices(stage) {
       service.selected = !service.selected;
       if (!service.selected && state.leadServiceId === service.service_id) state.leadServiceId = null;
       button.setAttribute('aria-pressed', String(service.selected));
-      persist();
     }));
   });
 
@@ -447,7 +447,6 @@ function renderPracticeServices(stage) {
       state: 'ACTIVE',
       preference: 'CORE'
     });
-    persist();
     render();
   }));
 
@@ -660,7 +659,6 @@ function renderCommercialMinimum(stage) {
   input.setAttribute('aria-label', 'Minimum viable engagement');
   input.addEventListener('input', () => {
     state.minimumEngagement = Number(input.value || 0);
-    persist();
   });
 
   control.appendChild(input);
