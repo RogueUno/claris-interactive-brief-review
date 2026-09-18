@@ -8,10 +8,14 @@ export default {
     if (!token) return json({ ok: false, error: 'SESSION_REQUIRED' }, 401);
     const parsed = await parseJson(request);
     if (!parsed.ok) return parsed.response;
-    const result = await serverContext().service.lock(token, parsed.value?.calibration_state);
+    const result = await serverContext().service.lock(
+      token,
+      parsed.value?.calibration_state,
+      { expectedVersion: parsed.value?.profile_version ?? null }
+    );
     const status = result.ok
       ? 200
-      : result.error === 'PROFILE_LOCKED'
+      : ['PROFILE_LOCKED', 'PROFILE_CONFLICT'].includes(result.error)
         ? 409
         : result.error === 'PROFILE_VALIDATION_FAILED'
           ? 422
