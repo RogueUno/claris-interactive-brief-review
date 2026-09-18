@@ -20,6 +20,13 @@ function invitePath(hash) { return `claris/invites/${hash}.json`; }
 function identityPath(id) { return `claris/consultants/${assertConsultantId(id)}/identity.json`; }
 function profilePath(id) { return `claris/consultants/${assertConsultantId(id)}/profile.json`; }
 
+async function getJsonWithMeta(storage, pathname) {
+  if (typeof storage.getJsonWithMeta === 'function') {
+    return storage.getJsonWithMeta(pathname);
+  }
+  return { value: await storage.getJson(pathname), etag: null };
+}
+
 export function createProfileRepository(storage) {
   if (!storage?.getJson || !storage?.putJson) throw new Error('JSON_STORAGE_ADAPTER_REQUIRED');
 
@@ -79,11 +86,24 @@ export function createProfileRepository(storage) {
       return envelope?.schema_version === ENVELOPE_VERSION ? envelope : null;
     },
 
+    async loadProfileEnvelopeWithMeta(consultantId) {
+      const result = await getJsonWithMeta(storage, profilePath(consultantId));
+      const envelope = result.value?.schema_version === ENVELOPE_VERSION ? result.value : null;
+      return { envelope, etag: envelope ? (result.etag || null) : null };
+    },
+
     async saveProfileEnvelope(consultantId, envelope) {
       const id = assertConsultantId(consultantId);
       const value = { ...envelope, schema_version: ENVELOPE_VERSION, consultant_id: id };
       await storage.putJson(profilePath(id), value);
       return value;
+    },
+
+    async saveProfileEnvelopeWithMeta(consultantId, envelope, { ifMatch = null } = {}) {
+      const id = assertConsultantId(consultantId);
+      const value = { ...envelope, schema_version: ENVELOPE_VERSION, consultant_id: id };
+      const saved = await storage.putJson(profilePath(id), value, { ifMatch });
+      return { envelope: value, etag: saved?.etag || null };
     }
   };
 }
