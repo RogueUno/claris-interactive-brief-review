@@ -200,6 +200,43 @@ test('choice answers cannot invent an option', async () => {
   assert.equal(result.error, 'ANSWER_OPTION_INVALID:q_priority');
 });
 
+test('reissue rotates the invite without persisting the new raw token', async () => {
+  const { storage, service } = serviceFixture();
+  const created = await service.createPackage(basePackage(), { now: 7_500_000, ttlMs: 60_000 });
+  const firstToken = created.invite_token;
+
+  const reissued = await service.reissueInvite('opp_acme_001', { now: 7_510_000, ttlMs: 120_000 });
+  assert.equal(reissued.ok, true);
+  assert.ok(reissued.invite_token);
+  assert.notEqual(reissued.invite_token, firstToken);
+
+  const firstResolve = await service.resolveInvite(firstToken, { now: 7_511_000 });
+  assert.equal(firstResolve.ok, false);
+  assert.equal(firstResolve.error, 'INVITE_NOT_ACTIVE');
+
+  const secondResolve = await service.resolveInvite(reissued.invite_token, { now: 7_511_000 });
+  assert.equal(secondResolve.ok, true);
+
+  const serialized = JSON.stringify([...storage.map.values()].map((item) => item.value));
+  assert.equal(serialized.includes(reissued.invite_token), false);
+});
+
+test('submitted opportunity cannot receive a new clarification invite', async () => {
+  const { service } = serviceFixture();
+  const created = await service.createPackage(basePackage(), { now: 7_700_000, ttlMs: 60_000 });
+  const resolved = await service.resolveInvite(created.invite_token, { now: 7_701_000 });
+  const submitted = await service.submit(
+    resolved.session_token,
+    [{ question_id: 'q_priority', value: 'Yes' }],
+    { now: 7_702_000, expectedVersion: resolved.opportunity_version }
+  );
+  assert.equal(submitted.ok, true);
+
+  const reissued = await service.reissueInvite('opp_acme_001', { now: 7_703_000, ttlMs: 60_000 });
+  assert.equal(reissued.ok, false);
+  assert.equal(reissued.error, 'CLARIFICATION_ALREADY_SUBMITTED');
+});
+
 test('tampered prospect session cannot load opportunity data', async () => {
   const { service } = serviceFixture();
   const created = await service.createPackage(basePackage(), { now: 8_000_000, ttlMs: 60_000 });
