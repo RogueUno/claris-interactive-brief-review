@@ -81,6 +81,7 @@ export function createClarificationService({ repository, sessionSecret }) {
       const sessionPayload = {
         version: 1,
         opportunity_id: pkg.opportunity_id,
+        invite_hash: pkg.invite_hash,
         issued_at: now,
         expires_at: expiryMs
       };
@@ -96,6 +97,9 @@ export function createClarificationService({ repository, sessionSecret }) {
       if (!auth.ok) return auth;
       const loaded = await repository.loadEnvelopeWithMeta(auth.payload.opportunity_id);
       if (!loaded.envelope) return { ok: false, error: 'CLARIFICATION_NOT_FOUND' };
+      if (auth.payload.invite_hash !== loaded.envelope.package?.invite_hash) {
+        return { ok: false, error: 'SESSION_REVOKED' };
+      }
       if (isExpired(loaded.envelope.package, now) && loaded.envelope.package.status !== 'SUBMITTED') {
         return { ok: false, error: 'CLARIFICATION_EXPIRED' };
       }
@@ -109,6 +113,9 @@ export function createClarificationService({ repository, sessionSecret }) {
       const loaded = await repository.loadEnvelopeWithMeta(auth.payload.opportunity_id);
       const envelope = loaded.envelope;
       if (!envelope) return { ok: false, error: 'CLARIFICATION_NOT_FOUND' };
+      if (auth.payload.invite_hash !== envelope.package?.invite_hash) {
+        return { ok: false, error: 'SESSION_REVOKED' };
+      }
       if (envelope.response || envelope.package.status === 'SUBMITTED') {
         return { ok: false, error: 'CLARIFICATION_ALREADY_SUBMITTED', opportunity_version: loaded.etag || null };
       }
