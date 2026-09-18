@@ -25,7 +25,7 @@ body.claris-bridge-active .chapter-identity {
     radial-gradient(64rem 36rem at 74% 18%, rgba(146,173,169,.12), transparent 64%),
     linear-gradient(155deg, rgba(80,105,108,.96), rgba(36,57,67,.98) 54%, rgba(24,40,46,.99));
   opacity: 0;
-  animation: claris-bridge-shell var(--bridge-duration, 4600ms) ease forwards;
+  animation: claris-bridge-shell var(--bridge-duration, 6600ms) ease forwards;
 }
 
 .claris-reasoning-bridge__inner {
@@ -48,7 +48,7 @@ body.claris-bridge-active .chapter-identity {
   font-weight: 470;
   letter-spacing: .22em;
   text-transform: uppercase;
-  animation: claris-bridge-line-in .62s var(--premium-ease, cubic-bezier(.16,1,.3,1)) .12s forwards;
+  animation: claris-bridge-line-in .68s var(--premium-ease, cubic-bezier(.16,1,.3,1)) .16s forwards;
 }
 
 .claris-reasoning-bridge__conclusion,
@@ -64,29 +64,79 @@ body.claris-bridge-active .chapter-identity {
 .claris-reasoning-bridge__conclusion {
   font-size: clamp(19px, 2vw, 27px);
   line-height: 1.42;
-  animation: claris-bridge-line-in .72s var(--premium-ease, cubic-bezier(.16,1,.3,1)) .42s forwards;
+  animation: claris-bridge-line-in .78s var(--premium-ease, cubic-bezier(.16,1,.3,1)) .5s forwards;
 }
 
 .claris-reasoning-bridge__reason {
-  margin-top: 12px;
+  margin-top: 14px;
   color: rgba(250,251,248,.86);
   font-size: clamp(17px, 1.8vw, 23px);
   line-height: 1.45;
-  animation: claris-bridge-line-in .72s var(--premium-ease, cubic-bezier(.16,1,.3,1)) .78s forwards;
+  animation: claris-bridge-line-in .78s var(--premium-ease, cubic-bezier(.16,1,.3,1)) .92s forwards;
+}
+
+/* Major chapter boundaries breathe across two separate screens:
+   first the acknowledgement / summary, then the reason for the next chapter. */
+.claris-reasoning-bridge.is-split .claris-reasoning-bridge__inner {
+  display: grid;
+  grid-template-areas: 'phase';
+  align-items: center;
+  min-height: 180px;
+}
+
+.claris-reasoning-bridge__panel {
+  grid-area: phase;
+  width: 100%;
+  transition:
+    opacity .68s var(--premium-ease, cubic-bezier(.16,1,.3,1)),
+    transform .72s var(--premium-ease, cubic-bezier(.16,1,.3,1));
+}
+
+.claris-reasoning-bridge.is-split .claris-reasoning-bridge__panel--summary {
+  opacity: 1;
+  transform: translate3d(0,0,0);
+}
+
+.claris-reasoning-bridge.is-split .claris-reasoning-bridge__panel--next {
+  opacity: 0;
+  transform: translate3d(0,12px,0);
+  pointer-events: none;
+}
+
+.claris-reasoning-bridge.is-split.is-phase-two .claris-reasoning-bridge__panel--summary {
+  opacity: 0;
+  transform: translate3d(0,-10px,0);
+  pointer-events: none;
+}
+
+.claris-reasoning-bridge.is-split.is-phase-two .claris-reasoning-bridge__panel--next {
+  opacity: 1;
+  transform: translate3d(0,0,0);
+}
+
+/* The panel transition owns the split-screen reveal, so child copy is fully
+   legible as soon as each panel arrives. */
+.claris-reasoning-bridge.is-split .claris-reasoning-bridge__panel .claris-reasoning-bridge__eyebrow,
+.claris-reasoning-bridge.is-split .claris-reasoning-bridge__panel .claris-reasoning-bridge__conclusion,
+.claris-reasoning-bridge.is-split .claris-reasoning-bridge__panel .claris-reasoning-bridge__reason {
+  opacity: 1;
+  transform: none;
+  animation: none;
 }
 
 .claris-reasoning-bridge.is-leaving {
   opacity: 0 !important;
-  transition: opacity .52s ease;
+  transition: opacity .58s ease;
 }
+
 .claris-reasoning-bridge.is-leaving .claris-reasoning-bridge__inner {
   transform: translate3d(0,-8px,0);
-  transition: transform .58s var(--premium-ease, cubic-bezier(.16,1,.3,1));
+  transition: transform .62s var(--premium-ease, cubic-bezier(.16,1,.3,1));
 }
 
 @keyframes claris-bridge-shell {
   0% { opacity: 0; }
-  8%, 92% { opacity: 1; }
+  6%, 94% { opacity: 1; }
   100% { opacity: 0; }
 }
 
@@ -97,16 +147,22 @@ body.claris-bridge-active .chapter-identity {
 
 @media (max-width: 700px) {
   .claris-reasoning-bridge { padding-inline: 24px; }
-  .claris-reasoning-bridge__reason { margin-top: 10px; }
+  .claris-reasoning-bridge__reason { margin-top: 12px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
   .claris-reasoning-bridge,
   .claris-reasoning-bridge__eyebrow,
   .claris-reasoning-bridge__conclusion,
-  .claris-reasoning-bridge__reason {
+  .claris-reasoning-bridge__reason,
+  .claris-reasoning-bridge__panel {
     animation: none !important;
+    transition: none !important;
     opacity: 1 !important;
     transform: none !important;
+  }
+
+  .claris-reasoning-bridge.is-split .claris-reasoning-bridge__panel--summary {
+    display: none;
   }
 }
