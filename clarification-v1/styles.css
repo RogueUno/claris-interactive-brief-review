@@ -185,6 +185,21 @@ h1 {
 .text-answer.long { min-height: 112px; }
 .text-answer::placeholder { color: rgba(239,244,240,.33); }
 
+.other-answer {
+  margin-top: 14px;
+  padding: 4px 0 2px;
+  animation: other-in .28s var(--ease) both;
+}
+.other-answer[hidden] { display: none; }
+.other-answer .text-answer {
+  min-height: 64px;
+  padding-top: 10px;
+}
+@keyframes other-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
 .actions {
   margin-top: 30px;
   display: flex;
