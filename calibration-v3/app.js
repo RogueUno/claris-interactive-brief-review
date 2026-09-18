@@ -1269,6 +1269,10 @@ window.addEventListener('claris:server-profile-locked', () => {
   setTimeout(render, 180);
 });
 
+window.addEventListener('claris:server-profile-conflict', () => {
+  showInsight(root, 'This profile changed in another session. I’m loading the newest saved version.');
+});
+
 window.__CLARIS_CALIBRATION_V3_PREVIEW__ = {
   reset() {
     state = resetState();
