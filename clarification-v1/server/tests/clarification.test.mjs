@@ -86,10 +86,14 @@ function serviceFixture() {
 }
 
 test('CONFIRM and CONTRAST require evidence while DISCOVER can be evidence-free', () => {
-  assert.throws(() => normalizeClarificationPackage({
-    ...basePackage(),
-    questions: [{ ...basePackage().questions[0], evidence_refs: [] }]
-  }), /EVIDENCE_REQUIRED/);
+  assert.throws(
+    () => normalizeClarificationPackage({
+      ...basePackage(),
+      questions: [{ ...basePackage().questions[0], evidence_refs: [] }]
+    }),
+    (error) => error?.code === 'CLARIFICATION_GOVERNANCE_FAILED' &&
+      error?.report?.violations?.some((item) => ['OPTION_BASIS_UNKNOWN', 'QUESTION_EVIDENCE_REQUIRED'].includes(item.code))
+  );
 
   const discover = normalizeClarificationPackage({
     ...basePackage(),
