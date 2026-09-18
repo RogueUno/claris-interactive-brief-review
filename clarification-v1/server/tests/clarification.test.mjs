@@ -135,6 +135,117 @@ test('invite resolution exposes safe dynamic content but not evidence refs', asy
   assert.ok(resolved.session_token);
 });
 
+test('committed clarification progress resumes at the next question', async () => {
+  const { service } = serviceFixture();
+  const created = await service.createPackage({
+    ...basePackage(),
+    questions: [
+      basePackage().questions[0],
+      {
+        question_id: 'q_trigger',
+        mode: 'DISCOVER',
+        prompt: 'What made this conversation worth having now?',
+        response_type: 'LONG_TEXT',
+        required: true,
+        evidence_refs: []
+      }
+    ]
+  }, { now: 3_500_000, ttlMs: 60_000 });
+  const resolved = await service.resolveInvite(created.invite_token, { now: 3_501_000 });
+
+  const saved = await service.saveProgress(
+    resolved.session_token,
+    [{ question_id: 'q_priority', value: 'Yes' }],
+    'q_trigger',
+    { now: 3_502_000, expectedVersion: resolved.opportunity_version }
+  );
+  assert.equal(saved.ok, true);
+  assert.equal(saved.progress.resume_question_id, 'q_trigger');
+  assert.equal(saved.progress.answers.length, 1);
+  assert.equal(saved.progress.answers[0].value, 'Yes');
+
+  const resumed = await service.load(resolved.session_token, { now: 3_503_000 });
+  assert.equal(resumed.ok, true);
+  assert.equal(resumed.progress.resume_question_id, 'q_trigger');
+  assert.equal(resumed.progress.answers[0].question_id, 'q_priority');
+});
+
+test('partial progress validates supplied answers without requiring future questions', async () => {
+  const { service } = serviceFixture();
+  const created = await service.createPackage({
+    ...basePackage(),
+    opportunity_id: 'opp_progress_partial',
+    questions: [
+      basePackage().questions[0],
+      {
+        question_id: 'q_trigger',
+        mode: 'DISCOVER',
+        prompt: 'What made this conversation worth having now?',
+        response_type: 'LONG_TEXT',
+        required: true,
+        evidence_refs: []
+      }
+    ]
+  }, { now: 3_600_000, ttlMs: 60_000 });
+  const resolved = await service.resolveInvite(created.invite_token, { now: 3_601_000 });
+
+  const saved = await service.saveProgress(
+    resolved.session_token,
+    [{ question_id: 'q_priority', value: 'Yes' }],
+    'q_trigger',
+    { now: 3_602_000, expectedVersion: resolved.opportunity_version }
+  );
+  assert.equal(saved.ok, true);
+  assert.equal(saved.progress.answers.length, 1);
+});
+
+test('stale clarification progress save fails closed', async () => {
+  const { service } = serviceFixture();
+  const created = await service.createPackage(basePackage({ opportunity_id: 'opp_progress_stale' }), {
+    now: 3_700_000,
+    ttlMs: 60_000
+  });
+  const resolved = await service.resolveInvite(created.invite_token, { now: 3_701_000 });
+
+  const result = await service.saveProgress(
+    resolved.session_token,
+    [{ question_id: 'q_priority', value: 'Yes' }],
+    'q_priority',
+    { now: 3_702_000, expectedVersion: 'stale-etag' }
+  );
+  assert.equal(result.ok, false);
+  assert.equal(result.error, 'CLARIFICATION_CONFLICT');
+});
+
+test('final submission clears saved progress and remains canonical', async () => {
+  const { service } = serviceFixture();
+  const created = await service.createPackage(basePackage({ opportunity_id: 'opp_progress_submit' }), {
+    now: 3_800_000,
+    ttlMs: 60_000
+  });
+  const resolved = await service.resolveInvite(created.invite_token, { now: 3_801_000 });
+
+  const saved = await service.saveProgress(
+    resolved.session_token,
+    [{ question_id: 'q_priority', value: 'Yes' }],
+    'q_priority',
+    { now: 3_802_000, expectedVersion: resolved.opportunity_version }
+  );
+  assert.equal(saved.ok, true);
+
+  const submitted = await service.submit(
+    resolved.session_token,
+    [{ question_id: 'q_priority', value: 'Yes' }],
+    { now: 3_803_000, expectedVersion: saved.opportunity_version }
+  );
+  assert.equal(submitted.ok, true);
+
+  const loaded = await service.load(resolved.session_token, { now: 3_804_000 });
+  assert.equal(loaded.ok, true);
+  assert.equal(loaded.status, 'SUBMITTED');
+  assert.equal(loaded.progress, null);
+});
+
 test('valid submission is immutable and exported as PROSPECT_REPORTED beside evidence', async () => {
   const { repository, service } = serviceFixture();
   const created = await service.createPackage(basePackage(), { now: 4_000_000, ttlMs: 60_000 });
