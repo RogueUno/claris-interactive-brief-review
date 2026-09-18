@@ -51,6 +51,25 @@ export function createClarificationService({ repository, sessionSecret }) {
       };
     },
 
+    async reissueInvite(opportunityId, { now = Date.now(), ttlMs = 7 * 24 * 60 * 60 * 1000 } = {}) {
+      if (!Number.isFinite(ttlMs) || ttlMs <= 0 || ttlMs > 30 * 24 * 60 * 60 * 1000) {
+        return { ok: false, error: 'CLARIFICATION_TTL_INVALID' };
+      }
+      const result = await repository.reissueInvite(opportunityId, {
+        now,
+        expiresAt: new Date(now + ttlMs).toISOString()
+      });
+      if (!result.ok) return result;
+      return {
+        ok: true,
+        opportunity_id: result.envelope.package.opportunity_id,
+        status: result.envelope.package.status,
+        invite_token: result.token,
+        expires_at: result.envelope.package.expires_at,
+        opportunity_version: result.etag || null
+      };
+    },
+
     async resolveInvite(inviteToken, { now = Date.now() } = {}) {
       const resolved = await repository.resolveInvite(inviteToken, { now });
       if (!resolved.ok) return resolved;
