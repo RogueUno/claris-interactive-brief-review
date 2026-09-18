@@ -1,4 +1,4 @@
-import { normalizeClarificationPackage, normalizeProspectAnswers, publicClarificationPackage } from './contract.mjs';
+import { normalizeClarificationPackage, normalizeProspectAnswers, normalizeProspectProgress, publicClarificationPackage } from './contract.mjs';
 import { signClarificationSession, verifyClarificationSession } from './session.mjs';
 
 const SESSION_TTL_MS = 14 * 24 * 60 * 60 * 1000;
@@ -24,6 +24,7 @@ function publicState(envelope, etag) {
     clarification: publicClarificationPackage(envelope.package),
     status: envelope.package.status,
     submitted_at: envelope.response?.submitted_at || null,
+    progress: envelope.progress || null,
     opportunity_version: etag || null
   };
 }
@@ -106,6 +107,74 @@ export function createClarificationService({ repository, sessionSecret }) {
       return publicState(loaded.envelope, loaded.etag);
     },
 
+    async saveProgress(
+      sessionToken,
+      answers,
+      resumeQuestionId,
+      { now = Date.now(), expectedVersion = null } = {}
+    ) {
+      const auth = authenticate(sessionToken, now);
+      if (!auth.ok) return auth;
+
+      const loaded = await repository.loadEnvelopeWithMeta(auth.payload.opportunity_id);
+      const envelope = loaded.envelope;
+      if (!envelope) return { ok: false, error: 'CLARIFICATION_NOT_FOUND' };
+      if (auth.payload.invite_hash !== envelope.package?.invite_hash) {
+        return { ok: false, error: 'SESSION_REVOKED' };
+      }
+      if (envelope.response || envelope.package.status === 'SUBMITTED') {
+        return { ok: false, error: 'CLARIFICATION_ALREADY_SUBMITTED', opportunity_version: loaded.etag || null };
+      }
+      if (envelope.package.status !== 'OPEN') return { ok: false, error: 'CLARIFICATION_NOT_OPEN' };
+      if (isExpired(envelope.package, now)) return { ok: false, error: 'CLARIFICATION_EXPIRED' };
+      if (versionConflict(expectedVersion, loaded.etag)) {
+        return { ok: false, error: 'CLARIFICATION_CONFLICT', opportunity_version: loaded.etag || null };
+      }
+
+      const resumeId = String(resumeQuestionId || '').trim();
+      if (!resumeId || !envelope.package.questions.some((question) => question.question_id === resumeId)) {
+        return { ok: false, error: 'RESUME_QUESTION_INVALID' };
+      }
+
+      let normalizedAnswers;
+      try {
+        normalizedAnswers = normalizeProspectProgress(envelope.package, answers);
+      } catch (error) {
+        return { ok: false, error: error?.message || 'ANSWER_VALIDATION_FAILED' };
+      }
+
+      const updatedAt = new Date(now).toISOString();
+      const nextEnvelope = {
+        ...envelope,
+        progress: {
+          schema_version: 'claris_clarification_progress_v1',
+          resume_question_id: resumeId,
+          updated_at: updatedAt,
+          answers: normalizedAnswers
+        },
+        updated_at: updatedAt
+      };
+
+      let saved;
+      try {
+        saved = await repository.saveEnvelopeWithMeta(
+          envelope.package.opportunity_id,
+          nextEnvelope,
+          { ifMatch: loaded.etag }
+        );
+      } catch (error) {
+        if (blobConflict(error)) return { ok: false, error: 'CLARIFICATION_CONFLICT' };
+        throw error;
+      }
+
+      return {
+        ok: true,
+        status: 'OPEN',
+        progress: saved.envelope.progress,
+        opportunity_version: saved.etag || null
+      };
+    },
+
     async submit(sessionToken, answers, { now = Date.now(), expectedVersion = null } = {}) {
       const auth = authenticate(sessionToken, now);
       if (!auth.ok) return auth;
@@ -143,6 +212,7 @@ export function createClarificationService({ repository, sessionSecret }) {
       const nextEnvelope = {
         ...envelope,
         package: { ...envelope.package, status: 'SUBMITTED' },
+        progress: null,
         response,
         updated_at: submittedAt
       };
