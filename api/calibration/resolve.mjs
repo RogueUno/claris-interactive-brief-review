@@ -13,7 +13,8 @@ export default {
       identity: result.identity,
       resume_state: result.resume_state,
       profile_status: result.profile_status,
-      runtime_v3: result.runtime_v3
+      runtime_v3: result.runtime_v3,
+      profile_version: result.profile_version
     }, 200, { 'Set-Cookie': sessionCookie(result.session_token, result.session_expires_at) });
   }
 };
