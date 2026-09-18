@@ -157,3 +157,54 @@
     margin-left: 0;
   }
 }
+
+/* Keep the review reachable on shorter laptop and mobile viewports.
+   The page shell itself is intentionally fixed, so the review becomes the
+   single controlled scroll surface only when the available height requires it. */
+@media (max-height: 760px) and (min-width: 861px) {
+  .review-scene {
+    max-height: calc(100dvh - 142px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding-right: 10px;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255,255,255,.18) transparent;
+  }
+
+  .review-scene::-webkit-scrollbar { width: 5px; }
+  .review-scene::-webkit-scrollbar-track { background: transparent; }
+  .review-scene::-webkit-scrollbar-thumb {
+    background: rgba(255,255,255,.16);
+    border-radius: 999px;
+  }
+
+  .review-scene.is-correcting .review-grid {
+    max-height: none;
+    overflow: visible;
+    padding-right: 0;
+  }
+}
+
+@media (max-width: 860px) {
+  .review-scene {
+    max-height: calc(100dvh - 118px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: 2px 8px 22px 0;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255,255,255,.18) transparent;
+  }
+
+  .review-scene::-webkit-scrollbar { width: 4px; }
+  .review-scene::-webkit-scrollbar-track { background: transparent; }
+  .review-scene::-webkit-scrollbar-thumb {
+    background: rgba(255,255,255,.15);
+    border-radius: 999px;
+  }
+
+  .review-scene.is-correcting .review-grid {
+    max-height: none;
+    overflow: visible;
+    padding-right: 0;
+  }
+}
