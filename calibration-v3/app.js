@@ -1155,6 +1155,7 @@ function renderReview(stage) {
     () => {
       if (gaps.length) {
         setReviewCorrectionMode(true);
+        saveState(state);
         showInsight(root, `Still needed: ${gaps.join(', ')}. Choose the matching point to fix it.`);
         setTimeout(render, 360);
         return;
