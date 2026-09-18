@@ -12,8 +12,16 @@ export default {
     if (request.method === 'PUT') {
       const parsed = await parseJson(request);
       if (!parsed.ok) return parsed.response;
-      const result = await serverContext().service.saveProgress(token, parsed.value?.calibration_state);
-      const status = result.ok ? 200 : result.error === 'PROFILE_LOCKED' ? 409 : 400;
+      const result = await serverContext().service.saveProgress(
+        token,
+        parsed.value?.calibration_state,
+        { expectedVersion: parsed.value?.profile_version ?? null }
+      );
+      const status = result.ok
+        ? 200
+        : ['PROFILE_LOCKED', 'PROFILE_CONFLICT'].includes(result.error)
+          ? 409
+          : 400;
       return json(result, status);
     }
     return methodNotAllowed('GET, PUT');
