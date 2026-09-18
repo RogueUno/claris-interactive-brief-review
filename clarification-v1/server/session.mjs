@@ -38,6 +38,7 @@ export function verifyClarificationSession(token, secret, { now = Date.now() } =
     const payload = JSON.parse(Buffer.from(body, 'base64url').toString('utf8'));
     if (payload?.purpose !== PURPOSE) return { ok: false, error: 'SESSION_PURPOSE_INVALID' };
     if (!payload?.opportunity_id) return { ok: false, error: 'SESSION_OPPORTUNITY_MISSING' };
+    if (!payload?.invite_hash) return { ok: false, error: 'SESSION_INVITE_MISSING' };
     if (!Number.isFinite(payload?.expires_at) || payload.expires_at <= now) return { ok: false, error: 'SESSION_EXPIRED' };
     return { ok: true, payload };
   } catch {
