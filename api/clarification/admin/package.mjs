@@ -34,10 +34,13 @@ export default {
         opportunity_version: result.opportunity_version
       }, 201);
     } catch (error) {
-      const code = error?.message || 'CLARIFICATION_PACKAGE_CREATE_FAILED';
+      const code = error?.code || error?.message || 'CLARIFICATION_PACKAGE_CREATE_FAILED';
+      const body = { ok: false, error: code };
+      if (error?.report) body.governance_report = error.report;
+      if (error?.repair_plan) body.repair_plan = error.repair_plan;
       return json(
-        { ok: false, error: code },
-        code === 'OPPORTUNITY_ALREADY_EXISTS' ? 409 : 400
+        body,
+        code === 'OPPORTUNITY_ALREADY_EXISTS' ? 409 : code === 'CLARIFICATION_GOVERNANCE_FAILED' ? 422 : 400
       );
     }
   }
