@@ -3,7 +3,12 @@ import { bootstrapProductionSession, renderProductionBlock, startProductionPersi
 const status = await bootstrapProductionSession();
 window.__CLARIS_PRODUCTION_SESSION__ = status;
 
-if (status.mode === 'invite-error' || status.mode === 'seed-required' || status.mode === 'server-error') {
+if (
+  status.mode === 'invite-error' ||
+  status.mode === 'seed-required' ||
+  status.mode === 'session-required' ||
+  status.mode === 'server-error'
+) {
   renderProductionBlock(status);
 } else {
   await import('./app.js?v=3.9');
