@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="robots" content="noindex,nofollow">
+  <meta name="theme-color" content="#243943">
+  <title>CLARIS — Clarification Console</title>
+  <link rel="preconnect" href="https://rsms.me">
+  <link rel="stylesheet" href="./styles.css?v=1.0">
+</head>
+<body>
+  <main class="shell">
+    <section class="card">
+      <div class="eyebrow">CLARIS · Admin</div>
+      <h1>Prospect clarification test console</h1>
+      <p class="lede">Create a fixture-driven, research-aware prospect experience without Make. Your admin key is request-only and is never stored in the browser.</p>
+
+      <form id="package-form">
+        <label>Admin key<input id="admin-key" type="password" autocomplete="off" required></label>
+
+        <div class="section-title">Opportunity</div>
+        <div class="grid">
+          <label>Opportunity ID<input id="opportunity-id" required pattern="[A-Za-z0-9_-]{3,100}"></label>
+          <label>Invite lifetime
+            <select id="ttl"><option value="3">3 days</option><option value="7" selected>7 days</option><option value="14">14 days</option></select>
+          </label>
+        </div>
+
+        <div class="section-title">Consultant</div>
+        <div class="grid">
+          <label>Consultant ID<input id="consultant-id" required pattern="[A-Za-z0-9_-]{3,100}"></label>
+          <label>First name<input id="consultant-first" required></label>
+          <label>Firm<input id="consultant-firm" required></label>
+        </div>
+
+        <div class="section-title">Prospect</div>
+        <div class="grid">
+          <label>First name<input id="prospect-first" required></label>
+          <label>Role<input id="prospect-role"></label>
+          <label>Company<input id="prospect-company" required></label>
+          <label>Fixture
+            <select id="fixture-mode">
+              <option value="dynamic" selected>3 research-aware questions</option>
+              <option value="zero">Zero-question path</option>
+            </select>
+          </label>
+        </div>
+
+        <button id="create" type="submit">Create clarification package</button>
+      </form>
+
+      <div id="status" class="status" aria-live="polite"></div>
+
+      <div id="result" class="result" hidden>
+        <label id="invite-label">Invite URL
+          <div class="copy-row">
+            <input id="invite-url" readonly>
+            <button id="copy" type="button" class="secondary">Copy</button>
+          </div>
+        </label>
+        <a id="open" class="open-link" target="_blank" rel="noopener">Open prospect experience</a>
+        <button id="reissue" type="button" class="secondary full">Reissue this invite</button>
+      </div>
+    </section>
+  </main>
+  <script type="module" src="./app.mjs?v=1.0"></script>
+</body>
+</html>
