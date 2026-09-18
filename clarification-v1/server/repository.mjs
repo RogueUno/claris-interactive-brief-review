@@ -54,6 +54,7 @@ export function createClarificationRepository(storage) {
           ...pkg,
           invite_hash: tokenHash
         },
+        progress: null,
         response: null,
         updated_at: new Date(now).toISOString()
       };
