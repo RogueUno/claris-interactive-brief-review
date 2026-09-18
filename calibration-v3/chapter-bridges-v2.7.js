@@ -245,6 +245,12 @@ function handleChapterChange() {
   const toIndex = CHAPTER_ORDER.indexOf(current);
   previousChapter = current;
 
+  if (window.__CLARIS_SUPPRESS_NEXT_BRIDGE__) {
+    window.__CLARIS_SUPPRESS_NEXT_BRIDGE__ = false;
+    if (activeBridge) removeBridge(activeBridge);
+    return;
+  }
+
   // Bridges narrate forward chapter completion only.
   // Back navigation should feel immediate and must never replay the recap
   // for the chapter the user is returning from.
