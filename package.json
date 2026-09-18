@@ -5,6 +5,6 @@
   "engines": { "node": ">=22" },
   "dependencies": { "@vercel/blob": "2.8.0" },
   "scripts": {
-    "test:server": "node --test calibration-v3/server/tests/*.test.mjs"
+    "test:server": "node --test calibration-v3/server/tests/*.test.mjs clarification-v1/server/tests/*.test.mjs"
   }
 }
