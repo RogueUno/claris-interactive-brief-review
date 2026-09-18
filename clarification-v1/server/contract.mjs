@@ -1,6 +1,7 @@
 const MODES = new Set(['CONFIRM', 'CONTRAST', 'DISCOVER']);
 const RESPONSE_TYPES = new Set(['SINGLE_CHOICE', 'MULTI_CHOICE', 'SHORT_TEXT', 'LONG_TEXT']);
 const SOURCE_TYPES = new Set(['PUBLIC_WEB', 'BOOKING', 'CONSULTANT_INPUT', 'OTHER']);
+const EVIDENCE_SUBJECTS = new Set(['PROSPECT', 'COMPANY', 'OPPORTUNITY']);
 
 function text(value, field, max = 240) {
   const out = String(value || '').trim();
@@ -23,8 +24,11 @@ function id(value, field) {
 function normalizeEvidenceRef(value, index) {
   const sourceType = String(value?.source_type || '').trim().toUpperCase();
   if (!SOURCE_TYPES.has(sourceType)) throw new Error(`QUESTION_EVIDENCE_${index}_SOURCE_INVALID`);
+  const subject = String(value?.subject || '').trim().toUpperCase();
+  if (!EVIDENCE_SUBJECTS.has(subject)) throw new Error(`QUESTION_EVIDENCE_${index}_SUBJECT_INVALID`);
   return {
     source_type: sourceType,
+    subject,
     ref: text(value?.ref, `QUESTION_EVIDENCE_${index}_REF`, 500)
   };
 }
@@ -90,6 +94,7 @@ export function normalizeClarificationPackage(input, { now = Date.now(), ttlMs =
     },
     prospect: {
       first_name: text(input?.prospect?.first_name, 'PROSPECT_FIRST_NAME', 100),
+      role: optionalText(input?.prospect?.role, 'PROSPECT_ROLE', 160),
       company: text(input?.prospect?.company, 'PROSPECT_COMPANY', 180)
     },
     intro_context: optionalText(input?.intro_context, 'INTRO_CONTEXT', 420),
@@ -106,7 +111,7 @@ export function publicClarificationPackage(pkg) {
     schema_version: pkg.schema_version,
     opportunity_id: pkg.opportunity_id,
     consultant: { first_name: pkg.consultant.first_name, firm: pkg.consultant.firm },
-    prospect: { first_name: pkg.prospect.first_name, company: pkg.prospect.company },
+    prospect: { first_name: pkg.prospect.first_name, role: pkg.prospect.role || null, company: pkg.prospect.company },
     intro_context: pkg.intro_context,
     status: pkg.status,
     expires_at: pkg.expires_at,
@@ -166,5 +171,6 @@ export function normalizeProspectAnswers(pkg, input) {
 export const clarificationContract = Object.freeze({
   modes: [...MODES],
   response_types: [...RESPONSE_TYPES],
-  source_types: [...SOURCE_TYPES]
+  source_types: [...SOURCE_TYPES],
+  evidence_subjects: [...EVIDENCE_SUBJECTS]
 });
