@@ -94,6 +94,28 @@ test('lock uses server timestamp and future edits fail closed', async () => {
   assert.deepEqual(save, { ok: false, error: 'PROFILE_LOCKED' });
 });
 
+test('a locked profile cannot be overwritten by a second lock request', async () => {
+  const storage = memoryStorage();
+  const repo = createProfileRepository(storage);
+  const service = createCalibrationService({ repository: repo, sessionSecret: SECRET, buildLifecycleRecord: fakeLifecycleBuilder });
+  const { token } = await repo.createInvite(IDENTITY, { now: 1000, ttlMs: 100000 });
+  const resolved = await service.resolveInvite(token, { now: 2000 });
+
+  const first = await service.lock(resolved.session_token, COMPLETE, { now: 5000 });
+  assert.equal(first.ok, true);
+
+  const second = await service.lock(
+    resolved.session_token,
+    { ...COMPLETE, minimumEngagement: 999999 },
+    { now: 6000 }
+  );
+  assert.deepEqual(second, { ok: false, error: 'PROFILE_LOCKED' });
+
+  const loaded = await service.load(resolved.session_token, { now: 7000 });
+  assert.equal(loaded.resume_state.minimumEngagement, 7500);
+  assert.equal(loaded.profile_status, 'LOCKED');
+});
+
 test('non-USD profile can lock while runtime remains blocked', async () => {
   const storage = memoryStorage();
   const repo = createProfileRepository(storage);
