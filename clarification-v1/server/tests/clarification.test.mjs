@@ -53,9 +53,22 @@ function basePackage(overrides = {}) {
         prompt: 'Is SOC 2 still the immediate priority?',
         display_context: 'Acme currently presents SOC 2 publicly.',
         response_type: 'SINGLE_CHOICE',
-        options: ['Yes', 'No', 'Not decided'],
+        allow_other: true,
+        allow_unsure: true,
+        options: [
+          { option_id: 'priority_yes', label: 'Yes', posture: 'EVIDENCE_DERIVED', basis_ids: ['ev_soc2'] },
+          { option_id: 'priority_no', label: 'No', posture: 'GENERIC_SAFE', basis_ids: [] },
+          { option_id: 'priority_deciding', label: 'Not decided', posture: 'GENERIC_SAFE', basis_ids: [] }
+        ],
         required: true,
-        evidence_refs: [{ source_type: 'PUBLIC_WEB', subject: 'COMPANY', ref: 'https://acme.example/security' }]
+        evidence_refs: [
+          {
+            evidence_id: 'ev_soc2',
+            source_type: 'PUBLIC_WEB',
+            subject: 'COMPANY',
+            ref: 'https://acme.example/security'
+          }
+        ]
       }
     ],
     ...overrides
@@ -84,8 +97,15 @@ test('CONFIRM and CONTRAST require evidence while DISCOVER can be evidence-free'
       question_id: 'q_trigger',
       mode: 'DISCOVER',
       prompt: 'What made this conversation worth having now?',
-      response_type: 'LONG_TEXT',
-      required: true
+      response_type: 'SINGLE_CHOICE',
+      allow_other: true,
+      allow_unsure: true,
+      options: [
+        { option_id: 'trigger_customer', label: 'A customer is asking', posture: 'GENERIC_SAFE', basis_ids: [] },
+        { option_id: 'trigger_deadline', label: 'A deadline is approaching', posture: 'GENERIC_SAFE', basis_ids: [] }
+      ],
+      required: true,
+      evidence_refs: []
     }]
   });
   assert.equal(discover.questions[0].evidence_refs.length, 0);
@@ -146,6 +166,10 @@ test('committed clarification progress resumes at the next question', async () =
         mode: 'DISCOVER',
         prompt: 'What made this conversation worth having now?',
         response_type: 'LONG_TEXT',
+        friction_exception: {
+          reason: 'PROSPECT_LANGUAGE_REQUIRED',
+          rationale: 'This test intentionally exercises the exceptional free-text path.'
+        },
         required: true,
         evidence_refs: []
       }
@@ -182,6 +206,10 @@ test('partial progress validates supplied answers without requiring future quest
         mode: 'DISCOVER',
         prompt: 'What made this conversation worth having now?',
         response_type: 'LONG_TEXT',
+        friction_exception: {
+          reason: 'PROSPECT_LANGUAGE_REQUIRED',
+          rationale: 'This test intentionally exercises the exceptional free-text path.'
+        },
         required: true,
         evidence_refs: []
       }
@@ -272,8 +300,11 @@ test('valid submission is immutable and exported as PROSPECT_REPORTED beside evi
   assert.equal(result.ok, true);
   assert.equal(result.clarification_result.source_class, 'PROSPECT_REPORTED');
   assert.equal(result.clarification_result.answers[0].value, 'Yes');
-  assert.equal(result.clarification_result.answers[0].evidence_refs[0].source_type, 'PUBLIC_WEB');
-  assert.equal(result.clarification_result.answers[0].evidence_refs[0].subject, 'COMPANY');
+  assert.equal(result.clarification_result.answers[0].answer_kind, 'OPTION');
+  assert.equal(result.clarification_result.answers[0].selected_option_id, 'priority_yes');
+  assert.equal(result.clarification_result.answers[0].selected_option_postures[0], 'EVIDENCE_DERIVED');
+  assert.equal(result.clarification_result.answers[0].basis_evidence_refs[0].source_type, 'PUBLIC_WEB');
+  assert.equal(result.clarification_result.answers[0].basis_evidence_refs[0].subject, 'COMPANY');
 });
 
 test('stale opportunity version fails closed', async () => {
