@@ -101,9 +101,19 @@ export function createProfileRepository(storage) {
 
     async saveProfileEnvelopeWithMeta(consultantId, envelope, { ifMatch = null } = {}) {
       const id = assertConsultantId(consultantId);
+      const pathname = profilePath(id);
       const value = { ...envelope, schema_version: ENVELOPE_VERSION, consultant_id: id };
-      const saved = await storage.putJson(profilePath(id), value, { ifMatch });
-      return { envelope: value, etag: saved?.etag || null };
+      const saved = await storage.putJson(pathname, value, { ifMatch });
+
+      if (saved?.etag) {
+        return { envelope: value, etag: saved.etag };
+      }
+
+      const confirmed = await getJsonWithMeta(storage, pathname);
+      return {
+        envelope: confirmed.value?.schema_version === ENVELOPE_VERSION ? confirmed.value : value,
+        etag: confirmed.etag || null
+      };
     }
   };
 }
