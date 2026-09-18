@@ -36,6 +36,15 @@ export function auditClarificationDraft(input) {
     const responseType = String(question?.response_type || '').trim().toUpperCase();
     const options = Array.isArray(question?.options) ? question.options : [];
     const evidenceIds = questionEvidenceIds(question);
+    const mode = String(question?.mode || '').trim().toUpperCase();
+
+    if (['CONFIRM', 'CONTRAST'].includes(mode) && evidenceIds.size === 0) {
+      violations.push({
+        code: 'QUESTION_EVIDENCE_REQUIRED',
+        path: `${path}.evidence_refs`,
+        detail: `${mode} questions require at least one explicit evidence reference.`
+      });
+    }
 
     if (CHOICE_TYPES.has(responseType)) {
       if (options.length < 2) {
