@@ -23,6 +23,23 @@ import {
 const root = document.getElementById('calibration-root');
 let state = loadState();
 let transitioning = false;
+const REVIEW_EDIT_SESSION_KEY = 'claris_review_edit_mode_v1';
+let reviewCorrectionMode = false;
+
+function readReviewEditMode() {
+  try { return sessionStorage.getItem(REVIEW_EDIT_SESSION_KEY) === '1'; }
+  catch { return false; }
+}
+
+let reviewEditMode = readReviewEditMode();
+
+function setReviewEditMode(enabled) {
+  reviewEditMode = Boolean(enabled);
+  try {
+    if (reviewEditMode) sessionStorage.setItem(REVIEW_EDIT_SESSION_KEY, '1');
+    else sessionStorage.removeItem(REVIEW_EDIT_SESSION_KEY);
+  } catch {}
+}
 
 const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -237,14 +254,46 @@ async function transitionTo(nextIndex, message = '') {
   render();
 }
 
+function reviewStepIndex() {
+  return flow().indexOf('review');
+}
+
+function returnToReview({ discardDraft = false } = {}) {
+  if (discardDraft) state = loadState();
+  setReviewEditMode(false);
+  reviewCorrectionMode = true;
+  window.__CLARIS_SUPPRESS_NEXT_BRIDGE__ = true;
+  transitionTo(reviewStepIndex());
+}
+
+function openReviewEdit(step) {
+  const index = flow().indexOf(step);
+  if (index < 0) {
+    showInsight(root, 'That point is no longer part of the active calibration path.');
+    return;
+  }
+  setReviewEditMode(true);
+  reviewCorrectionMode = true;
+  window.__CLARIS_SUPPRESS_NEXT_BRIDGE__ = true;
+  transitionTo(index);
+}
+
 function next(message = '') {
+  if (reviewEditMode) {
+    returnToReview();
+    return;
+  }
   transitionTo(state.currentStep + 1, message);
 }
 
 function previous() {
-  // Back means “discard the draft on this screen”, not “accept it”.
-  // Rehydrate the last committed state before moving backward so only
-  // Continue advances and commits an answer.
+  // While correcting from the final review, Back means “cancel this edit and
+  // return to review”. In the normal flow it still discards the current draft.
+  if (reviewEditMode) {
+    returnToReview({ discardDraft: true });
+    return;
+  }
+
   state = loadState();
   transitionTo(state.currentStep - 1);
 }
@@ -252,9 +301,14 @@ function previous() {
 function appendActions(zone, label, onContinue) {
   const row = el('div', 'answer-actions');
   if (state.currentStep > 0) {
-    row.appendChild(iconButton('arrow-left', 'Back', previous, 'back-action'));
+    row.appendChild(iconButton(
+      'arrow-left',
+      reviewEditMode ? 'Cancel edit' : 'Back',
+      previous,
+      'back-action'
+    ));
   }
-  row.appendChild(primary(label, onContinue));
+  row.appendChild(primary(reviewEditMode ? 'Save & return' : label, onContinue));
   zone.appendChild(row);
 }
 
@@ -922,13 +976,31 @@ function criticalGaps() {
   return gaps;
 }
 
+function reviewSecondary(label, onClick) {
+  const button = wireGlass(el('button', 'review-secondary glass'));
+  button.type = 'button';
+  button.textContent = label;
+  button.addEventListener('click', onClick);
+  return button;
+}
+
+function reviewEditPoint(label, value, step) {
+  return { label, value: value || 'Still open', step };
+}
+
 function renderReview(stage) {
-  const scene = el('div', 'scene review-scene');
+  const scene = el('div', `scene review-scene${reviewCorrectionMode ? ' is-correcting' : ''}`);
   const head = el('div', 'review-head');
 
   head.appendChild(el('p', 'review-eyebrow', 'Operating profile'));
-  head.appendChild(el('h1', 'review-title', `Calibration complete, ${state.firstName}.`));
-  head.appendChild(el('p', 'review-sub', `Here’s the operating model I’ll use for ${state.firm}.`));
+  head.appendChild(el('h1', 'review-title', `Calibration complete, are we all set, ${state.firstName}?`));
+  head.appendChild(el(
+    'p',
+    'review-sub',
+    reviewCorrectionMode
+      ? 'Choose anything that doesn’t feel right. Save the change and I’ll bring you straight back here.'
+      : `Here’s the operating model I’ll use for ${state.firm}. If something feels off, choose “Not quite yet”.`
+  ));
   scene.appendChild(head);
 
   const grid = el('div', 'review-grid');
@@ -936,6 +1008,10 @@ function renderReview(stage) {
   const serviceSummary = selectedServices()
     .map((service) => `${service.name} · ${serviceStateLabel(service)}`)
     .join(' · ');
+
+  const leadPreference = state.leadServiceId
+    ? state.services.find((service) => service.service_id === state.leadServiceId)?.name || 'Follow the opportunity'
+    : 'No forced lead service';
 
   const commercialMeta = [
     ...state.engagementModels,
@@ -959,33 +1035,116 @@ function renderReview(stage) {
       : null
   ].filter(Boolean).join(' · ');
 
+  const practicePoints = [
+    reviewEditPoint('Services offered', listSummary(selectedServices().map((service) => service.name)), 'practice_services'),
+    ...selectedServices().map((service) =>
+      reviewEditPoint(`${service.name} status`, serviceStateLabel(service), `practice_state:${service.service_id}`)
+    )
+  ];
+  if (currentServices().length > 1) {
+    practicePoints.push(reviewEditPoint('Lead preference', leadPreference, 'practice_lead'));
+  }
+  pausedServices().forEach((service) => {
+    practicePoints.push(reviewEditPoint(
+      `${service.name} paused policy`,
+      state.pausedPolicies?.[service.service_id] || 'Still open',
+      `practice_paused:${service.service_id}`
+    ));
+  });
+
+  const opportunityPoints = [
+    reviewEditPoint('Company types', listSummary([...state.companyTypes, ...state.customCompanyTypes]), 'opportunity_company_types'),
+    reviewEditPoint('Buyer roles', listSummary([...state.buyerRoles, ...state.customBuyerRoles]), 'opportunity_buyers'),
+    reviewEditPoint('Company stage', state.companyStage || 'Still open', 'opportunity_stage'),
+    reviewEditPoint('Geography rule', state.geographyMatters ? 'Geography matters' : 'Geography neutral', 'opportunity_geo_material')
+  ];
+  if (state.geographyMatters) {
+    opportunityPoints.push(reviewEditPoint(
+      'Preferred geographies',
+      listSummary([...state.geographies, ...state.customGeographies]),
+      'opportunity_geographies'
+    ));
+  }
+
+  const commercialPoints = [
+    reviewEditPoint('Commercial floor', formatMoney(state.minimumEngagement, state.currency), 'commercial_minimum'),
+    reviewEditPoint('Engagement models', listSummary([...state.engagementModels, ...state.customEngagementModels]), 'commercial_models'),
+    reviewEditPoint('Budget before call one', state.budgetRequired ? 'Required' : 'May remain unknown', 'commercial_budget'),
+    reviewEditPoint(
+      'Hard disqualifiers',
+      listSummary([...state.hardDisqualifiers, ...state.customHardDisqualifiers], 'No additional hard stops'),
+      'commercial_disqualifiers'
+    ),
+    reviewEditPoint(
+      'Caution signals',
+      listSummary([...state.cautionSignals, ...state.customCautionSignals], 'No additional caution signals'),
+      'commercial_caution'
+    )
+  ];
+
+  const judgmentPoints = [
+    reviewEditPoint('First-call rules', judgmentSummary(), 'judgment_first_call'),
+    reviewEditPoint('Signals that strengthen interest', listSummary(state.positiveSignals, 'No additional strengthening signals'), 'judgment_positive'),
+    reviewEditPoint('Signals not to overvalue', listSummary(state.vanitySignals, 'No vanity-signal guardrails added'), 'judgment_vanity')
+  ];
+
+  const strategyPoints = [
+    reviewEditPoint('Discovery style', state.discoveryStyle || 'Still open', 'strategy_discovery'),
+    reviewEditPoint('Brief density', state.briefDensity || 'Still open', 'strategy_density'),
+    reviewEditPoint('Preferred next move', state.preferredNextMove || 'Still open', 'strategy_next_move'),
+    reviewEditPoint('Proof to surface', listSummary([...state.proofPoints, ...state.customProofPoints], 'No proof preference added'), 'strategy_proof'),
+    reviewEditPoint('Avoid introducing early', listSummary([...state.avoidPush, ...state.customAvoidPush], 'No additional guardrail'), 'strategy_avoid')
+  ];
+
+  const exceptionPoints = [
+    reviewEditPoint(
+      'Exceptions',
+      listSummary([...state.exceptions, ...state.customExceptions], 'No explicit exceptions'),
+      'exceptions'
+    )
+  ];
+
   grid.append(
-    reviewCard('Practice', serviceSummary, state.leadServiceId
-      ? `Lead preference: ${state.services.find((service) => service.service_id === state.leadServiceId)?.name || 'follow the opportunity'}`
-      : 'No forced lead service'),
-    reviewCard('Opportunity', opportunitySummary(), `Stakeholders: ${listSummary([...state.buyerRoles, ...state.customBuyerRoles], 'Still open')}`),
-    reviewCard('Commercial', commercialSummary(), commercialMeta),
-    reviewCard('Judgment', judgmentSummary(), judgmentMeta || 'No additional signal preferences'),
-    reviewCard('Strategy', strategySummary(), strategyMeta || 'No additional strategy guardrails'),
-    reviewCard('Exceptions', listSummary([...state.exceptions, ...state.customExceptions], 'No explicit exceptions'), 'Exceptions invite a closer look; they do not erase evidence requirements')
+    reviewCard('Practice', serviceSummary, `Lead preference: ${leadPreference}`, practicePoints),
+    reviewCard('Opportunity', opportunitySummary(), `Stakeholders: ${listSummary([...state.buyerRoles, ...state.customBuyerRoles], 'Still open')}`, opportunityPoints),
+    reviewCard('Commercial', commercialSummary(), commercialMeta, commercialPoints),
+    reviewCard('Judgment', judgmentSummary(), judgmentMeta || 'No additional signal preferences', judgmentPoints),
+    reviewCard('Strategy', strategySummary(), strategyMeta || 'No additional strategy guardrails', strategyPoints),
+    reviewCard(
+      'Exceptions',
+      listSummary([...state.exceptions, ...state.customExceptions], 'No explicit exceptions'),
+      'Exceptions invite a closer look; they do not erase evidence requirements',
+      exceptionPoints
+    )
   );
 
   scene.appendChild(grid);
 
   const actions = el('div', 'review-actions');
-  actions.appendChild(iconButton('arrow-left', 'Back', previous, 'back-action'));
+  const revise = reviewSecondary(
+    reviewCorrectionMode ? 'Done reviewing' : 'Not quite yet',
+    () => {
+      reviewCorrectionMode = !reviewCorrectionMode;
+      render();
+    }
+  );
+  revise.disabled = Boolean(state.lockedAt);
+  actions.appendChild(revise);
 
   const gaps = criticalGaps();
   const lock = primary(
     state.lockedAt ? 'Operating profile locked' : gaps.length ? 'Resolve critical gaps' : 'Lock operating profile',
     () => {
       if (gaps.length) {
-        showInsight(root, `Still needed: ${gaps.join(', ')}.`);
+        reviewCorrectionMode = true;
+        showInsight(root, `Still needed: ${gaps.join(', ')}. Choose the matching point to fix it.`);
+        setTimeout(render, 360);
         return;
       }
 
       state.lockedAt = new Date().toISOString();
       saveState(state);
+      setReviewEditMode(false);
       showInsight(root, 'Done. I’ll use this operating profile when I prepare your opportunities.');
       setTimeout(render, 460);
     }
@@ -997,13 +1156,30 @@ function renderReview(stage) {
   stage.appendChild(scene);
 }
 
-function reviewCard(title, value, meta) {
+function reviewCard(title, value, meta, points = []) {
   const card = el('article', 'review-card');
   card.append(
     el('h3', '', title),
     el('p', 'review-value', value || 'Still open'),
     el('p', 'review-meta', meta || '')
   );
+
+  if (reviewCorrectionMode && points.length) {
+    const editList = el('div', 'review-edit-list');
+    points.forEach((point) => {
+      const button = el('button', 'review-edit-point');
+      button.type = 'button';
+      button.append(
+        el('span', 'review-edit-label', point.label),
+        el('span', 'review-edit-current', point.value),
+        el('span', 'review-edit-action', 'Change')
+      );
+      button.addEventListener('click', () => openReviewEdit(point.step));
+      editList.appendChild(button);
+    });
+    card.appendChild(editList);
+  }
+
   return card;
 }
 
