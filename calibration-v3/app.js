@@ -194,30 +194,43 @@ function startCalibration(scene) {
   setTimeout(render, 900);
 }
 
+function transitionThoughtDuration(message) {
+  const words = String(message || '').trim().split(/\s+/).filter(Boolean).length;
+  return Math.max(2800, Math.min(4300, 2050 + words * 145));
+}
+
 async function transitionTo(nextIndex, message = '') {
   if (transitioning) return;
   transitioning = true;
 
   const steps = flow();
+  const departingStep = steps[state.currentStep] || 'review';
+  const departingChapter = chapterFor(departingStep);
+
   document.querySelector('#stage .scene')?.classList.add('is-exiting');
 
   state.currentStep = Math.max(0, Math.min(nextIndex, steps.length - 1));
   saveState(state);
 
   const nextStep = flow()[state.currentStep] || 'review';
-  setChapter(chapterFor(nextStep), true);
+  const nextChapter = chapterFor(nextStep);
+  const chapterChanged = nextChapter !== departingChapter;
+  setChapter(nextChapter, true);
 
   await wait(820);
 
-  if (message) {
+  // Chapter boundaries have their own paced reasoning bridge. Showing the
+  // short transition-thought underneath it created duplicate / unreadable
+  // interstitials, so these thoughts are reserved for movement inside a chapter.
+  if (message && !chapterChanged) {
     const stage = addShell(root);
     const transition = el('div', 'scene transition-scene');
     transition.appendChild(el('p', 'transition-thought', message));
     stage.appendChild(transition);
 
-    await wait(1550);
+    await wait(transitionThoughtDuration(message));
     transition.classList.add('is-exiting');
-    await wait(700);
+    await wait(760);
   }
 
   transitioning = false;
