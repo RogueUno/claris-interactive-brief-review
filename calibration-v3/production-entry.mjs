@@ -1,4 +1,4 @@
-import { bootstrapProductionSession, renderProductionBlock, startProductionPersistence } from './production-session.mjs?v=3.9';
+import { bootstrapProductionSession, renderProductionBlock, startProductionPersistence } from './production-session.mjs?v=3.11';
 
 const status = await bootstrapProductionSession();
 window.__CLARIS_PRODUCTION_SESSION__ = status;
