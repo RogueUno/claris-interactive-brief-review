@@ -1164,7 +1164,14 @@ function renderReview(stage) {
       setReviewEditMode(false);
       setReviewCorrectionMode(false);
       saveState(state);
-      showInsight(root, 'Done. I’ll use this operating profile when I prepare your opportunities.');
+
+      const awaitingServerConfirmation = Boolean(window.__CLARIS_PRODUCTION_SESSION__?.authenticated);
+      showInsight(
+        root,
+        awaitingServerConfirmation
+          ? 'Locking your operating profile…'
+          : 'Done. I’ll use this operating profile when I prepare your opportunities.'
+      );
       setTimeout(render, 460);
     }
   );
@@ -1252,6 +1259,14 @@ function profileSnapshot() {
     lockedAt: state.lockedAt
   }));
 }
+
+window.addEventListener('claris:server-profile-locked', () => {
+  state = loadState();
+  setReviewEditMode(false);
+  setReviewCorrectionMode(false);
+  showInsight(root, 'Done. I’ll use this operating profile when I prepare your opportunities.');
+  setTimeout(render, 180);
+});
 
 window.__CLARIS_CALIBRATION_V3_PREVIEW__ = {
   reset() {
