@@ -24,21 +24,31 @@ const root = document.getElementById('calibration-root');
 let state = loadState();
 let transitioning = false;
 const REVIEW_EDIT_SESSION_KEY = 'claris_review_edit_mode_v1';
-let reviewCorrectionMode = false;
+const REVIEW_CORRECTION_SESSION_KEY = 'claris_review_correction_mode_v1';
 
-function readReviewEditMode() {
-  try { return sessionStorage.getItem(REVIEW_EDIT_SESSION_KEY) === '1'; }
+function readSessionFlag(key) {
+  try { return sessionStorage.getItem(key) === '1'; }
   catch { return false; }
 }
 
-let reviewEditMode = readReviewEditMode();
+let reviewEditMode = readSessionFlag(REVIEW_EDIT_SESSION_KEY);
+let reviewCorrectionMode = readSessionFlag(REVIEW_CORRECTION_SESSION_KEY) || reviewEditMode;
+
+function setSessionFlag(key, enabled) {
+  try {
+    if (enabled) sessionStorage.setItem(key, '1');
+    else sessionStorage.removeItem(key);
+  } catch {}
+}
 
 function setReviewEditMode(enabled) {
   reviewEditMode = Boolean(enabled);
-  try {
-    if (reviewEditMode) sessionStorage.setItem(REVIEW_EDIT_SESSION_KEY, '1');
-    else sessionStorage.removeItem(REVIEW_EDIT_SESSION_KEY);
-  } catch {}
+  setSessionFlag(REVIEW_EDIT_SESSION_KEY, reviewEditMode);
+}
+
+function setReviewCorrectionMode(enabled) {
+  reviewCorrectionMode = Boolean(enabled);
+  setSessionFlag(REVIEW_CORRECTION_SESSION_KEY, reviewCorrectionMode);
 }
 
 const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -261,7 +271,7 @@ function reviewStepIndex() {
 function returnToReview({ discardDraft = false } = {}) {
   if (discardDraft) state = loadState();
   setReviewEditMode(false);
-  reviewCorrectionMode = true;
+  setReviewCorrectionMode(true);
   window.__CLARIS_SUPPRESS_NEXT_BRIDGE__ = true;
   transitionTo(reviewStepIndex());
 }
@@ -273,7 +283,7 @@ function openReviewEdit(step) {
     return;
   }
   setReviewEditMode(true);
-  reviewCorrectionMode = true;
+  setReviewCorrectionMode(true);
   window.__CLARIS_SUPPRESS_NEXT_BRIDGE__ = true;
   transitionTo(index);
 }
@@ -993,7 +1003,7 @@ function renderReview(stage) {
   const head = el('div', 'review-head');
 
   head.appendChild(el('p', 'review-eyebrow', 'Operating profile'));
-  head.appendChild(el('h1', 'review-title', `Calibration complete, are we all set, ${state.firstName}?`));
+  head.appendChild(el('h1', 'review-title', `Calibration complete. Are we all set, ${state.firstName}?`));
   head.appendChild(el(
     'p',
     'review-sub',
@@ -1124,7 +1134,7 @@ function renderReview(stage) {
   const revise = reviewSecondary(
     reviewCorrectionMode ? 'Done reviewing' : 'Not quite yet',
     () => {
-      reviewCorrectionMode = !reviewCorrectionMode;
+      setReviewCorrectionMode(!reviewCorrectionMode);
       render();
     }
   );
@@ -1136,7 +1146,7 @@ function renderReview(stage) {
     state.lockedAt ? 'Operating profile locked' : gaps.length ? 'Resolve critical gaps' : 'Lock operating profile',
     () => {
       if (gaps.length) {
-        reviewCorrectionMode = true;
+        setReviewCorrectionMode(true);
         showInsight(root, `Still needed: ${gaps.join(', ')}. Choose the matching point to fix it.`);
         setTimeout(render, 360);
         return;
@@ -1145,13 +1155,19 @@ function renderReview(stage) {
       state.lockedAt = new Date().toISOString();
       saveState(state);
       setReviewEditMode(false);
+      setReviewCorrectionMode(false);
       showInsight(root, 'Done. I’ll use this operating profile when I prepare your opportunities.');
       setTimeout(render, 460);
     }
   );
 
   lock.disabled = Boolean(state.lockedAt);
-  actions.appendChild(lock);
+
+  // “Not quite yet” is a deliberate correction state. Require the consultant
+  // to finish reviewing and return to the clean summary before the irreversible
+  // lock action is offered again.
+  if (!reviewCorrectionMode) actions.appendChild(lock);
+
   scene.appendChild(actions);
   stage.appendChild(scene);
 }
