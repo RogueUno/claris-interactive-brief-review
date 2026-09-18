@@ -9,7 +9,13 @@ export default {
     const parsed = await parseJson(request);
     if (!parsed.ok) return parsed.response;
     const result = await serverContext().service.lock(token, parsed.value?.calibration_state);
-    const status = result.ok ? 200 : result.error === 'PROFILE_VALIDATION_FAILED' ? 422 : 400;
+    const status = result.ok
+      ? 200
+      : result.error === 'PROFILE_LOCKED'
+        ? 409
+        : result.error === 'PROFILE_VALIDATION_FAILED'
+          ? 422
+          : 400;
     return json(result, status);
   }
 };
