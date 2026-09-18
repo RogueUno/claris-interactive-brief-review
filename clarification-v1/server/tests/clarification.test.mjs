@@ -207,6 +207,8 @@ test('reissue rotates the invite without persisting the new raw token', async ()
   const { storage, service } = serviceFixture();
   const created = await service.createPackage(basePackage(), { now: 7_500_000, ttlMs: 60_000 });
   const firstToken = created.invite_token;
+  const firstSession = await service.resolveInvite(firstToken, { now: 7_501_000 });
+  assert.equal(firstSession.ok, true);
 
   const reissued = await service.reissueInvite('opp_acme_001', { now: 7_510_000, ttlMs: 120_000 });
   assert.equal(reissued.ok, true);
@@ -216,6 +218,18 @@ test('reissue rotates the invite without persisting the new raw token', async ()
   const firstResolve = await service.resolveInvite(firstToken, { now: 7_511_000 });
   assert.equal(firstResolve.ok, false);
   assert.equal(firstResolve.error, 'INVITE_NOT_ACTIVE');
+
+  const revokedLoad = await service.load(firstSession.session_token, { now: 7_511_000 });
+  assert.equal(revokedLoad.ok, false);
+  assert.equal(revokedLoad.error, 'SESSION_REVOKED');
+
+  const revokedSubmit = await service.submit(
+    firstSession.session_token,
+    [{ question_id: 'q_priority', value: 'Yes' }],
+    { now: 7_511_000, expectedVersion: firstSession.opportunity_version }
+  );
+  assert.equal(revokedSubmit.ok, false);
+  assert.equal(revokedSubmit.error, 'SESSION_REVOKED');
 
   const secondResolve = await service.resolveInvite(reissued.invite_token, { now: 7_511_000 });
   assert.equal(secondResolve.ok, true);
