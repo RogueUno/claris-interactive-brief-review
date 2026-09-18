@@ -1,0 +1,33 @@
+import { clarificationServerContext } from '../../clarification-v1/server/api-shared.mjs';
+import { CLARIFICATION_SESSION_COOKIE, cookieValue, json, methodNotAllowed, parseJson } from '../../clarification-v1/server/http.mjs';
+
+export default {
+  async fetch(request) {
+    if (request.method !== 'PUT') return methodNotAllowed('PUT');
+    const token = cookieValue(request, CLARIFICATION_SESSION_COOKIE);
+    if (!token) return json({ ok: false, error: 'SESSION_REQUIRED' }, 401);
+
+    const parsed = await parseJson(request);
+    if (!parsed.ok) return parsed.response;
+
+    const result = await clarificationServerContext().service.saveProgress(
+      token,
+      parsed.value?.answers,
+      parsed.value?.resume_question_id,
+      { expectedVersion: parsed.value?.opportunity_version ?? null }
+    );
+
+    if (result.ok) return json(result);
+
+    const status = ['CLARIFICATION_ALREADY_SUBMITTED', 'CLARIFICATION_CONFLICT', 'CLARIFICATION_NOT_OPEN'].includes(result.error)
+      ? 409
+      : result.error === 'CLARIFICATION_EXPIRED'
+        ? 410
+        : result.error === 'CLARIFICATION_NOT_FOUND'
+          ? 404
+          : result.error === 'RESUME_QUESTION_INVALID' || result.error?.startsWith('ANSWER_')
+            ? 422
+            : 401;
+    return json(result, status);
+  }
+};
