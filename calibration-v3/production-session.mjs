@@ -9,6 +9,10 @@ const API = Object.freeze({
 const SERVER_HOST_RE = /\.vercel\.app$/i;
 const SAVE_DEBOUNCE_MS = 900;
 const LIFECYCLE_STORAGE_PREFIX = 'claris_profile_lifecycle_v1:';
+const REVIEW_SESSION_KEYS = Object.freeze([
+  'claris_review_edit_mode_v1',
+  'claris_review_correction_mode_v1'
+]);
 
 function onServerHost() {
   return SERVER_HOST_RE.test(window.location.hostname) || window.location.hostname === 'localhost';
@@ -28,6 +32,10 @@ function writeLocalState(value) {
 }
 
 function clearStaleLocalConsultantData() {
+  REVIEW_SESSION_KEYS.forEach((key) => {
+    try { window.sessionStorage.removeItem(key); } catch {}
+  });
+
   const local = readLocalState();
   const consultantId = String(local?.consultantId || '');
   if (!consultantId || consultantId.startsWith('consultant_prototype_')) return;
