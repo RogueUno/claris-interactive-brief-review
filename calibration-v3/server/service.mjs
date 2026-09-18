@@ -110,6 +110,11 @@ export function createCalibrationService({ repository, sessionSecret, buildLifec
       const identity = await repository.loadIdentity(auth.payload.consultant_id);
       if (!identity) return { ok: false, error: 'CONSULTANT_IDENTITY_NOT_FOUND' };
 
+      const existing = await repository.loadProfileEnvelope(identity.consultant_id);
+      if (existing?.lifecycle_record?.status === 'LOCKED') {
+        return { ok: false, error: 'PROFILE_LOCKED' };
+      }
+
       const lockedAt = new Date(now).toISOString();
       const boundState = bindIdentity({ ...(calibrationState || {}), lockedAt }, identity);
       const lifecycle = buildLifecycleRecord(boundState, { persistedAt: lockedAt });
