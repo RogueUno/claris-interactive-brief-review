@@ -1,7 +1,7 @@
 const CHAPTER_ORDER = ['Practice', 'Opportunity', 'Commercial', 'Judgment', 'Strategy', 'Exceptions', 'Review'];
 let previousChapter = '';
 let activeBridge = null;
-let bridgeTimer = null;
+let bridgeTimers = [];
 
 function safeProfile() {
   try {
@@ -82,89 +82,146 @@ const bridgeLogic = {
   Practice: {
     next: 'Opportunity',
     conclusion: practiceConclusion,
-    reason: 'Now I need to know who that work is really for.'
+    reason: 'Now I need to know who that work is really for.',
+    split: true
   },
   Opportunity: {
     next: 'Commercial',
     conclusion: opportunityConclusion,
-    reason: 'Next: what makes that fit worth taking on?'
+    reason: 'Next: what makes that fit worth taking on?',
+    split: false
   },
   Commercial: {
     next: 'Judgment',
     conclusion: commercialConclusion,
-    reason: 'Next: what makes a first call worth your time?'
+    reason: 'Next: what makes a first call worth your time?',
+    split: true
   },
   Judgment: {
     next: 'Strategy',
     conclusion: judgmentConclusion,
-    reason: 'Next: how do you want a good opportunity approached?'
+    reason: 'Next: how do you want a good opportunity approached?',
+    split: false
   },
   Strategy: {
     next: 'Exceptions',
     conclusion: strategyConclusion,
-    reason: 'Last: where should that default playbook bend?'
+    reason: 'Last: where should that default playbook bend?',
+    split: false
   },
   Exceptions: {
     next: 'Review',
     conclusion: exceptionConclusion,
-    reason: 'The reasoning model is complete. Let’s review what I’ll use.'
+    reason: 'The reasoning model is complete. Let’s review what I’ll use.',
+    split: true
   }
 };
 
-function readingDuration(text) {
+function readingDuration(text, { splitPhase = false } = {}) {
   const words = String(text || '').trim().split(/\s+/).filter(Boolean).length;
-  return Math.max(4300, Math.min(5700, 2850 + words * 120));
+  if (splitPhase) return Math.max(3900, Math.min(5200, 3000 + words * 150));
+  return Math.max(6000, Math.min(7800, 3900 + words * 165));
+}
+
+function clearBridgeTimers() {
+  bridgeTimers.forEach((timer) => window.clearTimeout(timer));
+  bridgeTimers = [];
 }
 
 function removeBridge(shell) {
   if (!shell) return;
+  clearBridgeTimers();
   shell.classList.add('is-leaving');
   document.body.classList.remove('claris-bridge-active');
-  window.setTimeout(() => shell.remove(), 560);
+  window.setTimeout(() => shell.remove(), 620);
   if (activeBridge === shell) activeBridge = null;
+}
+
+function makeEyebrow(text) {
+  const node = document.createElement('p');
+  node.className = 'claris-reasoning-bridge__eyebrow';
+  node.textContent = text;
+  return node;
+}
+
+function makeConclusion(text) {
+  const node = document.createElement('p');
+  node.className = 'claris-reasoning-bridge__conclusion';
+  node.textContent = text;
+  return node;
+}
+
+function makeReason(text) {
+  const node = document.createElement('p');
+  node.className = 'claris-reasoning-bridge__reason';
+  node.textContent = text;
+  return node;
 }
 
 function showBridge(chapter) {
   const logic = bridgeLogic[chapter];
   if (!logic) return;
 
-  activeBridge?.remove();
-  if (bridgeTimer) window.clearTimeout(bridgeTimer);
+  if (activeBridge) activeBridge.remove();
+  clearBridgeTimers();
 
   const snapshot = safeProfile();
   const conclusion = logic.conclusion(snapshot);
   const reason = logic.reason;
-  const totalText = `${conclusion} ${reason}`;
-  const duration = readingDuration(totalText);
 
   const shell = document.createElement('section');
   shell.className = 'claris-reasoning-bridge';
   shell.setAttribute('aria-live', 'polite');
   shell.setAttribute('aria-label', `${chapter} to ${logic.next}`);
-  shell.style.setProperty('--bridge-duration', `${duration}ms`);
 
   const inner = document.createElement('div');
   inner.className = 'claris-reasoning-bridge__inner';
 
-  const eyebrow = document.createElement('p');
-  eyebrow.className = 'claris-reasoning-bridge__eyebrow';
-  eyebrow.textContent = `${chapter}  →  ${logic.next}`;
+  let duration;
 
-  const conclusionNode = document.createElement('p');
-  conclusionNode.className = 'claris-reasoning-bridge__conclusion';
-  conclusionNode.textContent = conclusion;
+  if (logic.split) {
+    shell.classList.add('is-split');
 
-  const reasonNode = document.createElement('p');
-  reasonNode.className = 'claris-reasoning-bridge__reason';
-  reasonNode.textContent = reason;
+    const firstDuration = readingDuration(conclusion, { splitPhase: true });
+    const secondDuration = readingDuration(reason, { splitPhase: true });
+    const phaseTransition = 700;
+    duration = firstDuration + secondDuration + phaseTransition;
 
-  inner.append(eyebrow, conclusionNode, reasonNode);
+    const summaryPanel = document.createElement('div');
+    summaryPanel.className = 'claris-reasoning-bridge__panel claris-reasoning-bridge__panel--summary';
+    summaryPanel.append(
+      makeEyebrow(`${chapter} understood`),
+      makeConclusion(conclusion)
+    );
+
+    const nextPanel = document.createElement('div');
+    nextPanel.className = 'claris-reasoning-bridge__panel claris-reasoning-bridge__panel--next';
+    nextPanel.append(
+      makeEyebrow(`Next · ${logic.next}`),
+      makeReason(reason)
+    );
+
+    inner.append(summaryPanel, nextPanel);
+
+    bridgeTimers.push(window.setTimeout(() => {
+      if (activeBridge === shell) shell.classList.add('is-phase-two');
+    }, firstDuration));
+  } else {
+    duration = readingDuration(`${conclusion} ${reason}`);
+    inner.append(
+      makeEyebrow(`${chapter}  →  ${logic.next}`),
+      makeConclusion(conclusion),
+      makeReason(reason)
+    );
+  }
+
+  shell.style.setProperty('--bridge-duration', `${duration}ms`);
   shell.appendChild(inner);
   document.body.appendChild(shell);
   document.body.classList.add('claris-bridge-active');
   activeBridge = shell;
 
-  bridgeTimer = window.setTimeout(() => removeBridge(shell), duration);
+  bridgeTimers.push(window.setTimeout(() => removeBridge(shell), duration));
 }
 
 function currentChapter() {
@@ -184,7 +241,20 @@ function handleChapterChange() {
   if (current === previousChapter) return;
 
   const departing = previousChapter;
+  const fromIndex = CHAPTER_ORDER.indexOf(departing);
+  const toIndex = CHAPTER_ORDER.indexOf(current);
   previousChapter = current;
+
+  // Bridges narrate forward chapter completion only.
+  // Back navigation should feel immediate and must never replay the recap
+  // for the chapter the user is returning from.
+  if (toIndex <= fromIndex) {
+    if (activeBridge) removeBridge(activeBridge);
+    return;
+  }
+
+  const logic = bridgeLogic[departing];
+  if (!logic || logic.next !== current) return;
   showBridge(departing);
 }
 
