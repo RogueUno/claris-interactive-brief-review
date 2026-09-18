@@ -36,41 +36,141 @@ function setStatus(message, kind = '') {
 }
 
 function dynamicQuestions() {
+  const company = prospectCompany.value.trim();
+  const prospect = prospectFirst.value.trim();
+
   return [
     {
       question_id: 'q_priority',
       mode: 'CONFIRM',
-      prompt: 'Is SOC 2 still the immediate compliance priority?',
-      display_context: `${prospectCompany.value.trim()} currently presents SOC 2 readiness publicly as part of its security work.`,
+      prompt: 'Is SOC 2 still the immediate priority?',
+      display_context: `We can see SOC 2 is part of ${company}’s current security story. A quick check helps us avoid assuming it is still the main priority.`,
       response_type: 'SINGLE_CHOICE',
-      options: ['Yes — SOC 2 is the priority', 'No — another framework is more urgent', 'It is still being decided'],
+      allow_other: true,
+      allow_unsure: true,
+      options: [
+        {
+          option_id: 'priority_soc2',
+          label: 'Yes — SOC 2 is the priority',
+          posture: 'EVIDENCE_DERIVED',
+          basis_ids: ['ev_company_soc2']
+        },
+        {
+          option_id: 'priority_other_framework',
+          label: 'Another framework or requirement is more urgent',
+          posture: 'GENERIC_SAFE',
+          basis_ids: []
+        },
+        {
+          option_id: 'priority_deciding',
+          label: 'We’re still deciding what comes first',
+          posture: 'GENERIC_SAFE',
+          basis_ids: []
+        }
+      ],
       required: true,
       evidence_refs: [
-        { source_type: 'PUBLIC_WEB', subject: 'COMPANY', ref: 'fixture://company/trust-center' }
+        {
+          evidence_id: 'ev_company_soc2',
+          source_type: 'PUBLIC_WEB',
+          subject: 'COMPANY',
+          ref: 'fixture://company/trust-center'
+        }
       ]
     },
     {
       question_id: 'q_owner',
       mode: 'CONTRAST',
-      prompt: 'Who will own this initiative internally?',
-      display_context: `Public role information for ${prospectFirst.value.trim()} suggests engineering ownership, while the booking context points to a broader compliance initiative.`,
+      prompt: 'Who is most likely to own this internally?',
+      display_context: `We have signals pointing to both ${prospect}’s engineering role and a broader compliance initiative, so we’d rather confirm the owner than guess.`,
       response_type: 'SINGLE_CHOICE',
-      options: ['Security / GRC', 'Engineering / IT', 'Executive leadership', 'Shared ownership', 'Not decided yet'],
+      allow_other: true,
+      allow_unsure: true,
+      options: [
+        {
+          option_id: 'owner_engineering',
+          label: 'Engineering / IT',
+          posture: 'INFERENCE',
+          basis_ids: ['ev_prospect_role']
+        },
+        {
+          option_id: 'owner_security',
+          label: 'Security / GRC',
+          posture: 'INFERENCE',
+          basis_ids: ['ev_booking_compliance']
+        },
+        {
+          option_id: 'owner_shared',
+          label: 'Shared ownership across teams',
+          posture: 'GENERIC_SAFE',
+          basis_ids: []
+        }
+      ],
       required: true,
       evidence_refs: [
-        { source_type: 'PUBLIC_WEB', subject: 'PROSPECT', ref: 'fixture://prospect/public-role' },
-        { source_type: 'BOOKING', subject: 'OPPORTUNITY', ref: 'fixture://booking/context' }
+        {
+          evidence_id: 'ev_prospect_role',
+          source_type: 'PUBLIC_WEB',
+          subject: 'PROSPECT',
+          ref: 'fixture://prospect/public-role'
+        },
+        {
+          evidence_id: 'ev_booking_compliance',
+          source_type: 'BOOKING',
+          subject: 'OPPORTUNITY',
+          ref: 'fixture://booking/context'
+        }
       ]
     },
     {
       question_id: 'q_trigger',
       mode: 'DISCOVER',
-      prompt: 'What made this conversation worth having now?',
-      display_context: null,
-      response_type: 'LONG_TEXT',
-      options: [],
+      prompt: 'What best describes why this became a priority now?',
+      display_context: 'We already have most of the background. This just helps us understand what changed recently.',
+      response_type: 'SINGLE_CHOICE',
+      allow_other: true,
+      allow_unsure: true,
+      options: [
+        {
+          option_id: 'trigger_customer',
+          label: 'A customer or prospect is asking for security or compliance evidence',
+          posture: 'INFERENCE',
+          basis_ids: ['ev_booking_customer']
+        },
+        {
+          option_id: 'trigger_upmarket',
+          label: 'Larger customers are raising the security bar',
+          posture: 'INFERENCE',
+          basis_ids: ['ev_company_enterprise']
+        },
+        {
+          option_id: 'trigger_deadline',
+          label: 'A compliance milestone or deadline is approaching',
+          posture: 'GENERIC_SAFE',
+          basis_ids: []
+        },
+        {
+          option_id: 'trigger_maturing',
+          label: 'We’re formalizing security as the company grows',
+          posture: 'GENERIC_SAFE',
+          basis_ids: []
+        }
+      ],
       required: true,
-      evidence_refs: []
+      evidence_refs: [
+        {
+          evidence_id: 'ev_booking_customer',
+          source_type: 'BOOKING',
+          subject: 'OPPORTUNITY',
+          ref: 'fixture://booking/customer-security-requirements'
+        },
+        {
+          evidence_id: 'ev_company_enterprise',
+          source_type: 'PUBLIC_WEB',
+          subject: 'COMPANY',
+          ref: 'fixture://company/enterprise-offer'
+        }
+      ]
     }
   ];
 }
@@ -90,7 +190,7 @@ function buildPackage() {
     },
     intro_context: fixtureMode.value === 'zero'
       ? null
-      : `I found a few public signals about ${prospectCompany.value.trim()} and ${prospectFirst.value.trim()}’s role. These questions only clarify what the research still cannot settle reliably.`,
+      : `We already have most of the context on ${prospectCompany.value.trim()} and ${prospectFirst.value.trim()}’s role. These quick checks only resolve what the available signals cannot settle reliably.`,
     questions: fixtureMode.value === 'zero' ? [] : dynamicQuestions()
   };
 }
