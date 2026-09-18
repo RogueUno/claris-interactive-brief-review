@@ -121,7 +121,8 @@ export async function bootstrapProductionSession() {
       if (!result.ok) {
         if (result.status === 401) {
           clearStaleLocalConsultantData();
-          status.mode = 'preview';
+          status.error = result.body?.error || 'SESSION_REQUIRED';
+          status.mode = 'session-required';
           return status;
         }
         status.error = result.body?.error || `PROFILE_LOAD_${result.status}`;
@@ -316,9 +317,13 @@ export function renderProductionBlock(status) {
   if (!root) return;
   const title = status?.mode === 'seed-required'
     ? 'This calibration is not ready yet.'
-    : 'This calibration link could not be opened.';
+    : status?.mode === 'session-required'
+      ? 'A private calibration link is required.'
+      : 'This calibration link could not be opened.';
   const detail = status?.mode === 'seed-required'
     ? 'The consultant identity was verified, but the approved research seed is missing. Nothing has been saved.'
-    : 'Please request a fresh CLARIS calibration link.';
+    : status?.mode === 'session-required'
+      ? 'Open the CLARIS invite you received to continue or resume your calibration.'
+      : 'Please request a fresh CLARIS calibration link.';
   root.innerHTML = `<div style="min-height:100vh;display:grid;place-items:center;padding:32px;font-family:Inter,system-ui,sans-serif"><div style="max-width:620px;text-align:center"><h1 style="font-weight:300;letter-spacing:-.03em">${title}</h1><p style="opacity:.7;line-height:1.6">${detail}</p></div></div>`;
 }
