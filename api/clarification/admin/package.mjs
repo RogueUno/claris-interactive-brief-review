@@ -76,7 +76,14 @@ export default {
 
     const adminKey = process.env.CLARIS_ADMIN_KEY || '';
     if (!adminKey || bearerToken(request) !== adminKey) {
-      return json({ ok: false, error: 'ADMIN_UNAUTHORIZED' }, 401);
+      const authLikeHeaderNames = [...request.headers.keys()]
+        .filter((name) => /auth|api|key/i.test(name))
+        .sort();
+      return json({
+        ok: false,
+        error: 'ADMIN_UNAUTHORIZED',
+        diagnostic_auth_header_names: authLikeHeaderNames
+      }, 401);
     }
 
     const operation = String(request.headers.get('x-claris-operation') || '').trim().toUpperCase();
