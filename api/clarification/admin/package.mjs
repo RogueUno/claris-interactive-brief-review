@@ -98,7 +98,27 @@ export default {
     const adminKey = String(process.env.CLARIS_ADMIN_KEY || '').trim();
     const makeKey = String(process.env.CLARIS_MAKE_KEY || '').trim();
     if (!adminAuthorized(request, [adminKey, makeKey])) {
-      return json({ ok: false, error: 'ADMIN_UNAUTHORIZED' }, 401);
+      const authorization = String(request.headers.get('authorization') || '').trim();
+      const bearerStripped = authorization
+        .replace(/^(?:Bearer(?:%20|\s+))+/i, '')
+        .replace(/^['"]|['"]$/g, '')
+        .trim();
+      return json({
+        ok: false,
+        error: 'ADMIN_UNAUTHORIZED',
+        diagnostic: {
+          authorization_present: Boolean(authorization),
+          authorization_length: authorization.length,
+          bearer_prefix_present: /^(?:Bearer(?:%20|\s+))/i.test(authorization),
+          normalized_token_length: bearerStripped.length,
+          admin_key_configured: Boolean(adminKey),
+          admin_key_length: adminKey.length,
+          make_key_configured: Boolean(makeKey),
+          make_key_length: makeKey.length,
+          normalized_matches_admin: Boolean(adminKey) && bearerStripped === adminKey,
+          normalized_matches_make: Boolean(makeKey) && bearerStripped === makeKey
+        }
+      }, 401);
     }
 
     const operation = String(request.headers.get('x-claris-operation') || '').trim().toUpperCase();
