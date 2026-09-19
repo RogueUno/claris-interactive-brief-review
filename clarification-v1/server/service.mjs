@@ -37,9 +37,9 @@ export function createClarificationService({ repository, sessionSecret }) {
   }
 
   return {
-    async createPackage(input, { now = Date.now(), ttlMs } = {}) {
+    async createPackage(input, { now = Date.now(), ttlMs, finalizeContext = null } = {}) {
       const pkg = normalizeClarificationPackage(input, { now, ...(ttlMs ? { ttlMs } : {}) });
-      const created = await repository.createPackage(pkg, { now });
+      const created = await repository.createPackage(pkg, { now, finalizeContext });
       return {
         ok: true,
         opportunity_id: pkg.opportunity_id,
