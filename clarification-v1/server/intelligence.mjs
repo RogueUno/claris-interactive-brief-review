@@ -320,6 +320,22 @@ export function createClarificationIntelligence({
   };
 }
 
+export function materializeClarificationProposal(bundle, proposal) {
+  return materializeProposal(bundle, proposal);
+}
+
+export function validateClarificationSemanticReport(bundle, report) {
+  return validateSemanticReport(bundle, report);
+}
+
+export function mergeClarificationIssues(materialized, semantic) {
+  return mergeIssues(materialized, semantic);
+}
+
+export function buildClarificationIntelligenceRepairPlan(issues) {
+  return repairPlanFromIssues(issues);
+}
+
 export const clarificationIntelligenceInternals = Object.freeze({
   max_repairs: MAX_REPAIRS
 });
