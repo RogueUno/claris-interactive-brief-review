@@ -34,7 +34,7 @@ function normalizeEvidenceItem(item, index) {
     source_type: sourceType,
     subject,
     visibility,
-    statement: requiredText(item?.statement, `EVIDENCE_${index}_STATEMENT`, 1200),
+    statement: requiredText(item?.statement, `EVIDENCE_${index}_STATEMENT`, 8000),
     ref: requiredText(item?.ref, `EVIDENCE_${index}_REF`, 800),
     observed_at: optionalText(item?.observed_at, `EVIDENCE_${index}_OBSERVED_AT`, 80),
     authority: optionalText(item?.authority, `EVIDENCE_${index}_AUTHORITY`, 100),
