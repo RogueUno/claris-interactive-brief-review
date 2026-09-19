@@ -10,6 +10,8 @@ function adminAuthorized(request, adminKey) {
 
   const authorization = String(request.headers.get('authorization') || '').trim();
   const candidates = new Set([authorization]);
+  const finalToken = authorization.split(/\s+/).filter(Boolean).at(-1);
+  if (finalToken) candidates.add(finalToken);
 
   let stripped = authorization;
   for (let index = 0; index < 2; index += 1) {
@@ -90,7 +92,7 @@ export default {
   async fetch(request) {
     if (request.method !== 'POST') return methodNotAllowed('POST');
 
-    const adminKey = process.env.CLARIS_ADMIN_KEY || '';
+    const adminKey = String(process.env.CLARIS_ADMIN_KEY || '').trim();
     if (!adminAuthorized(request, adminKey)) {
       return json({ ok: false, error: 'ADMIN_UNAUTHORIZED' }, 401);
     }
