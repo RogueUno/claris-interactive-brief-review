@@ -39,6 +39,7 @@ function caseState() {
 
 function base(action) {
   return {
+    protocol_version: 'claris_clarification_protocol_v1',
     action,
     opportunity_id: 'opp_protocol_001',
     case_state_json: JSON.stringify(caseState()),
@@ -204,5 +205,15 @@ test('unknown or uncertified PREPARE never reaches model stage', () => {
   assert.throws(
     () => runClarificationProtocolStep(value),
     /PREPARE_SEMANTIC_NOT_CERTIFIED/
+  );
+});
+
+
+test('unsupported protocol version fails closed before adaptation', () => {
+  const value = base('START');
+  value.protocol_version = 'claris_clarification_protocol_v999';
+  assert.throws(
+    () => runClarificationProtocolStep(value),
+    /CLARIFICATION_PROTOCOL_VERSION_UNSUPPORTED/
   );
 });
