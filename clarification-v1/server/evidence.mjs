@@ -36,7 +36,12 @@ function normalizeEvidenceItem(item, index) {
     visibility,
     statement: requiredText(item?.statement, `EVIDENCE_${index}_STATEMENT`, 1200),
     ref: requiredText(item?.ref, `EVIDENCE_${index}_REF`, 800),
-    observed_at: optionalText(item?.observed_at, `EVIDENCE_${index}_OBSERVED_AT`, 80)
+    observed_at: optionalText(item?.observed_at, `EVIDENCE_${index}_OBSERVED_AT`, 80),
+    authority: optionalText(item?.authority, `EVIDENCE_${index}_AUTHORITY`, 100),
+    strength: optionalText(item?.strength, `EVIDENCE_${index}_STRENGTH`, 40),
+    freshness: optionalText(item?.freshness, `EVIDENCE_${index}_FRESHNESS`, 80),
+    source_date: optionalText(item?.source_date, `EVIDENCE_${index}_SOURCE_DATE`, 80),
+    channel: optionalText(item?.channel, `EVIDENCE_${index}_CHANNEL`, 100)
   };
 }
 
@@ -78,7 +83,12 @@ export function publicEvidenceView(bundle) {
       source_type: item.source_type,
       subject: item.subject,
       visibility: item.visibility,
-      statement: item.statement
+      statement: item.statement,
+      authority: item.authority,
+      strength: item.strength,
+      freshness: item.freshness,
+      source_date: item.source_date,
+      channel: item.channel
     }))
   };
 }
