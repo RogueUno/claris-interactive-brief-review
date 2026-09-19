@@ -1,4 +1,8 @@
 import { normalizeClarificationPackage } from './contract.mjs';
+import {
+  consultantPolicyAuditView,
+  normalizeClarificationConsultantPolicy
+} from './consultant-policy.mjs';
 import { publicEvidenceView } from './evidence.mjs';
 import {
   buildClarificationIntelligenceRepairPlan,
@@ -13,7 +17,7 @@ import {
 } from './model-prompts.mjs';
 import { adaptCertifiedPrepareToClarificationEvidence } from './prepare-adapter.mjs';
 
-const PROTOCOL_VERSION = 'claris_clarification_protocol_v1';
+const PROTOCOL_VERSION = 'claris_clarification_protocol_v2';
 
 const ACTIONS = new Set([
   'START',
@@ -73,9 +77,11 @@ function contextFromInput(input) {
     consultant: input?.consultant,
     prospect: input?.prospect
   });
+  const consultantPolicy = normalizeClarificationConsultantPolicy(input?.consultant_sot_json);
   return {
     bundle,
-    model_evidence: publicEvidenceView(bundle)
+    model_evidence: publicEvidenceView(bundle),
+    consultant_policy: consultantPolicy
   };
 }
 
@@ -84,6 +90,7 @@ function repairResponse(context, proposal, issues, phase) {
   const request = {
     schema_version: 'claris_clarification_repair_request_v1',
     evidence_bundle: context.model_evidence,
+    consultant_policy: copy(context.consultant_policy),
     prior_proposal: copy(proposal),
     repair_plan: copy(repairPlan)
   };
@@ -107,7 +114,8 @@ function finalResponse(context, materialized, semantic, input, now) {
     schema_version: 'claris_clarification_protocol_audit_v1',
     deterministic_governance: copy(materialized.governance),
     semantic_verification: copy(semantic),
-    prepare_certification: copy(context.bundle.prepare_certification)
+    prepare_certification: copy(context.bundle.prepare_certification),
+    consultant_policy: consultantPolicyAuditView(context.consultant_policy)
   };
   return {
     ok: true,
@@ -153,7 +161,8 @@ export function runClarificationProtocolStep(input, { now = Date.now() } = {}) {
         max_authored_options: 5,
         free_text_exceptional: true
       },
-      evidence_bundle: context.model_evidence
+      evidence_bundle: context.model_evidence,
+      consultant_policy: copy(context.consultant_policy)
     };
     return {
       ok: true,
@@ -189,6 +198,7 @@ export function runClarificationProtocolStep(input, { now = Date.now() } = {}) {
     const request = {
       schema_version: 'claris_clarification_verifier_request_v1',
       evidence_bundle: context.model_evidence,
+      consultant_policy: copy(context.consultant_policy),
       proposal: copy(materialized.proposal),
       materialized_draft: copy(materialized.draft),
       checks: [
@@ -198,7 +208,8 @@ export function runClarificationProtocolStep(input, { now = Date.now() } = {}) {
         'Internal-only evidence is not exposed or paraphrased in a creepy or confrontational way.',
         'Questions resolve decision-relevant uncertainty rather than re-asking known facts.',
         'Suggested choices are distinct, non-leading, and collectively reasonable.',
-        'Zero-question decisions are allowed when the evidence is already sufficient.'
+        'Zero-question decisions are allowed only when the evidence is sufficient under consultant policy.',
+        'A SKIP must satisfy every consultant first-call requirement and any explicit pre-call budget rule.'
       ]
     };
     return {
