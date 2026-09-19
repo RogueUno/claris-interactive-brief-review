@@ -16,17 +16,56 @@ async function handleIntelligenceProtocol(request) {
 
   try {
     const result = runClarificationProtocolStep(parsed.value);
+
+    if (result.ok && result.status === 'READY' && result.clarification_package) {
+      const ttlDays = Math.max(1, Math.min(30, Number(parsed.value?.ttl_days || 7)));
+      const persisted = await clarificationServerContext().service.createPackage(
+        result.clarification_package,
+        { ttlMs: ttlDays * 24 * 60 * 60 * 1000 }
+      );
+
+      const base = new URL('/clarification-v1/', request.url).toString();
+      return json({
+        ...result,
+        delivery: {
+          persisted: true,
+          requires_clarification: true,
+          invite_url: persisted.invite_token
+            ? `${base}#invite=${encodeURIComponent(persisted.invite_token)}`
+            : null,
+          expires_at: persisted.expires_at,
+          opportunity_version: persisted.opportunity_version
+        }
+      }, 200);
+    }
+
+    if (result.ok && result.status === 'NO_CLARIFICATION') {
+      return json({
+        ...result,
+        delivery: {
+          persisted: false,
+          requires_clarification: false,
+          invite_url: null,
+          expires_at: null,
+          opportunity_version: null
+        }
+      }, 200);
+    }
+
     const status = result.ok === false && result.status === 'BLOCKED' ? 422 : 200;
     return json(result, status);
   } catch (error) {
-    const code = error?.message || 'CLARIFICATION_PROTOCOL_FAILED';
-    const status = code.endsWith('_INVALID_JSON') || code.endsWith('_REQUIRED') ||
-      code === 'CLARIFICATION_PROTOCOL_ACTION_INVALID' ||
-      code === 'CLARIFICATION_TTL_INVALID'
-      ? 400
-      : code.startsWith('PREPARE_')
-        ? 422
-        : 500;
+    const code = error?.code || error?.message || 'CLARIFICATION_PROTOCOL_FAILED';
+    const status = code === 'OPPORTUNITY_ALREADY_EXISTS'
+      ? 409
+      : code.endsWith('_INVALID_JSON') || code.endsWith('_REQUIRED') ||
+          code === 'CLARIFICATION_PROTOCOL_ACTION_INVALID' ||
+          code === 'CLARIFICATION_PROTOCOL_VERSION_UNSUPPORTED' ||
+          code === 'CLARIFICATION_TTL_INVALID'
+        ? 400
+        : code.startsWith('PREPARE_') || code.startsWith('CONSULTANT_SOT_')
+          ? 422
+          : 500;
     return json({ ok: false, error: code }, status);
   }
 }
@@ -35,14 +74,14 @@ export default {
   async fetch(request) {
     if (request.method !== 'POST') return methodNotAllowed('POST');
 
-    const operation = String(request.headers.get('x-claris-operation') || '').trim().toUpperCase();
-    if (operation === PROTOCOL_OPERATION) {
-      return handleIntelligenceProtocol(request);
-    }
-
     const adminKey = process.env.CLARIS_ADMIN_KEY || '';
     if (!adminKey || bearerToken(request) !== adminKey) {
       return json({ ok: false, error: 'ADMIN_UNAUTHORIZED' }, 401);
+    }
+
+    const operation = String(request.headers.get('x-claris-operation') || '').trim().toUpperCase();
+    if (operation === PROTOCOL_OPERATION) {
+      return handleIntelligenceProtocol(request);
     }
 
     const parsed = await parseJson(request);
