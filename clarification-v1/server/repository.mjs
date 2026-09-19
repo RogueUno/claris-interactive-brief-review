@@ -9,6 +9,11 @@ function assertOpportunityId(value) {
   return id;
 }
 
+function storageIfMatch(value) {
+  const etag = String(value || '').trim();
+  return /^W\//i.test(etag) ? etag.slice(2) : etag;
+}
+
 function envelopePath(opportunityId) {
   return `claris/opportunities/${assertOpportunityId(opportunityId)}/clarification/envelope.json`;
 }
@@ -155,7 +160,9 @@ export function createClarificationRepository(storage) {
     async saveEnvelopeWithMeta(opportunityId, envelope, { ifMatch = null } = {}) {
       const id = assertOpportunityId(opportunityId);
       const value = { ...envelope, schema_version: ENVELOPE_VERSION, opportunity_id: id };
-      const saved = await storage.putJson(envelopePath(id), value, { ifMatch });
+      const saved = await storage.putJson(envelopePath(id), value, {
+        ifMatch: ifMatch ? storageIfMatch(ifMatch) : null
+      });
       if (saved?.etag) return { envelope: value, etag: saved.etag };
 
       const confirmed = await getJsonWithMeta(storage, envelopePath(id));
