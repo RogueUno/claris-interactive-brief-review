@@ -1,9 +1,25 @@
 import { clarificationServerContext } from '../../../clarification-v1/server/api-shared.mjs';
-import { bearerToken, json, methodNotAllowed, parseJson } from '../../../clarification-v1/server/http.mjs';
+import { json, methodNotAllowed, parseJson } from '../../../clarification-v1/server/http.mjs';
 import { runClarificationProtocolStep } from '../../../clarification-v1/server/protocol.mjs';
 
 const PROTOCOL_OPERATION = 'INTELLIGENCE_PROTOCOL';
 const MAX_PROTOCOL_BODY_BYTES = 450_000;
+
+function adminAuthorized(request, adminKey) {
+  if (!adminKey) return false;
+
+  const authorization = String(request.headers.get('authorization') || '').trim();
+  const candidates = new Set([authorization]);
+
+  let stripped = authorization;
+  for (let index = 0; index < 2; index += 1) {
+    if (!/^Bearer\s+/i.test(stripped)) break;
+    stripped = stripped.replace(/^Bearer\s+/i, '').trim();
+    candidates.add(stripped);
+  }
+
+  return candidates.has(adminKey);
+}
 
 async function handleIntelligenceProtocol(request) {
   const declaredLength = Number(request.headers.get('content-length') || 0);
@@ -75,15 +91,8 @@ export default {
     if (request.method !== 'POST') return methodNotAllowed('POST');
 
     const adminKey = process.env.CLARIS_ADMIN_KEY || '';
-    if (!adminKey || bearerToken(request) !== adminKey) {
-      const authLikeHeaderNames = [...request.headers.keys()]
-        .filter((name) => /auth|api|key/i.test(name))
-        .sort();
-      return json({
-        ok: false,
-        error: 'ADMIN_UNAUTHORIZED',
-        diagnostic_auth_header_names: authLikeHeaderNames
-      }, 401);
+    if (!adminAuthorized(request, adminKey)) {
+      return json({ ok: false, error: 'ADMIN_UNAUTHORIZED' }, 401);
     }
 
     const operation = String(request.headers.get('x-claris-operation') || '').trim().toUpperCase();
