@@ -101,18 +101,37 @@ function finalResponse(context, materialized, semantic, input, now) {
     now,
     ttlMs: ttlMs(input)
   });
+  const audit = {
+    schema_version: 'claris_clarification_protocol_audit_v1',
+    deterministic_governance: copy(materialized.governance),
+    semantic_verification: copy(semantic),
+    prepare_certification: copy(context.bundle.prepare_certification)
+  };
   return {
     ok: true,
     status: pkg.questions.length ? 'READY' : 'NO_CLARIFICATION',
     next_action: 'RETURN',
     clarification_package: pkg,
     clarification_package_json: JSON.stringify(pkg),
-    intelligence_audit: {
-      schema_version: 'claris_clarification_protocol_audit_v1',
-      deterministic_governance: copy(materialized.governance),
-      semantic_verification: copy(semantic),
-      prepare_certification: copy(context.bundle.prepare_certification)
-    }
+    intelligence_audit: audit,
+    intelligence_audit_json: JSON.stringify(audit),
+    failure_json: ''
+  };
+}
+
+function blockedResponse(body) {
+  const value = {
+    ok: false,
+    status: 'BLOCKED',
+    next_action: 'BLOCKED',
+    error: 'CLARIFICATION_INTELLIGENCE_BLOCKED',
+    ...body
+  };
+  return {
+    ...value,
+    clarification_package_json: '',
+    intelligence_audit_json: '',
+    failure_json: JSON.stringify(value)
   };
 }
 
@@ -150,13 +169,10 @@ export function runClarificationProtocolStep(input, { now = Date.now() } = {}) {
     const phase = action.startsWith('REPAIRED_') ? 'REPAIRED' : 'ORIGINAL';
     const response = repairResponse(context, materialized.proposal, materialized.violations, phase);
     if (response.next_action === 'BLOCKED') {
-      return {
-        ...response,
-        ok: false,
-        status: 'BLOCKED',
-        error: 'CLARIFICATION_INTELLIGENCE_BLOCKED',
+      return blockedResponse({
+        repair_plan: copy(response.repair_plan),
         deterministic_governance: copy(materialized.governance)
-      };
+      });
     }
     return {
       ...response,
@@ -202,15 +218,11 @@ export function runClarificationProtocolStep(input, { now = Date.now() } = {}) {
   }
 
   if (action === 'REPAIRED_VERIFICATION') {
-    return {
-      ok: false,
-      status: 'BLOCKED',
-      next_action: 'BLOCKED',
-      error: 'CLARIFICATION_INTELLIGENCE_BLOCKED',
+    return blockedResponse({
       repair_plan: buildClarificationIntelligenceRepairPlan(issues),
-      deterministic_governance: materialized.governance,
-      semantic_verification: semantic
-    };
+      deterministic_governance: copy(materialized.governance),
+      semantic_verification: copy(semantic)
+    });
   }
 
   return {
