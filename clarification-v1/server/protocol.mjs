@@ -13,6 +13,8 @@ import {
 } from './model-prompts.mjs';
 import { adaptCertifiedPrepareToClarificationEvidence } from './prepare-adapter.mjs';
 
+const PROTOCOL_VERSION = 'claris_clarification_protocol_v1';
+
 const ACTIONS = new Set([
   'START',
   'PROPOSAL',
@@ -136,6 +138,9 @@ function blockedResponse(body) {
 }
 
 export function runClarificationProtocolStep(input, { now = Date.now() } = {}) {
+  if (String(input?.protocol_version || '').trim() !== PROTOCOL_VERSION) {
+    throw new Error('CLARIFICATION_PROTOCOL_VERSION_UNSUPPORTED');
+  }
   const action = actionValue(input?.action);
   const context = contextFromInput(input);
 
@@ -233,3 +238,4 @@ export function runClarificationProtocolStep(input, { now = Date.now() } = {}) {
 }
 
 export const clarificationProtocolActions = Object.freeze([...ACTIONS]);
+export const clarificationProtocolVersion = PROTOCOL_VERSION;
