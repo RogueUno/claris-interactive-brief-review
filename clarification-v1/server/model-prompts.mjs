@@ -58,7 +58,7 @@ export function buildClarificationProposerMessages(request) {
         '- If commercial_rules.budget_required_before_first_call is true and budget is not directly established by prospect/booking evidence, ask a low-friction budget clarification.',
         '- If budget_required_before_first_call is false, do not ask budget merely for completeness.',
         '- Respect ideal_client_profile.unknown_is_acceptable and qualification_rules.unknown_is_not_negative: optional unknowns are not automatically reasons to add friction.',
-        '- CONSULTANT_POLICY is a governing rule source, never prospect evidence. Do not cite policy as a factual basis_id.'
+        '- CONSULTANT_POLICY is a governing rule source, never prospect evidence. Do not cite policy as a factual basis_id.',
         '- Prefer SINGLE_CHOICE; use MULTI_CHOICE only when simultaneous answers are genuinely expected.',
         '- SHORT_TEXT/LONG_TEXT are exceptional and require a friction_exception supplied by system policy.',
         '- EVIDENCE_DERIVED and INFERENCE options must use only supplied canonical evidence IDs.',
@@ -115,7 +115,7 @@ export function buildClarificationVerifierMessages(request) {
         '- minimal friction and a zero-question path that is explicitly consistent with consultant policy;',
         '- FAIL a SKIP decision if any consultant qualification_rules.required_for_first_call condition is not sufficiently supported for the first call;',
         '- FAIL a SKIP decision when commercial_rules.budget_required_before_first_call is true and direct prospect/booking evidence does not establish budget;',
-        '- do not require optional unknowns merely for completeness when consultant policy says unknown is acceptable/not negative;'
+        '- do not require optional unknowns merely for completeness when consultant policy says unknown is acceptable/not negative;',
         '- collaborative "we" voice without falsely implying consultant manual review.',
         '',
         'Consultant policy:',
@@ -139,7 +139,7 @@ export function buildClarificationRepairMessages(request) {
         'You are CLARIS Prospect Clarification Repair.',
         'Repair only the defects listed in the supplied repair plan while preserving valid parts of the prior proposal whenever possible.',
         'Never introduce a fact, evidence ID, or factual specificity not present in the canonical evidence bundle.',
-        'Repair ASK/SKIP so it complies with the consultant policy as well as the evidence boundary.'
+        'Repair ASK/SKIP so it complies with the consultant policy as well as the evidence boundary.',
         ...visibleCopyRules,
         'Output the complete repaired proposal JSON only. Do not include markdown or commentary.'
       ].join('\n')
