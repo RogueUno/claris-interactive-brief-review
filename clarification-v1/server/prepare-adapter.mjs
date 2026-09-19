@@ -59,16 +59,22 @@ function validateCertifiedCaseState(caseState) {
   if (!ACCEPTED_SEMANTIC_STATUSES.has(semanticStatus)) {
     throw new Error('PREPARE_SEMANTIC_NOT_CERTIFIED');
   }
-  if (!caseState?.prepare_advisory || typeof caseState.prepare_advisory !== 'object') {
-    throw new Error('PREPARE_ADVISORY_MISSING');
-  }
+  const prepareAdvisory = caseState?.prepare_advisory;
+  const prepareStage = prepareAdvisory && typeof prepareAdvisory === 'object'
+    ? String(prepareAdvisory.stage || '').trim() || null
+    : null;
+  const prepareAdvisoryRef = prepareAdvisory != null && typeof prepareAdvisory !== 'object'
+    ? String(prepareAdvisory).trim() || null
+    : null;
 
   return {
     artifact_contract_version: artifactContract,
     compiler_contract_version: compilerContract,
     semantic_status: semanticStatus,
     repaired: caseState?.p3_repair_applied === true ||
-      String(caseState?.p3_repair_applied || '').trim().toLowerCase() === 'true'
+      String(caseState?.p3_repair_applied || '').trim().toLowerCase() === 'true',
+    prepare_stage: prepareStage,
+    prepare_advisory_ref: prepareAdvisoryRef
   };
 }
 
@@ -160,7 +166,8 @@ export function adaptCertifiedPrepareToClarificationEvidence(input) {
       compiler_contract_version: certification.compiler_contract_version,
       semantic_status: certification.semantic_status,
       repaired: certification.repaired,
-      prepare_stage: String(caseState.prepare_advisory.stage || '').trim() || null
+      prepare_stage: certification.prepare_stage,
+      prepare_advisory_ref: certification.prepare_advisory_ref
     }
   };
 }
