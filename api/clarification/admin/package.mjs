@@ -1,6 +1,7 @@
 import { clarificationServerContext } from '../../../clarification-v1/server/api-shared.mjs';
 import { json, methodNotAllowed, parseJson } from '../../../clarification-v1/server/http.mjs';
 import { runClarificationProtocolStep } from '../../../clarification-v1/server/protocol.mjs';
+import { buildFinalizeContext } from '../../../clarification-v1/server/finalize-handoff.mjs';
 
 const PROTOCOL_OPERATION = 'INTELLIGENCE_PROTOCOL';
 const MAX_PROTOCOL_BODY_BYTES = 450_000;
@@ -43,9 +44,13 @@ async function handleIntelligenceProtocol(request) {
 
     if (result.ok && result.status === 'READY' && result.clarification_package) {
       const ttlDays = Math.max(1, Math.min(30, Number(parsed.value?.ttl_days || 7)));
+      const finalizeContext = buildFinalizeContext(parsed.value);
       const persisted = await clarificationServerContext().service.createPackage(
         result.clarification_package,
-        { ttlMs: ttlDays * 24 * 60 * 60 * 1000 }
+        {
+          ttlMs: ttlDays * 24 * 60 * 60 * 1000,
+          finalizeContext
+        }
       );
 
       const base = new URL('/clarification-v1/', request.url).toString();
@@ -114,9 +119,16 @@ export default {
     const ttlDays = Math.max(1, Math.min(30, Number(parsed.value?.ttl_days || 7)));
 
     try {
+      const directPackage = parsed.value?.package ?? parsed.value;
+      const finalizeContext = parsed.value?.finalize_context
+        ? buildFinalizeContext(parsed.value.finalize_context)
+        : null;
       const result = await clarificationServerContext().service.createPackage(
-        parsed.value?.package ?? parsed.value,
-        { ttlMs: ttlDays * 24 * 60 * 60 * 1000 }
+        directPackage,
+        {
+          ttlMs: ttlDays * 24 * 60 * 60 * 1000,
+          finalizeContext
+        }
       );
 
       const base = new URL('/clarification-v1/', request.url).toString();
