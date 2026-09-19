@@ -18,7 +18,7 @@ export function buildClarificationProposerMessages(request) {
       role: 'system',
       content: [
         'You are CLARIS Prospect Clarification Proposer.',
-        'Your job is to propose zero to four low-friction clarification questions from the supplied canonical evidence.',
+        'Your job is to propose zero to four low-friction clarification questions from the supplied canonical evidence, governed by the supplied consultant policy.',
         'You do not establish truth. You propose prospect-facing hypotheses that will be independently verified.',
         ...visibleCopyRules,
         'Output JSON only. Do not include markdown or commentary.'
@@ -53,7 +53,12 @@ export function buildClarificationProposerMessages(request) {
           }]
         }),
         'Rules:',
-        '- Prefer SKIP when the evidence already answers what the consultant needs for a useful first call.',
+        '- ASK/SKIP is governed by CONSULTANT_POLICY, not by a generic idea of a useful first call.',
+        '- SKIP only when every consultant qualification_rules.required_for_first_call condition is sufficiently supported for the first call and every explicit pre-call commercial rule is satisfied.',
+        '- If commercial_rules.budget_required_before_first_call is true and budget is not directly established by prospect/booking evidence, ask a low-friction budget clarification.',
+        '- If budget_required_before_first_call is false, do not ask budget merely for completeness.',
+        '- Respect ideal_client_profile.unknown_is_acceptable and qualification_rules.unknown_is_not_negative: optional unknowns are not automatically reasons to add friction.',
+        '- CONSULTANT_POLICY is a governing rule source, never prospect evidence. Do not cite policy as a factual basis_id.'
         '- Prefer SINGLE_CHOICE; use MULTI_CHOICE only when simultaneous answers are genuinely expected.',
         '- SHORT_TEXT/LONG_TEXT are exceptional and require a friction_exception supplied by system policy.',
         '- EVIDENCE_DERIVED and INFERENCE options must use only supplied canonical evidence IDs.',
@@ -61,6 +66,9 @@ export function buildClarificationProposerMessages(request) {
         '- INTERNAL_ONLY evidence may influence whether neutral clarification is useful, but must never be paraphrased or exposed in visible copy and must not directly ground visible options.',
         '- Do not invent deadlines, incidents, failed audits, budgets, owners, frameworks, customers, or motives.',
         '- "Something else" and "Not sure yet" are system-rendered fallbacks; do not author them as options.',
+        '',
+        'Consultant policy:',
+        json(request?.consultant_policy || {}),
         '',
         'Canonical evidence bundle:',
         json(request?.evidence_bundle || {})
@@ -75,7 +83,7 @@ export function buildClarificationVerifierMessages(request) {
       role: 'system',
       content: [
         'You are CLARIS Prospect Clarification Verifier.',
-        'Independently evaluate the proposed clarification against the supplied canonical evidence.',
+        'Independently evaluate the proposed clarification against the supplied canonical evidence and consultant policy.',
         'Do not repair or rewrite the proposal. Only return a verdict and actionable issues.',
         'Fail unsupported specificity even when the proposal cites a real evidence ID whose text does not support the claim.',
         ...visibleCopyRules,
@@ -104,8 +112,14 @@ export function buildClarificationVerifierMessages(request) {
         '- no INTERNAL_ONLY evidence leakage or creepy/confrontational wording;',
         '- no question that simply re-asks a fact already known;',
         '- distinct, non-leading and collectively reasonable answer choices;',
-        '- minimal friction and a defensible zero-question path;',
+        '- minimal friction and a zero-question path that is explicitly consistent with consultant policy;',
+        '- FAIL a SKIP decision if any consultant qualification_rules.required_for_first_call condition is not sufficiently supported for the first call;',
+        '- FAIL a SKIP decision when commercial_rules.budget_required_before_first_call is true and direct prospect/booking evidence does not establish budget;',
+        '- do not require optional unknowns merely for completeness when consultant policy says unknown is acceptable/not negative;'
         '- collaborative "we" voice without falsely implying consultant manual review.',
+        '',
+        'Consultant policy:',
+        json(request?.consultant_policy || {}),
         '',
         'Canonical evidence bundle:',
         json(request?.evidence_bundle || {}),
@@ -125,6 +139,7 @@ export function buildClarificationRepairMessages(request) {
         'You are CLARIS Prospect Clarification Repair.',
         'Repair only the defects listed in the supplied repair plan while preserving valid parts of the prior proposal whenever possible.',
         'Never introduce a fact, evidence ID, or factual specificity not present in the canonical evidence bundle.',
+        'Repair ASK/SKIP so it complies with the consultant policy as well as the evidence boundary.'
         ...visibleCopyRules,
         'Output the complete repaired proposal JSON only. Do not include markdown or commentary.'
       ].join('\n')
@@ -132,6 +147,9 @@ export function buildClarificationRepairMessages(request) {
     {
       role: 'user',
       content: [
+        'Consultant policy:',
+        json(request?.consultant_policy || {}),
+        '',
         'Canonical evidence bundle:',
         json(request?.evidence_bundle || {}),
         '',
