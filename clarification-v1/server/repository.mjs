@@ -26,7 +26,7 @@ export function createClarificationRepository(storage) {
   if (!storage?.getJson || !storage?.putJson) throw new Error('JSON_STORAGE_ADAPTER_REQUIRED');
 
   return {
-    async createPackage(pkg, { now = Date.now() } = {}) {
+    async createPackage(pkg, { now = Date.now(), finalizeContext = null } = {}) {
       const opportunityId = assertOpportunityId(pkg?.opportunity_id);
       const existing = await storage.getJson(envelopePath(opportunityId));
       if (existing) throw new Error('OPPORTUNITY_ALREADY_EXISTS');
@@ -56,6 +56,7 @@ export function createClarificationRepository(storage) {
         },
         progress: null,
         response: null,
+        finalize_context: finalizeContext || null,
         updated_at: new Date(now).toISOString()
       };
       const saved = await storage.putJson(envelopePath(opportunityId), envelope);
