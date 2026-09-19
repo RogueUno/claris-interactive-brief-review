@@ -5,8 +5,11 @@ import { runClarificationProtocolStep } from '../../../clarification-v1/server/p
 const PROTOCOL_OPERATION = 'INTELLIGENCE_PROTOCOL';
 const MAX_PROTOCOL_BODY_BYTES = 450_000;
 
-function adminAuthorized(request, adminKey) {
-  if (!adminKey) return false;
+function adminAuthorized(request, acceptedKeys) {
+  const keys = (Array.isArray(acceptedKeys) ? acceptedKeys : [acceptedKeys])
+    .map((value) => String(value || '').trim())
+    .filter(Boolean);
+  if (!keys.length) return false;
 
   const authorization = String(request.headers.get('authorization') || '').trim();
   const candidates = new Set([authorization]);
@@ -20,7 +23,7 @@ function adminAuthorized(request, adminKey) {
     candidates.add(stripped);
   }
 
-  return candidates.has(adminKey);
+  return keys.some((key) => candidates.has(key));
 }
 
 async function handleIntelligenceProtocol(request) {
@@ -93,7 +96,8 @@ export default {
     if (request.method !== 'POST') return methodNotAllowed('POST');
 
     const adminKey = String(process.env.CLARIS_ADMIN_KEY || '').trim();
-    if (!adminAuthorized(request, adminKey)) {
+    const makeKey = String(process.env.CLARIS_MAKE_KEY || '').trim();
+    if (!adminAuthorized(request, [adminKey, makeKey])) {
       return json({ ok: false, error: 'ADMIN_UNAUTHORIZED' }, 401);
     }
 
