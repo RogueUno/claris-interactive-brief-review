@@ -134,6 +134,10 @@ test('semantic PASS creates final clarification package', () => {
   assert.equal(result.status, 'READY');
   assert.equal(result.clarification_package.questions.length, 1);
   assert.equal(typeof result.clarification_package_json, 'string');
+  assert.equal(typeof result.intelligence_audit_json, 'string');
+  assert.equal(result.failure_json, '');
+  assert.equal(JSON.parse(result.clarification_package_json).schema_version, 'claris_clarification_package_v1');
+  assert.equal(JSON.parse(result.intelligence_audit_json).schema_version, 'claris_clarification_protocol_audit_v1');
 });
 
 test('semantic FAIL routes one controlled repair', () => {
@@ -175,6 +179,9 @@ test('invalid repaired proposal fails closed without a second repair', () => {
   assert.equal(result.ok, false);
   assert.equal(result.next_action, 'BLOCKED');
   assert.equal(result.error, 'CLARIFICATION_INTELLIGENCE_BLOCKED');
+  assert.equal(result.clarification_package_json, '');
+  assert.equal(result.intelligence_audit_json, '');
+  assert.equal(JSON.parse(result.failure_json).error, 'CLARIFICATION_INTELLIGENCE_BLOCKED');
 });
 
 test('repaired verification failure fails closed', () => {
