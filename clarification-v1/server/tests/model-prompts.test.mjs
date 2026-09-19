@@ -22,8 +22,10 @@ test('proposer prompt encodes zero-question, friction and evidence rules', () =>
   const text = buildClarificationProposerMessages({ evidence_bundle: evidenceBundle })
     .map((message) => message.content)
     .join('\n');
-  assert.match(text, /Prefer SKIP/);
+  assert.match(text, /ASK\/SKIP is governed by CONSULTANT_POLICY/);
   assert.match(text, /Prefer SINGLE_CHOICE/);
+  assert.match(text, /use mode DISCOVER/);
+  assert.match(text, /GENERIC_SAFE answer categories must use basis_ids: \[\]/);
   assert.match(text, /INTERNAL_ONLY/);
   assert.match(text, /Do not invent deadlines, incidents, failed audits, budgets, owners, frameworks, customers, or motives/);
 });
@@ -36,6 +38,8 @@ test('verifier prompt independently checks unsupported specificity and consultan
   assert.match(text, /unsupported specificity/i);
   assert.match(text, /Do not repair or rewrite/);
   assert.match(text, /falsely implying consultant manual review/);
+  assert.match(text, /FAIL any EVIDENCE_DERIVED or INFERENCE option whose label is merely a generic answer category/);
+  assert.match(text, /policy-driven missing facts should normally be DISCOVER questions/);
 });
 
 test('repair prompt is constrained to exact defects and canonical evidence', () => {
@@ -46,6 +50,8 @@ test('repair prompt is constrained to exact defects and canonical evidence', () 
   }).map((message) => message.content).join('\n');
   assert.match(text, /Repair only the defects/);
   assert.match(text, /Never introduce a fact, evidence ID, or factual specificity/);
+  assert.match(text, /change posture to GENERIC_SAFE and clear basis_ids/);
+  assert.match(text, /Do not attach an unrelated evidence ID just to satisfy structure/);
   assert.match(text, /complete repaired proposal/i);
 });
 
