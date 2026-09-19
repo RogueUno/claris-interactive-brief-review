@@ -156,3 +156,13 @@ test('company can be derived from canonical truth when caller omits it', () => {
   const bundle = adaptCertifiedPrepareToClarificationEvidence(value);
   assert.equal(bundle.prospect.company, 'Acme');
 });
+
+
+test('frozen PREPARE module reference is trace-only and does not block canonical evidence adaptation', () => {
+  const state = certifiedCaseState({ prepare_advisory: 104 });
+  const bundle = adaptCertifiedPrepareToClarificationEvidence(input(state));
+  assert.equal(bundle.prepare_certification.prepare_stage, null);
+  assert.equal(bundle.prepare_certification.prepare_advisory_ref, '104');
+  assert.equal(bundle.evidence.some((item) => item.evidence_id === 'BOOK-001'), true);
+  assert.equal(bundle.evidence.some((item) => item.evidence_id === 'FAC-001'), true);
+});
