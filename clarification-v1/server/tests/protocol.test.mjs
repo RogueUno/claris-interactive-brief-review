@@ -37,12 +37,40 @@ function caseState() {
   };
 }
 
+function consultantSot({ budgetRequired = false } = {}) {
+  return {
+    sot_version: 'AGENTIC_TEST_1',
+    consultant: {
+      consultant_name: 'Sarah Jones',
+      firm: 'Northstar Security'
+    },
+    services: [{ service_id: 'SVC_SOC2', name: 'SOC 2 readiness/advisory' }],
+    ideal_client_profile: {
+      preferred_company_types: ['B2B technology', 'SaaS'],
+      unknown_is_acceptable: true
+    },
+    commercial_rules: {
+      minimum_viable_engagement_usd: 5000,
+      budget_required_before_first_call: budgetRequired,
+      budget_rule: 'Direct evidence only; never infer budget.'
+    },
+    qualification_rules: {
+      required_for_first_call: [
+        'documented service/problem alignment',
+        'not affirmatively disqualified'
+      ],
+      unknown_is_not_negative: true
+    }
+  };
+}
+
 function base(action) {
   return {
-    protocol_version: 'claris_clarification_protocol_v1',
+    protocol_version: 'claris_clarification_protocol_v2',
     action,
     opportunity_id: 'opp_protocol_001',
     case_state_json: JSON.stringify(caseState()),
+    consultant_sot_json: JSON.stringify(consultantSot()),
     consultant: {
       consultant_id: 'consultant_sarah',
       first_name: 'Sarah',
@@ -96,6 +124,8 @@ test('START returns proposer request only after certified PREPARE adaptation', (
   assert.equal(result.next_action, 'PROPOSE');
   assert.match(result.model_request.system_instruction, /Prospect Clarification Proposer/);
   assert.match(result.model_request.user_prompt, /BOOK-001/);
+  assert.match(result.model_request.user_prompt, /CONSULTANT_POLICY/);
+  assert.match(result.model_request.user_prompt, /budget_required_before_first_call/);
   assert.equal(result.model_request.user_prompt.includes('https://acme.example/security'), false);
 });
 
@@ -107,6 +137,7 @@ test('valid proposal advances to independent verification', () => {
   assert.equal(result.ok, true);
   assert.equal(result.next_action, 'VERIFY');
   assert.match(result.model_request.system_instruction, /Prospect Clarification Verifier/);
+  assert.match(result.model_request.user_prompt, /required_for_first_call/);
 });
 
 test('deterministically invalid proposal is routed to repair before verification', () => {
@@ -137,7 +168,10 @@ test('semantic PASS creates final clarification package', () => {
   assert.equal(typeof result.intelligence_audit_json, 'string');
   assert.equal(result.failure_json, '');
   assert.equal(JSON.parse(result.clarification_package_json).schema_version, 'claris_clarification_package_v1');
-  assert.equal(JSON.parse(result.intelligence_audit_json).schema_version, 'claris_clarification_protocol_audit_v1');
+  const audit = JSON.parse(result.intelligence_audit_json);
+  assert.equal(audit.schema_version, 'claris_clarification_protocol_audit_v1');
+  assert.equal(audit.consultant_policy.source_class, 'CONSULTANT_POLICY');
+  assert.equal(audit.consultant_policy.commercial_rules.budget_required_before_first_call, false);
 });
 
 test('semantic FAIL routes one controlled repair', () => {
@@ -223,4 +257,28 @@ test('unsupported protocol version fails closed before adaptation', () => {
     () => runClarificationProtocolStep(value),
     /CLARIFICATION_PROTOCOL_VERSION_UNSUPPORTED/
   );
+});
+
+
+test('consultant SOT is required before any clarification model stage', () => {
+  const value = base('START');
+  delete value.consultant_sot_json;
+  assert.throws(
+    () => runClarificationProtocolStep(value),
+    /CONSULTANT_SOT_REQUIRED/
+  );
+});
+
+test('budget-required consultant policy is explicitly carried into proposer and verifier prompts', () => {
+  const startInput = base('START');
+  startInput.consultant_sot_json = JSON.stringify(consultantSot({ budgetRequired: true }));
+  const start = runClarificationProtocolStep(startInput);
+  assert.match(start.model_request.user_prompt, /"budget_required_before_first_call": true/);
+
+  const proposalInput = base('PROPOSAL');
+  proposalInput.consultant_sot_json = JSON.stringify(consultantSot({ budgetRequired: true }));
+  proposalInput.proposal = validProposal();
+  const verify = runClarificationProtocolStep(proposalInput);
+  assert.match(verify.model_request.user_prompt, /FAIL a SKIP decision when commercial_rules\.budget_required_before_first_call is true/);
+  assert.match(verify.model_request.user_prompt, /"budget_required_before_first_call": true/);
 });
