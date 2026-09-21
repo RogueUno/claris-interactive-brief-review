@@ -97,3 +97,42 @@ test('renders minimal client_profile plus metrics schema without inventing quali
   assert.match(rendered.brief_markdown, /Business Trigger: UNKNOWN/);
   assert.match(rendered.brief_markdown, /Review OAuth token flows/);
 });
+
+
+test('supports metadata plus historical_signals schema emitted by frozen FINALIZE', () => {
+  const artifact = {
+    metadata: {
+      consultant_name: 'Jordan Vale',
+      firm_name: 'Priority Stack Advisory',
+      target_company: 'Instructure',
+      target_domain: 'https://instructure.com'
+    },
+    deterministic_metrics: {
+      supported_match_score: 65,
+      scorable_coverage_score: 70,
+      evaluated_fit_rate: 92.8,
+      evidence_completeness_score: 80
+    },
+    canonical_match_classifications: {
+      service_need_alignment: { status: 'MATCH', reason: 'Booking supports the service need.' }
+    },
+    strategic_guidance: {
+      qualification_status: 'QUALIFIED',
+      primary_service_id: 'SVC_API_AUDIT',
+      recommended_action: 'Scope the API audit.'
+    },
+    consultant_only_context: {
+      historical_signals: [{
+        evidence_id: 'FAC-007',
+        description: 'Historical public incident context.',
+        relevance_limitations: 'Historical context only; do not infer current weakness.'
+      }]
+    }
+  };
+
+  const rendered = renderFinalBrief(artifact);
+  assert.match(rendered.brief_markdown, /Company: Instructure/);
+  assert.match(rendered.brief_markdown, /Consultant: Jordan Vale/);
+  assert.match(rendered.brief_markdown, /Historical public incident context/);
+  assert.match(rendered.brief_markdown, /Historical context only; do not infer current weakness/);
+});
