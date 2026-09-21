@@ -179,3 +179,99 @@ test('fails closed when a quoted FINAL artifact contains truncated JSON', () => 
     /FINAL_ARTIFACT_INVALID_JSON/
   );
 });
+
+
+test('renders nested claris_final_brief contract emitted by V2.3 FINALIZE', () => {
+  const artifact = {
+    claris_final_brief: {
+      brief_metadata: {
+        compiler_version: 'V3_CANONICAL_TRUTH_1',
+        artifact_contract: 'V3_TRUTH_BOUNDARY_3',
+        report_status: 'QUALIFIED_FOR_DISCOVERY',
+        lead_consultant: 'Jordan Vale',
+        firm: 'Priority Stack Advisory'
+      },
+      deterministic_metrics: {
+        supported_match: 50,
+        scorable_coverage: 50,
+        evaluated_fit_rate: 100,
+        evidence_completeness: 68.75
+      },
+      match_score_explanation: {
+        overall_assessment: 'The prospect requirements align directly with the consultancy services.',
+        match_breakdown: {
+          service_need_alignment: {
+            status: 'MATCH',
+            rationale: 'Explicit booking need maps to API auditing.',
+            basis_ids: ['SVC_API_AUDIT', 'BOOK-001']
+          },
+          business_trigger: {
+            status: 'UNKNOWN',
+            rationale: 'No deadline stated.',
+            basis_ids: []
+          }
+        }
+      },
+      preliminary_brief_markdown: '### Engagement Scope\nThe prospect is seeking an API/OAuth audit and continuous red teaming.',
+      consultant_only_context: {
+        historical_signals: [{
+          event: 'May 2026 Data Breach',
+          details: 'Historical incident context.',
+          relevance: 'Context only; do not infer current weakness.'
+        }],
+        internal_hypotheses: [{
+          hypothesis_id: 'HYP-001',
+          description: 'The request may reflect heightened security sensitivity.',
+          status: 'UNVERIFIED'
+        }]
+      },
+      discovery_question_plan: [{
+        question: 'Which API surfaces are highest priority?',
+        intent: 'Define the technical boundary.',
+        alignment_id: 'UNK-001'
+      }],
+      intelligence_lineage: [{
+        source_id: 'BOOK-001',
+        authority: 'BOOKING_TEXT',
+        usage: 'Establishes primary service need.'
+      }]
+    }
+  };
+
+  const normalized = normalizeFinalArtifact(artifact);
+  assert.equal(normalized.source_schema, 'claris_final_brief');
+  assert.equal(normalized.qualification_status, 'QUALIFIED_FOR_DISCOVERY');
+  assert.equal(normalized.consultant_name, 'Jordan Vale');
+  assert.equal(normalized.primary_service_id, 'SVC_API_AUDIT');
+  assert.equal(normalized.metrics.supported_match, 50);
+  assert.equal(normalized.metrics.evidence_completeness, 68.75);
+
+  const rendered = renderFinalBrief(artifact);
+  assert.match(rendered.brief_markdown, /Status: QUALIFIED_FOR_DISCOVERY/);
+  assert.match(rendered.brief_markdown, /Primary service: SVC_API_AUDIT/);
+  assert.match(rendered.brief_markdown, /Supported Match: 50\/100/);
+  assert.match(rendered.brief_markdown, /Evidence Completeness: 68.75\/100/);
+  assert.match(rendered.brief_markdown, /Engagement Scope/);
+  assert.match(rendered.brief_markdown, /Which API surfaces are highest priority/);
+  assert.match(rendered.brief_markdown, /May 2026 Data Breach/);
+  assert.match(rendered.brief_markdown, /Internal hypotheses/);
+  assert.match(rendered.brief_markdown, /BOOK-001 \(BOOKING_TEXT\)/);
+});
+
+test('fails closed when nested current FINAL contract is missing required metrics/content', () => {
+  assert.throws(
+    () => renderFinalBrief({
+      claris_final_brief: {
+        brief_metadata: { report_status: 'QUALIFIED_FOR_DISCOVERY' }
+      }
+    }),
+    /FINAL_ARTIFACT_CONTRACT_MISMATCH/
+  );
+});
+
+test('fails closed on structurally valid but unrecognized artifact', () => {
+  assert.throws(
+    () => renderFinalBrief({ unrelated: 'value' }),
+    /FINAL_ARTIFACT_UNRECOGNIZED/
+  );
+});
