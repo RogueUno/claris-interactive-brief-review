@@ -1,13 +1,35 @@
 import { serverContext } from '../../../calibration-v3/server/api-shared.mjs';
 import { buildRuntimeV3Export } from '../../../calibration-v3/server/runtime-export.mjs';
-import { bearerToken, json, methodNotAllowed } from '../../../calibration-v3/server/http.mjs';
+import { json, methodNotAllowed } from '../../../calibration-v3/server/http.mjs';
+
+function adminAuthorized(request, acceptedKey) {
+  const key = String(acceptedKey || '').trim();
+  if (!key) return false;
+
+  const authorization = String(request.headers.get('authorization') || '').trim();
+  const candidates = new Set([authorization]);
+  const finalToken = authorization.split(/\s+/).filter(Boolean).at(-1);
+  if (finalToken) candidates.add(finalToken);
+
+  let stripped = authorization;
+  for (let index = 0; index < 2; index += 1) {
+    if (!/^Bearer\s+/i.test(stripped)) break;
+    stripped = stripped.replace(/^Bearer\s+/i, '').trim();
+    candidates.add(stripped);
+  }
+
+  const wrapped = stripped.match(/^<(.+)>$/s);
+  if (wrapped?.[1]) candidates.add(wrapped[1].trim());
+
+  return candidates.has(key);
+}
 
 export default {
   async fetch(request) {
     if (request.method !== 'GET') return methodNotAllowed('GET');
 
     const adminKey = process.env.CLARIS_ADMIN_KEY || '';
-    if (!adminKey || bearerToken(request) !== adminKey) {
+    if (!adminAuthorized(request, adminKey)) {
       return json({ ok: false, error: 'ADMIN_UNAUTHORIZED' }, 401);
     }
 
