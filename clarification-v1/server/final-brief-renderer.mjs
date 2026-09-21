@@ -59,6 +59,13 @@ function parseArtifact(input) {
   return current;
 }
 
+function unwrapArtifact(parsed) {
+  const nested = object(parsed.claris_final_brief);
+  return Object.keys(nested).length
+    ? { artifact: nested, source_schema: 'claris_final_brief' }
+    : { artifact: parsed, source_schema: 'legacy_or_flat' };
+}
+
 function serviceFromRelevance(artifact) {
   const entries = array(artifact.potential_service_relevance);
   const preferred = entries.find((entry) =>
@@ -67,6 +74,13 @@ function serviceFromRelevance(artifact) {
     )
   );
   return firstText(preferred?.service_id);
+}
+
+function serviceFromMatchBreakdown(matchClassifications) {
+  const serviceNeed = object(matchClassifications.service_need_alignment);
+  return array(serviceNeed.basis_ids)
+    .map((value) => firstText(value))
+    .find((value) => value?.startsWith('SVC_')) || null;
 }
 
 function normalizeUnknowns(artifact, matchClassifications) {
@@ -85,7 +99,7 @@ function normalizeUnknowns(artifact, matchClassifications) {
     .map(([id, item]) => ({
       id,
       description: null,
-      reason: firstText(item?.reason)
+      reason: firstText(item?.reason, item?.rationale)
     }));
 }
 
@@ -112,17 +126,46 @@ function normalizeConsultantContext(artifact) {
   const historicalSignals = array(context.historical_signals)
     .map((item) => ({
       evidence_id: firstText(item?.evidence_id),
-      title: null,
-      summary: firstText(item?.description),
-      boundary_warning: firstText(item?.relevance_limitations)
+      title: firstText(item?.event, item?.title),
+      summary: firstText(item?.details, item?.description, item?.summary),
+      boundary_warning: firstText(item?.relevance, item?.relevance_limitations, item?.boundary_warning)
     }))
-    .filter((item) => item.evidence_id || item.summary);
+    .filter((item) => item.evidence_id || item.title || item.summary);
+
+  const hypotheses = array(context.internal_hypotheses)
+    .map((item) => ({
+      hypothesis_id: firstText(item?.hypothesis_id),
+      description: firstText(item?.description),
+      status: firstText(item?.status)
+    }))
+    .filter((item) => item.hypothesis_id || item.description);
 
   return {
     boundary_caveat: firstText(context.boundary_caveat),
     background_cyber_signals: firstText(context.background_cyber_signals),
-    sensitive_items: sensitive.length ? sensitive : historical.length ? historical : historicalSignals
+    sensitive_items: sensitive.length ? sensitive : historical.length ? historical : historicalSignals,
+    hypotheses
   };
+}
+
+function normalizeDiscoveryQuestions(artifact) {
+  return array(artifact.discovery_question_plan)
+    .map((item) => ({
+      question: firstText(item?.question),
+      intent: firstText(item?.intent),
+      alignment_id: firstText(item?.alignment_id)
+    }))
+    .filter((item) => item.question);
+}
+
+function normalizeLineage(artifact) {
+  return array(artifact.intelligence_lineage)
+    .map((item) => ({
+      source_id: firstText(item?.source_id, item?.evidence_id),
+      authority: firstText(item?.authority),
+      usage: firstText(item?.usage)
+    }))
+    .filter((item) => item.source_id || item.usage);
 }
 
 function formatMetric(value, suffix = '') {
@@ -138,13 +181,60 @@ function humanize(key) {
 function classificationLines(classifications) {
   return Object.entries(classifications).map(([key, item]) => {
     const status = firstText(item?.status) || 'UNKNOWN';
-    const reason = firstText(item?.reason);
+    const reason = firstText(item?.reason, item?.rationale);
     return `- **${humanize(key)}:** ${status}${reason ? ` — ${reason}` : ''}`;
   });
 }
 
+function assertRenderable(normalized) {
+  const metricValues = Object.values(normalized.metrics);
+  const hasAnyMetric = metricValues.some((value) => value !== null);
+  const hasSubstantiveContent = Boolean(
+    normalized.company ||
+    normalized.domain ||
+    normalized.consultant_name ||
+    normalized.firm ||
+    normalized.qualification_status ||
+    normalized.primary_service_id ||
+    normalized.recommended_action ||
+    normalized.rationale ||
+    normalized.preliminary_brief_markdown ||
+    Object.keys(normalized.match_classifications).length ||
+    Object.keys(normalized.completeness_classifications).length ||
+    normalized.talking_points.length ||
+    normalized.risk_factors.length ||
+    normalized.remaining_unknowns.length ||
+    normalized.discovery_questions.length ||
+    normalized.intelligence_lineage.length ||
+    normalized.consultant_only_context.sensitive_items.length ||
+    normalized.consultant_only_context.hypotheses.length
+  );
+
+  if (!hasAnyMetric && !hasSubstantiveContent) {
+    throw new Error('FINAL_ARTIFACT_UNRECOGNIZED');
+  }
+
+  if (normalized.source_schema === 'claris_final_brief') {
+    const allMetricsPresent = metricValues.every((value) => value !== null);
+    const hasCurrentContractContent = Boolean(
+      normalized.qualification_status &&
+      (
+        normalized.preliminary_brief_markdown ||
+        Object.keys(normalized.match_classifications).length ||
+        normalized.rationale ||
+        normalized.discovery_questions.length
+      )
+    );
+
+    if (!allMetricsPresent || !hasCurrentContractContent) {
+      throw new Error('FINAL_ARTIFACT_CONTRACT_MISMATCH');
+    }
+  }
+}
+
 export function normalizeFinalArtifact(input) {
-  const artifact = parseArtifact(input);
+  const parsed = parseArtifact(input);
+  const { artifact, source_schema: sourceSchema } = unwrapArtifact(parsed);
   const clarisMetadata = object(artifact.claris_brief_metadata);
   const briefMetadata = object(artifact.brief_metadata);
   const targetFirm = object(briefMetadata.target_firm);
@@ -154,12 +244,16 @@ export function normalizeFinalArtifact(input) {
   const strategicGuidance = object(artifact.strategic_guidance);
   const strategicRecommendations = object(artifact.strategic_recommendations);
   const scopeAnalysis = object(artifact.scope_analysis);
+  const matchScoreExplanation = object(artifact.match_score_explanation);
+  const matchBreakdown = object(matchScoreExplanation.match_breakdown);
   const deterministicMetrics = Object.keys(object(artifact.deterministic_metrics)).length
     ? object(artifact.deterministic_metrics)
     : object(artifact.metrics);
   const matchClassifications = Object.keys(object(artifact.match_classifications)).length
     ? object(artifact.match_classifications)
-    : object(artifact.canonical_match_classifications);
+    : Object.keys(object(artifact.canonical_match_classifications)).length
+      ? object(artifact.canonical_match_classifications)
+      : matchBreakdown;
   const completenessClassifications = Object.keys(object(artifact.completeness_classifications)).length
     ? object(artifact.completeness_classifications)
     : object(artifact.canonical_completeness_classifications);
@@ -177,42 +271,52 @@ export function normalizeFinalArtifact(input) {
 
   return {
     schema_version: 'claris_final_brief_render_v1',
+    source_schema: sourceSchema,
     company: firstText(
       clarisMetadata.target_company,
       targetFirm.company_name,
       clientProfile.company_name,
-      metadata.target_company
+      metadata.target_company,
+      briefMetadata.target_company
     ),
     domain: firstText(
       clarisMetadata.target_domain,
       targetFirm.domain,
       clientProfile.domain,
-      metadata.target_domain
+      metadata.target_domain,
+      briefMetadata.target_domain
     ),
     consultant_name: firstText(
       clarisMetadata.consultant_name,
       consultant.consultant_name,
-      metadata.consultant_name
+      metadata.consultant_name,
+      briefMetadata.lead_consultant
     ),
     firm: firstText(
       clarisMetadata.firm,
       consultant.firm,
-      metadata.firm_name
+      metadata.firm_name,
+      briefMetadata.firm
     ),
     qualification_status: firstText(
       strategicGuidance.qualification_status,
-      artifact.qualification_status
+      artifact.qualification_status,
+      briefMetadata.report_status
     ),
     primary_service_id: firstText(
       strategicGuidance.primary_service_id,
       scopeAnalysis.primary_service_id,
-      serviceFromRelevance(artifact)
+      serviceFromRelevance(artifact),
+      serviceFromMatchBreakdown(matchClassifications)
     ),
     recommended_action: firstText(
       strategicGuidance.recommended_action,
       strategicRecommendations.recommended_action
     ),
-    rationale: firstText(strategicGuidance.rationale),
+    rationale: firstText(
+      strategicGuidance.rationale,
+      matchScoreExplanation.overall_assessment
+    ),
     metrics: {
       supported_match: numeric(
         deterministicMetrics.supported_match_score ??
@@ -233,15 +337,19 @@ export function normalizeFinalArtifact(input) {
     talking_points: talkingPoints,
     risk_factors: riskFactors,
     remaining_unknowns: normalizeUnknowns(artifact, matchClassifications),
+    preliminary_brief_markdown: firstText(artifact.preliminary_brief_markdown),
+    discovery_questions: normalizeDiscoveryQuestions(artifact),
+    intelligence_lineage: normalizeLineage(artifact),
     consultant_only_context: normalizeConsultantContext(artifact)
   };
 }
 
 export function renderFinalBrief(input) {
   const normalized = normalizeFinalArtifact(input);
+  assertRenderable(normalized);
   const lines = ['# CLARIS Opportunity Brief', ''];
 
-  if (normalized.company || normalized.domain) {
+  if (normalized.company || normalized.domain || normalized.consultant_name || normalized.firm) {
     lines.push('## Opportunity');
     if (normalized.company) lines.push(`- Company: ${normalized.company}`);
     if (normalized.domain) lines.push(`- Domain: ${normalized.domain}`);
@@ -264,6 +372,12 @@ export function renderFinalBrief(input) {
   lines.push(`- Evidence Completeness: ${formatMetric(normalized.metrics.evidence_completeness, '/100')}`);
   lines.push('');
 
+  if (normalized.preliminary_brief_markdown) {
+    lines.push('## Engagement Intelligence');
+    lines.push(normalized.preliminary_brief_markdown);
+    lines.push('');
+  }
+
   if (Object.keys(normalized.match_classifications).length) {
     lines.push('## Evidence-Based Fit');
     lines.push(...classificationLines(normalized.match_classifications));
@@ -282,6 +396,15 @@ export function renderFinalBrief(input) {
     lines.push('');
   }
 
+  if (normalized.discovery_questions.length) {
+    lines.push('## Discovery Questions');
+    lines.push(...normalized.discovery_questions.map((item) => {
+      const intent = item.intent ? ` — ${item.intent}` : '';
+      return `- ${item.question}${intent}`;
+    }));
+    lines.push('');
+  }
+
   if (normalized.remaining_unknowns.length) {
     lines.push('## Remaining Unknowns');
     lines.push(...normalized.remaining_unknowns.map((item) => {
@@ -295,7 +418,8 @@ export function renderFinalBrief(input) {
   if (
     consultantContext.boundary_caveat ||
     consultantContext.background_cyber_signals ||
-    consultantContext.sensitive_items.length
+    consultantContext.sensitive_items.length ||
+    consultantContext.hypotheses.length
   ) {
     lines.push('## Consultant-Only Context');
     if (consultantContext.background_cyber_signals) {
@@ -307,9 +431,26 @@ export function renderFinalBrief(input) {
       lines.push(`- **${label}:**${detail}`);
       if (item.boundary_warning) lines.push(`  - Boundary: ${item.boundary_warning}`);
     }
+    if (consultantContext.hypotheses.length) {
+      lines.push('- **Internal hypotheses:**');
+      for (const item of consultantContext.hypotheses) {
+        const status = item.status ? ` (${item.status})` : '';
+        lines.push(`  - ${item.description || item.hypothesis_id}${status}`);
+      }
+    }
     if (consultantContext.boundary_caveat) {
       lines.push(`- Boundary: ${consultantContext.boundary_caveat}`);
     }
+    lines.push('');
+  }
+
+  if (normalized.intelligence_lineage.length) {
+    lines.push('## Evidence Lineage');
+    lines.push(...normalized.intelligence_lineage.map((item) => {
+      const authority = item.authority ? ` (${item.authority})` : '';
+      const usage = item.usage ? ` — ${item.usage}` : '';
+      return `- ${item.source_id || 'Source'}${authority}${usage}`;
+    }));
     lines.push('');
   }
 
