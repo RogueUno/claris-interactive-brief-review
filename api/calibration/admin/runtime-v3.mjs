@@ -2,9 +2,11 @@ import { serverContext } from '../../../calibration-v3/server/api-shared.mjs';
 import { buildRuntimeV3Export } from '../../../calibration-v3/server/runtime-export.mjs';
 import { json, methodNotAllowed } from '../../../calibration-v3/server/http.mjs';
 
-function adminAuthorized(request, acceptedKey) {
-  const key = String(acceptedKey || '').trim();
-  if (!key) return false;
+function adminAuthorized(request, acceptedKeys) {
+  const keys = (Array.isArray(acceptedKeys) ? acceptedKeys : [acceptedKeys])
+    .map((value) => String(value || '').trim())
+    .filter(Boolean);
+  if (!keys.length) return false;
 
   const authorization = String(request.headers.get('authorization') || '').trim();
   const candidates = new Set([authorization]);
@@ -21,7 +23,7 @@ function adminAuthorized(request, acceptedKey) {
   const wrapped = stripped.match(/^<(.+)>$/s);
   if (wrapped?.[1]) candidates.add(wrapped[1].trim());
 
-  return candidates.has(key);
+  return keys.some((key) => candidates.has(key));
 }
 
 export default {
@@ -29,7 +31,8 @@ export default {
     if (request.method !== 'GET') return methodNotAllowed('GET');
 
     const adminKey = process.env.CLARIS_ADMIN_KEY || '';
-    if (!adminAuthorized(request, adminKey)) {
+    const makeKey = process.env.CLARIS_MAKE_KEY || '';
+    if (!adminAuthorized(request, [adminKey, makeKey])) {
       return json({ ok: false, error: 'ADMIN_UNAUTHORIZED' }, 401);
     }
 
