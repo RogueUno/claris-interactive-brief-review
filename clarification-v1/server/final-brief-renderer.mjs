@@ -19,30 +19,44 @@ function firstText(...values) {
 }
 
 function numeric(value) {
-  const candidate = Number(value);
+  if (typeof value === 'number') {
+    return Number.isFinite(value) ? value : null;
+  }
+  if (typeof value !== 'string') return null;
+
+  const source = value.trim();
+  const match = source.match(/^(-?\d+(?:\.\d+)?)(?:\s*(?:\/\s*100|%))?$/);
+  if (!match) return null;
+
+  const candidate = Number(match[1]);
   return Number.isFinite(candidate) ? candidate : null;
 }
 
 function parseArtifact(input) {
-  if (typeof input === 'string') {
-    const source = input.trim();
-    if (!source) throw new Error('FINAL_ARTIFACT_REQUIRED');
+  if (
+    typeof input !== 'string' &&
+    (!input || typeof input !== 'object' || Array.isArray(input))
+  ) {
+    throw new Error('FINAL_ARTIFACT_REQUIRED');
+  }
+
+  let current = input;
+  for (let depth = 0; depth < 2 && typeof current === 'string'; depth += 1) {
+    const source = current.trim();
+    if (!source) {
+      throw new Error(depth === 0 ? 'FINAL_ARTIFACT_REQUIRED' : 'FINAL_ARTIFACT_INVALID');
+    }
     try {
-      const parsed = JSON.parse(source);
-      if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) {
-        throw new Error('FINAL_ARTIFACT_INVALID');
-      }
-      return parsed;
-    } catch (error) {
-      if (error?.message === 'FINAL_ARTIFACT_INVALID') throw error;
+      current = JSON.parse(source);
+    } catch {
       throw new Error('FINAL_ARTIFACT_INVALID_JSON');
     }
   }
 
-  if (!input || typeof input !== 'object' || Array.isArray(input)) {
-    throw new Error('FINAL_ARTIFACT_REQUIRED');
+  if (!current || typeof current !== 'object' || Array.isArray(current)) {
+    throw new Error('FINAL_ARTIFACT_INVALID');
   }
-  return input;
+  return current;
 }
 
 function serviceFromRelevance(artifact) {
