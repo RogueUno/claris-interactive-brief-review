@@ -231,6 +231,7 @@ export function createClarificationService({ repository, sessionSecret }) {
 
       return {
         ok: true,
+        opportunity_id: envelope.package.opportunity_id,
         status: 'SUBMITTED',
         submitted_at: submittedAt,
         answer_count: normalizedAnswers.length,
