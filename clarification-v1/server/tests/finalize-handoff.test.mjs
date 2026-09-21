@@ -8,6 +8,7 @@ import {
   buildFinalizeContext,
   buildFinalizeProspectAnswers
 } from '../finalize-handoff.mjs';
+import { triggerFinalizeContinuation } from '../finalize-continuation.mjs';
 
 function memoryStorage() {
   const map = new Map();
@@ -109,6 +110,7 @@ test('submitted prospect response becomes deterministic FINALIZE input', async (
     { now: 4000, expectedVersion: resolved.opportunity_version }
   );
   assert.equal(submitted.ok, true);
+  assert.equal(submitted.opportunity_id, 'opp_finalize_001');
 
   const loaded = await repository.loadEnvelopeWithMeta('opp_finalize_001');
   const bundle = buildFinalizeBundle(loaded.envelope, loaded.etag);
@@ -139,4 +141,28 @@ test('zero-question FINALIZE adapter creates an empty answer set without fabrica
   assert.equal(adapted.clarification_required, false);
   assert.equal(adapted.source_class, null);
   assert.deepEqual(adapted.answers, []);
+});
+
+
+test('FINALIZE continuation posts only canonical opportunity id', async () => {
+  let captured = null;
+  const result = await triggerFinalizeContinuation(' opp_finalize_001 ', {
+    webhookUrl: 'https://example.test/finalize',
+    fetchImpl: async (url, options) => {
+      captured = { url, options };
+      return { ok: true, status: 200 };
+    }
+  });
+
+  assert.equal(result.ok, true);
+  assert.equal(captured.url, 'https://example.test/finalize');
+  assert.equal(captured.options.method, 'POST');
+  assert.equal(captured.options.headers['content-type'], 'application/json');
+  assert.deepEqual(JSON.parse(captured.options.body), { opportunity_id: 'opp_finalize_001' });
+});
+
+test('FINALIZE continuation reports unavailable configuration without throwing', async () => {
+  const result = await triggerFinalizeContinuation('opp_finalize_001', { webhookUrl: '' });
+  assert.equal(result.ok, false);
+  assert.equal(result.error, 'FINALIZE_WEBHOOK_NOT_CONFIGURED');
 });
