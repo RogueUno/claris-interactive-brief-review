@@ -2,9 +2,11 @@ import { clarificationServerContext } from '../../../clarification-v1/server/api
 import { json, methodNotAllowed, parseJson } from '../../../clarification-v1/server/http.mjs';
 import { runClarificationProtocolStep } from '../../../clarification-v1/server/protocol.mjs';
 import { buildFinalizeBundle, buildFinalizeContext } from '../../../clarification-v1/server/finalize-handoff.mjs';
+import { renderFinalBrief } from '../../../clarification-v1/server/final-brief-renderer.mjs';
 
 const PROTOCOL_OPERATION = 'INTELLIGENCE_PROTOCOL';
 const FINALIZE_BUNDLE_OPERATION = 'FINALIZE_BUNDLE';
+const RENDER_FINAL_BRIEF_OPERATION = 'RENDER_FINAL_BRIEF';
 const MAX_PROTOCOL_BODY_BYTES = 450_000;
 
 function adminAuthorized(request, acceptedKeys) {
@@ -48,6 +50,22 @@ async function handleFinalizeBundle(request) {
       ? 'OPPORTUNITY_ID_INVALID'
       : 'FINALIZE_BUNDLE_FAILED';
     return json({ ok: false, error: code }, code === 'OPPORTUNITY_ID_INVALID' ? 400 : 500);
+  }
+}
+
+async function handleRenderFinalBrief(request) {
+  const parsed = await parseJson(request);
+  if (!parsed.ok) return parsed.response;
+
+  try {
+    const artifact = parsed.value?.stage_output_json ?? parsed.value?.artifact ?? parsed.value;
+    return json(renderFinalBrief(artifact), 200);
+  } catch (error) {
+    const code = error?.message || 'FINAL_BRIEF_RENDER_FAILED';
+    const status = ['FINAL_ARTIFACT_REQUIRED', 'FINAL_ARTIFACT_INVALID', 'FINAL_ARTIFACT_INVALID_JSON'].includes(code)
+      ? 400
+      : 500;
+    return json({ ok: false, error: code }, status);
   }
 }
 
@@ -136,6 +154,9 @@ export default {
     }
     if (operation === FINALIZE_BUNDLE_OPERATION) {
       return handleFinalizeBundle(request);
+    }
+    if (operation === RENDER_FINAL_BRIEF_OPERATION) {
+      return handleRenderFinalBrief(request);
     }
 
     const parsed = await parseJson(request);
