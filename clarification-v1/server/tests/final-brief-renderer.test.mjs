@@ -136,3 +136,46 @@ test('supports metadata plus historical_signals schema emitted by frozen FINALIZ
   assert.match(rendered.brief_markdown, /Historical public incident context/);
   assert.match(rendered.brief_markdown, /Historical context only; do not infer current weakness/);
 });
+
+
+test('unwraps a complete quoted JSON artifact and normalizes formatted metrics', () => {
+  const artifact = {
+    metadata: {
+      consultant_name: 'Jordan Vale',
+      firm_name: 'Priority Stack Advisory',
+      target_company: 'Instructure',
+      target_domain: 'https://instructure.com'
+    },
+    deterministic_metrics: {
+      supported_match_score: '50/100',
+      scorable_coverage_score: '50/100',
+      evaluated_fit_rate: '100%',
+      evidence_completeness_score: '80/100'
+    },
+    strategic_guidance: {
+      qualification_status: 'QUALIFIED',
+      primary_service_id: 'SVC_API_AUDIT',
+      recommended_action: 'Proceed with scoped discovery.'
+    }
+  };
+
+  const doubleEncoded = JSON.stringify(JSON.stringify(artifact));
+  const normalized = normalizeFinalArtifact(doubleEncoded);
+  assert.equal(normalized.company, 'Instructure');
+  assert.equal(normalized.metrics.supported_match, 50);
+  assert.equal(normalized.metrics.scorable_coverage, 50);
+  assert.equal(normalized.metrics.evaluated_fit_rate, 100);
+  assert.equal(normalized.metrics.evidence_completeness, 80);
+
+  const rendered = renderFinalBrief(doubleEncoded);
+  assert.match(rendered.brief_markdown, /Supported Match: 50\/100/);
+  assert.match(rendered.brief_markdown, /Evaluated Fit Rate: 100%/);
+});
+
+test('fails closed when a quoted FINAL artifact contains truncated JSON', () => {
+  const truncated = JSON.stringify('{"metadata":{"target_company":"Instructure"}');
+  assert.throws(
+    () => normalizeFinalArtifact(truncated),
+    /FINAL_ARTIFACT_INVALID_JSON/
+  );
+});
