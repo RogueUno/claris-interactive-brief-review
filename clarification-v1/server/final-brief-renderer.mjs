@@ -95,10 +95,19 @@ function normalizeConsultantContext(artifact) {
     }))
     .filter((item) => item.evidence_id || item.title || item.summary);
 
+  const historicalSignals = array(context.historical_signals)
+    .map((item) => ({
+      evidence_id: firstText(item?.evidence_id),
+      title: null,
+      summary: firstText(item?.description),
+      boundary_warning: firstText(item?.relevance_limitations)
+    }))
+    .filter((item) => item.evidence_id || item.summary);
+
   return {
     boundary_caveat: firstText(context.boundary_caveat),
     background_cyber_signals: firstText(context.background_cyber_signals),
-    sensitive_items: sensitive.length ? sensitive : historical
+    sensitive_items: sensitive.length ? sensitive : historical.length ? historical : historicalSignals
   };
 }
 
@@ -127,6 +136,7 @@ export function normalizeFinalArtifact(input) {
   const targetFirm = object(briefMetadata.target_firm);
   const consultant = object(briefMetadata.consultant);
   const clientProfile = object(artifact.client_profile);
+  const metadata = object(artifact.metadata);
   const strategicGuidance = object(artifact.strategic_guidance);
   const strategicRecommendations = object(artifact.strategic_recommendations);
   const scopeAnalysis = object(artifact.scope_analysis);
@@ -156,20 +166,24 @@ export function normalizeFinalArtifact(input) {
     company: firstText(
       clarisMetadata.target_company,
       targetFirm.company_name,
-      clientProfile.company_name
+      clientProfile.company_name,
+      metadata.target_company
     ),
     domain: firstText(
       clarisMetadata.target_domain,
       targetFirm.domain,
-      clientProfile.domain
+      clientProfile.domain,
+      metadata.target_domain
     ),
     consultant_name: firstText(
       clarisMetadata.consultant_name,
-      consultant.consultant_name
+      consultant.consultant_name,
+      metadata.consultant_name
     ),
     firm: firstText(
       clarisMetadata.firm,
-      consultant.firm
+      consultant.firm,
+      metadata.firm_name
     ),
     qualification_status: firstText(
       strategicGuidance.qualification_status,
