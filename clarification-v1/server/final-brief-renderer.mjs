@@ -159,12 +159,23 @@ function normalizeDiscoveryQuestions(artifact) {
 }
 
 function normalizeLineage(artifact) {
-  return array(artifact.intelligence_lineage)
-    .map((item) => ({
-      source_id: firstText(item?.source_id, item?.evidence_id),
-      authority: firstText(item?.authority),
-      usage: firstText(item?.usage)
-    }))
+  const evidenceLog = object(artifact.evidence_log);
+  const source = array(artifact.intelligence_lineage).length
+    ? array(artifact.intelligence_lineage)
+    : array(evidenceLog.intelligence_lineage);
+
+  return source
+    .map((item) => typeof item === 'string'
+      ? {
+          source_id: firstText(item),
+          authority: null,
+          usage: null
+        }
+      : {
+          source_id: firstText(item?.source_id, item?.evidence_id),
+          authority: firstText(item?.authority),
+          usage: firstText(item?.usage)
+        })
     .filter((item) => item.source_id || item.usage);
 }
 
@@ -241,6 +252,10 @@ export function normalizeFinalArtifact(input) {
   const consultant = object(briefMetadata.consultant);
   const clientProfile = object(artifact.client_profile);
   const metadata = object(artifact.metadata);
+  const prospectOverview = object(artifact.prospect_overview);
+  const matchSummary = object(artifact.match_summary);
+  const strategicAssessment = object(artifact.strategic_assessment);
+  const discoveryGuidance = object(strategicAssessment.discovery_guidance);
   const strategicGuidance = object(artifact.strategic_guidance);
   const strategicRecommendations = object(artifact.strategic_recommendations);
   const scopeAnalysis = object(artifact.scope_analysis);
@@ -248,12 +263,16 @@ export function normalizeFinalArtifact(input) {
   const matchBreakdown = object(matchScoreExplanation.match_breakdown);
   const deterministicMetrics = Object.keys(object(artifact.deterministic_metrics)).length
     ? object(artifact.deterministic_metrics)
-    : object(artifact.metrics);
+    : Object.keys(object(matchSummary.deterministic_metrics)).length
+      ? object(matchSummary.deterministic_metrics)
+      : object(artifact.metrics);
   const matchClassifications = Object.keys(object(artifact.match_classifications)).length
     ? object(artifact.match_classifications)
     : Object.keys(object(artifact.canonical_match_classifications)).length
       ? object(artifact.canonical_match_classifications)
-      : matchBreakdown;
+      : Object.keys(object(strategicAssessment.match_classifications)).length
+        ? object(strategicAssessment.match_classifications)
+        : matchBreakdown;
   const completenessClassifications = Object.keys(object(artifact.completeness_classifications)).length
     ? object(artifact.completeness_classifications)
     : object(artifact.canonical_completeness_classifications);
@@ -261,18 +280,21 @@ export function normalizeFinalArtifact(input) {
   const talkingPoints = array(
     strategicGuidance.key_talking_points ??
     strategicRecommendations.key_talking_points ??
+    discoveryGuidance.key_talking_points ??
     artifact.talking_points
   ).map(text).filter(Boolean);
 
   const riskFactors = array(
     strategicGuidance.risk_factors ??
-    strategicRecommendations.risk_factors
+    strategicRecommendations.risk_factors ??
+    discoveryGuidance.risk_factors
   ).map(text).filter(Boolean);
 
   return {
     schema_version: 'claris_final_brief_render_v1',
     source_schema: sourceSchema,
     company: firstText(
+      prospectOverview.company_name,
       clarisMetadata.target_company,
       targetFirm.company_name,
       clientProfile.company_name,
@@ -280,6 +302,7 @@ export function normalizeFinalArtifact(input) {
       briefMetadata.target_company
     ),
     domain: firstText(
+      prospectOverview.domain,
       clarisMetadata.target_domain,
       targetFirm.domain,
       clientProfile.domain,
@@ -290,31 +313,38 @@ export function normalizeFinalArtifact(input) {
       clarisMetadata.consultant_name,
       consultant.consultant_name,
       metadata.consultant_name,
+      briefMetadata.consultant_name,
       briefMetadata.lead_consultant
     ),
     firm: firstText(
       clarisMetadata.firm,
       consultant.firm,
       metadata.firm_name,
+      briefMetadata.firm_name,
       briefMetadata.firm
     ),
     qualification_status: firstText(
       strategicGuidance.qualification_status,
+      matchSummary.qualification_status,
       artifact.qualification_status,
       briefMetadata.report_status
     ),
     primary_service_id: firstText(
       strategicGuidance.primary_service_id,
       scopeAnalysis.primary_service_id,
+      serviceFromRelevance(strategicAssessment),
       serviceFromRelevance(artifact),
-      serviceFromMatchBreakdown(matchClassifications)
+      serviceFromMatchBreakdown(matchClassifications),
+      prospectOverview.primary_interest
     ),
     recommended_action: firstText(
       strategicGuidance.recommended_action,
-      strategicRecommendations.recommended_action
+      strategicRecommendations.recommended_action,
+      discoveryGuidance.recommended_action
     ),
     rationale: firstText(
       strategicGuidance.rationale,
+      matchSummary.fit_rationale,
       matchScoreExplanation.overall_assessment
     ),
     metrics: {
