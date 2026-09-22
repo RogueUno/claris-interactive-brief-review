@@ -6,6 +6,7 @@ const consultantId = document.getElementById('consultant-id');
 const firstName = document.getElementById('first-name');
 const fullName = document.getElementById('full-name');
 const firm = document.getElementById('firm');
+const deliveryEmail = document.getElementById('delivery-email');
 const ttl = document.getElementById('ttl');
 const status = document.getElementById('status');
 const result = document.getElementById('result');
@@ -85,7 +86,8 @@ form.addEventListener('submit', async (event) => {
       consultant_id: consultantId.value.trim(),
       first_name: firstName.value.trim(),
       full_name: fullName.value.trim(),
-      firm: firm.value.trim()
+      firm: firm.value.trim(),
+      delivery_email: deliveryEmail.value.trim()
     },
     ttl_days: Number(ttl.value),
     seed_state: buildDemoSeed()
