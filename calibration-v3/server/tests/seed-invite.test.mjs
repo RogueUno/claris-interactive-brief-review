@@ -30,7 +30,8 @@ const IDENTITY = {
   consultant_id: 'consultant_real',
   first_name: 'Ari',
   full_name: 'Ari Real',
-  firm: 'RealCo'
+  firm: 'RealCo',
+  delivery_email: 'ari@realco.example'
 };
 
 test('approved invite seed persists on first resolution with canonical identity', async () => {
@@ -56,9 +57,11 @@ test('approved invite seed persists on first resolution with canonical identity'
   assert.equal(resolved.resume_state.consultantId, 'consultant_real');
   assert.equal(resolved.resume_state.fullName, 'Ari Real');
   assert.equal(resolved.resume_state.firm, 'RealCo');
+  assert.equal(resolved.identity.delivery_email, 'ari@realco.example');
   assert.equal(resolved.resume_state.services[0].name, 'vCISO');
 
   const loaded = await service.load(resolved.session_token, { now: 3000 });
   assert.equal(loaded.resume_state.consultantId, 'consultant_real');
   assert.equal(loaded.profile_status, 'IN_PROGRESS');
+  assert.equal(loaded.identity.delivery_email, 'ari@realco.example');
 });
