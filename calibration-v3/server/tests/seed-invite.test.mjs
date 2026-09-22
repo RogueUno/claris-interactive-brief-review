@@ -65,3 +65,28 @@ test('approved invite seed persists on first resolution with canonical identity'
   assert.equal(loaded.profile_status, 'IN_PROGRESS');
   assert.equal(loaded.identity.delivery_email, 'ari@realco.example');
 });
+
+
+test('delivery email validation preserves legacy invites', async () => {
+  const repo = createProfileRepository(memoryStorage());
+
+  await assert.rejects(
+    () => repo.createInvite({
+      consultant_id: 'consultant_email_check',
+      first_name: 'Test',
+      full_name: 'Test Consultant',
+      firm: 'ExampleCo',
+      delivery_email: 'invalid'
+    }),
+    /INVALID_CONSULTANT_DELIVERY_EMAIL/
+  );
+
+  const legacy = await repo.createInvite({
+    consultant_id: 'consultant_legacy',
+    first_name: 'Legacy',
+    full_name: 'Legacy Consultant',
+    firm: 'LegacyCo'
+  });
+
+  assert.equal(legacy.invite.identity.delivery_email, undefined);
+});
