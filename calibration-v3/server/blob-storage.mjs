@@ -11,13 +11,13 @@ export function createVercelBlobJsonStorage({ token = process.env.BLOB_READ_WRIT
 
   return {
     async getJson(pathname) {
-      const result = normalizeGetResult(await get(pathname, { access: 'private', token }));
+      const result = normalizeGetResult(await get(pathname, { access: 'private', token, useCache: false }));
       if (!result) return null;
       return new Response(result.stream).json();
     },
 
     async getJsonWithMeta(pathname) {
-      const result = normalizeGetResult(await get(pathname, { access: 'private', token }));
+      const result = normalizeGetResult(await get(pathname, { access: 'private', token, useCache: false }));
       if (!result) return { value: null, etag: null };
       return {
         value: await new Response(result.stream).json(),
