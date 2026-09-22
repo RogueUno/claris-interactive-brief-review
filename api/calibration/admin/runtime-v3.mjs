@@ -43,10 +43,17 @@ export default {
     }
 
     try {
-      const { envelope, etag } = await serverContext().repository.loadProfileEnvelopeWithMeta(consultantId);
+      const repository = serverContext().repository;
+      const [{ envelope, etag }, identity] = await Promise.all([
+        repository.loadProfileEnvelopeWithMeta(consultantId),
+        repository.loadIdentity(consultantId)
+      ]);
       const result = buildRuntimeV3Export(envelope, etag);
       const { http_status: status, ...body } = result;
-      return json(body, status);
+      return json({
+        ...body,
+        consultant_delivery_email: identity?.delivery_email || null
+      }, status);
     } catch (error) {
       const code = error?.message === 'INVALID_CONSULTANT_ID'
         ? 'INVALID_CONSULTANT_ID'
