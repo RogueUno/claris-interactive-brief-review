@@ -10,16 +10,16 @@ function required(value, code) {
 
 function validEmail(value) {
   const email = text(value).toLowerCase();
-  if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return null;
+  if (!email || !/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email)) return null;
   return email;
 }
 
 function readableMarkdown(value) {
   return text(value)
-    .replace(/^#{1,6}\s+/gm, '')
-    .replace(/\*\*(.*?)\*\*/g, '$1')
+    .replace(/^#{1,6}\\s+/gm, '')
+    .replace(/\\*\\*(.*?)\\*\\*/g, '$1')
     .replace(/__(.*?)__/g, '$1')
-    .replace(/`([^`]+)`/g, '$1')
+    .replace(/\x60([^\x60]+)\x60/g, '$1')
     .trim();
 }
 
@@ -57,8 +57,7 @@ export function buildProspectClarificationDelivery(input = {}) {
   const plural = count === 1 ? 'detail' : 'details';
   const pronoun = count === 1 ? 'it' : 'them';
   const expiry = text(input.expires_at);
-  const expiryLine = expiry ? '
-This private link expires at ' + expiry + '.' : '';
+  const expiryLine = expiry ? '\\nThis private link expires at ' + expiry + '.' : '';
 
   return {
     schema_version: 'claris_delivery_package_v1',
@@ -75,8 +74,7 @@ This private link expires at ' + expiry + '.' : '';
       'Answer ' + (count === 1 ? 'the quick question' : 'the ' + count + ' quick questions') + ': ' + inviteUrl,
       '',
       'Once you send ' + pronoun + ', there is nothing else you need to prepare here.' + expiryLine
-    ].join('
-'),
+    ].join('\\n'),
     metadata: {
       opportunity_id: text(input.opportunity_id) || null,
       question_count: count,
@@ -96,9 +94,7 @@ export function buildConsultantFinalDelivery(input = {}) {
 
   const heading = prospect ? company + ' / ' + prospect : company;
   const intro = consultantFirstName
-    ? 'Hi ' + consultantFirstName + ',
-
-CLARIS has finished preparing this opportunity.'
+    ? 'Hi ' + consultantFirstName + ',\\n\\nCLARIS has finished preparing this opportunity.'
     : 'CLARIS has finished preparing this opportunity.';
 
   return {
@@ -112,8 +108,7 @@ CLARIS has finished preparing this opportunity.'
       meeting ? 'Meeting: ' + meeting : null,
       '',
       brief
-    ].filter((value) => value !== null).join('
-'),
+    ].filter((value) => value !== null).join('\\n'),
     metadata: {
       opportunity_id: text(input.opportunity_id) || null,
       company,
