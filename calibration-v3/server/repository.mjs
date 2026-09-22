@@ -36,7 +36,11 @@ export function createProfileRepository(storage) {
       const firstName = String(identity?.first_name || '').trim();
       const fullName = String(identity?.full_name || '').trim();
       const firm = String(identity?.firm || '').trim();
+      const deliveryEmail = String(identity?.delivery_email || '').trim().toLowerCase();
       if (!firstName || !fullName || !firm) throw new Error('INVITE_IDENTITY_INCOMPLETE');
+      if (deliveryEmail && !/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(deliveryEmail)) {
+        throw new Error('INVALID_CONSULTANT_DELIVERY_EMAIL');
+      }
       if (!Number.isFinite(ttlMs) || ttlMs <= 0) throw new Error('INVITE_TTL_INVALID');
       const approvedSeedState = cloneSeedState(seedState);
 
@@ -50,7 +54,13 @@ export function createProfileRepository(storage) {
         created_at: new Date(now).toISOString(),
         expires_at: new Date(now + ttlMs).toISOString(),
         last_resolved_at: null,
-        identity: { consultant_id: consultantId, first_name: firstName, full_name: fullName, firm },
+        identity: {
+          consultant_id: consultantId,
+          first_name: firstName,
+          full_name: fullName,
+          firm,
+          ...(deliveryEmail ? { delivery_email: deliveryEmail } : {})
+        },
         seed_state: approvedSeedState
       };
       await storage.putJson(invitePath(tokenHash), invite);
