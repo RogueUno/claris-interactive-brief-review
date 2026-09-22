@@ -38,7 +38,7 @@ export function createProfileRepository(storage) {
       const firm = String(identity?.firm || '').trim();
       const deliveryEmail = String(identity?.delivery_email || '').trim().toLowerCase();
       if (!firstName || !fullName || !firm) throw new Error('INVITE_IDENTITY_INCOMPLETE');
-      if (deliveryEmail && !/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(deliveryEmail)) {
+      if (deliveryEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(deliveryEmail)) {
         throw new Error('INVALID_CONSULTANT_DELIVERY_EMAIL');
       }
       if (!Number.isFinite(ttlMs) || ttlMs <= 0) throw new Error('INVITE_TTL_INVALID');
