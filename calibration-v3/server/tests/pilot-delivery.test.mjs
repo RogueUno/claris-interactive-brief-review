@@ -57,14 +57,14 @@ test('builds consultant final email from rendered brief', () => {
     company: 'Acme',
     prospect_name: 'Alex Morgan',
     meeting_time: '2026-09-25T13:00:00Z',
-    final_brief_markdown: '# CLARIS Opportunity Brief\\n\\n**Status:** QUALIFIED_FOR_DISCOVERY\\n\\n- API security need'
+    final_brief_markdown: '# CLARIS Opportunity Brief\n\n**Status:** QUALIFIED_FOR_DISCOVERY\n\n- API security need'
   });
 
   assert.equal(result.kind, 'CONSULTANT_FINAL');
   assert.equal(result.to, 'sarah@northstar.example');
   assert.equal(result.subject, 'CLARIS — Acme / Alex Morgan');
   assert.match(result.text_body, /Status: QUALIFIED_FOR_DISCOVERY/);
-  assert.doesNotMatch(result.text_body, /\\*\\*/);
+  assert.doesNotMatch(result.text_body, /\*\*/);
 });
 
 test('fails closed when consultant delivery email is missing', () => {
