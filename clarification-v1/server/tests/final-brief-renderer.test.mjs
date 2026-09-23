@@ -258,6 +258,80 @@ test('renders nested claris_final_brief contract emitted by V2.3 FINALIZE', () =
   assert.match(rendered.brief_markdown, /BOOK-001 \(BOOKING_TEXT\)/);
 });
 
+test('renders current flat FINALIZE schema emitted after prospect clarification', () => {
+  const artifact = {
+    brief_metadata: {
+      consultant_name: 'Mehdi Medjahed',
+      firm_name: 'Tailead',
+      artifact_version: 'V3_TRUTH_BOUNDARY_3',
+      compiler_contract: 'V3_CANONICAL_TRUTH_1'
+    },
+    prospect_overview: {
+      company_name: 'Test SaaS Co',
+      domain: 'https://example.com',
+      booking_basis: 'BOOK-001',
+      primary_interest: 'API Security Auditing'
+    },
+    match_summary: {
+      deterministic_metrics: {
+        supported_match_score: 30,
+        scorable_coverage_score: 30,
+        evaluated_fit_rate: 100,
+        evidence_completeness_score: 74.75
+      },
+      qualification_status: 'PROSPECT_DISCOVERY',
+      fit_rationale: 'Service alignment is confirmed through prospect reporting.'
+    },
+    strategic_assessment: {
+      match_classifications: {
+        service_need_alignment: {
+          status: 'MATCH',
+          basis_ids: ['PROS-001'],
+          reason: 'Prospect explicitly reported the service need.'
+        },
+        business_trigger: {
+          status: 'UNKNOWN',
+          basis_ids: [],
+          reason: 'No business trigger has been established.'
+        }
+      },
+      potential_service_relevance: [{
+        service_id: 'SVC_API_AUDIT',
+        alignment_evidence: 'PROS-001'
+      }]
+    },
+    evidence_log: {
+      intelligence_lineage: ['BOOK-001', 'PROS-001']
+    },
+    discovery_guidance: {
+      recommended_action: 'Conduct discovery call to qualify requirements.',
+      key_talking_points: ['Confirm technical scope of API audit'],
+      risk_factors: ['Unknown urgency']
+    }
+  };
+
+  const normalized = normalizeFinalArtifact(artifact);
+  assert.equal(normalized.company, 'Test SaaS Co');
+  assert.equal(normalized.domain, 'https://example.com');
+  assert.equal(normalized.consultant_name, 'Mehdi Medjahed');
+  assert.equal(normalized.firm, 'Tailead');
+  assert.equal(normalized.qualification_status, 'PROSPECT_DISCOVERY');
+  assert.equal(normalized.primary_service_id, 'API Security Auditing');
+  assert.equal(normalized.metrics.supported_match, 30);
+  assert.equal(normalized.recommended_action, 'Conduct discovery call to qualify requirements.');
+  assert.deepEqual(normalized.intelligence_lineage.map((item) => item.source_id), ['BOOK-001', 'PROS-001']);
+
+  const rendered = renderFinalBrief(artifact);
+  assert.match(rendered.brief_markdown, /Company: Test SaaS Co/);
+  assert.match(rendered.brief_markdown, /Consultant: Mehdi Medjahed/);
+  assert.match(rendered.brief_markdown, /Status: PROSPECT_DISCOVERY/);
+  assert.match(rendered.brief_markdown, /Primary service: API Security Auditing/);
+  assert.match(rendered.brief_markdown, /Supported Match: 30\/100/);
+  assert.match(rendered.brief_markdown, /Conduct discovery call to qualify requirements/);
+  assert.match(rendered.brief_markdown, /Confirm technical scope of API audit/);
+  assert.match(rendered.brief_markdown, /BOOK-001/);
+});
+
 test('fails closed when nested current FINAL contract is missing required metrics/content', () => {
   assert.throws(
     () => renderFinalBrief({
