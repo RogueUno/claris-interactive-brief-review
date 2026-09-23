@@ -99,7 +99,7 @@ function normalizeUnknowns(artifact, matchClassifications) {
     .map(([id, item]) => ({
       id,
       description: null,
-      reason: firstText(item?.reason, item?.rationale)
+      reason: firstText(item?.reason, item?.rationale, item?.reasoning)
     }));
 }
 
@@ -132,49 +132,71 @@ function normalizeConsultantContext(artifact) {
     }))
     .filter((item) => item.evidence_id || item.title || item.summary);
 
-  const hypotheses = array(context.internal_hypotheses)
+  const hypothesisSource = array(context.internal_hypotheses).length
+    ? array(context.internal_hypotheses)
+    : array(context.hypotheses);
+  const hypotheses = hypothesisSource
     .map((item) => ({
-      hypothesis_id: firstText(item?.hypothesis_id),
+      hypothesis_id: firstText(item?.hypothesis_id, item?.label),
       description: firstText(item?.description),
-      status: firstText(item?.status)
+      status: firstText(item?.status, item?.risk_of_inference)
     }))
     .filter((item) => item.hypothesis_id || item.description);
 
   return {
     boundary_caveat: firstText(context.boundary_caveat),
-    background_cyber_signals: firstText(context.background_cyber_signals),
+    background_cyber_signals: firstText(
+      context.background_cyber_signals,
+      context.historical_context,
+      context.non_admitted_context,
+      context.internal_strategy_notes
+    ),
     sensitive_items: sensitive.length ? sensitive : historical.length ? historical : historicalSignals,
     hypotheses
   };
 }
 
 function normalizeDiscoveryQuestions(artifact) {
-  return array(artifact.discovery_question_plan)
-    .map((item) => ({
-      question: firstText(item?.question),
-      intent: firstText(item?.intent),
-      alignment_id: firstText(item?.alignment_id)
-    }))
+  const discoveryPlan = object(artifact.discovery_plan);
+  const source = array(artifact.discovery_question_plan).length
+    ? array(artifact.discovery_question_plan)
+    : array(artifact.discovery_questions).length
+      ? array(artifact.discovery_questions)
+      : array(discoveryPlan.priority_questions).length
+        ? array(discoveryPlan.priority_questions)
+        : array(discoveryPlan.high_priority_questions);
+
+  return source
+    .map((item) => typeof item === 'string'
+      ? { question: firstText(item), intent: null, alignment_id: null }
+      : {
+          question: firstText(item?.question),
+          intent: firstText(item?.intent, item?.objective, item?.target_dimension),
+          alignment_id: firstText(item?.alignment_id)
+        })
     .filter((item) => item.question);
 }
 
 function normalizeLineage(artifact) {
   const evidenceLog = object(artifact.evidence_log);
+  const consultantContext = object(artifact.consultant_only_context);
   const source = array(artifact.intelligence_lineage).length
     ? array(artifact.intelligence_lineage)
-    : array(evidenceLog.intelligence_lineage);
+    : array(evidenceLog.intelligence_lineage).length
+      ? array(evidenceLog.intelligence_lineage)
+      : array(artifact.evidence_registry).length
+        ? array(artifact.evidence_registry)
+        : array(artifact.canonical_evidence_ledger).length
+          ? array(artifact.canonical_evidence_ledger)
+          : array(consultantContext.intelligence_lineage);
 
   return source
     .map((item) => typeof item === 'string'
-      ? {
-          source_id: firstText(item),
-          authority: null,
-          usage: null
-        }
+      ? { source_id: firstText(item), authority: null, usage: null }
       : {
           source_id: firstText(item?.source_id, item?.evidence_id),
-          authority: firstText(item?.authority),
-          usage: firstText(item?.usage)
+          authority: firstText(item?.authority, item?.source),
+          usage: firstText(item?.usage, item?.description, item?.statement)
         })
     .filter((item) => item.source_id || item.usage);
 }
@@ -192,7 +214,7 @@ function humanize(key) {
 function classificationLines(classifications) {
   return Object.entries(classifications).map(([key, item]) => {
     const status = firstText(item?.status) || 'UNKNOWN';
-    const reason = firstText(item?.reason, item?.rationale);
+    const reason = firstText(item?.reason, item?.rationale, item?.reasoning);
     return `- **${humanize(key)}:** ${status}${reason ? ` — ${reason}` : ''}`;
   });
 }
