@@ -255,7 +255,9 @@ export function normalizeFinalArtifact(input) {
   const prospectOverview = object(artifact.prospect_overview);
   const matchSummary = object(artifact.match_summary);
   const strategicAssessment = object(artifact.strategic_assessment);
-  const discoveryGuidance = object(strategicAssessment.discovery_guidance);
+  const discoveryGuidance = Object.keys(object(artifact.discovery_guidance)).length
+    ? object(artifact.discovery_guidance)
+    : object(strategicAssessment.discovery_guidance);
   const strategicGuidance = object(artifact.strategic_guidance);
   const strategicRecommendations = object(artifact.strategic_recommendations);
   const scopeAnalysis = object(artifact.scope_analysis);
