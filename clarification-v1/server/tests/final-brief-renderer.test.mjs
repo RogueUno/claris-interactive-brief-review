@@ -332,6 +332,83 @@ test('renders current flat FINALIZE schema emitted after prospect clarification'
   assert.match(rendered.brief_markdown, /BOOK-001/);
 });
 
+test('renders canonical_alignment FINALIZE schema with overall match', () => {
+  const artifact = {
+    brief_metadata: {
+      consultant_name: 'Mehdi Medjahed',
+      firm_name: 'Tailead',
+      prospect_company: 'Test SaaS Co'
+    },
+    match_score_summary: {
+      overall_match_score: 15,
+      scorable_coverage: 30,
+      evaluated_fit_rate: 50,
+      evidence_completeness: 62.5
+    },
+    canonical_alignment: {
+      service_need_alignment: {
+        status: 'PARTIAL_MATCH',
+        basis_ids: ['PROS-001'],
+        reason: 'Prospect explicitly requested API Security Auditing.'
+      },
+      business_trigger: {
+        status: 'UNKNOWN',
+        basis_ids: [],
+        reason: 'No stated business trigger exists in evidence.'
+      }
+    },
+    client_intel: {
+      company_profile: {
+        name: 'Test SaaS Co',
+        domain: 'https://example.com'
+      }
+    },
+    strategic_intelligence: {
+      stated_need: {
+        primary_requirement: 'API Security Auditing',
+        evidence_id: 'PROS-001'
+      },
+      potential_service_relevance: [{
+        service_id: 'SVC_API_AUDIT',
+        name: 'API Security Auditing'
+      }],
+      strategic_recommendations: [
+        'Conduct discovery to establish business context.'
+      ],
+      risk_factors: ['Lack of project context or urgency indicators.']
+    },
+    intelligence_lineage: {
+      admissible_evidence: [
+        { evidence_id: 'BOOK-001', authority: 'BOOKING_TEXT', statement: 'Company website: https://example.com' },
+        { evidence_id: 'PROS-001', authority: 'PROSPECT_REPORTED', statement: 'Interest in API Security Auditing.' }
+      ]
+    }
+  };
+
+  const normalized = normalizeFinalArtifact(artifact);
+  assert.equal(normalized.company, 'Test SaaS Co');
+  assert.equal(normalized.domain, 'https://example.com');
+  assert.equal(normalized.consultant_name, 'Mehdi Medjahed');
+  assert.equal(normalized.firm, 'Tailead');
+  assert.equal(normalized.primary_service_id, 'SVC_API_AUDIT');
+  assert.equal(normalized.metrics.supported_match, null);
+  assert.equal(normalized.metrics.overall_match, 15);
+  assert.equal(normalized.metrics.scorable_coverage, 30);
+  assert.equal(normalized.metrics.evaluated_fit_rate, 50);
+  assert.equal(normalized.metrics.evidence_completeness, 62.5);
+
+  const rendered = renderFinalBrief(artifact);
+  assert.match(rendered.brief_markdown, /Company: Test SaaS Co/);
+  assert.match(rendered.brief_markdown, /Primary service: SVC_API_AUDIT/);
+  assert.match(rendered.brief_markdown, /Overall Match: 15\/100/);
+  assert.doesNotMatch(rendered.brief_markdown, /Supported Match:/);
+  assert.match(rendered.brief_markdown, /Scorable Coverage: 30\/100/);
+  assert.match(rendered.brief_markdown, /Evaluated Fit Rate: 50%/);
+  assert.match(rendered.brief_markdown, /Evidence Completeness: 62.5\/100/);
+  assert.match(rendered.brief_markdown, /BOOK-001/);
+  assert.match(rendered.brief_markdown, /PROS-001/);
+});
+
 test('fails closed when nested current FINAL contract is missing required metrics/content', () => {
   assert.throws(
     () => renderFinalBrief({
