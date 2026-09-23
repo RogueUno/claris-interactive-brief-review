@@ -179,6 +179,7 @@ function normalizeDiscoveryQuestions(artifact) {
 
 function normalizeLineage(artifact) {
   const evidenceLog = object(artifact.evidence_log);
+  const nestedLineage = object(artifact.intelligence_lineage);
   const consultantContext = object(artifact.consultant_only_context);
   const source = array(artifact.intelligence_lineage).length
     ? array(artifact.intelligence_lineage)
@@ -188,7 +189,9 @@ function normalizeLineage(artifact) {
         ? array(artifact.evidence_registry)
         : array(artifact.canonical_evidence_ledger).length
           ? array(artifact.canonical_evidence_ledger)
-          : array(consultantContext.intelligence_lineage);
+          : array(nestedLineage.admissible_evidence).length
+            ? array(nestedLineage.admissible_evidence)
+            : array(consultantContext.intelligence_lineage);
 
   return source
     .map((item) => typeof item === 'string'
@@ -274,6 +277,12 @@ export function normalizeFinalArtifact(input) {
   const consultant = object(briefMetadata.consultant);
   const clientProfile = object(artifact.client_profile);
   const metadata = object(artifact.metadata);
+  const clientIntel = object(artifact.client_intel);
+  const companyProfile = object(clientIntel.company_profile);
+  const strategicIntelligence = object(artifact.strategic_intelligence);
+  const statedNeed = object(strategicIntelligence.stated_need);
+  const strategicService = array(strategicIntelligence.potential_service_relevance)[0] || {};
+  const matchScoreSummary = object(artifact.match_score_summary);
   const consultantInfo = object(artifact.consultant_info);
   const prospectInfo = object(artifact.prospect_info);
   const prospectOverview = object(artifact.prospect_overview);
@@ -304,7 +313,9 @@ export function normalizeFinalArtifact(input) {
           ? object(matchDiagnostics.deterministic_metrics)
           : Object.keys(object(artifact.match_score_metrics)).length
             ? object(artifact.match_score_metrics)
-            : object(artifact.metrics);
+            : Object.keys(matchScoreSummary).length
+              ? matchScoreSummary
+              : object(artifact.metrics);
   const matchClassifications = Object.keys(object(artifact.match_classifications)).length
     ? object(artifact.match_classifications)
     : Object.keys(object(artifact.canonical_match_classifications)).length
@@ -315,7 +326,9 @@ export function normalizeFinalArtifact(input) {
           ? object(matchDiagnostics.match_classifications)
           : Object.keys(object(artifact.match_dimension_analysis)).length
             ? object(artifact.match_dimension_analysis)
-            : matchBreakdown;
+            : Object.keys(object(artifact.canonical_alignment)).length
+              ? object(artifact.canonical_alignment)
+              : matchBreakdown;
   const completenessClassifications = Object.keys(object(artifact.completeness_classifications)).length
     ? object(artifact.completeness_classifications)
     : Object.keys(object(artifact.canonical_completeness_classifications)).length
@@ -329,6 +342,7 @@ export function normalizeFinalArtifact(input) {
     strategicBrief.key_talking_points ??
     strategySummary.key_talking_points ??
     discoveryPlan.key_talking_points ??
+    strategicIntelligence.strategic_recommendations ??
     artifact.talking_points
   ).map(text).filter(Boolean);
 
@@ -338,7 +352,8 @@ export function normalizeFinalArtifact(input) {
     discoveryGuidance.risk_factors ??
     strategicBrief.risk_factors ??
     strategySummary.risk_factors ??
-    discoveryPlan.risk_factors
+    discoveryPlan.risk_factors ??
+    strategicIntelligence.risk_factors
   ).map(text).filter(Boolean);
 
   return {
@@ -348,6 +363,8 @@ export function normalizeFinalArtifact(input) {
       prospectOverview.company_name,
       prospectInfo.company_name,
       engagementSummary.prospect_name,
+      briefMetadata.prospect_company,
+      companyProfile.name,
       companyIdentifiers.legal_name,
       clarisMetadata.target_company,
       targetFirm.company_name,
@@ -359,6 +376,7 @@ export function normalizeFinalArtifact(input) {
       prospectOverview.domain,
       prospectInfo.domain,
       engagementSummary.website,
+      companyProfile.domain,
       companyIdentifiers.domain,
       clarisMetadata.target_domain,
       targetFirm.domain,
@@ -400,6 +418,8 @@ export function normalizeFinalArtifact(input) {
       serviceFromRelevance(artifact),
       serviceFromMatchBreakdown(matchClassifications),
       array(canonicalTruthSummary.potential_service_relevance)[0],
+      strategicService.service_id,
+      statedNeed.primary_requirement,
       engagementSummary.primary_service_intent,
       prospectOverview.primary_interest
     ),
@@ -407,6 +427,7 @@ export function normalizeFinalArtifact(input) {
       strategicGuidance.recommended_action,
       strategicRecommendations.recommended_action,
       discoveryGuidance.recommended_action,
+      array(strategicIntelligence.strategic_recommendations)[0],
       strategicBrief.recommended_action,
       strategySummary.recommended_action
     ),
@@ -421,6 +442,10 @@ export function normalizeFinalArtifact(input) {
       supported_match: numeric(
         deterministicMetrics.supported_match_score ??
         deterministicMetrics.supported_match
+      ),
+      overall_match: numeric(
+        deterministicMetrics.overall_match_score ??
+        deterministicMetrics.overall_match
       ),
       scorable_coverage: numeric(
         deterministicMetrics.scorable_coverage_score ??
@@ -466,10 +491,21 @@ export function renderFinalBrief(input) {
   lines.push('');
 
   lines.push('## Deterministic Metrics');
-  lines.push(`- Supported Match: ${formatMetric(normalized.metrics.supported_match, '/100')}`);
-  lines.push(`- Scorable Coverage: ${formatMetric(normalized.metrics.scorable_coverage, '/100')}`);
-  lines.push(`- Evaluated Fit Rate: ${formatMetric(normalized.metrics.evaluated_fit_rate, '%')}`);
-  lines.push(`- Evidence Completeness: ${formatMetric(normalized.metrics.evidence_completeness, '/100')}`);
+  if (normalized.metrics.supported_match !== null) {
+    lines.push(`- Supported Match: ${formatMetric(normalized.metrics.supported_match, '/100')}`);
+  }
+  if (normalized.metrics.overall_match !== null) {
+    lines.push(`- Overall Match: ${formatMetric(normalized.metrics.overall_match, '/100')}`);
+  }
+  if (normalized.metrics.scorable_coverage !== null) {
+    lines.push(`- Scorable Coverage: ${formatMetric(normalized.metrics.scorable_coverage, '/100')}`);
+  }
+  if (normalized.metrics.evaluated_fit_rate !== null) {
+    lines.push(`- Evaluated Fit Rate: ${formatMetric(normalized.metrics.evaluated_fit_rate, '%')}`);
+  }
+  if (normalized.metrics.evidence_completeness !== null) {
+    lines.push(`- Evidence Completeness: ${formatMetric(normalized.metrics.evidence_completeness, '/100')}`);
+  }
   lines.push('');
 
   if (normalized.preliminary_brief_markdown) {
