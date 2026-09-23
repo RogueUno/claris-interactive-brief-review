@@ -346,6 +346,9 @@ export function normalizeFinalArtifact(input) {
     source_schema: sourceSchema,
     company: firstText(
       prospectOverview.company_name,
+      prospectInfo.company_name,
+      engagementSummary.prospect_name,
+      companyIdentifiers.legal_name,
       clarisMetadata.target_company,
       targetFirm.company_name,
       clientProfile.company_name,
@@ -354,6 +357,9 @@ export function normalizeFinalArtifact(input) {
     ),
     domain: firstText(
       prospectOverview.domain,
+      prospectInfo.domain,
+      engagementSummary.website,
+      companyIdentifiers.domain,
       clarisMetadata.target_domain,
       targetFirm.domain,
       clientProfile.domain,
@@ -362,6 +368,7 @@ export function normalizeFinalArtifact(input) {
     ),
     consultant_name: firstText(
       clarisMetadata.consultant_name,
+      consultantInfo.name,
       consultant.consultant_name,
       metadata.consultant_name,
       briefMetadata.consultant_name,
@@ -369,6 +376,7 @@ export function normalizeFinalArtifact(input) {
     ),
     firm: firstText(
       clarisMetadata.firm,
+      consultantInfo.firm,
       consultant.firm,
       metadata.firm_name,
       briefMetadata.firm_name,
@@ -377,25 +385,36 @@ export function normalizeFinalArtifact(input) {
     qualification_status: firstText(
       strategicGuidance.qualification_status,
       matchSummary.qualification_status,
+      strategicBrief.qualification_status,
+      engagementSummary.qualification_status,
+      strategySummary.qualification_status,
       artifact.qualification_status,
       briefMetadata.report_status
     ),
     primary_service_id: firstText(
       strategicGuidance.primary_service_id,
+      strategicBrief.primary_service_id,
+      strategySummary.primary_service_id,
       scopeAnalysis.primary_service_id,
       serviceFromRelevance(strategicAssessment),
       serviceFromRelevance(artifact),
       serviceFromMatchBreakdown(matchClassifications),
+      array(canonicalTruthSummary.potential_service_relevance)[0],
+      engagementSummary.primary_service_intent,
       prospectOverview.primary_interest
     ),
     recommended_action: firstText(
       strategicGuidance.recommended_action,
       strategicRecommendations.recommended_action,
-      discoveryGuidance.recommended_action
+      discoveryGuidance.recommended_action,
+      strategicBrief.recommended_action,
+      strategySummary.recommended_action
     ),
     rationale: firstText(
       strategicGuidance.rationale,
       matchSummary.fit_rationale,
+      strategicBrief.rationale,
+      engagementSummary.narrative,
       matchScoreExplanation.overall_assessment
     ),
     metrics: {
