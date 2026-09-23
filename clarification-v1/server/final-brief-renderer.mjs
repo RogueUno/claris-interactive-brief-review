@@ -198,7 +198,7 @@ function normalizeLineage(artifact) {
       ? { source_id: firstText(item), authority: null, usage: null }
       : {
           source_id: firstText(item?.source_id, item?.evidence_id),
-          authority: firstText(item?.authority, item?.source),
+          authority: firstText(item?.authority, item?.source_authority, item?.source),
           usage: firstText(item?.usage, item?.description, item?.statement)
         })
     .filter((item) => item.source_id || item.usage);
@@ -279,6 +279,10 @@ export function normalizeFinalArtifact(input) {
   const metadata = object(artifact.metadata);
   const clientIntel = object(artifact.client_intel);
   const companyProfile = object(clientIntel.company_profile);
+  const executiveSummary = object(artifact.executive_summary);
+  const consultantOnlyContext = object(artifact.consultant_only_context);
+  const strategicPosture = object(consultantOnlyContext.strategic_posture);
+  const directService = array(artifact.potential_service_relevance)[0] || {};
   const strategicIntelligence = object(artifact.strategic_intelligence);
   const statedNeed = object(strategicIntelligence.stated_need);
   const strategicService = array(strategicIntelligence.potential_service_relevance)[0] || {};
@@ -326,7 +330,9 @@ export function normalizeFinalArtifact(input) {
           ? object(matchDiagnostics.match_classifications)
           : Object.keys(object(artifact.match_dimension_analysis)).length
             ? object(artifact.match_dimension_analysis)
-            : Object.keys(object(artifact.canonical_alignment)).length
+            : Object.keys(object(artifact.match_analysis)).length
+              ? object(artifact.match_analysis)
+              : Object.keys(object(artifact.canonical_alignment)).length
               ? object(artifact.canonical_alignment)
               : matchBreakdown;
   const completenessClassifications = Object.keys(object(artifact.completeness_classifications)).length
@@ -342,9 +348,10 @@ export function normalizeFinalArtifact(input) {
     strategicBrief.key_talking_points ??
     strategySummary.key_talking_points ??
     discoveryPlan.key_talking_points ??
+    strategicPosture.key_talking_points ??
     strategicIntelligence.strategic_recommendations ??
     artifact.talking_points
-  ).map(text).filter(Boolean);
+  ).map((item) => typeof item === 'string' ? text(item) : firstText(item?.description, item?.summary)).filter(Boolean);
 
   const riskFactors = array(
     strategicGuidance.risk_factors ??
@@ -353,8 +360,9 @@ export function normalizeFinalArtifact(input) {
     strategicBrief.risk_factors ??
     strategySummary.risk_factors ??
     discoveryPlan.risk_factors ??
-    strategicIntelligence.risk_factors
-  ).map(text).filter(Boolean);
+    strategicIntelligence.risk_factors ??
+    consultantOnlyContext.risk_factors
+  ).map((item) => typeof item === 'string' ? text(item) : firstText(item?.description, item?.summary, item?.risk)).filter(Boolean);
 
   return {
     schema_version: 'claris_final_brief_render_v1',
@@ -377,6 +385,7 @@ export function normalizeFinalArtifact(input) {
       prospectInfo.domain,
       engagementSummary.website,
       companyProfile.domain,
+      briefMetadata.prospect_domain,
       companyIdentifiers.domain,
       clarisMetadata.target_domain,
       targetFirm.domain,
@@ -406,6 +415,7 @@ export function normalizeFinalArtifact(input) {
       strategicBrief.qualification_status,
       engagementSummary.qualification_status,
       strategySummary.qualification_status,
+      executiveSummary.qualification_status,
       artifact.qualification_status,
       briefMetadata.report_status
     ),
@@ -413,10 +423,12 @@ export function normalizeFinalArtifact(input) {
       strategicGuidance.primary_service_id,
       strategicBrief.primary_service_id,
       strategySummary.primary_service_id,
+      executiveSummary.primary_service_id,
       scopeAnalysis.primary_service_id,
       serviceFromRelevance(strategicAssessment),
       serviceFromRelevance(artifact),
       serviceFromMatchBreakdown(matchClassifications),
+      directService.service_id,
       array(canonicalTruthSummary.potential_service_relevance)[0],
       strategicService.service_id,
       statedNeed.primary_requirement,
@@ -428,6 +440,7 @@ export function normalizeFinalArtifact(input) {
       strategicRecommendations.recommended_action,
       discoveryGuidance.recommended_action,
       array(strategicIntelligence.strategic_recommendations)[0],
+      strategicPosture.recommended_action,
       strategicBrief.recommended_action,
       strategySummary.recommended_action
     ),
@@ -435,6 +448,7 @@ export function normalizeFinalArtifact(input) {
       strategicGuidance.rationale,
       matchSummary.fit_rationale,
       strategicBrief.rationale,
+      executiveSummary.summary_statement,
       engagementSummary.narrative,
       matchScoreExplanation.overall_assessment
     ),
@@ -451,7 +465,10 @@ export function normalizeFinalArtifact(input) {
         deterministicMetrics.scorable_coverage_score ??
         deterministicMetrics.scorable_coverage
       ),
-      evaluated_fit_rate: numeric(deterministicMetrics.evaluated_fit_rate),
+      evaluated_fit_rate: numeric(
+        deterministicMetrics.evaluated_fit_rate ??
+        deterministicMetrics.evaluated_fit_rate_percent
+      ),
       evidence_completeness: numeric(
         deterministicMetrics.evidence_completeness_score ??
         deterministicMetrics.evidence_completeness
