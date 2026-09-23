@@ -274,9 +274,18 @@ export function normalizeFinalArtifact(input) {
   const consultant = object(briefMetadata.consultant);
   const clientProfile = object(artifact.client_profile);
   const metadata = object(artifact.metadata);
+  const consultantInfo = object(artifact.consultant_info);
+  const prospectInfo = object(artifact.prospect_info);
   const prospectOverview = object(artifact.prospect_overview);
+  const canonicalTruthSummary = object(artifact.canonical_truth_summary);
+  const companyIdentifiers = object(canonicalTruthSummary.company_identifiers);
+  const engagementSummary = object(artifact.engagement_summary);
   const matchSummary = object(artifact.match_summary);
+  const matchDiagnostics = object(artifact.match_diagnostics);
   const strategicAssessment = object(artifact.strategic_assessment);
+  const strategySummary = object(strategicAssessment.strategy_summary);
+  const strategicBrief = object(artifact.strategic_brief);
+  const discoveryPlan = object(artifact.discovery_plan);
   const discoveryGuidance = Object.keys(object(artifact.discovery_guidance)).length
     ? object(artifact.discovery_guidance)
     : object(strategicAssessment.discovery_guidance);
@@ -289,29 +298,47 @@ export function normalizeFinalArtifact(input) {
     ? object(artifact.deterministic_metrics)
     : Object.keys(object(matchSummary.deterministic_metrics)).length
       ? object(matchSummary.deterministic_metrics)
-      : object(artifact.metrics);
+      : Object.keys(object(strategicAssessment.deterministic_metrics)).length
+        ? object(strategicAssessment.deterministic_metrics)
+        : Object.keys(object(matchDiagnostics.deterministic_metrics)).length
+          ? object(matchDiagnostics.deterministic_metrics)
+          : Object.keys(object(artifact.match_score_metrics)).length
+            ? object(artifact.match_score_metrics)
+            : object(artifact.metrics);
   const matchClassifications = Object.keys(object(artifact.match_classifications)).length
     ? object(artifact.match_classifications)
     : Object.keys(object(artifact.canonical_match_classifications)).length
       ? object(artifact.canonical_match_classifications)
       : Object.keys(object(strategicAssessment.match_classifications)).length
         ? object(strategicAssessment.match_classifications)
-        : matchBreakdown;
+        : Object.keys(object(matchDiagnostics.match_classifications)).length
+          ? object(matchDiagnostics.match_classifications)
+          : Object.keys(object(artifact.match_dimension_analysis)).length
+            ? object(artifact.match_dimension_analysis)
+            : matchBreakdown;
   const completenessClassifications = Object.keys(object(artifact.completeness_classifications)).length
     ? object(artifact.completeness_classifications)
-    : object(artifact.canonical_completeness_classifications);
+    : Object.keys(object(artifact.canonical_completeness_classifications)).length
+      ? object(artifact.canonical_completeness_classifications)
+      : object(artifact.evidence_completeness_analysis);
 
   const talkingPoints = array(
     strategicGuidance.key_talking_points ??
     strategicRecommendations.key_talking_points ??
     discoveryGuidance.key_talking_points ??
+    strategicBrief.key_talking_points ??
+    strategySummary.key_talking_points ??
+    discoveryPlan.key_talking_points ??
     artifact.talking_points
   ).map(text).filter(Boolean);
 
   const riskFactors = array(
     strategicGuidance.risk_factors ??
     strategicRecommendations.risk_factors ??
-    discoveryGuidance.risk_factors
+    discoveryGuidance.risk_factors ??
+    strategicBrief.risk_factors ??
+    strategySummary.risk_factors ??
+    discoveryPlan.risk_factors
   ).map(text).filter(Boolean);
 
   return {
