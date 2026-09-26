@@ -49,7 +49,7 @@ const validationContext = {
   commercial_rules: { budget_required_before_first_call: false }
 };
 
-function setup() {
+function setup(overrides = {}) {
   const storage = memoryStorage();
   const service = createBriefService({
     repository: createBriefRepository(storage),
@@ -58,7 +58,8 @@ function setup() {
   const gateway = createDeliveryGateway({
     briefServiceProvider: () => service,
     acceptedKeysProvider: () => ['make-test-key', 'admin-test-key'],
-    briefBaseUrlProvider: () => 'https://preview.example/brief-v1/'
+    briefBaseUrlProvider: () => 'https://preview.example/brief-v1/',
+    ...overrides
   });
   return { storage, service, gateway };
 }
@@ -197,6 +198,32 @@ test('publish-ready preflights notification before persistence', async () => {
   assert.equal(rejected.status, 422);
   assert.equal((await body(rejected)).error, 'CONSULTANT_DELIVERY_EMAIL_REQUIRED');
   assert.equal(storage.data.size, 0);
+});
+
+
+test('publish-ready revokes a persisted brief if final notification packaging unexpectedly fails', async () => {
+  const { gateway, storage } = setup({
+    deliveryBuilder(operation, input) {
+      if (operation !== 'CONSULTANT_BRIEF_READY') throw new Error('UNEXPECTED_OPERATION');
+      if (String(input?.brief_url || '').includes('#brief=preflight')) {
+        return { kind: 'CONSULTANT_BRIEF_READY', to: input.consultant_delivery_email };
+      }
+      throw new Error('PACKAGING_BROKE');
+    }
+  });
+
+  const response = await gateway.fetch(request('brief_publish_ready', {
+    consultant_id: 'consultant_test_1',
+    consultant_delivery_email: 'sarah@example.com',
+    company: 'Acme',
+    brief_payload: payload,
+    validation_context: validationContext
+  }, { auth: true }));
+
+  assert.equal(response.status, 500);
+  assert.equal((await body(response)).error, 'PACKAGING_BROKE');
+  const brief = [...storage.data.values()].find((value) => value?.schema_version === 'claris_private_brief_v1');
+  assert.equal(brief.status, 'REVOKED');
 });
 
 test('private create is authenticated and deterministic validation fails closed', async () => {
