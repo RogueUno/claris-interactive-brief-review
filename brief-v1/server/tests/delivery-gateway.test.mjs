@@ -1,8 +1,10 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import fs from 'node:fs';
 import { createDeliveryGateway } from '../../../api/delivery/package.mjs';
 import { createBriefRepository } from '../repository.mjs';
 import { createBriefService } from '../service.mjs';
+import { compileBriefPublishReady } from '../publication-contract.mjs';
 
 function memoryStorage() {
   const data = new Map();
@@ -251,3 +253,66 @@ test('private create is authenticated and deterministic validation fails closed'
   assert.equal(rejectedBody.errors.some((item) => item.code === 'ECON_TARGET_NONEMPTY'), true);
   assert.equal(storage.data.size, 0);
 });
+
+
+const goldenCases = [
+  { name: 'Resend', dir: '../../../reference/premium-gauntlet/fixtures/resend-v3/' },
+  { name: 'Linear', dir: '../../../reference/premium-gauntlet/fixtures/linear-v1/' },
+  { name: 'Supabase', dir: '../../../reference/premium-gauntlet/fixtures/supabase-v1/' }
+];
+
+for (const fixture of goldenCases) {
+  test(`${fixture.name} gold publishes, resolves, and loads through the consolidated gateway`, async () => {
+    const base = new URL(fixture.dir, import.meta.url);
+    const prepare = JSON.parse(fs.readFileSync(new URL('premium-prepare.json', base), 'utf8'));
+    const discovery = JSON.parse(fs.readFileSync(new URL('discovery-plan.json', base), 'utf8'));
+    const consultantSot = JSON.parse(fs.readFileSync(new URL('consultant-sot.json', base), 'utf8'));
+
+    const compiled = compileBriefPublishReady({
+      opportunity_id: `gold_gateway_${fixture.name.toLowerCase()}`,
+      consultant_id: `consultant_${fixture.name.toLowerCase()}`,
+      consultant_delivery_email: 'pilot@example.com',
+      consultant_first_name: 'Pilot',
+      company: fixture.name,
+      prospect_name: 'Fixture Prospect',
+      meeting_time: '2026-09-30T14:00:00Z',
+      prepare,
+      discovery,
+      consultant_sot: consultantSot,
+      ttl_days: 7
+    });
+
+    const { gateway } = setup();
+    const publish = await gateway.fetch(request(
+      compiled.operation,
+      compiled.body,
+      { auth: true }
+    ));
+    assert.equal(publish.status, 201, `${fixture.name} publication must succeed`);
+    const published = await body(publish);
+    assert.equal(published.ok, true);
+    assert.equal(published.delivery.kind, 'CONSULTANT_BRIEF_READY');
+    assert.equal(published.delivery.to, 'pilot@example.com');
+    assert.match(published.brief.brief_url, /^https:\/\/preview\.example\/brief-v1\/#brief=/);
+
+    const url = new URL(published.brief.brief_url);
+    const token = new URLSearchParams(url.hash.slice(1)).get('brief');
+    assert.ok(token);
+
+    const resolve = await gateway.fetch(request('brief_resolve', { brief_token: token }));
+    assert.equal(resolve.status, 200);
+    const cookie = resolve.headers.get('set-cookie').split(';')[0];
+
+    const data = await gateway.fetch(request('brief_data', {}, { cookie }));
+    assert.equal(data.status, 200);
+    const loaded = await body(data);
+    assert.equal(loaded.brief.company, fixture.name);
+    assert.equal(loaded.brief.payload.prepare.schema_version, 'CLARIS_PREMIUM_PREPARE_V3_6');
+    assert.equal(loaded.brief.payload.discovery.schema_version, 'CLARIS_DISCOVERY_INTELLIGENCE_V1_2');
+    assert.equal(
+      loaded.brief.payload.discovery.primary_questions.length,
+      discovery.primary_questions.length
+    );
+  });
+}
+
