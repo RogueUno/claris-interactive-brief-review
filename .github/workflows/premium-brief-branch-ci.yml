@@ -23,7 +23,8 @@ jobs:
           node-version: '22'
       - run: npm install --no-audit --no-fund
       - run: npm run test:premium
-      - run: npm run test:server
+      - run: npm run test:calibration
+      - run: npm run test:brief
 
   preview-smoke:
     needs: brief
