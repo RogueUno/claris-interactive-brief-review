@@ -17,10 +17,69 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout premium branch
+        uses: actions/checkout@v4
+        with:
+          ref: premium-gauntlet-v3-1
+          path: branch
+
+      - name: Checkout main baseline
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          path: baseline
+
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - run: npm install --no-audit --no-fund
-      - run: npm run test:premium
-      - run: npm run test:server
+
+      - name: Install premium branch dependencies
+        working-directory: branch
+        run: npm install --no-audit --no-fund
+
+      - name: Install main baseline dependencies
+        working-directory: baseline
+        run: npm install --no-audit --no-fund
+
+      - name: Premium intelligence certification
+        working-directory: branch
+        run: npm run test:premium
+
+      - name: Run premium branch full server suite
+        working-directory: branch
+        shell: bash
+        run: |
+          set +e
+          npm run test:server > ../branch-server.log 2>&1
+          echo $? > ../branch-server.exit
+          exit 0
+
+      - name: Run main baseline server suite
+        working-directory: baseline
+        shell: bash
+        run: |
+          set +e
+          npm run test:server > ../baseline-server.log 2>&1
+          echo $? > ../baseline-server.exit
+          exit 0
+
+      - name: Compare server failures against main
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep '^not ok ' branch-server.log | sed -E 's/^not ok [0-9]+ - //' | sort -u > branch-failures.txt || true
+          grep '^not ok ' baseline-server.log | sed -E 's/^not ok [0-9]+ - //' | sort -u > baseline-failures.txt || true
+
+          echo "=== Main baseline failures ==="
+          cat baseline-failures.txt || true
+          echo "=== Premium branch failures ==="
+          cat branch-failures.txt || true
+
+          comm -13 baseline-failures.txt branch-failures.txt > new-failures.txt
+          if [ -s new-failures.txt ]; then
+            echo "New server regressions introduced by premium branch:"
+            cat new-failures.txt
+            exit 1
+          fi
+
+          echo "No new server regressions versus main baseline."
