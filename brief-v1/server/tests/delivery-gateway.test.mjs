@@ -220,6 +220,9 @@ test('publish-ready revokes a persisted brief if final notification packaging un
     consultant_id: 'consultant_test_1',
     consultant_delivery_email: 'sarah@example.com',
     company: 'Acme',
+    prospect_name: 'Alex Morgan',
+    prospect_role: 'VP Engineering',
+    meeting_time: '2026-09-30T14:00:00Z',
     brief_payload: payload,
     validation_context: validationContext
   }, { auth: true }));
@@ -370,7 +373,7 @@ test('publish-ready retry reuses the same private publication and stable notific
 });
 
 test('revoked publish-ready publication stays revoked on retry', async () => {
-  const { gateway } = setup();
+  const { gateway, storage } = setup();
   const requestBody = {
     opportunity_id: 'opp_retry_revoked_1',
     consultant_id: 'consultant_test_1',
@@ -387,9 +390,13 @@ test('revoked publish-ready publication stays revoked on retry', async () => {
   const revoke = await gateway.fetch(request('brief_revoke', { brief_id: first.brief.brief_id }, { auth: true }));
   assert.equal(revoke.status, 200);
 
-  const retry = await gateway.fetch(request('brief_publish_ready', requestBody, { auth: true }));
+  const retryBody = { ...requestBody, prospect_role: 'Changed Role', meeting_time: '2026-10-03T10:00:00Z' };
+  const retry = await gateway.fetch(request('brief_publish_ready', retryBody, { auth: true }));
   assert.equal(retry.status, 410);
   const rejected = await body(retry);
   assert.equal(rejected.error, 'BRIEF_PUBLICATION_REVOKED');
   assert.equal(rejected.publication_id, first.publication_id);
+  const stored=[...storage.data.values()].find(v=>v?.schema_version==='claris_private_brief_v1');
+  assert.equal(stored.context.prospect_role, 'VP Engineering');
+  assert.equal(stored.context.meeting_time, '2026-09-30T14:00:00Z');
 });
