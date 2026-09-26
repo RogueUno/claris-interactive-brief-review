@@ -28,9 +28,10 @@ function render(brief){
 }
 
 async function boot(){
+  const gateway='/api/delivery/package';
   const token=tokenFromFragment();
-  if(token){clearFragment();const resolved=await requestJson('/api/brief/resolve',{method:'POST',body:JSON.stringify({brief_token:token})});if(!resolved.ok){gate('This private brief could not be opened.',resolved.status===410?'The link expired or was revoked.':'Request a fresh CLARIS brief link.');return;}}
-  const loaded=await requestJson('/api/brief/data',{method:'GET'});
+  if(token){clearFragment();const resolved=await requestJson(gateway,{method:'POST',body:JSON.stringify({operation:'brief_resolve',brief_token:token})});if(!resolved.ok){gate('This private brief could not be opened.',resolved.status===410?'The link expired or was revoked.':'Request a fresh CLARIS brief link.');return;}}
+  const loaded=await requestJson(gateway,{method:'POST',body:JSON.stringify({operation:'brief_data'})});
   if(!loaded.ok){gate('A private brief link is required.',loaded.status===410?'This brief expired or was revoked.':'Open the CLARIS link you received to view this brief.');return;}
   render(loaded.body.brief);
 }
