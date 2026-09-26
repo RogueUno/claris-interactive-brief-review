@@ -45,6 +45,10 @@ jobs:
         working-directory: branch
         run: npm run test:premium
 
+      - name: Secure brief certification
+        working-directory: branch
+        run: npm run test:brief
+
       - name: Run premium branch full server suite
         working-directory: branch
         shell: bash
