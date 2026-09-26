@@ -1,0 +1,1 @@
+I'm VP Engineering and own the evaluation. We're planning an enterprise OAuth 2.1 rollout this quarter. We want an independent security review of the OAuth/RLS boundary before launch, but haven't fixed the review deadline or exact test scope yet.
