@@ -215,6 +215,7 @@ test('publish-ready revokes a persisted brief if final notification packaging un
   });
 
   const response = await gateway.fetch(request('brief_publish_ready', {
+    opportunity_id: 'opp_packaging_break',
     consultant_id: 'consultant_test_1',
     consultant_delivery_email: 'sarah@example.com',
     company: 'Acme',
@@ -316,3 +317,66 @@ for (const fixture of goldenCases) {
   });
 }
 
+
+
+test('publish-ready retry reuses the same private publication and stable notification key', async () => {
+  const { gateway, storage } = setup();
+  const requestBody = {
+    opportunity_id: 'opp_retry_same_1',
+    consultant_id: 'consultant_test_1',
+    consultant_delivery_email: 'sarah@example.com',
+    consultant_first_name: 'Sarah',
+    company: 'Acme',
+    prospect_name: 'Alex Morgan',
+    meeting_time: '2026-09-30T14:00:00Z',
+    brief_payload: payload,
+    validation_context: validationContext,
+    ttl_days: 7
+  };
+
+  const firstResponse = await gateway.fetch(request('brief_publish_ready', requestBody, { auth: true }));
+  assert.equal(firstResponse.status, 201);
+  const first = await body(firstResponse);
+
+  const secondResponse = await gateway.fetch(request('brief_publish_ready', requestBody, { auth: true }));
+  assert.equal(secondResponse.status, 200);
+  const second = await body(secondResponse);
+
+  assert.equal(first.reused, false);
+  assert.equal(second.reused, true);
+  assert.equal(first.publication_id, second.publication_id);
+  assert.equal(first.brief.brief_id, second.brief.brief_id);
+  assert.equal(first.brief.brief_url, second.brief.brief_url);
+  assert.equal(first.notification_dedupe_key, second.notification_dedupe_key);
+  assert.match(first.notification_dedupe_key, /^CONSULTANT_BRIEF_READY:pub_/);
+
+  const briefs=[...storage.data.values()].filter(v=>v?.schema_version==='claris_private_brief_v1');
+  const accesses=[...storage.data.values()].filter(v=>v?.schema_version==='claris_private_brief_access_v1');
+  assert.equal(briefs.length,1);
+  assert.equal(accesses.length,1);
+});
+
+test('revoked publish-ready publication stays revoked on retry', async () => {
+  const { gateway } = setup();
+  const requestBody = {
+    opportunity_id: 'opp_retry_revoked_1',
+    consultant_id: 'consultant_test_1',
+    consultant_delivery_email: 'sarah@example.com',
+    company: 'Acme',
+    brief_payload: payload,
+    validation_context: validationContext
+  };
+
+  const firstResponse = await gateway.fetch(request('brief_publish_ready', requestBody, { auth: true }));
+  assert.equal(firstResponse.status, 201);
+  const first = await body(firstResponse);
+
+  const revoke = await gateway.fetch(request('brief_revoke', { brief_id: first.brief.brief_id }, { auth: true }));
+  assert.equal(revoke.status, 200);
+
+  const retry = await gateway.fetch(request('brief_publish_ready', requestBody, { auth: true }));
+  assert.equal(retry.status, 410);
+  const rejected = await body(retry);
+  assert.equal(rejected.error, 'BRIEF_PUBLICATION_REVOKED');
+  assert.equal(rejected.publication_id, first.publication_id);
+});
