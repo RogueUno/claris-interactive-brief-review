@@ -99,7 +99,27 @@ test('builds compact consultant private-brief notification', () => {
   assert.doesNotMatch(result.text_body, /This fourth question/);
   assert.match(result.text_body, /https:\/\/preview\.example\/brief-v1\/#brief=opaque-token/);
   assert.doesNotMatch(result.text_body, /\*\*/);
+  assert.match(result.html_body, /Open private brief/);
+  assert.match(result.html_body, /https:\/\/preview\.example\/brief-v1\/#brief=opaque-token/);
+  assert.match(result.html_body, /Which API or authentication surface/);
   assert.equal(result.metadata.priority_question_count, 3);
+});
+
+test('escapes dynamic content in premium HTML notification', () => {
+  const result = buildConsultantBriefReadyDelivery({
+    consultant_delivery_email: 'sarah@northstar.example',
+    consultant_first_name: '<Sarah>',
+    company: '<script>alert(1)</script>',
+    executive_readout: '<img src=x onerror=alert(1)>',
+    priority_questions: ['<b>Question</b>'],
+    brief_url: 'https://preview.example/brief-v1/#brief=opaque'
+  });
+
+  assert.doesNotMatch(result.html_body, /<script>/);
+  assert.doesNotMatch(result.html_body, /<img/);
+  assert.match(result.html_body, /&lt;script&gt;/);
+  assert.match(result.html_body, /&lt;img src=x onerror=alert\(1\)&gt;/);
+  assert.match(result.html_body, /&lt;b&gt;Question&lt;\/b&gt;/);
 });
 
 test('dispatches private brief notification through delivery package', () => {
