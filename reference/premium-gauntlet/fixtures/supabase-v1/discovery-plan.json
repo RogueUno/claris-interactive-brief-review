@@ -1,0 +1,71 @@
+{
+  "schema_version":"CLARIS_DISCOVERY_INTELLIGENCE_V1_2",
+  "call_objective":"Lock the OAuth/RLS review boundary, define what independent validation must produce, and establish the latest useful completion date for the enterprise rollout.",
+  "authorized_dimensions":[
+    {"dimension_id":"D1","ontology_intent":"D02 technical_or_service_scope","authority":"PREPARE","policy_key":null,"reason":"Exact test scope is explicitly unresolved in the booking."},
+    {"dimension_id":"D2","ontology_intent":"D06 desired_outcome","authority":"PREPARE","policy_key":null,"reason":"Independent review is explicit but the required deliverable/depth is unresolved."},
+    {"dimension_id":"D3","ontology_intent":"D11 timing_trigger","authority":"PREPARE","policy_key":null,"reason":"The booking explicitly says the review deadline is not fixed."}
+  ],
+  "diagnostic_target":[
+    "Exact OAuth/RLS technical boundary requiring independent review.",
+    "Exact review artifact/depth needed to clear rollout.",
+    "Latest useful completion date for findings before launch."
+  ],
+  "commercial_target":[],
+  "primary_questions":[
+    {
+      "question_id":"Q1","ontology_intent":"D02 technical_or_service_scope","dimension_id":"D1","authority":"PREPARE","policy_key":null,
+      "ask":"Which exact boundary should the independent review cover: OAuth authorization/PKCE and client registration, token issuance/refresh, RLS enforcement for OAuth clients, or the end-to-end path?",
+      "why_now":"The booking explicitly leaves test scope unresolved, while first-party documentation shows that OAuth identity flow and RLS database authorization are distinct layers.",
+      "already_known_context":["Supabase Auth supports OAuth 2.1/OIDC with PKCE and dynamic client registration.","Supabase states OAuth scopes do not control database access; RLS does and can use client_id."],
+      "listen_for":[
+        {"pattern":"We mainly want an architecture review of authorization code, PKCE and client registration.","meaning":"Review is design-focused and bounded to delegated-authentication architecture.","next_effect":"Keeps Advisory vCISO as the leading conditional path."},
+        {"pattern":"We need someone to actively validate that OAuth clients cannot access data outside intended RLS policies.","meaning":"The prospect wants hands-on authorization validation across the OAuth-to-RLS boundary.","next_effect":"Moves Penetration Testing / technical validation into scope."},
+        {"pattern":"We want the whole chain reviewed from client registration through token use and database authorization.","meaning":"Scope is end-to-end and may require both architecture and hands-on validation components.","next_effect":"Define a combined review boundary before scoping delivery."}
+      ],
+      "conditional_probes":[
+        {"trigger_if":"The prospect says they observed or suspect cross-tenant or over-broad data access through an OAuth client.","opens_ontology_intent":"D04 problem_or_gap","ask":"Is that based on a specific observed test result, or is it a design uncertainty you want the review to rule out?","why":"The prospect has explicitly introduced a possible access-control problem; the follow-up separates observed behavior from preventive validation.","listen_for":["We reproduced access across tenant boundaries.","We have not observed it; we want independent assurance before launch."],"what_changes":"Determines whether the engagement includes validating a known issue versus testing a design assumption."}
+      ],
+      "what_the_answer_changes":"Sets the actual technical perimeter and whether architecture review, hands-on validation, or a combined engagement is relevant.",
+      "stop_condition":"The layers included and excluded from the independent review are explicit.",
+      "linked_service_paths":[{"service_id":"SVC_VCISO_ADVISORY","condition":"Architecture/design review is the confirmed need."},{"service_id":"SVC_PENTEST","condition":"Hands-on independent validation/testing is confirmed."}]
+    },
+    {"question_id":"Q2","ontology_intent":"D06 desired_outcome","dimension_id":"D2","authority":"PREPARE","policy_key":null,
+      "ask":"What must the independent review produce to clear rollout: architecture findings, hands-on validation and a test report, remediation/retest, customer-facing assurance, or something else?",
+      "why_now":"The booking asks for an independent review but does not define the decision artifact or validation depth needed for launch.",
+      "already_known_context":["Supabase already publishes SOC 2 Type 2 and ISO 27001 assurance, so generic readiness documentation is not the default assumption."],
+      "listen_for":[{"pattern":"We need a written architecture review and prioritized design findings.","meaning":"The desired output is advisory/design assurance.","next_effect":"Keeps Advisory vCISO as the conditional path."},{"pattern":"We need an independent test report plus a retest after fixes.","meaning":"The desired output is hands-on technical validation with remediation closure.","next_effect":"Moves Penetration Testing into the conditional path and makes timing/retest feasibility important."},{"pattern":"We need something enterprise customers can rely on during security review.","meaning":"The prospect has introduced a customer-assurance requirement.","next_effect":"Enterprise Security Enablement may become relevant after clarifying the required evidence."}],
+      "conditional_probes":[{"trigger_if":"The prospect says enterprise customers need a reusable review artifact or assurance package.","opens_ontology_intent":"D13 assurance_requirements","ask":"What are those customers expecting to rely on that your existing SOC 2/ISO evidence does not answer for this OAuth rollout?","why":"The prospect explicitly introduced customer assurance, so it is now valid to diagnose the evidence gap.","listen_for":["They want a dedicated technical assessment of the new OAuth path.","They want architecture diagrams and control explanations specific to the rollout."],"what_changes":"Determines whether Enterprise Sales Security Enablement belongs alongside the technical review."}],
+      "what_the_answer_changes":"Determines the service shape and what 'done' means for the independent review.",
+      "stop_condition":"The required review artifact, validation depth and acceptance condition are clear.",
+      "linked_service_paths":[{"service_id":"SVC_VCISO_ADVISORY","condition":"Architecture findings/design opinion are required."},{"service_id":"SVC_PENTEST","condition":"Hands-on validation/test report/retest are required."},{"service_id":"SVC_ENTERPRISE_SECURITY","condition":"Customer-facing assurance is explicitly required."}]
+    },
+    {"question_id":"Q3","ontology_intent":"D11 timing_trigger","dimension_id":"D3","authority":"PREPARE","policy_key":null,
+      "ask":"What is the latest date findings need to be in hand for this quarter's rollout to stay on track?",
+      "why_now":"The booking explicitly says the review deadline is not fixed, so timing is authorized and unresolved rather than generic 'why now' discovery.",
+      "already_known_context":["The enterprise OAuth rollout is planned for this quarter.","The review must happen before launch."],
+      "listen_for":[{"pattern":"We need findings before code freeze, with two weeks left for remediation.","meaning":"The engagement needs a fixed findings milestone and likely remediation buffer.","next_effect":"Check whether the selected review depth and any retest fit the delivery window."},{"pattern":"Launch can move; we care more about review quality than a fixed date.","meaning":"Timing is flexible despite the quarterly target.","next_effect":"Optimize scope/depth rather than compressing the review."},{"pattern":"We need final evidence before a named enterprise launch/customer date.","meaning":"The prospect has introduced an external timing dependency.","next_effect":"Preserve that date as a delivery constraint and, if customer evidence is involved, connect to the assurance branch."}],
+      "conditional_probes":[],
+      "what_the_answer_changes":"Determines whether architecture review, hands-on testing and possible remediation/retest can fit before launch.",
+      "stop_condition":"Latest useful findings date and any required remediation/retest buffer are explicit.",
+      "linked_service_paths":[{"service_id":"SVC_PENTEST","condition":"Testing/retest is confirmed and feasible within the prospect-stated delivery window."}]
+    }
+  ],
+  "do_not_ask":[
+    {"topic":"Who owns the evaluation?","reason":"RESEARCH_ALREADY_ANSWERED","detail":"The booking explicitly says VP Engineering owns the evaluation."},
+    {"topic":"Why now?","reason":"RESEARCH_ALREADY_ANSWERED","detail":"The booking explicitly ties the review to an enterprise OAuth rollout this quarter before launch."},
+   {"topic":"Do you have SOC 2 or ISO 27001?","reason":"RESEARCH_ALREADY_ANSWERED","detail":"Supabase publicly documents SOC 2 Type 2 and ISO 27001."},
+    {"topic":"Budget","reason":"UNAUTHORIZED","detail":"Consultant policy does not require economics before the first call and PREPARE did not open an economics dimension."}
+  ],
+  "call_flow":[
+    {"step":1,"move":"Use the booking context to skip role/trigger discovery and lock the exact OAuth/RLS review boundary with Q1.","advance_when":"Included/excluded technical layers are explicit."},
+    {"step":2,"move":"Use Q2 to define what independent review must produce to clear rollout.","advance_when":"Review artifact and validation depth are explicit."},
+    {"step":3,"move":"Use Q3 to convert the unresolved quarterly timing into a real findings deadline and remediation/retest buffer.","advance_when":"Latest useful findings date is explicit."},
+   {"step":4,"move":"Map the confirmed scope, output and timing to a conditional service shape and agree the next scoping step.","advance_when":"The next action is clear without introducing unauthorized commercial discovery."}
+  ],
+  "end_of_call_decision":{
+    "ready_for_next_step_if":["Technical review boundary is explicit.","Required independent-review artifact/depth is explicit.","Review-completion timing is explicit and feasible for the requested service shape."],
+    "remain_in_discovery_if":["OAuth/RLS scope is still ambiguous.","The prospect cannot yet define what independent review must produce.","Delivery timing remains too uncertain to know whether remediation/retest fits."],
+    "disqualify_or_deprioritize_if":["The prospect confirms a required service or deliverable that falls entirely outside all consultant SOT capabilities."]
+  }
+}
