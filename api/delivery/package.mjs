@@ -1,6 +1,5 @@
 import { buildDeliveryPackage } from '../../calibration-v3/server/pilot-delivery.mjs';
 import { json, methodNotAllowed, parseJson, cookieValue } from '../../calibration-v3/server/http.mjs';
-import { briefServerContext } from '../../brief-v1/server/api-shared.mjs';
 import { briefSessionCookie } from '../../brief-v1/server/http.mjs';
 
 function normalizeAcceptedKeys(values = []) {
@@ -59,13 +58,13 @@ function notificationInput(body, { briefId = null, briefUrl, expiresAt = null })
 }
 
 export function createDeliveryGateway({
-  briefServiceProvider = () => briefServerContext().service,
+  briefServiceProvider = async () => (await import('../../brief-v1/server/api-shared.mjs')).briefServerContext().service,
   deliveryBuilder = buildDeliveryPackage,
   acceptedKeysProvider = defaultAcceptedKeys,
   briefBaseUrlProvider = defaultBriefBaseUrl
 } = {}) {
   async function handleBriefOperation(request, operation, body) {
-    const service = briefServiceProvider();
+    const service = await briefServiceProvider();
 
     if (operation === 'brief_resolve') {
       const result = await service.resolve(body?.brief_token);
