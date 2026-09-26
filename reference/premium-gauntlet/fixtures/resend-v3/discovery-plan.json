@@ -1,0 +1,194 @@
+{
+  "schema_version": "CLARIS_DISCOVERY_INTELLIGENCE_V1_2",
+  "call_objective": "Resolve the exact API/security boundary and the external-help outcome without repeating Resend's public security baseline or opening unauthorized commercial discovery.",
+  "authorized_dimensions": [
+    {
+      "dimension_id": "D1",
+      "ontology_intent": "D02 technical_or_service_scope",
+      "authority": "PREPARE",
+      "policy_key": null,
+      "reason": "The booking names API security but leaves the exact surface unresolved."
+    },
+    {
+      "dimension_id": "D2",
+      "ontology_intent": "D06 desired_outcome",
+      "authority": "PREPARE",
+      "policy_key": null,
+      "reason": "The booking requests a discussion but does not define the result wanted from external help."
+    }
+  ],
+  "diagnostic_target": [
+    "Exact API/security surface in scope.",
+    "Exact result the prospect wants from outside help."
+  ],
+  "commercial_target": [],
+  "primary_questions": [
+    {
+      "question_id": "Q1",
+      "ontology_intent": "D02 technical_or_service_scope",
+      "dimension_id": "D1",
+      "authority": "PREPARE",
+      "policy_key": null,
+      "ask": "Which surface is actually in scope: API-key permissions/scoping, OAuth flows, webhook verification, MCP/agent access, or something else?",
+      "why_now": "The booking says API security while public evidence shows several materially different access and trust boundaries.",
+      "already_known_context": [
+        "API keys can be full-access or send-only.",
+        "OAuth 2.1 + PKCE and dynamic client registration are documented.",
+        "Webhooks use signing-secret verification.",
+        "A remote MCP server supports OAuth/Bearer access."
+      ],
+      "listen_for": [
+        {
+          "pattern": "We want an architecture review of our OAuth or API-key model.",
+          "meaning": "The need is design/advisory rather than hands-on testing.",
+          "next_effect": "Keeps SVC_VCISO_ADVISORY as a conditional path."
+        },
+        {
+          "pattern": "We want someone to actively test a bounded API or authorization surface.",
+          "meaning": "The prospect wants independent technical validation.",
+          "next_effect": "Moves SVC_PENTEST into conditional scope."
+        },
+        {
+          "pattern": "The issue is customer security review evidence around this API surface.",
+          "meaning": "The prospect has introduced an assurance requirement.",
+          "next_effect": "May open an enterprise-security branch after clarifying the evidence gap."
+        }
+      ],
+      "conditional_probes": [
+        {
+          "trigger_if": "The prospect says they are concerned about unauthorized or over-broad access through an API or OAuth client.",
+          "opens_ontology_intent": "D04 problem_or_gap",
+          "ask": "Is that concern based on observed behavior, a specific test result, or a design uncertainty you want independent validation to rule out?",
+          "why": "The prospect has explicitly introduced a possible access-control problem, so a problem/gap branch is now earned.",
+          "listen_for": [
+            "We reproduced unexpected access.",
+            "We have not observed it; we want to rule it out before release."
+          ],
+          "what_changes": "Separates validation of a known issue from preventive architecture/testing work."
+        }
+      ],
+      "what_the_answer_changes": "Sets the technical perimeter and prevents choosing a service before the relevant surface is known.",
+      "stop_condition": "The included and excluded API/security surfaces are explicit.",
+      "linked_service_paths": [
+        {
+          "service_id": "SVC_VCISO_ADVISORY",
+          "condition": "Architecture/security-design guidance is confirmed."
+        },
+        {
+          "service_id": "SVC_PENTEST",
+          "condition": "Hands-on independent validation/testing is confirmed."
+        }
+      ]
+    },
+    {
+      "question_id": "Q2",
+      "ontology_intent": "D06 desired_outcome",
+      "dimension_id": "D2",
+      "authority": "PREPARE",
+      "policy_key": null,
+      "ask": "What do you need from external help here: architecture/security-design guidance, independent technical validation/testing, customer-assurance documentation, or something else?",
+      "why_now": "The same API-security topic can map to very different engagement shapes, and the booking does not identify the desired result.",
+      "already_known_context": [
+        "Resend already publishes SOC 2 Type II and recurring third-party testing, so baseline readiness is not the default assumption."
+      ],
+      "listen_for": [
+        {
+          "pattern": "We need a second opinion on architecture and authorization design.",
+          "meaning": "The desired result is advisory/design assurance.",
+          "next_effect": "Keeps SVC_VCISO_ADVISORY as the conditional path."
+        },
+        {
+          "pattern": "We need an independent test and report.",
+          "meaning": "The desired result is hands-on validation.",
+          "next_effect": "Moves SVC_PENTEST into the conditional path."
+        },
+        {
+          "pattern": "Enterprise customers need reusable evidence about this surface.",
+          "meaning": "The prospect has introduced customer assurance.",
+          "next_effect": "May open SVC_ENTERPRISE_SECURITY after clarifying what existing evidence does not answer."
+        }
+      ],
+      "conditional_probes": [
+        {
+          "trigger_if": "The prospect says enterprise customers or security reviewers need reusable assurance for the API surface.",
+          "opens_ontology_intent": "D13 assurance_requirements",
+          "ask": "What are those reviewers asking for that your existing SOC 2 or published security material does not answer for this API surface?",
+          "why": "The prospect has explicitly introduced customer assurance, making the evidence gap valid to diagnose.",
+          "listen_for": [
+            "They need a dedicated technical assessment.",
+            "They need architecture/control explanations specific to the API surface."
+          ],
+          "what_changes": "Determines whether enterprise security enablement belongs alongside technical or advisory work."
+        }
+      ],
+      "what_the_answer_changes": "Determines the conditional consultant service path and what a useful next step would look like.",
+      "stop_condition": "The desired external-help result and acceptance condition are clear.",
+      "linked_service_paths": [
+        {
+          "service_id": "SVC_VCISO_ADVISORY",
+          "condition": "Architecture/design guidance is confirmed."
+        },
+        {
+          "service_id": "SVC_PENTEST",
+          "condition": "Independent technical validation/testing is confirmed."
+        },
+        {
+          "service_id": "SVC_ENTERPRISE_SECURITY",
+          "condition": "Customer-facing assurance support is confirmed."
+        }
+      ]
+    }
+  ],
+  "do_not_ask": [
+    {
+      "topic": "Do you have SOC 2?",
+      "reason": "RESEARCH_ALREADY_ANSWERED",
+      "detail": "Resend publicly documents SOC 2 Type II."
+    },
+    {
+      "topic": "Do you sign webhooks?",
+      "reason": "RESEARCH_ALREADY_ANSWERED",
+      "detail": "Resend documents signing-secret verification."
+    },
+    {
+      "topic": "Budget",
+      "reason": "UNAUTHORIZED",
+      "detail": "Consultant policy does not require economics before the first call and PREPARE did not open economics."
+    },
+    {
+      "topic": "Why now?",
+      "reason": "UNAUTHORIZED",
+      "detail": "The booking does not provide a trigger; public releases cannot create one."
+    }
+  ],
+  "call_flow": [
+    {
+      "step": 1,
+      "move": "Use Q1 to identify the exact API/security surface.",
+      "advance_when": "The technical boundary is explicit."
+    },
+    {
+      "step": 2,
+      "move": "Use Q2 to identify the result wanted from external help.",
+      "advance_when": "The desired outcome is explicit."
+    },
+    {
+      "step": 3,
+      "move": "Follow only branches earned by the prospect's answers and map confirmed need to a conditional service path.",
+      "advance_when": "The next action is clear without unauthorized discovery."
+    }
+  ],
+  "end_of_call_decision": {
+    "ready_for_next_step_if": [
+      "The API/security boundary is explicit.",
+      "The desired external-help result is explicit and matches at least one consultant capability."
+    ],
+    "remain_in_discovery_if": [
+      "The prospect still uses API security as an undefined umbrella term.",
+      "The desired review/advisory/assurance outcome remains ambiguous."
+    ],
+    "disqualify_or_deprioritize_if": [
+      "The prospect confirms a required deliverable that falls entirely outside all available consultant services."
+    ]
+  }
+}
