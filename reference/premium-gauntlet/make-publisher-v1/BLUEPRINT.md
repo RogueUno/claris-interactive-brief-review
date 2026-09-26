@@ -14,6 +14,15 @@ Make MUST NOT:
 - construct public brief URLs itself;
 - persist raw private brief tokens.
 
+## Mandatory scenario settings
+
+- **Keep data confidential: YES.** The publish response/email package contains a private fragment-token URL. Do not retain module input/output payloads in Make execution history.
+- Do not rely on incomplete-execution payload recovery for this scenario. If a run fails, rerun from the upstream certified opportunity state; publication idempotency will reuse the same brief for unchanged artifacts.
+- Keep production publisher inactive until Gate G certification.
+- Do not place the private URL/token in persistent Make variables, notes, or generic data stores. Only the notification receipt stores the dedupe key/publication id, never the raw URL.
+
+Reference: Make Scenario settings — https://help.make.com/scenario-settings
+
 ## Scenario input
 
 Required:
