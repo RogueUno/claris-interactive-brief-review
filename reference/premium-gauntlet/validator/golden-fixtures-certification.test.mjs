@@ -4,6 +4,9 @@ import fs from 'node:fs';
 import { validatePremiumPrepareV36 } from './premium-prepare-validator-v36.mjs';
 import { validateDiscoveryV12 } from './discovery-validator-v12.mjs';
 import { compileBriefPublishReady } from '../../../brief-v1/server/publication-contract.mjs';
+import { compileDiscoveryPlanSkeleton } from './discovery-plan-skeleton-compiler.mjs';
+
+const catalog = JSON.parse(fs.readFileSync(new URL('../contracts/discovery-intents-v1.json', import.meta.url), 'utf8'));
 
 const cases = [
   {
@@ -55,6 +58,15 @@ for (const fixture of cases) {
 
     assert.equal(prepare.open_dimensions.length, fixture.expectedDimensions);
     assert.equal(discovery.primary_questions.length, fixture.expectedQuestions);
+
+    const skeleton = compileDiscoveryPlanSkeleton(prepare, sot, catalog);
+    assert.equal(skeleton.ok, true, `${fixture.name} Skeleton failed: ${JSON.stringify(skeleton.errors)}`);
+    assert.equal(skeleton.ontology_coverage.length, 15);
+    assert.equal(skeleton.coverage_summary.catalog_intent_count, 15);
+    assert.equal(skeleton.coverage_summary.primary_authorized_count, fixture.expectedDimensions);
+    assert.equal(skeleton.coverage_summary.deferred_not_authorized_count, 15 - fixture.expectedDimensions);
+    assert.equal(skeleton.coverage_summary.unaccounted_count, 0);
+    assert.equal(new Set(skeleton.ontology_coverage.map((item) => item.intent_id)).size, 15);
 
     const compiled = compileBriefPublishReady({
       opportunity_id: `gold_${fixture.name.toLowerCase()}`,
