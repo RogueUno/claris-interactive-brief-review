@@ -29,9 +29,28 @@ export function compileDiscoveryPlanSkeleton(prepare,sot,catalog){
   }
   const allowedServiceIds=arr(sot?.services).map(s=>s?.service_id).filter(Boolean);
   const authorizedIntents=new Set(auth.dimensions.map(d=>d.ontology_intent));
-  const forbiddenPrimaryIntents=arr(catalog?.intents)
+  const catalogIntents=arr(catalog?.intents);
+  const forbiddenPrimaryIntents=catalogIntents
     .map(i=>`${i.intent_id} ${i.name}`)
     .filter(x=>!authorizedIntents.has(x));
+  const ontologyCoverage=catalogIntents.map(i=>{
+    const ontologyIntent=`${i.intent_id} ${i.name}`;
+    const authorized=auth.dimensions.filter(d=>d.ontology_intent===ontologyIntent);
+    return {
+      intent_id:i.intent_id,
+      name:i.name,
+      ontology_intent:ontologyIntent,
+      status:authorized.length?'PRIMARY_AUTHORIZED':'DEFERRED_NOT_AUTHORIZED',
+      authorized_dimensions:authorized.map(d=>d.dimension_id),
+      authorities:authorized.map(d=>d.authority),
+      objective:i.objective,
+      suppress_if:arr(i.suppress_if),
+      conditional_authority:i.conditional_authority||null,
+      may_unlock:arr(i.may_unlock)
+    };
+  });
+  const catalogIds=ontologyCoverage.map(x=>x.intent_id);
+  if(new Set(catalogIds).size!==catalogIds.length) errors.push({code:'CATALOG_DUPLICATE_INTENT',path:'catalog.intents',message:'Discovery intent ids must be unique.'});
   const economicsAuthorized=auth.dimensions.some(d=>d.ontology_intent==='D10 economics');
   return {
     ok:errors.length===0,
@@ -40,6 +59,13 @@ export function compileDiscoveryPlanSkeleton(prepare,sot,catalog){
     question_slots:slots,
     relevant_intent_definitions:relevant,
     forbidden_primary_intents:forbiddenPrimaryIntents,
+    ontology_coverage:ontologyCoverage,
+    coverage_summary:{
+      catalog_intent_count:ontologyCoverage.length,
+      primary_authorized_count:ontologyCoverage.filter(x=>x.status==='PRIMARY_AUTHORIZED').length,
+      deferred_not_authorized_count:ontologyCoverage.filter(x=>x.status==='DEFERRED_NOT_AUTHORIZED').length,
+      unaccounted_count:0
+    },
     allowed_service_ids:allowedServiceIds,
     commercial_target_authorized:economicsAuthorized,
     economics_policy_required:sot?.commercial_rules?.budget_required_before_first_call===true,
