@@ -21,7 +21,8 @@ function serviceProjection(sot) {
       service_id: text(service?.service_id),
       name: text(service?.name)
     }))
-    .filter((service) => service.service_id && service.name);
+    .filter((service) => service.service_id && service.name)
+    .sort((a, b) => a.service_id.localeCompare(b.service_id));
   if (!projected.length) throw new Error('CONSULTANT_SERVICES_REQUIRED');
   return projected;
 }
