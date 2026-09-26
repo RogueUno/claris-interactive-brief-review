@@ -140,3 +140,32 @@ test('revoked certified publication cannot be resurrected by retry', async()=>{
   const stored=[...storage.data.values()].find(v=>v?.schema_version==='claris_private_brief_v1');
   assert.equal(stored.status,'REVOKED');
 });
+
+
+test('publication identity ignores JSON object key order', async()=>{
+  const storage=memoryStorage();
+  const service=createBriefService({repository:createBriefRepository(storage),sessionSecret:secret});
+  const payloadA=structuredClone(payload);
+  const payloadB={
+    discovery:{
+      end_of_call_decision:payload.discovery.end_of_call_decision,
+      primary_questions:payload.discovery.primary_questions,
+      commercial_target:payload.discovery.commercial_target,
+      authorized_dimensions:payload.discovery.authorized_dimensions,
+      schema_version:payload.discovery.schema_version
+    },
+    prepare:{
+      open_dimensions:payload.prepare.open_dimensions,
+      schema_version:payload.prepare.schema_version
+    }
+  };
+  const contextA={services:[{name:'Advisory vCISO',service_id:'SVC_ADVISORY'}],commercial_rules:{budget_required_before_first_call:false}};
+  const contextB={commercial_rules:{budget_required_before_first_call:false},services:[{service_id:'SVC_ADVISORY',name:'Advisory vCISO'}]};
+
+  const first=await service.publish({opportunityId:'opp_key_order',consultantId:'consultant_test_1',company:'Acme',payload:payloadA,validationContext:contextA,ttlMs:86400000},{now:1000});
+  const second=await service.publish({opportunityId:'opp_key_order',consultantId:'consultant_test_1',company:'Acme',payload:payloadB,validationContext:contextB,ttlMs:86400000},{now:2000});
+
+  assert.equal(first.publication_id,second.publication_id);
+  assert.equal(first.token,second.token);
+  assert.equal(second.reused,true);
+});
