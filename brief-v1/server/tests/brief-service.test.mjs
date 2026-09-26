@@ -89,3 +89,54 @@ test('refuses invalid service mapping before publishing', async()=>{
   assert.equal(result.errors.some(e=>e.code==='SERVICE_ID'),true);
   assert.equal(storage.data.size,0);
 });
+
+
+test('certified publication is idempotent for identical opportunity and artifacts', async()=>{
+  const storage=memoryStorage();
+  const service=createBriefService({repository:createBriefRepository(storage),sessionSecret:secret});
+  const input={opportunityId:'opp_same_1',consultantId:'consultant_test_1',company:'Acme',payload,validationContext,ttlMs:86400000};
+  const first=await service.publish(input,{now:1000});
+  const second=await service.publish(input,{now:2000});
+
+  assert.equal(first.reused,false);
+  assert.equal(second.reused,true);
+  assert.equal(first.publication_id,second.publication_id);
+  assert.equal(first.brief.brief_id,second.brief.brief_id);
+  assert.equal(first.token,second.token);
+
+  const serialized=JSON.stringify([...storage.data.entries()]);
+  assert.equal(serialized.includes(first.token),false);
+  const briefs=[...storage.data.values()].filter(v=>v?.schema_version==='claris_private_brief_v1');
+  const accesses=[...storage.data.values()].filter(v=>v?.schema_version==='claris_private_brief_access_v1');
+  assert.equal(briefs.length,1);
+  assert.equal(accesses.length,1);
+});
+
+test('changed certified artifact creates a new publication for the same opportunity', async()=>{
+  const storage=memoryStorage();
+  const service=createBriefService({repository:createBriefRepository(storage),sessionSecret:secret});
+  const first=await service.publish({opportunityId:'opp_changed_1',consultantId:'consultant_test_1',company:'Acme',payload,validationContext,ttlMs:86400000},{now:1000});
+  const changed=structuredClone(payload);
+  changed.prepare.executive_readout='A materially updated certified readout.';
+  const second=await service.publish({opportunityId:'opp_changed_1',consultantId:'consultant_test_1',company:'Acme',payload:changed,validationContext,ttlMs:86400000},{now:2000});
+
+  assert.notEqual(first.publication_id,second.publication_id);
+  assert.notEqual(first.token,second.token);
+  const briefs=[...storage.data.values()].filter(v=>v?.schema_version==='claris_private_brief_v1');
+  assert.equal(briefs.length,2);
+});
+
+test('revoked certified publication cannot be resurrected by retry', async()=>{
+  const storage=memoryStorage();
+  const service=createBriefService({repository:createBriefRepository(storage),sessionSecret:secret});
+  const input={opportunityId:'opp_revoked_1',consultantId:'consultant_test_1',company:'Acme',payload,validationContext,ttlMs:86400000};
+  const first=await service.publish(input,{now:1000});
+  await service.revoke(first.brief.brief_id,{now:2000});
+  const retry=await service.publish(input,{now:3000});
+
+  assert.equal(retry.ok,false);
+  assert.equal(retry.error,'BRIEF_PUBLICATION_REVOKED');
+  assert.equal(retry.publication_id,first.publication_id);
+  const stored=[...storage.data.values()].find(v=>v?.schema_version==='claris_private_brief_v1');
+  assert.equal(stored.status,'REVOKED');
+});
