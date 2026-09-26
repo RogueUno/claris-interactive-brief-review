@@ -99,6 +99,7 @@ function publicMetadata(brief) {
     company: brief.company,
     created_at: brief.created_at,
     expires_at: brief.expires_at,
-    status: brief.status
+    status: brief.status,
+    context: brief.context || null
   };
 }
