@@ -22,11 +22,11 @@
 |---|---|---|
 | Premium Research first-party-first | STRUCTURALLY GREEN | Resend live search-first retrieval proved domain-first evidence quality. Search-first design replaces raw crawl for premium path. |
 | Evidence Curator | STRUCTURALLY GREEN | Resend compact packet reached 7/7 first-party findings and materially reduced prompt tokens. |
-| Premium PREPARE V3.6 authority contract | CERTIFIED LOCALLY | Booking/prospect/explicit consultant policy may open dimensions; public research may not. |
-| Discovery Intent Catalog — 15 families | CERTIFIED LOCALLY | Catalog integrity/regression checks passed. |
-| Authorized Dimensions Compiler | CERTIFIED LOCALLY | PREPARE + explicit consultant policy compile deterministic writable dimensions. |
-| Discovery Plan Skeleton Compiler | CERTIFIED LOCALLY | Model receives authorized question slots rather than deciding what may be asked. |
-| Discovery deterministic validator | CERTIFIED LOCALLY | Rejects economics leakage, invalid services, bad branch authority and capability-as-disqualifier failures. |
+| Premium PREPARE V3.6 authority contract | CERTIFIED + VERSIONED | Booking/prospect/explicit consultant policy may open dimensions; public research may not. Portable V3.6 regression test is versioned. |
+| Discovery Intent Catalog — 15 families | CERTIFIED + VERSIONED | Machine-readable 15-intent catalog and human-readable ontology contract are versioned on the premium branch. |
+| Authorized Dimensions Compiler | CERTIFIED + VERSIONED | PREPARE + explicit consultant policy compile deterministic writable dimensions. Compiler + portable regression test are versioned. |
+| Discovery Plan Skeleton Compiler | CERTIFIED + VERSIONED | Model receives authorized question slots rather than deciding what may be asked. Compiler + portable regression test are versioned. |
+| Discovery deterministic validator | CERTIFIED + VERSIONED | Rejects economics leakage, invalid services, bad branch authority and capability-as-disqualifier failures. Validator + regression test are versioned. |
 | Discovery semantic model path | PENDING LIVE | Resend/Linear V1.1/V1.2 runs proved direction, but final live Make V1.2 zero-economics contract still needs rerun after Make connector recovers. |
 
 ## Golden fixtures
@@ -35,7 +35,7 @@
 |---|---|---|
 | Resend — sparse API security | CERTIFIED LOCALLY | 2 dimensions / 2 primary questions. |
 | Linear — enterprise security-review friction | CERTIFIED LOCALLY | 2 dimensions / 2 primary questions. |
-| Supabase — richer OAuth/RLS review booking | CERTIFIED LOCALLY | 3 dimensions / 3 questions; already-known ownership/trigger suppressed. |
+| Supabase — richer OAuth/RLS review booking | CERTIFIED + VERSIONED | Complete booking/SOT/source/PREPARE/Discovery/skeleton fixture is versioned; 3 dimensions / 3 questions; already-known ownership/trigger suppressed. |
 
 Local promotion harness status:
 - 3/3 golden fixtures accepted.
@@ -95,3 +95,30 @@ External/integration only:
 3. Gateway/new notification regression tests are committed but need execution in a clean dependency-installed environment.
 
 No current blocker requires modifying frozen production PREPARE/FINALIZE or activating Calendly.
+
+
+## Repository reproducibility update — 2026-09-26 evening
+
+The premium branch now contains the deterministic core required by the Supabase regression suite:
+- authorized-dimensions-compiler.mjs + test
+- discovery-plan-skeleton-compiler.mjs + test
+- discovery-validator-v12.mjs + test
+- premium-prepare-validator-v36.mjs + portable V3.6 test
+- discovery-intents-v1.json
+- discovery-intelligence-v1.2.md
+- discovery-ontology-v1.md
+- complete Supabase fixture: booking, consultant SOT, source manifest, Premium PREPARE gold, Discovery V1.2 gold, Discovery skeleton
+
+package.json now exposes:
+`npm run test:premium`
+
+The branch CI runs:
+1. `npm run test:premium`
+2. `npm run test:brief`
+
+Latest direct executable proof from the recovery checkpoint after portable-path correction:
+- tests: 4
+- pass: 4
+- fail: 0
+
+This proof covers the deterministic Premium/Discovery core. It does not substitute for the still-pending live Make model/runtime certification or live private-link browser smoke test.
