@@ -51,6 +51,14 @@ const validationContext = {
   commercial_rules: { budget_required_before_first_call: false }
 };
 
+const certification = {
+  schema_version: 'CLARIS_PRECALL_CERTIFICATION_V1',
+  premium_semantic_pass: true,
+  discovery_semantic_pass: true,
+  premium_deterministic_pass: true,
+  discovery_deterministic_pass: true
+};
+
 function setup(overrides = {}) {
   const storage = memoryStorage();
   const service = createBriefService({
@@ -71,7 +79,10 @@ function request(operation, body = {}, { auth = false, cookie = null, header = t
   if (header && operation) headers['X-Claris-Delivery'] = operation;
   if (auth) headers.Authorization = 'Bearer make-test-key';
   if (cookie) headers.Cookie = cookie;
-  const value = header ? body : { operation, ...body };
+  const normalizedBody = operation === 'brief_publish_ready' && body?.certification === undefined
+    ? { ...body, certification }
+    : body;
+  const value = header ? normalizedBody : { operation, ...normalizedBody };
   return new Request('https://preview.example/api/delivery/package', {
     method: 'POST',
     headers,
@@ -148,6 +159,38 @@ test('private brief flow creates, resolves, resumes, and revokes through one gat
   const after = await gateway.fetch(request('brief_data', {}, { cookie }));
   assert.equal(after.status, 410);
   assert.equal((await body(after)).error, 'BRIEF_REVOKED');
+});
+
+test('publish-ready fails closed without certification', async () => {
+  const { gateway, storage } = setup();
+  const response = await gateway.fetch(request('brief_publish_ready', {
+    opportunity_id: 'opp_uncertified',
+    consultant_id: 'consultant_test_1',
+    consultant_delivery_email: 'sarah@example.com',
+    company: 'Acme',
+    brief_payload: payload,
+    validation_context: validationContext,
+    certification: null
+  }, { auth: true }));
+  assert.equal(response.status, 422);
+  assert.equal((await body(response)).error, 'BRIEF_CERTIFICATION_REQUIRED');
+  assert.equal(storage.data.size, 0);
+});
+
+test('publish-ready fails closed when any certification gate is false', async () => {
+  const { gateway, storage } = setup();
+  const response = await gateway.fetch(request('brief_publish_ready', {
+    opportunity_id: 'opp_failed_cert',
+    consultant_id: 'consultant_test_1',
+    consultant_delivery_email: 'sarah@example.com',
+    company: 'Acme',
+    brief_payload: payload,
+    validation_context: validationContext,
+    certification: { ...certification, discovery_semantic_pass: false }
+  }, { auth: true }));
+  assert.equal(response.status, 422);
+  assert.equal((await body(response)).error, 'BRIEF_CERTIFICATION_NOT_PASSED');
+  assert.equal(storage.data.size, 0);
 });
 
 test('publish-ready creates private brief and email package in one authenticated call', async () => {
