@@ -50,13 +50,13 @@ Local promotion harness status:
 | Deterministic delivery validator | CERTIFIED LOCALLY | Rejects uncertified schemas, unauthorized economics and invalid service mappings before persistence. |
 | Consolidated /api/delivery/package gateway | PREVIEW-BUILD GREEN | Multiplexed into existing API function to remain inside Vercel Hobby 12-function cap. |
 | Hobby function-cap regression | CERTIFIED BY DEPLOYMENT | Adding API function #13 failed; removing redundant /api/brief/* routes restored successful Vercel preview builds. |
-| brief_publish_ready one-call operation | PREVIEW-BUILD GREEN / TESTS AUTHORED | Server preflights email, validates/persists brief, creates URL and returns CONSULTANT_BRIEF_READY package in one call. |
-| Orphan-link revocation hardening | TEST AUTHORED | Unexpected post-persist notification-packaging failure revokes created brief. |
-| Gateway integration suite | TESTS AUTHORED — EXECUTION PENDING | Tests cover legacy delivery, create/resolve/data/revoke, publish-ready, no-token duplication, preflight failure and revocation. GitHub app commit did not trigger Actions; local container lacks @vercel/blob/package network. |
-| Browser private-link smoke test | PENDING LIVE | Vercel branch builds succeed, but current connected Vercel tool cannot expose claris-calibration deployment object/hostname for direct browser testing. |
+| brief_publish_ready one-call operation | CERTIFIED — GITHUB ACTIONS + VERCEL BUILD | Server preflights email, validates/persists brief, creates URL and returns CONSULTANT_BRIEF_READY package in one call. Clean Node 22 integration run passed. |
+| Orphan-link revocation hardening | CERTIFIED — GITHUB ACTIONS | Unexpected post-persist notification-packaging failure revokes the created brief; clean-run regression passed. |
+| Gateway integration suite | CERTIFIED — GITHUB ACTIONS | Node 22 clean runner executed 18/18 brief/gateway/publication tests successfully, including legacy delivery compatibility, create→resolve→session→data→revoke, publish-ready, notification preflight, orphan-link revocation, economics leakage rejection and invalid service rejection. |
+| Browser private-link smoke test | DEPLOYMENT PROTECTED / APP TEST PENDING | Branch alias resolves HTTP 200, but GitHub smoke sees Vercel's Login – Vercel interstitial. App-level browser verification therefore requires Vercel preview access/bypass. This is an access limitation, not a failed CLARIS route. |
 | Consultant web brief renderer | PREVIEW-BUILD GREEN | Displays executive readout, signals, live diagnostic map, call objective/targets, answer effects, call flow, end-of-call decisions and expandable E/R/U provenance. |
 | Brief-ready text email | PREVIEW-BUILD GREEN | Summary + max 3 questions + private URL; no full brief. |
-| Brief-ready HTML email | PREVIEW-BUILD / TEST AUTHORED | Restrained inline HTML, plain-text fallback, escaping regression authored. |
+| Brief-ready HTML email | CERTIFIED CONTRACT / PREVIEW-BUILD GREEN | Restrained inline HTML, plain-text fallback and compact question list are covered by delivery integration tests; visual email-client verification remains later. |
 
 ## Make publisher
 
@@ -92,7 +92,7 @@ Model upgrade remains a quality/reliability benchmark decision after the determi
 External/integration only:
 1. Make fallback connector internal error.
 2. Direct preview browser smoke test blocked by Vercel connector scope for claris-calibration.
-3. Gateway/new notification regression tests are committed but need execution in a clean dependency-installed environment.
+3. Direct app-level preview smoke is blocked by Vercel preview protection; server/build/integration tests are green.
 
 No current blocker requires modifying frozen production PREPARE/FINALIZE or activating Calendly.
 
@@ -122,3 +122,16 @@ Latest direct executable proof from the recovery checkpoint after portable-path 
 - fail: 0
 
 This proof covers the deterministic Premium/Discovery core. It does not substitute for the still-pending live Make model/runtime certification or live private-link browser smoke test.
+
+
+## Evening certification update — secure delivery
+
+Current premium branch head has all of:
+- Vercel preview build: SUCCESS
+- Node 22 GitHub Actions brief suite: 18/18 PASS
+- branch HTTP smoke: preview alias resolves, but content is Vercel protected (Login – Vercel)
+- API function count: exactly 12, preserving Hobby compatibility
+- compileBriefPublishReady(): deterministic minimized one-call publication body; strips minimum engagement, private notes, margins and unrelated consultant policy
+- brief_publish_ready: atomic server operation for validate → persist → secure URL → compact consultant delivery package
+
+Current Make handoff contract is therefore one authenticated HTTP call followed by Gmail, with no PREPARE/Discovery logic rebuilt in Make.
