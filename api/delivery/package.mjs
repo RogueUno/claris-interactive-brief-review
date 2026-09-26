@@ -37,6 +37,27 @@ function defaultBriefBaseUrl(request) {
   return (configured || `${new URL(request.url).origin}/brief-v1/`).replace(/\/?$/, '/');
 }
 
+function ttlMs(body) {
+  const days = Math.max(1, Math.min(30, Number(body?.ttl_days || 7)));
+  return days * 24 * 60 * 60 * 1000;
+}
+
+function notificationInput(body, { briefId = null, briefUrl, expiresAt = null }) {
+  return {
+    opportunity_id: body?.opportunity_id,
+    brief_id: briefId,
+    consultant_delivery_email: body?.consultant_delivery_email,
+    consultant_first_name: body?.consultant_first_name,
+    company: body?.company,
+    prospect_name: body?.prospect_name,
+    meeting_time: body?.meeting_time,
+    executive_readout: body?.brief_payload?.prepare?.executive_readout,
+    priority_questions: body?.brief_payload?.discovery?.primary_questions,
+    brief_url: briefUrl,
+    expires_at: expiresAt
+  };
+}
+
 export function createDeliveryGateway({
   briefServiceProvider = () => briefServerContext().service,
   deliveryBuilder = buildDeliveryPackage,
@@ -70,13 +91,12 @@ export function createDeliveryGateway({
 
     if (operation === 'brief_create') {
       if (!authorized(request, acceptedKeysProvider())) return json({ ok: false, error: 'MAKE_UNAUTHORIZED' }, 401);
-      const days = Math.max(1, Math.min(30, Number(body?.ttl_days || 7)));
       const created = await service.create({
         consultantId: body?.consultant_id,
         company: body?.company,
         payload: body?.brief_payload,
         validationContext: body?.validation_context,
-        ttlMs: days * 24 * 60 * 60 * 1000
+        ttlMs: ttlMs(body)
       });
       if (!created?.brief) return json(created, 422);
       const base = briefBaseUrlProvider(request);
@@ -86,6 +106,42 @@ export function createDeliveryGateway({
         brief_token: created.token,
         brief_url: `${base}#brief=${encodeURIComponent(created.token)}`,
         expires_at: created.brief.expires_at
+      }, 201);
+    }
+
+    if (operation === 'brief_publish_ready') {
+      if (!authorized(request, acceptedKeysProvider())) return json({ ok: false, error: 'MAKE_UNAUTHORIZED' }, 401);
+      const base = briefBaseUrlProvider(request);
+
+      // Preflight the email package before persisting anything.
+      deliveryBuilder('CONSULTANT_BRIEF_READY', notificationInput(body, {
+        briefUrl: `${base}#brief=preflight`
+      }));
+
+      const created = await service.create({
+        consultantId: body?.consultant_id,
+        company: body?.company,
+        payload: body?.brief_payload,
+        validationContext: body?.validation_context,
+        ttlMs: ttlMs(body)
+      });
+      if (!created?.brief) return json(created, 422);
+
+      const briefUrl = `${base}#brief=${encodeURIComponent(created.token)}`;
+      const delivery = deliveryBuilder('CONSULTANT_BRIEF_READY', notificationInput(body, {
+        briefId: created.brief.brief_id,
+        briefUrl,
+        expiresAt: created.brief.expires_at
+      }));
+
+      return json({
+        ok: true,
+        brief: {
+          brief_id: created.brief.brief_id,
+          brief_url: briefUrl,
+          expires_at: created.brief.expires_at
+        },
+        delivery
       }, 201);
     }
 
@@ -126,7 +182,7 @@ export function createDeliveryGateway({
       const operation = headerOperation || String(parsed.value?.operation || '').trim();
 
       try {
-        if (operation === 'brief_create' || operation === 'brief_revoke') {
+        if (operation === 'brief_create' || operation === 'brief_publish_ready' || operation === 'brief_revoke') {
           const briefResponse = await handleBriefOperation(request, operation, parsed.value);
           return briefResponse || json({ ok: false, error: 'BRIEF_OPERATION_INVALID' }, 422);
         }
@@ -135,7 +191,7 @@ export function createDeliveryGateway({
         return json({ ok: true, delivery: packageResult }, 200);
       } catch (error) {
         const code = error?.message || 'DELIVERY_PACKAGE_FAILED';
-        const clientError = code.endsWith('_REQUIRED') || code === 'DELIVERY_OPERATION_INVALID';
+        const clientError = code.endsWith('_REQUIRED') || code.endsWith('_INVALID') || code === 'DELIVERY_OPERATION_INVALID';
         return json({ ok: false, error: code }, clientError ? 422 : 500);
       }
     }
