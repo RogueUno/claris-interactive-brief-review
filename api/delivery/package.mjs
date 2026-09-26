@@ -41,6 +41,25 @@ function ttlMs(body) {
   return days * 24 * 60 * 60 * 1000;
 }
 
+const CERTIFICATION_VERSION = 'CLARIS_PRECALL_CERTIFICATION_V1';
+const CERTIFICATION_FLAGS = [
+  'premium_semantic_pass',
+  'discovery_semantic_pass',
+  'premium_deterministic_pass',
+  'discovery_deterministic_pass'
+];
+
+function assertPublishCertification(body) {
+  const certification = body?.certification;
+  if (!certification || certification.schema_version !== CERTIFICATION_VERSION) {
+    throw new Error('BRIEF_CERTIFICATION_REQUIRED');
+  }
+  if (!CERTIFICATION_FLAGS.every((field) => certification[field] === true)) {
+    throw new Error('BRIEF_CERTIFICATION_NOT_PASSED');
+  }
+  return certification;
+}
+
 function notificationInput(body, { briefId = null, briefUrl, expiresAt = null }) {
   return {
     opportunity_id: body?.opportunity_id,
@@ -110,6 +129,7 @@ export function createDeliveryGateway({
 
     if (operation === 'brief_publish_ready') {
       if (!authorized(request, acceptedKeysProvider())) return json({ ok: false, error: 'MAKE_UNAUTHORIZED' }, 401);
+      assertPublishCertification(body);
       const base = briefBaseUrlProvider(request);
 
       // Preflight the email package before persisting anything.
@@ -213,7 +233,7 @@ export function createDeliveryGateway({
         return json({ ok: true, delivery: packageResult }, 200);
       } catch (error) {
         const code = error?.message || 'DELIVERY_PACKAGE_FAILED';
-        const clientError = code.endsWith('_REQUIRED') || code.endsWith('_INVALID') || code === 'DELIVERY_OPERATION_INVALID';
+        const clientError = code.endsWith('_REQUIRED') || code.endsWith('_INVALID') || code.startsWith('BRIEF_CERTIFICATION_') || code === 'DELIVERY_OPERATION_INVALID';
         return json({ ok: false, error: code }, clientError ? 422 : 500);
       }
     }
