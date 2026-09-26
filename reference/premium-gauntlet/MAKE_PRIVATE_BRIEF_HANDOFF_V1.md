@@ -14,6 +14,8 @@ Make performs one authenticated HTTP POST to the existing CLARIS delivery gatewa
 
 The Make key is never stored in scenario notes or user-visible output.
 
+Raw `brief_create` is admin-only. The Make credential cannot create a private brief through that lower-level operation; it must use the certified `brief_publish_ready` path.
+
 ## Body authority
 The body MUST be produced from the certified-publication adapter contract. Make must not add, infer, rename, or synthesize discovery fields.
 
