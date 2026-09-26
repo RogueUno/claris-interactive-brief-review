@@ -58,6 +58,7 @@ export function compileBriefPublication(input = {}) {
 
 
 export function compileBriefPublishReady(input = {}) {
+  const opportunityId = required(input.opportunity_id, 'OPPORTUNITY_ID_REQUIRED');
   const consultantId = required(input.consultant_id, 'CONSULTANT_ID_REQUIRED');
   const company = required(input.company, 'COMPANY_REQUIRED');
   const consultantDeliveryEmail = required(input.consultant_delivery_email, 'CONSULTANT_DELIVERY_EMAIL_REQUIRED');
@@ -69,7 +70,7 @@ export function compileBriefPublishReady(input = {}) {
   return {
     operation: 'brief_publish_ready',
     body: {
-      opportunity_id: text(input.opportunity_id) || null,
+      opportunity_id: opportunityId,
       consultant_id: consultantId,
       consultant_delivery_email: consultantDeliveryEmail,
       consultant_first_name: text(input.consultant_first_name) || null,
