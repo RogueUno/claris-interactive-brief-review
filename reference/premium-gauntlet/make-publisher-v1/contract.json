@@ -35,5 +35,10 @@
       "delivery"
     ]
   },
-  "receipt_key": "notification_dedupe_key"
+  "receipt_key": "notification_dedupe_key",
+  "scenario_settings": {
+    "keep_data_confidential": true,
+    "rely_on_incomplete_execution_payloads": false,
+    "persist_private_url_or_token": false
+  }
 }
