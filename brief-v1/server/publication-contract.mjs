@@ -76,6 +76,7 @@ export function compileBriefPublishReady(input = {}) {
       consultant_first_name: text(input.consultant_first_name) || null,
       company,
       prospect_name: text(input.prospect_name) || null,
+      prospect_role: text(input.prospect_role) || null,
       meeting_time: text(input.meeting_time) || null,
       ttl_days: integerInRange(input.ttl_days, 1, 30, 7),
       brief_payload: { prepare, discovery },
