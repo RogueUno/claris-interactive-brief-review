@@ -13,6 +13,22 @@ function assertId(value, code) {
 }
 function cloneJson(value) { return JSON.parse(JSON.stringify(value)); }
 
+function compactText(value, max = 200) {
+  const result = String(value || '').trim();
+  return result ? result.slice(0, max) : null;
+}
+
+function normalizeContext(value) {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return null;
+  const context = {
+    opportunity_id: compactText(value.opportunity_id, 128),
+    prospect_name: compactText(value.prospect_name, 160),
+    prospect_role: compactText(value.prospect_role, 160),
+    meeting_time: compactText(value.meeting_time, 128)
+  };
+  return Object.values(context).some(Boolean) ? context : null;
+}
+
 function validateCreateInput({ consultantId, company, payload, ttlMs }) {
   const consultant_id = assertId(consultantId, 'INVALID_CONSULTANT_ID');
   const companyName = String(company || '').trim();
@@ -43,12 +59,14 @@ export function createBriefRepository(storage) {
       consultantId,
       company,
       payload,
+      context = null,
       identity = null,
       now = Date.now(),
       ttlMs = 7 * 86400000
     }) {
       const { consultant_id, companyName } = validateCreateInput({ consultantId, company, payload, ttlMs });
       const publication = publicationIdentity(identity);
+      const briefContext = normalizeContext(context);
 
       const briefId = publication?.brief_id || createOpaqueToken(24);
       const token = publication?.token || createOpaqueToken(32);
@@ -64,6 +82,18 @@ export function createBriefRepository(storage) {
           existingBrief.publication_fingerprint !== publication.fingerprint
         ) {
           throw new Error('BRIEF_PUBLICATION_COLLISION');
+        }
+
+        let currentBrief = existingBrief;
+        if (briefContext) {
+          const mergedContext = {
+            ...(existingBrief.context || {}),
+            ...Object.fromEntries(Object.entries(briefContext).filter(([, value]) => value != null))
+          };
+          if (JSON.stringify(mergedContext) !== JSON.stringify(existingBrief.context || {})) {
+            currentBrief = { ...existingBrief, context: mergedContext };
+            await storage.putJson(briefPath(briefId), currentBrief);
+          }
         }
 
         const existingAccess = await storage.getJson(accessPath(tokenHash));
@@ -83,7 +113,7 @@ export function createBriefRepository(storage) {
             last_resolved_at: null
           });
         }
-        return { token, brief: existingBrief, reused: true };
+        return { token, brief: currentBrief, reused: true };
       }
 
       const createdAt = new Date(now).toISOString();
@@ -96,6 +126,7 @@ export function createBriefRepository(storage) {
         status: 'ACTIVE',
         created_at: createdAt,
         expires_at: expiresAt,
+        ...(briefContext ? { context: briefContext } : {}),
         ...(publication ? {
           publication_id: publication.publication_id,
           publication_fingerprint: publication.fingerprint
