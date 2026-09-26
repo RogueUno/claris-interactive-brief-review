@@ -98,18 +98,31 @@ export default {
   async fetch(request) {
     if (request.method !== 'POST') return methodNotAllowed('POST');
 
+    const headerOperation = String(request.headers.get('x-claris-delivery') || '').trim();
+
+    if (headerOperation === 'brief_resolve' || headerOperation === 'brief_data') {
+      const parsed = await parseJson(request);
+      if (!parsed.ok) return parsed.response;
+      try {
+        const briefResponse = await handleBriefOperation(request, headerOperation, parsed.value);
+        return briefResponse || json({ ok: false, error: 'BRIEF_OPERATION_INVALID' }, 422);
+      } catch (error) {
+        return json({ ok: false, error: error?.message || 'BRIEF_OPERATION_FAILED' }, 500);
+      }
+    }
+
+    if (!authorized(request)) return json({ ok: false, error: 'MAKE_UNAUTHORIZED' }, 401);
+
     const parsed = await parseJson(request);
     if (!parsed.ok) return parsed.response;
-    const operation = operationFrom(request, parsed.value);
+    const operation = headerOperation || String(parsed.value?.operation || '').trim();
 
     try {
-      if (operation.startsWith('brief_')) {
+      if (operation === 'brief_create' || operation === 'brief_revoke') {
         const briefResponse = await handleBriefOperation(request, operation, parsed.value);
-        if (briefResponse) return briefResponse;
-        return json({ ok: false, error: 'BRIEF_OPERATION_INVALID' }, 422);
+        return briefResponse || json({ ok: false, error: 'BRIEF_OPERATION_INVALID' }, 422);
       }
 
-      if (!authorized(request)) return json({ ok: false, error: 'MAKE_UNAUTHORIZED' }, 401);
       const packageResult = buildDeliveryPackage(operation, parsed.value);
       return json({ ok: true, delivery: packageResult }, 200);
     } catch (error) {
