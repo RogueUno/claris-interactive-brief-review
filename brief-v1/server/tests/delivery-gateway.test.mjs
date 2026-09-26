@@ -329,6 +329,7 @@ test('publish-ready retry reuses the same private publication and stable notific
     consultant_first_name: 'Sarah',
     company: 'Acme',
     prospect_name: 'Alex Morgan',
+    prospect_role: 'VP Engineering',
     meeting_time: '2026-09-30T14:00:00Z',
     brief_payload: payload,
     validation_context: validationContext,
