@@ -11,9 +11,13 @@ function gate(title,detail){root.innerHTML=`<section class="gate"><div class="ey
 function chips(xs){return arr(xs).map(x=>`<button type="button" class="chip" data-ref="${esc(x)}">${esc(x)}</button>`).join('');}
 function targetColumn(title,items){return items.length?`<div><h4>${esc(title)}</h4><ul>${items.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div>`:'';}
 function decisionCard(title,items,tone=''){return items.length?`<article class="decision-card ${tone}"><h4>${esc(title)}</h4><ul>${items.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></article>`:'';}
+function readableTime(value){const raw=String(value||'').trim();if(!raw)return null;const d=new Date(raw);return Number.isNaN(d.getTime())?raw:d.toLocaleString();}
 
 function render(brief){
-  const prepare=brief?.payload?.prepare||{}, discovery=brief?.payload?.discovery||{};
+  const prepare=brief?.payload?.prepare||{}, discovery=brief?.payload?.discovery||{}, context=brief?.context||{};
+  const heading=context.prospect_name?`${brief.company} / ${context.prospect_name}`:brief.company;
+  const meeting=readableTime(context.meeting_time);
+  const meta=[context.prospect_role||null,meeting?`Meeting · ${meeting}`:null,`Private brief · expires ${new Date(brief.expires_at).toLocaleString()}`].filter(Boolean).join(' · ');
   const signals=arr(prepare.signals_that_matter).map((s,i)=>`<article class="signal"><div class="num">${i+1}</div><div><h3>${esc(s.signal)}</h3><p>${esc(s.observation)}</p><p><strong>Call implication</strong> ${esc(s.call_implication)}</p>${chips(s.routes_to)}</div></article>`).join('');
   const questions=arr(discovery.primary_questions).map(q=>{
     const listens=arr(q.listen_for).map(x=>`<li><strong>“${esc(x.pattern)}”</strong><span>${esc(x.meaning)}</span><em>${esc(x.next_effect)}</em></li>`).join('');
@@ -40,7 +44,7 @@ function render(brief){
   const rs=arr(prepare?.expandable_blocks?.reasoning).map(r=>`<details id="${esc(r.id)}"><summary><b>${esc(r.id)}</b> ${esc(r.title)}</summary><div class="detailbody"><h5>Premises</h5>${arr(r.premises).map(x=>`<p>${esc(x)}</p>`).join('')}<h5>Bounded observation</h5><p>${esc(r.observation)}</p><h5>Not a claim of</h5><p>${esc(arr(r.not_a_claim_of).join(' · '))}</p></div></details>`).join('');
   const us=arr(prepare?.expandable_blocks?.unknowns).map(u=>`<details id="${esc(u.id)}"><summary><b>${esc(u.id)}</b> ${esc(u.title)}</summary><div class="detailbody"><p><strong>Why unknown</strong> ${esc(u.why_unknown)}</p><p><strong>What resolves it</strong> ${esc(u.what_would_resolve_it)}</p><p><strong>Blocked conclusions</strong> ${esc(arr(u.blocked_conclusions).join(' · '))}</p></div></details>`).join('');
 
-  root.innerHTML=`<div class="eyebrow">CLARIS · Opportunity Intelligence</div><h1>${esc(brief.company)}</h1><div class="meta">Private brief · expires ${esc(new Date(brief.expires_at).toLocaleString())}</div><section class="hero"><div class="eyebrow">Executive readout</div><p>${esc(prepare.executive_readout)}</p></section>${objectiveSection}<h2>Signals that matter</h2>${signals}<h2>Live diagnostic map</h2><div class="eyebrow">Ask less · hear more · branch only when the answer earns it</div>${questions}<h2>Call flow</h2><ol class="flow">${flow}</ol>${decisionSection}<h2>Do not ask</h2><ul class="dna">${dna}</ul><h2>Evidence & reasoning</h2>${ev}${rs}${us}`;
+  root.innerHTML=`<div class="eyebrow">CLARIS · Opportunity Intelligence</div><h1>${esc(heading)}</h1><div class="meta">${esc(meta)}</div><section class="hero"><div class="eyebrow">Executive readout</div><p>${esc(prepare.executive_readout)}</p></section>${objectiveSection}<h2>Signals that matter</h2>${signals}<h2>Live diagnostic map</h2><div class="eyebrow">Ask less · hear more · branch only when the answer earns it</div>${questions}<h2>Call flow</h2><ol class="flow">${flow}</ol>${decisionSection}<h2>Do not ask</h2><ul class="dna">${dna}</ul><h2>Evidence & reasoning</h2>${ev}${rs}${us}`;
   root.addEventListener('click',e=>{const b=e.target.closest('[data-ref]');if(!b)return;const d=document.getElementById(b.dataset.ref);if(d){d.open=true;d.scrollIntoView({behavior:'smooth',block:'center'});}});
 }
 
