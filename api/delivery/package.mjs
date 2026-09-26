@@ -117,14 +117,18 @@ export function createDeliveryGateway({
         briefUrl: `${base}#brief=preflight`
       }));
 
-      const created = await service.create({
+      const created = await service.publish({
+        opportunityId: body?.opportunity_id,
         consultantId: body?.consultant_id,
         company: body?.company,
         payload: body?.brief_payload,
         validationContext: body?.validation_context,
         ttlMs: ttlMs(body)
       });
-      if (!created?.brief) return json(created, 422);
+      if (!created?.brief) {
+        const status = ['BRIEF_PUBLICATION_REVOKED', 'BRIEF_PUBLICATION_EXPIRED'].includes(created?.error) ? 410 : 422;
+        return json(created, status);
+      }
 
       const briefUrl = `${base}#brief=${encodeURIComponent(created.token)}`;
       let delivery;
@@ -135,19 +139,26 @@ export function createDeliveryGateway({
           expiresAt: created.brief.expires_at
         }));
       } catch (error) {
-        try { await service.revoke(created.brief.brief_id); } catch {}
+        if (!created.reused) {
+          try { await service.revoke(created.brief.brief_id); } catch {}
+        }
         throw error;
       }
 
+      const notificationDedupeKey = `CONSULTANT_BRIEF_READY:${created.publication_id}`;
       return json({
         ok: true,
+        publication_id: created.publication_id,
+        reused: created.reused === true,
+        notification_dedupe_key: notificationDedupeKey,
         brief: {
           brief_id: created.brief.brief_id,
+          publication_id: created.publication_id,
           brief_url: briefUrl,
           expires_at: created.brief.expires_at
         },
         delivery
-      }, 201);
+      }, created.reused ? 200 : 201);
     }
 
     if (operation === 'brief_revoke') {
