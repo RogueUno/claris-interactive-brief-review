@@ -68,16 +68,17 @@ function setup(overrides = {}) {
   const gateway = createDeliveryGateway({
     briefServiceProvider: () => service,
     acceptedKeysProvider: () => ['make-test-key', 'admin-test-key'],
+    adminKeysProvider: () => ['admin-test-key'],
     briefBaseUrlProvider: () => 'https://preview.example/brief-v1/',
     ...overrides
   });
   return { storage, service, gateway };
 }
 
-function request(operation, body = {}, { auth = false, cookie = null, header = true } = {}) {
+function request(operation, body = {}, { auth = false, authKey = null, cookie = null, header = true } = {}) {
   const headers = { 'Content-Type': 'application/json' };
   if (header && operation) headers['X-Claris-Delivery'] = operation;
-  if (auth) headers.Authorization = 'Bearer make-test-key';
+  if (auth || authKey) headers.Authorization = `Bearer ${authKey || 'make-test-key'}`;
   if (cookie) headers.Cookie = cookie;
   const normalizedBody = operation === 'brief_publish_ready' && body?.certification === undefined
     ? { ...body, certification }
@@ -125,7 +126,7 @@ test('private brief flow creates, resolves, resumes, and revokes through one gat
     brief_payload: payload,
     validation_context: validationContext,
     ttl_days: 7
-  }, { auth: true }));
+  }, { authKey: 'admin-test-key' }));
   assert.equal(create.status, 201);
   const created = await body(create);
   assert.equal(created.ok, true);
@@ -284,8 +285,9 @@ test('private create is authenticated and deterministic validation fails closed'
     company: 'Acme',
     brief_payload: payload,
     validation_context: validationContext
-  }));
+  }, { auth: true }));
   assert.equal(unauthorized.status, 401);
+  assert.equal((await body(unauthorized)).error, 'ADMIN_UNAUTHORIZED');
 
   const bad = structuredClone(payload);
   bad.discovery.commercial_target = ['Collect budget if raised.'];
@@ -294,7 +296,7 @@ test('private create is authenticated and deterministic validation fails closed'
     company: 'Acme',
     brief_payload: bad,
     validation_context: validationContext
-  }, { auth: true }));
+  }, { authKey: 'admin-test-key' }));
   assert.equal(rejected.status, 422);
   const rejectedBody = await body(rejected);
   assert.equal(rejectedBody.ok, false);
