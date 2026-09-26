@@ -43,14 +43,19 @@ export function compileCertifiedBriefPublication(input = {}) {
     consultant_sot: input.consultant_sot
   });
 
+  const certification = {
+    schema_version: 'CLARIS_PRECALL_CERTIFICATION_V1',
+    premium_semantic_pass: premiumAudit.audit_status === 'PASS',
+    discovery_semantic_pass: discoveryAudit.audit_status === 'PASS',
+    premium_deterministic_pass: premiumValidation.ok === true,
+    discovery_deterministic_pass: discoveryValidation.ok === true
+  };
+
   return {
     ...compiled,
-    certification: {
-      schema_version: 'CLARIS_PRECALL_CERTIFICATION_V1',
-      premium_semantic_pass: premiumAudit.audit_status === 'PASS',
-      discovery_semantic_pass: discoveryAudit.audit_status === 'PASS',
-      premium_deterministic_pass: premiumValidation.ok === true,
-      discovery_deterministic_pass: discoveryValidation.ok === true
+    body: {
+      ...compiled.body,
+      certification
     }
   };
 }
