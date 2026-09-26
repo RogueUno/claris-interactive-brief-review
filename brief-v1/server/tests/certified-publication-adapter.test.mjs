@@ -54,7 +54,7 @@ test('certified adapter emits one brief_publish_ready request',()=>{
   assert.equal(result.body.brief_payload.discovery,discovery);
   assert.equal(result.body.validation_context.commercial_rules.budget_required_before_first_call,false);
   assert.equal(JSON.stringify(result.body).includes('7500'),false);
-  assert.deepEqual(result.certification,{
+  assert.deepEqual(result.body.certification,{
     schema_version:'CLARIS_PRECALL_CERTIFICATION_V1',
     premium_semantic_pass:true,
     discovery_semantic_pass:true,
