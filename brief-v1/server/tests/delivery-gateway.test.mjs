@@ -22,6 +22,7 @@ function memoryStorage() {
 const payload = {
   prepare: {
     schema_version: 'CLARIS_PREMIUM_PREPARE_V3_6',
+    executive_readout: 'Acme already publishes the baseline. Resolve exact API scope and desired outcome.',
     open_dimensions: [{ dimension_id: 'D1', max_questions: 1 }]
   },
   discovery: {
@@ -144,6 +145,58 @@ test('private brief flow creates, resolves, resumes, and revokes through one gat
   const after = await gateway.fetch(request('brief_data', {}, { cookie }));
   assert.equal(after.status, 410);
   assert.equal((await body(after)).error, 'BRIEF_REVOKED');
+});
+
+test('publish-ready creates private brief and email package in one authenticated call', async () => {
+  const { gateway } = setup();
+  const publish = await gateway.fetch(request('brief_publish_ready', {
+    opportunity_id: 'opp_1',
+    consultant_id: 'consultant_test_1',
+    consultant_delivery_email: 'sarah@example.com',
+    consultant_first_name: 'Sarah',
+    company: 'Acme',
+    prospect_name: 'Alex Morgan',
+    meeting_time: '2026-09-30T14:00:00Z',
+    brief_payload: payload,
+    validation_context: validationContext,
+    ttl_days: 7
+  }, { auth: true }));
+
+  assert.equal(publish.status, 201);
+  const result = await body(publish);
+  assert.equal(result.ok, true);
+  assert.equal(result.delivery.kind, 'CONSULTANT_BRIEF_READY');
+  assert.equal(result.delivery.to, 'sarah@example.com');
+  assert.match(result.delivery.text_body, /Which API surface is in scope/);
+  assert.match(result.delivery.text_body, /https:\/\/preview\.example\/brief-v1\/#brief=/);
+  assert.equal('brief_token' in result, false);
+  assert.equal('brief_token' in result.brief, false);
+
+  const url = new URL(result.brief.brief_url);
+  const token = new URLSearchParams(url.hash.slice(1)).get('brief');
+  assert.ok(token);
+
+  const resolve = await gateway.fetch(request('brief_resolve', { brief_token: token }));
+  assert.equal(resolve.status, 200);
+  const cookie = resolve.headers.get('set-cookie').split(';')[0];
+  const data = await gateway.fetch(request('brief_data', {}, { cookie }));
+  assert.equal(data.status, 200);
+  assert.deepEqual((await body(data)).brief.payload, payload);
+});
+
+test('publish-ready preflights notification before persistence', async () => {
+  const { gateway, storage } = setup();
+  const rejected = await gateway.fetch(request('brief_publish_ready', {
+    consultant_id: 'consultant_test_1',
+    consultant_delivery_email: 'not-an-email',
+    company: 'Acme',
+    brief_payload: payload,
+    validation_context: validationContext
+  }, { auth: true }));
+
+  assert.equal(rejected.status, 422);
+  assert.equal((await body(rejected)).error, 'CONSULTANT_DELIVERY_EMAIL_REQUIRED');
+  assert.equal(storage.data.size, 0);
 });
 
 test('private create is authenticated and deterministic validation fails closed', async () => {
