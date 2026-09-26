@@ -56,6 +56,38 @@ export function compileBriefPublication(input = {}) {
   };
 }
 
+
+export function compileBriefPublishReady(input = {}) {
+  const consultantId = required(input.consultant_id, 'CONSULTANT_ID_REQUIRED');
+  const company = required(input.company, 'COMPANY_REQUIRED');
+  const consultantDeliveryEmail = required(input.consultant_delivery_email, 'CONSULTANT_DELIVERY_EMAIL_REQUIRED');
+  const prepare = input.prepare;
+  const discovery = input.discovery;
+  const consultantSot = input.consultant_sot || {};
+  assertSchemas(prepare, discovery);
+
+  return {
+    operation: 'brief_publish_ready',
+    body: {
+      opportunity_id: text(input.opportunity_id) || null,
+      consultant_id: consultantId,
+      consultant_delivery_email: consultantDeliveryEmail,
+      consultant_first_name: text(input.consultant_first_name) || null,
+      company,
+      prospect_name: text(input.prospect_name) || null,
+      meeting_time: text(input.meeting_time) || null,
+      ttl_days: integerInRange(input.ttl_days, 1, 30, 7),
+      brief_payload: { prepare, discovery },
+      validation_context: {
+        services: serviceProjection(consultantSot),
+        commercial_rules: {
+          budget_required_before_first_call: consultantSot?.commercial_rules?.budget_required_before_first_call === true
+        }
+      }
+    }
+  };
+}
+
 export function compileBriefReadyNotification(input = {}) {
   const published = input.published || {};
   const prepare = input.prepare;
