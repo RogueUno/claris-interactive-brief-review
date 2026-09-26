@@ -1,0 +1,116 @@
+{
+  "schema_version":"CLARIS_DISCOVERY_INTENT_CATALOG_V1",
+  "principle":"The catalog is an internal diagnostic ontology, not a questionnaire. Only authority-gated unresolved intents become visible primary questions.",
+  "intents":[
+    {
+      "intent_id":"D01","name":"conversation_reason","objective":"Understand the explicit subject, problem, change or decision brought to the call.",
+      "primary_authorities":["BOOKING","PROSPECT"],
+      "suppress_if":["booking already states the concrete trigger/reason sufficiently for the call"],
+      "listen_for_examples":["we are launching...","a customer asked...","we need an independent review...","we are seeing repeated friction..."],
+      "may_unlock":["D02","D04","D05","D06","D11","D13"]
+    },
+    {
+      "intent_id":"D02","name":"technical_or_service_scope","objective":"Bound the exact system, environment, control surface, framework or workload relevant to the engagement.",
+      "primary_authorities":["BOOKING","PROSPECT"],
+      "suppress_if":["scope is already explicit enough to select the correct review boundary"],
+      "listen_for_examples":["OAuth and RLS end-to-end","questionnaire workflow only","production AWS account","SOC 2 scope expansion"],
+      "may_unlock":["D03","D04","D07","D08","D14"]
+    },
+    {
+      "intent_id":"D03","name":"current_state","objective":"Establish only the current controls/process/architecture needed to diagnose an admitted problem or scope.",
+      "primary_authorities":["BOOKING","PROSPECT"],
+      "suppress_if":["governed public evidence already answers the relevant current-state fact","current state would be generic maturity discovery"],
+      "listen_for_examples":["we already use SSO and SCIM","we have a Trust Center but still answer custom spreadsheets","RLS is enforced using client_id"],
+      "may_unlock":["D04","D07","D08"]
+    },
+    {
+      "intent_id":"D04","name":"problem_or_gap","objective":"Locate the confirmed friction, uncertainty, failure or undesired condition.",
+      "primary_authorities":["BOOKING","PROSPECT"],
+      "conditional_authority":"A prospect answer may open D04 when it explicitly introduces a problem, gap, concern or observed behavior.",
+      "suppress_if":["no prospect evidence of a problem and the call is purely preventive/validation-oriented"],
+      "listen_for_examples":["we keep rewriting the same questionnaire","we reproduced cross-tenant access","we are unsure our token boundary is correct"],
+      "may_unlock":["D05","D07","D08","D14"]
+    },
+    {
+      "intent_id":"D05","name":"implication","objective":"Understand the consequence of a prospect-confirmed problem without manufacturing pain.",
+      "primary_authorities":["BOOKING","PROSPECT"],
+      "conditional_authority":"Only after the prospect explicitly introduces a problem, delay, cost, deal impact, risk or operational burden.",
+      "suppress_if":["no confirmed problem/consequence exists","question would be generic SPIN-style pain fishing"],
+      "listen_for_examples":["security engineers lose hours per review","deal is blocked","launch would slip","we cannot close remediation before code freeze"],
+      "may_unlock":["D06","D11","D15"]
+    },
+    {
+      "intent_id":"D06","name":"desired_outcome","objective":"Define the result, decision, artifact or operating change the prospect wants.",
+      "primary_authorities":["BOOKING","PROSPECT"],
+      "suppress_if":["the required deliverable and acceptance condition are already explicit"],
+      "listen_for_examples":["architecture opinion","independent test report","reusable assurance package","fewer engineering escalations"],
+      "may_unlock":["D13","D14","D15"]
+    },
+    {
+      "intent_id":"D07","name":"prior_attempts","objective":"Learn what has already been tried only when that changes diagnosis or avoids repeating failed work.",
+      "primary_authorities":["BOOKING","PROSPECT"],
+      "conditional_authority":"A prospect answer may open D07 when they mention prior work, an incumbent, previous test or attempted fix.",
+      "suppress_if":["asking would be generic history-taking with no effect on next action"],
+      "listen_for_examples":["we already ran a pentest","we built a Trust Center","our current consultant only handles compliance"],
+      "may_unlock":["D04","D08","D14"]
+    },
+    {
+      "intent_id":"D08","name":"constraints_dependencies","objective":"Identify a prospect-confirmed technical, contractual, regulatory or delivery constraint that changes feasible scope.",
+      "primary_authorities":["BOOKING","PROSPECT"],
+      "conditional_authority":"A prospect answer may open D08 by naming a constraint or dependency.",
+      "suppress_if":["constraint is hypothetical or inferred from public research"],
+      "listen_for_examples":["cannot change auth flow before launch","must keep EU residency","engineering access is restricted"],
+      "may_unlock":["D11","D14","D15"]
+    },
+    {
+      "intent_id":"D09","name":"ownership_stakeholders","objective":"Clarify implementation, evidence or decision ownership only when unresolved ownership affects the next move.",
+      "primary_authorities":["BOOKING","PROSPECT","CONSULTANT_POLICY"],
+      "suppress_if":["booking already identifies the relevant owner","stakeholder mapping would be generic qualification"],
+      "listen_for_examples":["I own the evaluation","security approves but engineering implements","legal owns the questionnaire"],
+      "may_unlock":["D12","D15"]
+    },
+    {
+      "intent_id":"D10","name":"economics","objective":"Collect direct commercial evidence only when the prospect or consultant policy authorizes it.",
+      "primary_authorities":["BOOKING","PROSPECT","CONSULTANT_POLICY"],
+      "suppress_if":["budget policy is off and prospect has not introduced economics","public company size/funding is the only basis"],
+      "listen_for_examples":["we allocated 20k","no budget approved","we are comparing fixed-fee options"],
+      "may_unlock":["D12","D15"]
+    },
+    {
+      "intent_id":"D11","name":"timing_trigger","objective":"Resolve a prospect-introduced deadline, milestone or timing dependency.",
+      "primary_authorities":["BOOKING","PROSPECT","CONSULTANT_POLICY"],
+      "suppress_if":["timing is already sufficiently explicit","asking 'why now' would be generic"],
+      "listen_for_examples":["findings before code freeze","enterprise launch this quarter","audit starts November 1"],
+      "may_unlock":["D05","D08","D15"]
+    },
+    {
+      "intent_id":"D12","name":"decision_process","objective":"Understand evaluation/approval mechanics only when the prospect or consultant policy makes them consequential.",
+      "primary_authorities":["BOOKING","PROSPECT","CONSULTANT_POLICY"],
+      "suppress_if":["decision process is generic procurement fishing","no next-step decision depends on it yet"],
+      "listen_for_examples":["CTO signs off after security review","procurement needs a fixed SOW","board approval required"],
+      "may_unlock":["D09","D10","D15"]
+    },
+    {
+      "intent_id":"D13","name":"assurance_requirements","objective":"Define a prospect-introduced customer, auditor, framework or evidence requirement.",
+      "primary_authorities":["BOOKING","PROSPECT"],
+      "conditional_authority":"A prospect answer may open D13 by explicitly introducing customers, questionnaires, audits, evidence or assurance requirements.",
+      "suppress_if":["public compliance facts are the only basis","no external assurance requirement has been introduced"],
+      "listen_for_examples":["customer wants a technical assessment","questionnaires ask for custom evidence","auditor needs a bridge letter"],
+      "may_unlock":["D04","D05","D06","D11","D14"]
+    },
+    {
+      "intent_id":"D14","name":"delivery_fit","objective":"Determine assessment vs implementation vs advisory vs ongoing support after problem/scope/outcome evidence exists.",
+      "primary_authorities":["BOOKING","PROSPECT"],
+      "suppress_if":["service shape is being selected before scope/outcome is known"],
+      "listen_for_examples":["we need a one-off independent test","we want ongoing security leadership","we need help implementing fixes"],
+      "may_unlock":["D10","D11","D15"]
+    },
+    {
+      "intent_id":"D15","name":"next_move","objective":"Choose the smallest correct post-call action once enough diagnostic and policy evidence exists.",
+      "primary_authorities":["BOOKING","PROSPECT","CONSULTANT_POLICY"],
+      "suppress_if":["core admitted dimensions remain unresolved"],
+      "listen_for_examples":["send SOW","technical scoping session","request evidence","deprioritize"],
+      "may_unlock":[]
+    }
+  ]
+}
