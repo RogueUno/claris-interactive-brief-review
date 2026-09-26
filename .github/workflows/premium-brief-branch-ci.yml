@@ -23,3 +23,34 @@ jobs:
           node-version: '22'
       - run: npm install --no-audit --no-fund
       - run: npm run test:brief
+
+  preview-smoke:
+    needs: brief
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      PREVIEW: https://claris-calibration-git-pre-685ffe-mehdimedjahed3-2420s-projects.vercel.app
+    steps:
+      - name: Wait for branch preview
+        shell: bash
+        run: |
+          code=000
+          for i in {1..45}; do
+            code="$(curl -sS -L -o /tmp/brief.html -w '%{http_code}' "$PREVIEW/brief-v1/" || true)"
+            if [ "$code" = "200" ]; then
+              break
+            fi
+            sleep 2
+          done
+          echo "brief page status=$code"
+          test "$code" = "200"
+          grep -q "CLARIS · Private Brief" /tmp/brief.html
+
+      - name: Unauthenticated private publish fails closed
+        shell: bash
+        run: |
+          code="$(curl -sS -o /tmp/unauth.json -w '%{http_code}'             -X POST "$PREVIEW/api/delivery/package"             -H 'content-type: application/json'             -H 'x-claris-delivery: brief_create'             --data '{"consultant_id":"smoke_test","company":"Smoke","brief_payload":{}}')"
+          echo "unauth publish status=$code"
+          cat /tmp/unauth.json
+          test "$code" = "401"
+          grep -q "MAKE_UNAUTHORIZED" /tmp/unauth.json
