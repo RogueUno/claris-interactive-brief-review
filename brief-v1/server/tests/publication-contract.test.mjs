@@ -74,6 +74,7 @@ test('publish-ready compiler emits one minimized atomic gateway request', () => 
     consultant_first_name: 'Sarah',
     company: 'Acme',
     prospect_name: 'Alex Morgan',
+    prospect_role: 'VP Engineering',
     meeting_time: '2026-09-30T14:00:00Z',
     prepare,
     discovery,
@@ -84,6 +85,7 @@ test('publish-ready compiler emits one minimized atomic gateway request', () => 
   assert.equal(result.operation, 'brief_publish_ready');
   assert.equal(result.body.consultant_id, 'consultant_test_1');
   assert.equal(result.body.consultant_delivery_email, 'sarah@example.com');
+  assert.equal(result.body.prospect_role, 'VP Engineering');
   assert.equal(result.body.ttl_days, 9);
   assert.equal(result.body.brief_payload.prepare.schema_version, 'CLARIS_PREMIUM_PREPARE_V3_6');
   assert.equal(result.body.brief_payload.discovery.schema_version, 'CLARIS_DISCOVERY_INTELLIGENCE_V1_2');
