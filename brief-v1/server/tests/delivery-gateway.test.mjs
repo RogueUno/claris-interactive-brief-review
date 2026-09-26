@@ -159,6 +159,7 @@ test('publish-ready creates private brief and email package in one authenticated
     consultant_first_name: 'Sarah',
     company: 'Acme',
     prospect_name: 'Alex Morgan',
+    prospect_role: 'VP Engineering',
     meeting_time: '2026-09-30T14:00:00Z',
     brief_payload: payload,
     validation_context: validationContext,
@@ -338,7 +339,8 @@ test('publish-ready retry reuses the same private publication and stable notific
   assert.equal(firstResponse.status, 201);
   const first = await body(firstResponse);
 
-  const secondResponse = await gateway.fetch(request('brief_publish_ready', requestBody, { auth: true }));
+  const secondBody = { ...requestBody, meeting_time: '2026-10-01T15:30:00Z' };
+  const secondResponse = await gateway.fetch(request('brief_publish_ready', secondBody, { auth: true }));
   assert.equal(secondResponse.status, 200);
   const second = await body(secondResponse);
 
@@ -354,6 +356,16 @@ test('publish-ready retry reuses the same private publication and stable notific
   const accesses=[...storage.data.values()].filter(v=>v?.schema_version==='claris_private_brief_access_v1');
   assert.equal(briefs.length,1);
   assert.equal(accesses.length,1);
+
+  const url = new URL(second.brief.brief_url);
+  const token = new URLSearchParams(url.hash.slice(1)).get('brief');
+  const resolve = await gateway.fetch(request('brief_resolve', { brief_token: token }));
+  const cookie = resolve.headers.get('set-cookie').split(';')[0];
+  const data = await gateway.fetch(request('brief_data', {}, { cookie }));
+  const loaded = await body(data);
+  assert.equal(loaded.brief.context.prospect_name, 'Alex Morgan');
+  assert.equal(loaded.brief.context.prospect_role, 'VP Engineering');
+  assert.equal(loaded.brief.context.meeting_time, '2026-10-01T15:30:00Z');
 });
 
 test('revoked publish-ready publication stays revoked on retry', async () => {
