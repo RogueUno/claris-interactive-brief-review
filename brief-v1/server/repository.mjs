@@ -85,7 +85,7 @@ export function createBriefRepository(storage) {
         }
 
         let currentBrief = existingBrief;
-        if (briefContext) {
+        if (briefContext && existingBrief.status === 'ACTIVE' && Date.parse(existingBrief.expires_at) > now) {
           const mergedContext = {
             ...(existingBrief.context || {}),
             ...Object.fromEntries(Object.entries(briefContext).filter(([, value]) => value != null))
