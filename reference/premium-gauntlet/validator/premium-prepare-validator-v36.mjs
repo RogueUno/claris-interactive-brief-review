@@ -26,7 +26,9 @@ export function validatePremiumPrepareV36(artifact, opts={}) {
   const dimIds=new Set();
   for(const [i,d] of dims.entries()){
     const p=`open_dimensions[${i}]`;
-    if(!d?.dimension_id) err(errors,'DIMENSION_ID',`${p}.dimension_id`,'Missing dimension_id.'); else dimIds.add(d.dimension_id);
+    if(!d?.dimension_id) err(errors,'DIMENSION_ID',`${p}.dimension_id`,'Missing dimension_id.');
+    else if(dimIds.has(d.dimension_id)) err(errors,'DIMENSION_DUPLICATE',`${p}.dimension_id`,`Duplicate dimension_id: ${d.dimension_id}`);
+    else dimIds.add(d.dimension_id);
     if(!DIMENSION_KINDS.has(d?.dimension_kind)) err(errors,'DIMENSION_KIND',`${p}.dimension_kind`,`Unsupported dimension kind: ${d?.dimension_kind}`);
     if(!OPEN_AUTHORITIES.has(d?.authority)) err(errors,'DIMENSION_AUTHORITY',`${p}.authority`,'Only BOOKING, PROSPECT, or CONSULTANT_POLICY may open a dimension.');
     if(PUBLIC_AUTHORITIES.has(d?.authority)) err(errors,'PUBLIC_OPEN_DIMENSION',`${p}.authority`,'Public research cannot open a discovery dimension.');
@@ -50,10 +52,19 @@ export function validatePremiumPrepareV36(artifact, opts={}) {
     if(!dimIds.has(q?.dimension_id)) err(errors,'QUESTION_DIMENSION',`${p}.dimension_id`,'Question references an unadmitted dimension.');
     qCount.set(q?.dimension_id,(qCount.get(q?.dimension_id)||0)+1);
   }
-  for(const d of dims) if((qCount.get(d.dimension_id)||0)>Number(d.max_questions ?? 1)) err(errors,'QUESTION_BUDGET','priority_questions',`Question budget exceeded for ${d.dimension_id}.`);
+  for(const d of dims){
+    const count=qCount.get(d.dimension_id)||0;
+    if(count<1) err(errors,'QUESTION_REQUIRED','priority_questions',`No priority question resolves ${d.dimension_id}.`);
+    if(count>Number(d.max_questions ?? 1)) err(errors,'QUESTION_BUDGET','priority_questions',`Question budget exceeded for ${d.dimension_id}.`);
+  }
 
   const unknowns=arr(artifact.critical_unknowns);
-  for(const [i,u] of unknowns.entries()) if(!dimIds.has(u?.dimension_id)) err(errors,'UNKNOWN_DIMENSION',`critical_unknowns[${i}].dimension_id`,'Unknown references an unadmitted dimension.');
+  const unknownCount=new Map();
+  for(const [i,u] of unknowns.entries()){
+    if(!dimIds.has(u?.dimension_id)) err(errors,'UNKNOWN_DIMENSION',`critical_unknowns[${i}].dimension_id`,'Unknown references an unadmitted dimension.');
+    else unknownCount.set(u.dimension_id,(unknownCount.get(u.dimension_id)||0)+1);
+  }
+  for(const d of dims) if((unknownCount.get(d.dimension_id)||0)<1) err(errors,'CRITICAL_UNKNOWN_REQUIRED','critical_unknowns',`No critical unknown covers ${d.dimension_id}.`);
   const hypotheses=arr(artifact.opportunity_hypotheses);
   if(hypotheses.length>2) err(errors,'HYPOTHESIS_COUNT','opportunity_hypotheses','At most two hypotheses.');
   for(const [i,h] of hypotheses.entries()) if(!dimIds.has(h?.dimension_id)) err(errors,'HYPOTHESIS_DIMENSION',`opportunity_hypotheses[${i}].dimension_id`,'Hypothesis references an unadmitted dimension.');
@@ -87,12 +98,15 @@ export function validatePremiumPrepareV36(artifact, opts={}) {
     if(!arr(r?.premises).length || !r?.observation || !arr(r?.not_a_claim_of).length) err(errors,'REASONING_SHAPE',p,'Reasoning needs premises, observation, not_a_claim_of.');
     for(const e of arr(r?.linked_evidence_ids)) if(!eIds.has(e)) err(errors,'REASONING_ROUTE',`${p}.linked_evidence_ids`,`Unknown evidence route ${e}.`);
   }
+  const unknownBlockCount=new Map();
   for(const [i,u] of us.entries()){
     const p=`expandable_blocks.unknowns[${i}]`;
     if(!/^U\d+$/.test(u?.id||'')) err(errors,'UNKNOWN_ID',`${p}.id`,'Unknown id must match U#.');
     if(!dimIds.has(u?.dimension_id)) err(errors,'UNKNOWN_BLOCK_DIM',`${p}.dimension_id`,'Unknown block references unadmitted dimension.');
+    else unknownBlockCount.set(u.dimension_id,(unknownBlockCount.get(u.dimension_id)||0)+1);
     if(!u?.why_unknown || !u?.what_would_resolve_it || !arr(u?.blocked_conclusions).length) err(errors,'UNKNOWN_SHAPE',p,'Unknown needs why_unknown, what_would_resolve_it, blocked_conclusions.');
   }
+  for(const d of dims) if((unknownBlockCount.get(d.dimension_id)||0)<1) err(errors,'UNKNOWN_BLOCK_REQUIRED','expandable_blocks.unknowns',`No expandable unknown covers ${d.dimension_id}.`);
   for(const [i,o] of [...arr(artifact.signals_that_matter),...hypotheses,...questions,...paths,...unknowns].entries())
     for(const ref of arr(o?.routes_to)) if(!routeIds.has(ref)) err(errors,'ROUTE_INTEGRITY',`routes[${i}]`,`Unknown provenance reference ${ref}.`);
 
