@@ -33,12 +33,13 @@
 
 | Fixture | State | Shape |
 |---|---|---|
-| Resend — sparse API security | CERTIFIED LOCALLY | 2 dimensions / 2 primary questions. |
-| Linear — enterprise security-review friction | CERTIFIED LOCALLY | 2 dimensions / 2 primary questions. |
-| Supabase — richer OAuth/RLS review booking | CERTIFIED + VERSIONED | Complete booking/SOT/source/PREPARE/Discovery/skeleton fixture is versioned; 3 dimensions / 3 questions; already-known ownership/trigger suppressed. |
+| Resend — sparse API security | CERTIFIED + VERSIONED + PUBLISHABLE | V3.6 + Discovery V1.2 fixture; 2 dimensions / 2 questions; passes shared validator/compiler gate and full secure gateway publish→resolve→session→load regression. |
+| Linear — enterprise security-review friction | CERTIFIED + VERSIONED + PUBLISHABLE | V3.6 + Discovery V1.2 fixture; 2 dimensions / 2 questions; passes shared validator/compiler gate and full secure gateway publish→resolve→session→load regression. |
+| Supabase — richer OAuth/RLS review booking | CERTIFIED + VERSIONED + PUBLISHABLE | Complete booking/SOT/source/PREPARE/Discovery/skeleton fixture; 3 dimensions / 3 questions; passes shared validator/compiler gate and full secure gateway publish→resolve→session→load regression. |
 
-Local promotion harness status:
-- 3/3 golden fixtures accepted.
+Executable promotion status:
+- 3/3 golden fixtures pass one shared Premium V3.6 + Discovery V1.2 + publish-ready compiler gate.
+- 3/3 golden fixtures pass the consolidated secure gateway publish → resolve → session → data load path.
 - 6/6 adversarial mutations rejected/handled as intended.
 
 ## Private brief delivery
@@ -69,7 +70,7 @@ StartSubscenario
 State: PENDING LIVE.
 
 Reason:
-Make fallback connector is currently returning internal errors even for scenario_get. Alternate Make connector is not linked to the required account. No production workaround has been attempted.
+Make fallback connector is currently globally unavailable for this account surface: both scenario_get and scenario_list return internal tool errors. This is not isolated to one CLARIS scenario. Alternate Make connector is not linked to the required account. No production workaround has been attempted.
 
 When connector recovers:
 1. create inactive sandbox publisher only;
@@ -135,3 +136,15 @@ Current premium branch head has all of:
 - brief_publish_ready: atomic server operation for validate → persist → secure URL → compact consultant delivery package
 
 Current Make handoff contract is therefore one authenticated HTTP call followed by Gmail, with no PREPARE/Discovery logic rebuilt in Make.
+
+
+## Certified baseline update — three-fixture publication
+
+Latest executable evidence on the premium branch:
+- npm run test:premium: 8/8 PASS, including the shared Resend / Linear / Supabase golden-fixture certification.
+- npm run test:brief: 23/23 PASS.
+- Resend, Linear and Supabase each complete validate → minimized publish-ready compile → private brief persistence → opaque fragment URL → HttpOnly session → payload load in the consolidated gateway regression.
+- Matching Vercel preview build: SUCCESS.
+- API function footprint remains exactly 12.
+
+The remaining critical external gap is live Make model/publisher execution, not server-side publication architecture.
