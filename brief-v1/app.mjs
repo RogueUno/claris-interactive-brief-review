@@ -9,6 +9,9 @@ async function requestJson(url,options={}){const {headers={},...rest}=options;co
 function gate(title,detail){root.innerHTML=`<section class="gate"><div class="eyebrow">CLARIS · Private Opportunity Intelligence</div><h1>${esc(title)}</h1><p>${esc(detail)}</p></section>`;}
 
 function chips(xs){return arr(xs).map(x=>`<button type="button" class="chip" data-ref="${esc(x)}">${esc(x)}</button>`).join('');}
+function targetColumn(title,items){return items.length?`<div><h4>${esc(title)}</h4><ul>${items.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></div>`:'';}
+function decisionCard(title,items,tone=''){return items.length?`<article class="decision-card ${tone}"><h4>${esc(title)}</h4><ul>${items.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></article>`:'';}
+
 function render(brief){
   const prepare=brief?.payload?.prepare||{}, discovery=brief?.payload?.discovery||{};
   const signals=arr(prepare.signals_that_matter).map((s,i)=>`<article class="signal"><div class="num">${i+1}</div><div><h3>${esc(s.signal)}</h3><p>${esc(s.observation)}</p><p><strong>Call implication</strong> ${esc(s.call_implication)}</p>${chips(s.routes_to)}</div></article>`).join('');
@@ -16,14 +19,28 @@ function render(brief){
     const listens=arr(q.listen_for).map(x=>`<li><strong>“${esc(x.pattern)}”</strong><span>${esc(x.meaning)}</span><em>${esc(x.next_effect)}</em></li>`).join('');
     const probes=arr(q.conditional_probes).map(p=>`<details class="probe"><summary>If you hear: ${esc(p.trigger_if)}</summary><div class="detailbody"><p><strong>Ask</strong> ${esc(p.ask)}</p><p><strong>Why</strong> ${esc(p.why)}</p><p><strong>Listen for</strong> ${esc(arr(p.listen_for).join(' · '))}</p><p><strong>Changes</strong> ${esc(p.what_changes)}</p></div></details>`).join('');
     const services=arr(q.linked_service_paths).map(s=>`<li><code>${esc(s.service_id)}</code><span>${esc(s.condition)}</span></li>`).join('');
-    return `<article class="question"><div class="qhead"><span class="qid">${esc(q.question_id)}</span><div><small>${esc(q.ontology_intent)} · ${esc(q.authority)}</small><h3>${esc(q.ask)}</h3></div></div><p><strong>Why now</strong> ${esc(q.why_now)}</p><div class="known"><strong>Already known — don’t re-ask</strong>${arr(q.already_known_context).map(x=>`<p>${esc(x)}</p>`).join('')}</div><h4>Listen for</h4><ul class="listen">${listens}</ul>${probes}<div class="stop"><strong>Stop when</strong> ${esc(q.stop_condition)}</div>${services?`<h4>Conditional service paths</h4><ul class="services">${services}</ul>`:''}</article>`;
+    const authority=q.authority?` · ${esc(q.authority)}`:'';
+    return `<article class="question"><div class="qhead"><span class="qid">${esc(q.question_id)}</span><div><small>${esc(q.ontology_intent)}${authority}</small><h3>${esc(q.ask)}</h3></div></div><p><strong>Why now</strong> ${esc(q.why_now)}</p><div class="known"><strong>Already known — don’t re-ask</strong>${arr(q.already_known_context).map(x=>`<p>${esc(x)}</p>`).join('')}</div><h4>Listen for</h4><ul class="listen">${listens}</ul>${probes}<div class="changes"><strong>What this answer changes</strong><p>${esc(q.what_the_answer_changes)}</p></div><div class="stop"><strong>Stop when</strong> ${esc(q.stop_condition)}</div>${services?`<h4>Conditional service paths</h4><ul class="services">${services}</ul>`:''}</article>`;
   }).join('');
   const flow=arr(discovery.call_flow).map(x=>`<li><span>${esc(x.step)}</span><div><strong>${esc(x.move)}</strong><small>Advance when: ${esc(x.advance_when)}</small></div></li>`).join('');
   const dna=arr(discovery.do_not_ask).map(x=>`<li><strong>${esc(x.topic)}</strong><span>${esc(x.detail)}</span></li>`).join('');
+  const diagnosticTargets=arr(discovery.diagnostic_target), commercialTargets=arr(discovery.commercial_target);
+  const targets=(diagnosticTargets.length||commercialTargets.length)?`<section class="targets">${targetColumn('By the end of the call, understand',diagnosticTargets)}${targetColumn('Commercial target — only if authorized',commercialTargets)}</section>`:'';
+  const end=discovery.end_of_call_decision||{};
+  const decisions=[
+    decisionCard('Ready for next step when',arr(end.ready_for_next_step_if),'go'),
+    decisionCard('Keep discovering if',arr(end.remain_in_discovery_if),'hold'),
+    decisionCard('Deprioritize only if',arr(end.disqualify_or_deprioritize_if),'stop')
+  ].join('');
+  const decisionSection=decisions?`<h2>End-of-call decision</h2><section class="decision-grid">${decisions}</section>`:'';
+  const objective=String(discovery.call_objective||'').trim();
+  const objectiveSection=(objective||targets)?`<section class="objective"><div class="eyebrow">Call objective</div>${objective?`<p>${esc(objective)}</p>`:''}${targets}</section>`:'';
+
   const ev=arr(prepare?.expandable_blocks?.evidence).map(e=>`<details id="${esc(e.id)}"><summary><b>${esc(e.id)}</b> ${esc(e.title)}</summary><div class="detailbody"><h5>Claims</h5>${arr(e.claims).map(x=>`<p>${esc(x)}</p>`).join('')}<h5>Sources</h5>${arr(e.sources).map(s=>`<p><a target="_blank" rel="noreferrer" href="${safeUrl(s.url)}">${esc(s.url)}</a><br><small>${esc(s.supports)}</small></p>`).join('')}<h5>Used for</h5><p>${esc(arr(e.used_for).join(' · '))}</p><h5>Not used for</h5><p>${esc(arr(e.not_used_for).join(' · '))}</p></div></details>`).join('');
   const rs=arr(prepare?.expandable_blocks?.reasoning).map(r=>`<details id="${esc(r.id)}"><summary><b>${esc(r.id)}</b> ${esc(r.title)}</summary><div class="detailbody"><h5>Premises</h5>${arr(r.premises).map(x=>`<p>${esc(x)}</p>`).join('')}<h5>Bounded observation</h5><p>${esc(r.observation)}</p><h5>Not a claim of</h5><p>${esc(arr(r.not_a_claim_of).join(' · '))}</p></div></details>`).join('');
   const us=arr(prepare?.expandable_blocks?.unknowns).map(u=>`<details id="${esc(u.id)}"><summary><b>${esc(u.id)}</b> ${esc(u.title)}</summary><div class="detailbody"><p><strong>Why unknown</strong> ${esc(u.why_unknown)}</p><p><strong>What resolves it</strong> ${esc(u.what_would_resolve_it)}</p><p><strong>Blocked conclusions</strong> ${esc(arr(u.blocked_conclusions).join(' · '))}</p></div></details>`).join('');
-  root.innerHTML=`<div class="eyebrow">CLARIS · Opportunity Intelligence</div><h1>${esc(brief.company)}</h1><div class="meta">Private brief · expires ${esc(new Date(brief.expires_at).toLocaleString())}</div><section class="hero"><div class="eyebrow">Executive readout</div><p>${esc(prepare.executive_readout)}</p></section><h2>Signals that matter</h2>${signals}<h2>Live diagnostic map</h2><div class="eyebrow">Ask less · hear more · branch only when the answer earns it</div>${questions}<h2>Call flow</h2><ol class="flow">${flow}</ol><h2>Do not ask</h2><ul class="dna">${dna}</ul><h2>Evidence & reasoning</h2>${ev}${rs}${us}`;
+
+  root.innerHTML=`<div class="eyebrow">CLARIS · Opportunity Intelligence</div><h1>${esc(brief.company)}</h1><div class="meta">Private brief · expires ${esc(new Date(brief.expires_at).toLocaleString())}</div><section class="hero"><div class="eyebrow">Executive readout</div><p>${esc(prepare.executive_readout)}</p></section>${objectiveSection}<h2>Signals that matter</h2>${signals}<h2>Live diagnostic map</h2><div class="eyebrow">Ask less · hear more · branch only when the answer earns it</div>${questions}<h2>Call flow</h2><ol class="flow">${flow}</ol>${decisionSection}<h2>Do not ask</h2><ul class="dna">${dna}</ul><h2>Evidence & reasoning</h2>${ev}${rs}${us}`;
   root.addEventListener('click',e=>{const b=e.target.closest('[data-ref]');if(!b)return;const d=document.getElementById(b.dataset.ref);if(d){d.open=true;d.scrollIntoView({behavior:'smooth',block:'center'});}});
 }
 
