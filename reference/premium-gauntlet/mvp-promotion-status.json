@@ -1,0 +1,61 @@
+{
+  "schema_version": "CLARIS_MVP_PROMOTION_GATE_V1",
+  "candidate_branch": "premium-gauntlet-v3-1",
+  "gates": {
+    "consultant_intelligence": {
+      "status": "PASS"
+    },
+    "premium_research": {
+      "status": "PARTIAL",
+      "reason": "Gold/design pass; live Make integration sandbox-only."
+    },
+    "premium_prepare_v3_6": {
+      "status": "PARTIAL",
+      "golden_fixtures": [
+        "Resend",
+        "Linear",
+        "Supabase"
+      ],
+      "deterministic_gate": "PASS",
+      "live_make_model_certification": "PENDING"
+    },
+    "discovery_intelligence_v1_2": {
+      "status": "PARTIAL",
+      "golden_fixtures": [
+        "Resend",
+        "Linear",
+        "Supabase"
+      ],
+      "deterministic_gate": "PASS",
+      "live_make_model_certification": "PENDING"
+    },
+    "secure_private_brief": {
+      "status": "PASS",
+      "github_ci": "PASS",
+      "vercel_function_count": 12,
+      "vercel_hobby_function_cap": 12,
+      "preview_protection": "ENABLED"
+    },
+    "retry_idempotency": {
+      "status": "PASS"
+    },
+    "make_publisher": {
+      "status": "PENDING",
+      "blueprint": "reference/premium-gauntlet/make-publisher-v1/BLUEPRINT.md"
+    },
+    "real_end_to_end_pilot": {
+      "status": "PENDING"
+    },
+    "commercial_readiness": {
+      "status": "PENDING"
+    }
+  },
+  "blockers": [
+    "Make fallback connector internal errors",
+    "Live V3.6 + Discovery V1.2 certification",
+    "Make Publisher V1 scenario implementation",
+    "Real end-to-end pilot",
+    "Vercel free deployment quota reset if new preview required"
+  ],
+  "production_ingress_policy": "KEEP_INACTIVE_UNTIL_GATES_C_THROUGH_H_GREEN"
+}
