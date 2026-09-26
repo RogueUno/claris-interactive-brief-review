@@ -182,3 +182,15 @@ test('notification compiler refuses insecure or missing published URLs', () => {
     published: { brief_url: 'http://example.com/brief' }
   }), /PUBLISHED_BRIEF_URL_INVALID/);
 });
+
+
+test('publish-ready compiler requires opportunity id for deterministic publication identity', () => {
+  assert.throws(() => compileBriefPublishReady({
+    consultant_id: 'consultant_test_1',
+    consultant_delivery_email: 'sarah@example.com',
+    company: 'Acme',
+    prepare,
+    discovery,
+    consultant_sot: sot
+  }), /OPPORTUNITY_ID_REQUIRED/);
+});
