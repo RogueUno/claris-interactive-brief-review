@@ -6,9 +6,12 @@ Instantiate this only as an inactive sandbox until Private Brief Lifecycle V1 is
 Preferred path is intentionally small:
 
 StartSubscenario
+→ deterministic publish-ready payload mapping
 → HTTP: brief_publish_ready
 → Gmail: Send an email
 → Return receipt
+
+Canonical server-side equivalent: compileBriefPublishReady() in brief-v1/server/publication-contract.mjs. Make must map the same minimized fields and must not transmit the full consultant SOT.
 
 Do not insert PREPARE/Discovery reasoning into this scenario.
 Do not modify frozen 7360890 or 7527099.
@@ -24,7 +27,10 @@ Required:
 - company
 - prepare_json = CLARIS_PREMIUM_PREPARE_V3_6
 - discovery_json = CLARIS_DISCOVERY_INTELLIGENCE_V1_2
-- validation_context_json
+- consultant_services_projection = service_id + name only
+- budget_required_before_first_call = boolean only
+
+Do not accept the full consultant SOT as a publisher input when the minimized projection is available.
 
 Optional:
 - prospect_name
@@ -66,7 +72,12 @@ Body:
     "prepare": <parsed prepare_json>,
     "discovery": <parsed discovery_json>
   },
-  "validation_context": <parsed validation_context_json>
+  "validation_context": {
+    "services": <service_id + name only>,
+    "commercial_rules": {
+      "budget_required_before_first_call": <boolean>
+    }
+  }
 }
 
 Expected HTTP 201.
@@ -191,3 +202,31 @@ Do not connect this publisher to Production Booking Adapter or Calendly until:
 - private link/session/revocation verified;
 - no duplicate brief is created on email retry;
 - production frozen scenarios remain unchanged.
+
+
+## Certified server contract — 2026-09-26
+
+The server side of this handoff is already certified on the premium branch:
+
+- Vercel preview build: PASS
+- GitHub Actions Node 22 private-brief suite: 18/18 PASS
+- brief_publish_ready integration: PASS
+- legacy CONSULTANT_FINAL delivery compatibility: PASS
+- economics leakage rejection before persistence: PASS
+- invalid service mapping rejection before persistence: PASS
+- post-persist notification packaging failure revokes the orphan brief: PASS
+- API function count remains 12, preserving Vercel Hobby deployment
+
+The only currently unexecuted piece is the live Make scenario because the Make fallback connector is returning internal errors.
+
+## Duplicate-prevention rule
+
+If Module 2 returned HTTP 201, treat its brief and delivery objects as the canonical publication result for that scenario execution.
+
+If Gmail fails:
+- retry Gmail from the retained Module 2 response;
+- never rerun brief_publish_ready just to retry email;
+- never fall back to the legacy full-brief email;
+- surface BRIEF_PUBLISHED_EMAIL_FAILED if the email cannot be recovered.
+
+A later lifecycle hardening pass may add cross-execution idempotency, but that is not required to certify the first controlled pilot when Make error handling is configured at the Gmail module boundary.
