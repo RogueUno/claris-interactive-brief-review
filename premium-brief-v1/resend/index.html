@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>CLARIS — Resend Opportunity Brief</title>
+<style>
+:root{--bg:#e8ecea;--panel:rgba(250,252,251,.78);--ink:#182321;--muted:#64706d;--line:rgba(32,52,48,.14);--accent:#536f69;--accent2:#2f4f49;--soft:#dfe6e3;--shadow:0 18px 60px rgba(35,52,48,.08)}
+*{box-sizing:border-box} body{margin:0;background:linear-gradient(180deg,#eef1ef 0%,#e6ebe8 100%);color:var(--ink);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;line-height:1.5}
+.wrap{max-width:1120px;margin:0 auto;padding:48px 24px 80px}.top{display:flex;justify-content:space-between;gap:24px;align-items:flex-start;margin-bottom:34px}.brand{letter-spacing:.18em;font-weight:650;font-size:13px}.eyebrow{color:var(--muted);font-size:13px;margin-top:8px}.status{border:1px solid var(--line);background:rgba(255,255,255,.45);padding:8px 12px;border-radius:999px;color:var(--accent2);font-size:12px}
+.hero{background:var(--panel);border:1px solid var(--line);border-radius:24px;padding:30px 32px;box-shadow:var(--shadow);backdrop-filter:blur(10px);margin-bottom:22px}.hero h1{margin:0 0 7px;font-size:34px;letter-spacing:-.035em;font-weight:620}.meta{display:flex;flex-wrap:wrap;gap:8px;color:var(--muted);font-size:13px}.pill{border:1px solid var(--line);border-radius:999px;padding:5px 9px;background:rgba(255,255,255,.36)}
+.grid{display:grid;grid-template-columns:minmax(0,1fr) 300px;gap:22px}.panel{background:var(--panel);border:1px solid var(--line);border-radius:20px;padding:26px 28px;box-shadow:var(--shadow);backdrop-filter:blur(10px);margin-bottom:18px}
+h2{font-size:15px;letter-spacing:.045em;text-transform:uppercase;margin:0 0 16px;color:var(--accent2)} h3{font-size:17px;margin:0 0 7px;letter-spacing:-.012em}.readout{font-size:17px;line-height:1.65;margin:0}
+.signal{padding:18px 0;border-top:1px solid var(--line)}.signal:first-of-type{border-top:0;padding-top:0}.fact{font-weight:590}.imp{margin-top:7px;color:#3f4d49}.route{font-size:12px;color:var(--accent);font-weight:650;text-decoration:none;white-space:nowrap}
+.question{padding:15px 0;border-top:1px solid var(--line)}.question:first-of-type{border-top:0}.qid{font-size:11px;font-weight:750;letter-spacing:.08em;color:var(--accent);text-transform:uppercase}.q{font-size:16px;font-weight:570;margin-top:4px}
+.path{padding:14px 0;border-top:1px solid var(--line)}.path:first-of-type{border-top:0}.service{font-weight:650}.condition{color:var(--muted);font-size:14px;margin-top:3px}
+.aside{position:sticky;top:20px;align-self:start}.aside .panel{padding:22px}.mini{font-size:13px;color:var(--muted);margin-bottom:14px}.unknown{padding:12px 0;border-top:1px solid var(--line)}.unknown:first-of-type{border-top:0}.unknown b{display:block;font-size:13px}.unknown span{font-size:13px;color:var(--muted)}
+.hyp{border-left:3px solid var(--accent);padding:4px 0 4px 15px}.hyp p{margin:5px 0;color:#40504c}
+details{border-top:1px solid var(--line)}details:first-of-type{border-top:0}summary{cursor:pointer;list-style:none;padding:16px 0;font-weight:620;display:flex;justify-content:space-between;gap:16px}summary::-webkit-details-marker{display:none}summary:after{content:"+";color:var(--accent);font-size:18px;font-weight:400}details[open] summary:after{content:"–"}.drawer{padding:0 0 18px;color:#3d4c48;font-size:14px}.drawer p{margin:8px 0}.label{display:inline-block;font-size:10px;letter-spacing:.08em;text-transform:uppercase;font-weight:750;color:var(--muted);margin-right:6px}.source{overflow-wrap:anywhere}.source a{color:var(--accent2)}
+.note{font-size:12px;color:var(--muted);border-top:1px solid var(--line);padding-top:16px;margin-top:22px}
+@media(max-width:820px){.grid{grid-template-columns:1fr}.aside{position:static}.top{flex-direction:column}.hero{padding:24px}.panel{padding:22px}.wrap{padding:28px 16px 56px}.hero h1{font-size:29px}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="top">
+    <div><div class="brand">CLARIS</div><div class="eyebrow">Governed commercial intelligence · Premium Gauntlet</div></div>
+    <div class="status">Sandbox · Resend fixture</div>
+  </div>
+
+  <section class="hero">
+    <h1>Resend — API Security</h1>
+    <div class="meta">
+      <span class="pill">Consultant: Chase Miller</span><span class="pill">Firm: vCISO.com</span><span class="pill">Booking: “Interested in discussing API security.”</span>
+    </div>
+  </section>
+
+  <div class="grid">
+    <main>
+      <section class="panel">
+        <h2>Executive Readout</h2>
+        <p class="readout">Resend’s public security surface already answers several low-value discovery questions. It documents SOC 2 Type II, annual third-party penetration tests, AES-256 at rest and TLS 1.3+ in transit; its API access surface spans full- or send-only API keys, OAuth 2.1 + PKCE with dynamic client registration, signed webhooks, and a hosted remote MCP server with OAuth/Bearer authentication <a class="route" href="#e5">[E5]</a> <a class="route" href="#e1">[E1]</a> <a class="route" href="#e2">[E2]</a> <a class="route" href="#e3">[E3]</a> <a class="route" href="#e4">[E4]</a>. The booking itself says only “Interested in discussing API security.” The call needs to resolve two things quickly: <b>which trust boundary is actually in scope, and what result the prospect wants from outside help.</b></p>
+      </section>
+
+      <section class="panel">
+        <h2>Signals That Matter</h2>
+        <div class="signal"><h3>1. Multiple credential models, not one generic API-auth surface</h3><div class="fact">Full- or send-only API keys coexist with OAuth 2.1 + PKCE and dynamic client registration. <a class="route" href="#e1">[E1]</a> <a class="route" href="#e2">[E2]</a></div><div class="imp"><b>Call implication:</b> scope the credential model first. Static-key permissions and delegated OAuth access are materially different review surfaces.</div></div>
+        <div class="signal"><h3>2. Webhooks are a separate inbound trust boundary</h3><div class="fact">Endpoint-specific signing secrets and Svix signature/timestamp/id headers are documented for authenticity and replay protection. <a class="route" href="#e3">[E3]</a></div><div class="imp"><b>Call implication:</b> if webhooks are in scope, skip “do you sign webhooks?” and establish what needs review in the verification/consumption path.</div></div>
+        <div class="signal"><h3>3. MCP adds an agent-facing access surface</h3><div class="fact">Resend operates a hosted remote MCP server with OAuth and Bearer-token connection options. <a class="route" href="#e4">[E4]</a></div><div class="imp"><b>Call implication:</b> agent access is a distinct trust boundary worth checking in scope; it is not evidence that MCP caused the booking.</div></div>
+        <div class="signal"><h3>4. Baseline assurance is already substantial</h3><div class="fact">SOC 2 Type II, annual third-party penetration testing, AES-256 at rest and TLS 1.3+ in transit are public. <a class="route" href="#e5">[E5]</a></div><div class="imp"><b>Call implication:</b> a generic maturity/SOC 2 opener is low-value. If they want independent validation, establish what needs validating beyond the assurance work already performed.</div></div>
+      </section>
+
+      <section class="panel">
+        <h2>Hypothesis Worth Testing</h2>
+        <div class="hyp"><h3>Newer delegated / agent access may be part of scope</h3><p>OAuth 2.1 and remote MCP create distinct delegated-access boundaries. This makes them worth including among the scope options—not a conclusion about why the meeting was booked. <a class="route" href="#r1">[R1]</a></p></div>
+      </section>
+
+      <section class="panel">
+        <h2>Call Plan</h2>
+        <ol>
+          <li>Identify the exact API/security surface.</li>
+          <li>Identify the required outcome.</li>
+          <li>Map the confirmed combination to the consultant’s service catalog; do not pitch before both are clear.</li>
+        </ol>
+        <div class="note"><b>Avoid early:</b> SOC 2/readiness discovery that first-party evidence already answers; any statement that OAuth, MCP, webhooks or a vulnerability caused the booking.</div>
+      </section>
+
+      <section class="panel">
+        <h2>Priority Questions</h2>
+        <div class="question"><div class="qid">D1 · Technical scope</div><div class="q">Which surface is actually in scope: API-key permissions/scoping, OAuth flows, webhook verification, MCP/agent access, or something else?</div></div>
+        <div class="question"><div class="qid">D2 · Desired outcome</div><div class="q">What do you need from external help here: architecture/security-design guidance, independent technical validation/testing, customer-assurance/security documentation, or something else?</div></div>
+      </section>
+
+      <section class="panel">
+        <h2>Conditional Service Paths</h2>
+        <div class="path"><div class="service">Advisory vCISO</div><div class="condition">Only if D2 confirms architecture / security-design guidance.</div></div>
+        <div class="path"><div class="service">Penetration Testing</div><div class="condition">Only if D2 confirms independent technical testing / validation of a bounded surface.</div></div>
+        <div class="path"><div class="service">Enterprise Sales Security Enablement</div><div class="condition">Only if D2 confirms customer-assurance / security-documentation support.</div></div>
+      </section>
+
+      <section class="panel" id="evidence">
+        <h2>Evidence & Reasoning</h2>
+        <details id="e1"><summary>E1 · API keys and permission scope</summary><div class="drawer"><p><span class="label">Fact</span>API keys can have full access or be restricted to sending.</p><p class="source"><span class="label">Source</span><a href="https://resend.com/docs/api-reference/api-keys/create-api-key">resend.com/docs/api-reference/api-keys/create-api-key</a></p><p><span class="label">Used for</span>API-key permission scope as one possible D1 surface.</p><p><span class="label">Not used for</span>Claiming Resend mismanages keys or needs remediation.</p></div></details>
+        <details id="e2"><summary>E2 · OAuth 2.1 + PKCE</summary><div class="drawer"><p><span class="label">Fact</span>OAuth 2.1 + PKCE, scoped access tokens and dynamic client registration are documented.</p><p class="source"><span class="label">Source</span><a href="https://resend.com/changelog/oauth-support">resend.com/changelog/oauth-support</a></p><p><span class="label">Used for</span>Delegated authorization as a distinct D1 surface.</p><p><span class="label">Not used for</span>Claiming OAuth caused the booking or is misconfigured.</p></div></details>
+        <details id="e3"><summary>E3 · Webhook verification</summary><div class="drawer"><p><span class="label">Fact</span>Endpoint-specific signing secrets and Svix signature/timestamp/id headers are documented for authenticity and replay protection.</p><p class="source"><span class="label">Source</span><a href="https://resend.com/docs/webhooks/verify-webhooks-requests">resend.com/docs/webhooks/verify-webhooks-requests</a></p><p><span class="label">Used for</span>Inbound webhook verification as a separate D1 surface.</p><p><span class="label">Not used for</span>Claiming a webhook vulnerability or bad client implementation.</p></div></details>
+        <details id="e4"><summary>E4 · Remote MCP surface</summary><div class="drawer"><p><span class="label">Fact</span>A hosted remote MCP server supports OAuth and Bearer-token connection options.</p><p class="source"><span class="label">Source</span><a href="https://resend.com/changelog/remote-mcp-server">resend.com/changelog/remote-mcp-server</a></p><p><span class="label">Used for</span>Agent-facing access as a distinct D1 surface.</p><p><span class="label">Not used for</span>Claiming agent integrations created risk or motivated the booking.</p></div></details>
+        <details id="e5"><summary>E5 · Existing assurance baseline</summary><div class="drawer"><p><span class="label">Fact</span>SOC 2 Type II, annual third-party penetration tests, AES-256 at rest and TLS 1.3+ in transit.</p><p class="source"><span class="label">Source</span><a href="https://resend.com/security/gdpr">resend.com/security/gdpr</a></p><p><span class="label">Used for</span>Suppressing generic baseline-maturity/SOC 2 discovery and contextualizing additional validation.</p><p><span class="label">Not used for</span>Claiming the platform is secure in every respect or that further testing is unnecessary.</p></div></details>
+        <details id="r1"><summary>R1 · Why OAuth / MCP is a hypothesis</summary><div class="drawer"><p><span class="label">Premises</span>The booking says API security; several materially different access surfaces are public; OAuth and remote MCP are delegated-access surfaces.</p><p><span class="label">Observation</span>OAuth/MCP deserve to be among the scope options presented to the prospect.</p><p><span class="label">Not a claim of</span>Booking cause, vulnerability, urgency or service need.</p></div></details>
+        <details id="u1"><summary>U1 · Technical scope</summary><div class="drawer"><p>The booking does not identify the relevant API/security boundary. D1 resolves this. Until then CLARIS must not choose OAuth, keys, webhooks, MCP or another surface as the problem.</p></div></details>
+        <details id="u2"><summary>U2 · Desired outcome</summary><div class="drawer"><p>The booking does not identify the wanted deliverable. D2 resolves whether the path is advisory, independent testing/validation, assurance documentation, or something else.</p></div></details>
+      </section>
+    </main>
+
+    <aside class="aside">
+      <section class="panel">
+        <h2>Critical Unknowns</h2>
+        <div class="unknown"><b>D1 · Technical scope</b><span>Which API/security boundary is actually under discussion.</span></div>
+        <div class="unknown"><b>D2 · Desired outcome</b><span>What result or deliverable the prospect wants.</span></div>
+      </section>
+      <section class="panel">
+        <h2>Trust Model</h2>
+        <div class="mini">Main brief = fast decision layer.</div>
+        <div class="mini">E# = admitted evidence.</div>
+        <div class="mini">R# = bounded reasoning.</div>
+        <div class="mini">U# = deliberate non-conclusion.</div>
+      </section>
+    </aside>
+  </div>
+</div>
+</body>
+</html>

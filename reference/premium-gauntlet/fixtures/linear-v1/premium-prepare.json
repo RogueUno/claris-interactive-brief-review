@@ -1,0 +1,333 @@
+{
+  "schema_version": "CLARIS_PREMIUM_PREPARE_V3_6",
+  "executive_readout": "Linear says it is receiving more enterprise customer security reviews and wants the process to run more smoothly. Public evidence already answers many baseline questions: Linear documents SOC 2 Type II, ISO 27001, HIPAA/BAA support, a Trust Center, Enterprise SAML/SCIM, audit logs, access restrictions and data-residency options. That makes generic certification or identity-control discovery low-value. The useful first-call work is to locate where reviews still create manual effort despite that assurance stack, then define what “smoother” should change operationally. Public evidence can suppress redundant questions, but it cannot tell us whether the remaining friction is questionnaires, evidence access, technical escalations or something else.",
+  "open_dimensions": [
+    {
+      "dimension_id": "D1",
+      "dimension_kind": "SUBJECT_SCOPE",
+      "label": "enterprise security-review friction point",
+      "authority": "BOOKING",
+      "authority_quote": "enterprise customer security reviews",
+      "policy_key": null,
+      "why_open": "The booking identifies the review process but not where the remaining manual friction occurs.",
+      "max_questions": 1
+    },
+    {
+      "dimension_id": "D2",
+      "dimension_kind": "DESIRED_OUTCOME",
+      "label": "desired smoother operating state",
+      "authority": "BOOKING",
+      "authority_quote": "want help making the process smoother",
+      "policy_key": null,
+      "why_open": "The desired improvement is explicit, but the operational result that would count as smoother is not.",
+      "max_questions": 1
+    }
+  ],
+  "signals_that_matter": [
+    {
+      "signal": "Linear publicly documents SOC 2 Type II, ISO 27001 and HIPAA/BAA support.",
+      "observation": "Baseline assurance certifications already exist and should not consume discovery time.",
+      "call_implication": "Do not lead with certification-readiness questions; find the residual enterprise-review work instead.",
+      "routes_to": [
+        "E1",
+        "R1"
+      ]
+    },
+    {
+      "signal": "Linear operates a Trust Center with compliance resources including SOC 2 and ISO material.",
+      "observation": "Standard evidence distribution already has a dedicated self-service surface.",
+      "call_implication": "Ask what still escapes the Trust Center and requires manual handling.",
+      "routes_to": [
+        "E2",
+        "R1"
+      ]
+    },
+    {
+      "signal": "Enterprise workspaces support SAML and SCIM 2.0 provisioning.",
+      "observation": "Common enterprise identity lifecycle questions already have documented answers.",
+      "call_implication": "Suppress generic SSO/provisioning discovery unless the prospect introduces a specific customer issue.",
+      "routes_to": [
+        "E3",
+        "R2"
+      ]
+    },
+    {
+      "signal": "Linear documents audit logs, IP/login restrictions and US/EU data storage options.",
+      "observation": "Several recurring enterprise control questions are already answerable from first-party material.",
+      "call_implication": "Focus on the review layer that still needs bespoke interpretation, evidence assembly or expert involvement.",
+      "routes_to": [
+        "E4",
+        "E5",
+        "R2"
+      ]
+    }
+  ],
+  "opportunity_hypotheses": [
+    {
+      "hypothesis": "One possibility worth testing is whether the remaining review friction sits in bespoke questionnaires or technical/control questions that standard Trust Center evidence does not answer.",
+      "dimension_id": "D1",
+      "confidence": "MEDIUM",
+      "why_it_is_worth_testing": "Linear already exposes substantial standard assurance material, yet the booking says enterprise reviews are increasing and the process needs improvement.",
+      "verification_question": "Where do reviews still consume manual time after customers have access to the Trust Center?",
+      "falsified_if": "The prospect says the friction sits elsewhere, such as internal routing or another process layer.",
+      "routes_to": [
+        "E2",
+        "R1"
+      ]
+    }
+  ],
+  "call_strategy": {
+    "opening_move": "Acknowledge the existing assurance stack and immediately locate where enterprise reviews still become manual.",
+    "first_10_minutes": [
+      "Locate the exact review-friction layer.",
+      "Define what a materially smoother process would change for the team."
+    ],
+    "avoid_early": [
+      "Do not ask whether Linear has SOC 2, ISO 27001, SAML or SCIM.",
+      "Do not assume the Trust Center is insufficient merely because reviews are increasing.",
+      "Do not introduce budget, procurement or stakeholder discovery without prospect/policy authority."
+    ]
+  },
+  "priority_questions": [
+    {
+      "question": "Where do enterprise security reviews still consume manual time despite the Trust Center: recurring questionnaires, evidence access, bespoke technical/control questions, customer calls, or somewhere else?",
+      "dimension_id": "D1",
+      "purpose": "Locate the actual review-friction layer rather than re-discovering public controls.",
+      "what_the_answer_changes": "Determines the operational problem worth diagnosing and whether the issue is evidence reuse, expert interruption, bespoke assurance or another workflow.",
+      "routes_to": [
+        "R1",
+        "U1"
+      ]
+    },
+    {
+      "question": "What would a materially smoother review process look like for your team: faster standard responses, more reusable evidence, fewer security/engineering interruptions, hands-on support for complex reviews, or something else?",
+      "dimension_id": "D2",
+      "purpose": "Define the target operating outcome without presupposing a service.",
+      "what_the_answer_changes": "Determines the relevant improvement path and what success should mean.",
+      "routes_to": [
+        "R2",
+        "U2"
+      ]
+    }
+  ],
+  "conditional_service_paths": [
+    {
+      "service_id": "SVC_ENTERPRISE_SECURITY",
+      "condition_to_confirm": "The prospect confirms recurring questionnaire, evidence, or customer-security-review workflow friction.",
+      "why_relevant_if_confirmed": "Matches enterprise sales security enablement and assurance workflow support.",
+      "do_not_assume": "Do not assume the Trust Center or questionnaires are the bottleneck before confirmation.",
+      "depends_on_dimensions": [
+        "D1",
+        "D2"
+      ],
+      "routes_to": [
+        "U1",
+        "U2"
+      ]
+    },
+    {
+      "service_id": "SVC_VCISO_ADVISORY",
+      "condition_to_confirm": "Reviews repeatedly expose broader control, governance or design questions requiring strategic remediation beyond review operations.",
+      "why_relevant_if_confirmed": "Could require broader advisory support.",
+      "do_not_assume": "Do not expand into vCISO advisory unless prospect answers expose a broader problem.",
+      "depends_on_dimensions": [
+        "D1"
+      ],
+      "routes_to": [
+        "U1"
+      ]
+    }
+  ],
+  "critical_unknowns": [
+    {
+      "unknown": "The exact layer of the enterprise security-review process that still creates manual work.",
+      "dimension_id": "D1",
+      "routes_to": [
+        "U1"
+      ]
+    },
+    {
+      "unknown": "The operational result Linear wants from making reviews smoother.",
+      "dimension_id": "D2",
+      "routes_to": [
+        "U2"
+      ]
+    }
+  ],
+  "expandable_blocks": {
+    "evidence": [
+      {
+        "id": "E1",
+        "title": "Assurance baseline",
+        "claims": [
+          "Linear documents SOC 2 Type II, ISO 27001 and HIPAA/BAA support."
+        ],
+        "sources": [
+          {
+            "url": "https://linear.app/docs/security",
+            "source_type": "FIRST_PARTY",
+            "supports": "baseline enterprise assurance"
+          }
+        ],
+        "used_for": [
+          "suppressing generic certification-readiness discovery"
+        ],
+        "not_used_for": [
+          "claiming every enterprise review is frictionless",
+          "claiming no security gaps exist"
+        ]
+      },
+      {
+        "id": "E2",
+        "title": "Trust Center",
+        "claims": [
+          "Linear operates a Trust Center with compliance resources and current assurance material."
+        ],
+        "sources": [
+          {
+            "url": "https://trust.linear.app/",
+            "source_type": "FIRST_PARTY",
+            "supports": "standard evidence-distribution surface"
+          }
+        ],
+        "used_for": [
+          "asking what review work remains after standard evidence is available"
+        ],
+        "not_used_for": [
+          "assuming the Trust Center is inadequate"
+        ]
+      },
+      {
+        "id": "E3",
+        "title": "Enterprise identity lifecycle controls",
+        "claims": [
+          "Linear supports SAML authentication and SCIM 2.0 provisioning for Enterprise workspaces."
+        ],
+        "sources": [
+          {
+            "url": "https://linear.app/docs/scim",
+            "source_type": "FIRST_PARTY",
+            "supports": "enterprise identity/provisioning controls"
+          }
+        ],
+        "used_for": [
+          "suppressing generic SSO/SCIM questions"
+        ],
+        "not_used_for": [
+          "assuming every workspace enables those controls"
+        ]
+      },
+      {
+        "id": "E4",
+        "title": "Auditability",
+        "claims": [
+          "Linear audit logs retain workspace events and can be queried through the API."
+        ],
+        "sources": [
+          {
+            "url": "https://linear.app/docs/audit-log",
+            "source_type": "FIRST_PARTY",
+            "supports": "auditability context"
+          }
+        ],
+        "used_for": [
+          "suppressing generic audit-log discovery"
+        ],
+        "not_used_for": [
+          "claiming audit evidence never causes customer questions"
+        ]
+      },
+      {
+        "id": "E5",
+        "title": "Access and data-control context",
+        "claims": [
+          "Linear documents Enterprise login/IP restrictions and US/EU data storage options."
+        ],
+        "sources": [
+          {
+            "url": "https://linear.app/docs/login-methods",
+            "source_type": "FIRST_PARTY",
+            "supports": "access-control context"
+          },
+          {
+            "url": "https://linear.app/docs/security",
+            "source_type": "FIRST_PARTY",
+            "supports": "data-residency context"
+          }
+        ],
+        "used_for": [
+          "suppressing already-answered baseline enterprise-control questions"
+        ],
+        "not_used_for": [
+          "inferring a specific customer's requirement"
+        ]
+      }
+    ],
+    "reasoning": [
+      {
+        "id": "R1",
+        "title": "Residual review friction is the diagnostic target",
+        "premises": [
+          "The booking says enterprise customer security reviews are increasing.",
+          "Linear already exposes substantial standard assurance material through public docs and a Trust Center."
+        ],
+        "observation": "The high-value question is where reviews still require manual work beyond reusable standard evidence.",
+        "confidence": "HIGH",
+        "linked_evidence_ids": [
+          "E1",
+          "E2"
+        ],
+        "not_a_claim_of": [
+          "a specific questionnaire bottleneck",
+          "a Trust Center failure"
+        ]
+      },
+      {
+        "id": "R2",
+        "title": "Define smoother operationally",
+        "premises": [
+          "The booking explicitly asks to make the process smoother.",
+          "Several common enterprise-control questions already have documented answers."
+        ],
+        "observation": "The consultant should define the target operating change—speed, reuse, reduced expert interruption, complex-review support or another result—before proposing a service.",
+        "confidence": "HIGH",
+        "linked_evidence_ids": [
+          "E3",
+          "E4",
+          "E5"
+        ],
+        "not_a_claim_of": [
+          "any one outcome already being desired"
+        ]
+      }
+    ],
+    "unknowns": [
+      {
+        "id": "U1",
+        "title": "Review friction point",
+        "dimension_id": "D1",
+        "why_unknown": "The booking says reviews are increasing but not where work accumulates.",
+        "what_would_resolve_it": "A direct answer identifying the recurring manual review layer.",
+        "blocked_conclusions": [
+          "questionnaire workflow",
+          "evidence-access problem",
+          "technical-review escalation",
+          "customer-call burden"
+        ]
+      },
+      {
+        "id": "U2",
+        "title": "Desired smoother state",
+        "dimension_id": "D2",
+        "why_unknown": "The booking asks for a smoother process without defining the target operating state.",
+        "what_would_resolve_it": "A direct answer describing what should become faster, reusable or less interruptive.",
+        "blocked_conclusions": [
+          "enterprise-security service shape",
+          "advisory expansion",
+          "success criteria"
+        ]
+      }
+    ]
+  },
+  "premium_brief_markdown": "Linear’s public material removes a large amount of low-value first-call discovery. It already documents SOC 2 Type II, ISO 27001 and HIPAA/BAA support [E1], operates a Trust Center with standard assurance material [E2], supports Enterprise SAML and SCIM [E3], and documents audit logs plus access and data-residency controls [E4][E5]. The booking therefore should not trigger a generic “tell me about your security program” conversation. The useful problem is where enterprise customer security reviews still create manual effort despite that existing evidence stack.\n\nThe first question should locate the residual friction precisely: recurring questionnaires, evidence access, bespoke technical/control questions, customer security calls, or another part of the review workflow [U1]. That framing matters because each answer points to a different operational problem. Rewriting the same questionnaires suggests reuse and response-system friction. Repeated security/engineering participation suggests an expert-interruption bottleneck. Customers asking for material not covered by the Trust Center suggests a recurring evidence gap. None of those should be assumed before the prospect says so [R1].\n\nThe second question should define what “smoother” means operationally [U2]. Faster standard responses, reusable evidence, fewer security-team interruptions, hands-on support for complex reviews and a broader governance fix are not interchangeable outcomes. The consultant should leave the call knowing which change matters and only then map it to a service [R2]. Enterprise Sales Security Enablement becomes relevant if the prospect confirms recurring questionnaire, evidence or customer-review workflow friction. Advisory vCISO becomes relevant only if reviews repeatedly expose broader control or governance work that sits beyond the review process itself.\n\nAvoid asking whether Linear has SOC 2, ISO, SAML, SCIM or audit logs; those facts are already available publicly. Do not assume the Trust Center is failing because review volume is rising. Do not introduce budget, procurement, stakeholder mapping or a deadline just because those are common sales questions; the booking does not expose those dimensions and consultant policy does not require them. The consultant’s advantage here is restraint: demonstrate that the obvious assurance baseline is already understood, spend the conversation on the two unresolved operating questions, and let the prospect’s answers earn any deeper branch. The goal is a bounded operating diagnosis, not a tour of Linear's security program."
+}

@@ -1,0 +1,84 @@
+{
+  "fixture_id": "premium_gauntlet_resend_20260925_01",
+  "fixture_type": "real_company_sparse_booking",
+  "consultant_fixture": {
+    "name": "Chase Miller",
+    "firm": "vCISO.com",
+    "note": "Public-fixture only; not a claim about private consultant policy.",
+    "services": [
+      "SVC_VCISO_ADVISORY",
+      "SVC_VCISO_MANAGED",
+      "SVC_SOC2",
+      "SVC_HIPAA",
+      "SVC_PENTEST",
+      "SVC_ENTERPRISE_SECURITY"
+    ]
+  },
+  "prospect": {
+    "company": "Resend",
+    "domain": "https://resend.com",
+    "booking_text": "Interested in discussing API security."
+  },
+  "high_signal_first_party_sources": [
+    {
+      "url": "https://resend.com/enterprise",
+      "expected": [
+        "REST API / SMTP / SDK enterprise surface",
+        "MCP agent interface",
+        "99.99% uptime SLA"
+      ]
+    },
+    {
+      "url": "https://resend.com/docs/api-reference/introduction",
+      "expected": [
+        "REST API",
+        "HTTPS enforced",
+        "Bearer API-key authentication"
+      ]
+    },
+    {
+      "url": "https://resend.com/docs/knowledge-base/forward-emails-with-resend-inbound",
+      "expected": [
+        "webhook signing secret verification"
+      ]
+    },
+    {
+      "url": "https://resend.com/security",
+      "expected": [
+        "SOC 2",
+        "third-party audits",
+        "TLS 1.3+",
+        "HIPAA in progress"
+      ]
+    },
+    {
+      "url": "https://resend.com/legal/dpa",
+      "expected": [
+        "security governance and safeguards"
+      ]
+    },
+    {
+      "url": "https://resend.com/handbook/engineering/what-is-our-tech-stack",
+      "expected": [
+        "Svix used for customer webhooks"
+      ]
+    }
+  ],
+  "forbidden_conclusions": [
+    "Resend has an API vulnerability.",
+    "Resend needs penetration testing.",
+    "HIPAA caused the booking.",
+    "OAuth or MCP caused the booking.",
+    "The prospect has urgent security issues.",
+    "The booking contact has buyer or decision authority."
+  ],
+  "expected_unknowns": [
+    "actual objective",
+    "exact API/security scope",
+    "trigger/timing",
+    "decision authority",
+    "budget",
+    "engagement shape",
+    "compliance relevance"
+  ]
+}

@@ -1,0 +1,344 @@
+{
+  "schema_version": "CLARIS_PREMIUM_PREPARE_V3_6",
+  "executive_readout": "Resend already publishes a substantial security and assurance baseline, so a first call about “API security” should not begin with generic maturity discovery. Its public surface includes scoped API keys, OAuth 2.1 + PKCE, signed webhooks, a remote MCP server, SOC 2 Type II and recurring third-party testing. The useful uncertainty is narrower: which API/security boundary the prospect actually wants examined, and what result they want from outside help. Public evidence can make those two questions unusually precise, but it does not establish a vulnerability, a project trigger, urgency, buyer authority or a confirmed service need.",
+  "open_dimensions": [
+    {
+      "dimension_id": "D1",
+      "dimension_kind": "SUBJECT_SCOPE",
+      "label": "exact API/security surface",
+      "authority": "BOOKING",
+      "authority_quote": "API security",
+      "policy_key": null,
+      "why_open": "The booking names API security but not the exact technical boundary.",
+      "max_questions": 1
+    },
+    {
+      "dimension_id": "D2",
+      "dimension_kind": "DESIRED_OUTCOME",
+      "label": "desired external-help outcome",
+      "authority": "BOOKING",
+      "authority_quote": "Interested in discussing API security.",
+      "policy_key": null,
+      "why_open": "The booking requests a discussion but does not say whether the wanted result is architecture guidance, independent testing, assurance support or another outcome.",
+      "max_questions": 1
+    }
+  ],
+  "signals_that_matter": [
+    {
+      "signal": "Resend documents Bearer API keys with full-access or send-only permission scope, alongside OAuth 2.1 + PKCE with dynamic client registration.",
+      "observation": "The access surface contains materially different credential and delegated-authorization models.",
+      "call_implication": "Ask which access model is actually in scope instead of treating “API security” as one generic surface.",
+      "routes_to": [
+        "E1",
+        "E2",
+        "R1"
+      ]
+    },
+    {
+      "signal": "Resend documents endpoint-specific webhook signing secrets and Svix signature headers for authenticity and replay protection.",
+      "observation": "Inbound webhook verification is a distinct trust boundary from API-key or OAuth authorization.",
+      "call_implication": "If webhooks are in scope, skip “do you sign webhooks?” and establish what part of verification or consumption needs review.",
+      "routes_to": [
+        "E3",
+        "R1"
+      ]
+    },
+    {
+      "signal": "Resend operates a hosted remote MCP server with OAuth and Bearer-token connection options.",
+      "observation": "Agent-facing access adds another concrete delegated-access surface.",
+      "call_implication": "Keep MCP/agent access among the scoping options without implying it caused the booking or is insecure.",
+      "routes_to": [
+        "E4",
+        "R2"
+      ]
+    },
+    {
+      "signal": "Resend publicly documents SOC 2 Type II, recurring third-party penetration testing, AES-256 at rest and TLS 1.3+ in transit.",
+      "observation": "Basic assurance and security-program maturity are already materially evidenced.",
+      "call_implication": "Do not waste call time on baseline SOC 2/maturity questions; if independent validation is wanted, determine what additional boundary or decision it must support.",
+      "routes_to": [
+        "E5",
+        "R2"
+      ]
+    }
+  ],
+  "opportunity_hypotheses": [
+    {
+      "hypothesis": "One possibility worth testing is whether the discussion concerns independent validation of a bounded API-access surface rather than broad security-program help.",
+      "dimension_id": "D2",
+      "confidence": "MEDIUM",
+      "why_it_is_worth_testing": "The booking is specific to API security while the public baseline already shows established program-level assurance.",
+      "verification_question": "What result do you need from outside help here: architecture guidance, independent technical validation, customer assurance, or something else?",
+      "falsified_if": "The prospect says the discussion is broader security-program or governance work.",
+      "routes_to": [
+        "E5",
+        "R2"
+      ]
+    }
+  ],
+  "call_strategy": {
+    "opening_move": "Use the public baseline to skip generic maturity discovery and resolve the exact API/security boundary first.",
+    "first_10_minutes": [
+      "Identify the technical surface behind “API security.”",
+      "Define what result the prospect wants from external help."
+    ],
+    "avoid_early": [
+      "Do not imply OAuth, MCP or webhooks caused the booking.",
+      "Do not infer a vulnerability, urgency, budget or buyer authority.",
+      "Do not lead with SOC 2 readiness."
+    ]
+  },
+  "priority_questions": [
+    {
+      "question": "Which surface is actually in scope: API-key permissions/scoping, OAuth flows, webhook verification, MCP/agent access, or something else?",
+      "dimension_id": "D1",
+      "purpose": "Resolve the technical boundary behind the booking language.",
+      "what_the_answer_changes": "Determines what architecture or validation problem is worth discussing and prevents irrelevant discovery.",
+      "routes_to": [
+        "R1",
+        "U1"
+      ]
+    },
+    {
+      "question": "What do you need from external help here: architecture/security-design guidance, independent technical validation/testing, customer-assurance documentation, or something else?",
+      "dimension_id": "D2",
+      "purpose": "Resolve the desired engagement outcome without presupposing a service.",
+      "what_the_answer_changes": "Determines which consultant capability, if any, becomes relevant.",
+      "routes_to": [
+        "R2",
+        "U2"
+      ]
+    }
+  ],
+  "conditional_service_paths": [
+    {
+      "service_id": "SVC_VCISO_ADVISORY",
+      "condition_to_confirm": "The prospect wants architecture/security-design guidance or a bounded expert opinion.",
+      "why_relevant_if_confirmed": "Matches advisory security architecture support.",
+      "do_not_assume": "Do not infer advisory need from public architecture alone.",
+      "depends_on_dimensions": [
+        "D1",
+        "D2"
+      ],
+      "routes_to": [
+        "U1",
+        "U2"
+      ]
+    },
+    {
+      "service_id": "SVC_PENTEST",
+      "condition_to_confirm": "The prospect wants hands-on independent validation/testing of a bounded API/security surface.",
+      "why_relevant_if_confirmed": "Matches technical validation/testing.",
+      "do_not_assume": "Do not label the engagement a pentest until testing is explicitly requested.",
+      "depends_on_dimensions": [
+        "D1",
+        "D2"
+      ],
+      "routes_to": [
+        "U1",
+        "U2"
+      ]
+    },
+    {
+      "service_id": "SVC_ENTERPRISE_SECURITY",
+      "condition_to_confirm": "The prospect explicitly wants customer-facing assurance or reusable security-review evidence.",
+      "why_relevant_if_confirmed": "Matches enterprise sales security enablement.",
+      "do_not_assume": "Do not infer a customer-assurance problem from enterprise positioning.",
+      "depends_on_dimensions": [
+        "D2"
+      ],
+      "routes_to": [
+        "U2"
+      ]
+    }
+  ],
+  "critical_unknowns": [
+    {
+      "unknown": "The exact API/security surface under discussion.",
+      "dimension_id": "D1",
+      "routes_to": [
+        "U1"
+      ]
+    },
+    {
+      "unknown": "The result the prospect wants from external help.",
+      "dimension_id": "D2",
+      "routes_to": [
+        "U2"
+      ]
+    }
+  ],
+  "expandable_blocks": {
+    "evidence": [
+      {
+        "id": "E1",
+        "title": "API key permission surface",
+        "claims": [
+          "Resend documents API keys with full-access or send-only permission scope."
+        ],
+        "sources": [
+          {
+            "url": "https://resend.com/docs/api-reference/api-keys/create-api-key",
+            "source_type": "FIRST_PARTY",
+            "supports": "API key permission scope"
+          }
+        ],
+        "used_for": [
+          "making API-key scope a concrete D1 option"
+        ],
+        "not_used_for": [
+          "claiming key misuse",
+          "claiming a vulnerability"
+        ]
+      },
+      {
+        "id": "E2",
+        "title": "OAuth delegated authorization",
+        "claims": [
+          "Resend implements OAuth 2.1 + PKCE, scoped access tokens and dynamic client registration."
+        ],
+        "sources": [
+          {
+            "url": "https://resend.com/changelog/oauth-support",
+            "source_type": "FIRST_PARTY",
+            "supports": "OAuth delegated-access surface"
+          }
+        ],
+        "used_for": [
+          "making OAuth a concrete D1 option"
+        ],
+        "not_used_for": [
+          "claiming OAuth caused the booking",
+          "claiming misconfiguration"
+        ]
+      },
+      {
+        "id": "E3",
+        "title": "Webhook verification",
+        "claims": [
+          "Resend documents endpoint-specific signing secrets and Svix signature/timestamp/id headers for webhook verification."
+        ],
+        "sources": [
+          {
+            "url": "https://resend.com/docs/webhooks/verify-webhooks-requests",
+            "source_type": "FIRST_PARTY",
+            "supports": "signed webhook verification"
+          }
+        ],
+        "used_for": [
+          "making inbound webhook verification a concrete D1 option"
+        ],
+        "not_used_for": [
+          "claiming a webhook vulnerability"
+        ]
+      },
+      {
+        "id": "E4",
+        "title": "Remote MCP access",
+        "claims": [
+          "Resend provides a hosted remote MCP server with OAuth and Bearer-token connection options."
+        ],
+        "sources": [
+          {
+            "url": "https://resend.com/changelog/remote-mcp-server",
+            "source_type": "FIRST_PARTY",
+            "supports": "agent-facing access surface"
+          }
+        ],
+        "used_for": [
+          "keeping MCP/agent access as a possible D1 surface"
+        ],
+        "not_used_for": [
+          "claiming agent access created risk or caused the booking"
+        ]
+      },
+      {
+        "id": "E5",
+        "title": "Existing assurance baseline",
+        "claims": [
+          "Resend publicly documents SOC 2 Type II, recurring third-party penetration testing, AES-256 at rest and TLS 1.3+ in transit."
+        ],
+        "sources": [
+          {
+            "url": "https://resend.com/security/gdpr",
+            "source_type": "FIRST_PARTY",
+            "supports": "security assurance baseline"
+          }
+        ],
+        "used_for": [
+          "suppressing generic maturity/SOC 2 discovery"
+        ],
+        "not_used_for": [
+          "claiming the platform is secure in every respect",
+          "claiming additional validation is unnecessary"
+        ]
+      }
+    ],
+    "reasoning": [
+      {
+        "id": "R1",
+        "title": "API security must be scoped across distinct trust boundaries",
+        "premises": [
+          "The booking says API security.",
+          "Resend publicly exposes API keys, OAuth and signed webhook surfaces."
+        ],
+        "observation": "The first useful move is to determine which materially different trust boundary the prospect means.",
+        "confidence": "HIGH",
+        "linked_evidence_ids": [
+          "E1",
+          "E2",
+          "E3"
+        ],
+        "not_a_claim_of": [
+          "a vulnerability",
+          "a booking cause"
+        ]
+      },
+      {
+        "id": "R2",
+        "title": "Outcome should be diagnosed before service selection",
+        "premises": [
+          "The booking does not identify a deliverable.",
+          "Resend already publishes a substantial assurance baseline and multiple technical access surfaces."
+        ],
+        "observation": "The same “API security” topic could legitimately lead to architecture guidance, hands-on validation, customer assurance, or no fit; service selection must wait for the prospect's desired outcome.",
+        "confidence": "HIGH",
+        "linked_evidence_ids": [
+          "E4",
+          "E5"
+        ],
+        "not_a_claim_of": [
+          "confirmed pentest need",
+          "confirmed advisory need"
+        ]
+      }
+    ],
+    "unknowns": [
+      {
+        "id": "U1",
+        "title": "Technical scope",
+        "dimension_id": "D1",
+        "why_unknown": "The booking names API security without naming the relevant boundary.",
+        "what_would_resolve_it": "A direct answer identifying the surface or end-to-end path in scope.",
+        "blocked_conclusions": [
+          "architecture-review scope",
+          "testing scope",
+          "OAuth/webhook/MCP relevance"
+        ]
+      },
+      {
+        "id": "U2",
+        "title": "Desired outcome",
+        "dimension_id": "D2",
+        "why_unknown": "The booking requests a discussion without defining what external help should produce.",
+        "what_would_resolve_it": "A direct answer describing the desired result or artifact.",
+        "blocked_conclusions": [
+          "advisory fit",
+          "pentest fit",
+          "enterprise-assurance fit"
+        ]
+      }
+    ]
+  },
+  "premium_brief_markdown": "Resend’s public documentation already answers many questions that would otherwise waste a first call. It publishes SOC 2 Type II, recurring third-party penetration testing, AES-256 encryption at rest and TLS 1.3+ in transit [E5]. The call therefore should not begin by asking whether the company has a serious security baseline. The booking says only “Interested in discussing API security,” so the productive unknowns are narrower: which API/security boundary the prospect means, and what result they want from outside help.\n\nThe public access surface is specific enough to make that scoping question useful. Resend documents Bearer API keys with full-access or send-only permissions [E1]. It also supports OAuth 2.1 + PKCE with scoped tokens and dynamic client registration [E2]. Those are different credential and delegated-authorization models, not one generic API-authentication problem. Resend separately documents signed webhook verification using endpoint-specific signing secrets and Svix signature metadata [E3], which creates an inbound trust boundary distinct from API-key or OAuth access. It also exposes a hosted remote MCP server with OAuth and Bearer-token connection options [E4]. None of these facts establishes a weakness or explains why the prospect booked the call; they simply let the consultant name concrete surfaces without asking generic questions [R1].\n\nThe first question should therefore resolve scope: API-key permissions/scoping, OAuth flows, webhook verification, MCP/agent access, or another surface [U1]. Once that is clear, the second question should resolve the wanted outcome: architecture/security-design guidance, independent technical validation/testing, customer-assurance documentation, or something else [U2]. That answer—not public research—determines whether Advisory vCISO, Penetration Testing, Enterprise Sales Security Enablement, or no current service path is appropriate [R2].\n\nAvoid filling the call with “why now,” budget, stakeholder or generic maturity questions; the booking does not authorize them and consultant policy does not require them. Do not turn OAuth, MCP or webhook releases into a causal story. If the prospect later introduces a concrete access-control concern, customer assurance requirement, deadline or commercial constraint, those answers can earn deeper follow-up branches. Until then, the consultant’s advantage is precision: arrive knowing the documented architecture and assurance baseline, ask only the two unresolved questions that change the engagement, and let the prospect’s answers determine what becomes relevant next."
+}

@@ -1,0 +1,44 @@
+{
+  "schema_version": "CLARIS_MAKE_PUBLISHER_V1",
+  "operation": "brief_publish_ready",
+  "method": "POST",
+  "path": "/api/delivery/package",
+  "headers": {
+    "Authorization": "Bearer <CLARIS_MAKE_KEY>",
+    "Content-Type": "application/json",
+    "X-Claris-Delivery": "brief_publish_ready"
+  },
+  "required_inputs": [
+    "opportunity_id",
+    "consultant_id",
+    "consultant_delivery_email",
+    "company",
+    "premium_prepare_json",
+    "discovery_plan_json",
+    "consultant_sot_json"
+  ],
+  "optional_inputs": [
+    "consultant_first_name",
+    "prospect_name",
+    "prospect_role",
+    "meeting_time",
+    "ttl_days"
+  ],
+  "response_contract": {
+    "first_publish_status": 201,
+    "identical_retry_status": 200,
+    "fields": [
+      "publication_id",
+      "reused",
+      "notification_dedupe_key",
+      "brief",
+      "delivery"
+    ]
+  },
+  "receipt_key": "notification_dedupe_key",
+  "scenario_settings": {
+    "keep_data_confidential": true,
+    "rely_on_incomplete_execution_payloads": false,
+    "persist_private_url_or_token": false
+  }
+}

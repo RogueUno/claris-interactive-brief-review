@@ -1,0 +1,78 @@
+{
+  "schema_version": "CLARIS_PREMIUM_PREPARE_V3_6",
+  "executive_readout": "Supabase already publishes a mature security baseline, including SOC 2 Type 2, ISO 27001 and a documented shared-responsibility boundary. The booking is more specific: VP Engineering owns an evaluation for an enterprise OAuth 2.1 rollout this quarter and wants an independent review of the OAuth/RLS boundary before launch. Public docs make one point especially important for scoping: OAuth scopes govern identity claims, while database access is enforced through Row Level Security, including the OAuth client_id claim. The call should therefore avoid baseline-compliance discovery and resolve the exact boundary to test, the review deliverable that clears launch, and the latest date findings must be available.",
+  "open_dimensions": [
+    {
+      "dimension_id": "D1",
+      "dimension_kind": "SUBJECT_SCOPE",
+      "label": "exact OAuth/RLS review scope",
+      "authority": "BOOKING",
+      "authority_quote": "exact test scope",
+      "policy_key": null,
+      "why_open": "The booking explicitly says the exact test scope is not fixed.",
+      "max_questions": 1
+    },
+    {
+      "dimension_id": "D2",
+      "dimension_kind": "DESIRED_OUTCOME",
+      "label": "independent review deliverable",
+      "authority": "BOOKING",
+      "authority_quote": "independent security review",
+      "policy_key": null,
+      "why_open": "Independent review is explicit, but the artifact and validation depth needed to clear rollout are not.",
+      "max_questions": 1
+    },
+    {
+      "dimension_id": "D3",
+      "dimension_kind": "TIMING",
+      "label": "review completion deadline",
+      "authority": "BOOKING",
+      "authority_quote": "haven't fixed the review deadline",
+      "policy_key": null,
+      "why_open": "The rollout is this quarter but the review deadline is explicitly unresolved.",
+      "max_questions": 1
+    }
+  ],
+  "signals_that_matter": [
+    {
+      "signal": "Supabase Auth can act as an OAuth 2.1/OIDC provider using Authorization Code + PKCE, with dynamic client registration.",
+      "observation": "The review can be scoped around a concrete delegated-authentication flow rather than generic API security.",
+      "call_implication": "Establish whether authorization flow, client registration, token lifecycle, or the complete delegated-access boundary is in scope.",
+      "routes_to": ["E1","R1"]},
+    {"signal":"Supabase documents that OAuth scopes do not govern database access; RLS policies control data access and can use the OAuth client_id claim.","observation":"The OAuth/RLS boundary is materially broader than scope-string review.","call_implication":"A review that stops at OAuth scopes could miss the database authorization boundary the booking explicitly names.","routes_to":["E2","R1"]},
+    {"signal":"Supabase is SOC 2 Type 2 compliant and ISO 27001 certified, with annual SOC 2 assessment.","observation":"Baseline assurance readiness is already established publicly.","call_implication":"Do not spend the call on generic certification maturity; focus on the rollout-specific review.","routes_to":["E3","R2"]},
+    {"signal":"Supabase's shared-responsibility model places customer configuration, project region choices and application controls partly outside Supabase's own compliance boundary.","observation":"Review scope needs to distinguish platform-provided controls from rollout-specific configuration and RLS policy responsibility.","call_implication":"Clarify which side of the shared-responsibility boundary the independent review must validate.","routes_to":["E3","E4","R2"]}
+  ],
+  "opportunity_hypotheses":[],
+  "call_strategy":{"opening_move":"Confirm the rollout context already provided, then resolve the exact OAuth/RLS boundary rather than re-establishing baseline security posture.","first_10_minutes":["Lock the technical review boundary.","Define what independent review must produce to clear launch.","Fix the latest useful review-completion date inside the stated quarter."],"avoid_early":["Do not lead with SOC 2 or ISO readiness questions.","Do not ask who owns the evaluation; the booking already says VP Engineering owns it.","Do not infer a vulnerability from the rollout or OAuth/RLS architecture."]},
+  "priority_questions":[
+    {"question":"Which exact boundary should the independent review cover: OAuth authorization/PKCE and client registration, token issuance/refresh, RLS enforcement for OAuth clients, or the end-to-end path?","dimension_id":"D1","purpose":"Define the technical review boundary.","what_the_answer_changes":"Determines architecture-review versus hands-on validation scope and prevents testing the wrong layer.","routes_to":["R1","U1"]},
+    {"question":"What does the review need to produce to clear rollout: architecture findings, hands-on validation and a test report, remediation/retest, customer-facing assurance, or another deliverable?","dimension_id":"D2","purpose":"Define the required review output.","what_the_answer_changes":"Determines the relevant service path and evidence depth.","routes_to":["R2","U2"]},
+    {"question":"What is the latest date findings need to be in hand for this quarter's rollout to stay on track?","dimension_id":"D3","purpose":"Turn the explicitly unresolved review deadline into a usable delivery constraint.","what_the_answer_changes":"Determines delivery sequencing and whether remediation/retest can fit before launch.","routes_to":["R3","U3"]}
+  ],
+  "conditional_service_paths":[
+    {"service_id":"SVC_VCISO_ADVISORY","condition_to_confirm":"The prospect wants architecture/design review and a bounded expert opinion on OAuth/RLS configuration.","why_relevant_if_confirmed":"Matches strategic security architecture guidance.","do_not_assume":"Do not assume advisory if hands-on validation is required.","depends_on_dimensions":["D1","D2"],"routes_to":["U1","U2"]},
+    {"service_id":"SVC_PENTEST","condition_to_confirm":"The prospect wants independent hands-on validation/testing of the OAuth/RLS boundary.","why_relevant_if_confirmed":"Matches technical validation/testing.","do_not_assume":"Do not call it a pentest unless the desired review depth confirms testing.","depends_on_dimensions":["D1","D2","D3"],"routes_to":["U1","U2","U3"]},
+    {"service_id":"SVC_ENTERPRISE_SECURITY","condition_to_confirm":"The required deliverable includes customer-facing assurance or evidence for enterprise buyers.","why_relevant_if_confirmed":"Matches enterprise security assurance enablement.","do_not_assume":"Do not infer a customer-review requirement from the word enterprise rollout alone.","depends_on_dimensions":["D2"],"routes_to":["U2"]}
+  ],
+  "critical_unknowns":[
+    {"unknown":"Exact OAuth/RLS boundary to review.","dimension_id":"D1","routes_to":["U1"]},
+    {"unknown":"Exact independent-review deliverable required to clear rollout.","dimension_id":"D2","routes_to":["U2"]},
+    {"unknown":"Latest useful completion date for findings inside the stated quarter.","dimension_id":"D3","routes_to":["U3"]}
+  ],
+  "expandable_blocks":{"evidence":[
+    {"id":"E1","title":"OAuth 2.1 provider surface","claims":["Supabase Auth supports OAuth 2.1/OIDC, Authorization Code + PKCE and dynamic client registration."],"sources":[{"url":"https://supabase.com/docs/guides/auth/oauth-server","source_type":"FIRST_PARTY","supports":"OAuth 2.1 provider capabilities"}],"used_for":["sharpening candidate technical scope"],"not_used_for":["claiming OAuth is vulnerable","claiming OAuth caused the booking"]},
+    {"id":"E2","title":"OAuth token to RLS authorization boundary","claims":["Supabase states OAuth scopes govern OIDC user information, not database access; RLS controls database/API access and can use client_id."],"sources":[{"url":"https://supabase.com/docs/guides/auth/oauth-server/token-security","source_type":"FIRST_PARTY","supports":"RLS enforcement for OAuth clients"}],"used_for":["showing why OAuth and RLS must be scoped together if relevant"],"not_used_for":["claiming existing RLS policies are wrong"]},
+    {"id":"E3","title":"Assurance baseline","claims":["Supabase is SOC 2 Type 2 compliant and ISO 27001 certified; SOC 2 is assessed annually."],"sources":[{"url":"https://supabase.com/docs/guides/security/soc-2-compliance","source_type":"FIRST_PARTY","supports":"SOC 2 baseline"},{"url":"https://supabase.com/docs/guides/security","source_type":"FIRST_PARTY","supports":"ISO 27001 baseline"}],"used_for":["suppressing generic certification discovery"],"not_used_for":["claiming the rollout is secure","claiming independent review is unnecessary"]},
+    {"id":"E4","title":"Shared responsibility","claims":["Supabase distinguishes platform controls from customer responsibilities, including configuration and regional choices."],"sources":[{"url":"https://supabase.com/docs/guides/security/soc-2-compliance","source_type":"FIRST_PARTY","supports":"shared responsibility boundary"}],"used_for":["clarifying which side of the boundary the review should validate"],"not_used_for":["claiming customer misconfiguration"]}
+  ],"reasoning":[
+    {"id":"R1","title":"Scope must include authorization, not only identity protocol","premises":["Booking names the OAuth/RLS boundary.","Supabase states OAuth scopes do not govern database access; RLS does."],"observation":"If the prospect wants end-to-end authorization assurance, scope must account for both delegated OAuth flow and RLS enforcement.","confidence":"HIGH","linked_evidence_ids":["E1","E2"],"not_a_claim_of":["a defect","a cross-tenant vulnerability"]},
+    {"id":"R2","title":"Independent review depth is still unresolved","premises":["Booking asks for an independent security review.","Supabase already has a substantial assurance baseline."],"observation":"The call should define whether 'independent review' means architecture opinion, hands-on technical validation, or customer-facing assurance rather than defaulting to readiness work.","confidence":"HIGH","linked_evidence_ids":["E3"],"not_a_claim_of":["a missing certification","a required pentest"]},
+    {"id":"R3","title":"Timing is authorized by the booking","premises":["Booking says rollout is this quarter.","Booking explicitly says the review deadline is not fixed."],"observation":"One precise deadline question is warranted because delivery timing is prospect-introduced and unresolved.","confidence":"HIGH","linked_evidence_ids":[],"not_a_claim_of":["urgency beyond the stated rollout"]}
+  ],"unknowns":[
+    {"id":"U1","title":"Review boundary","dimension_id":"D1","why_unknown":"Booking says exact test scope is not fixed.","what_would_resolve_it":"Direct selection of the OAuth/RLS layers that must be reviewed.","blocked_conclusions":["architecture-only review","hands-on testing scope"]},
+    {"id":"U2","title":"Review deliverable","dimension_id":"D2","why_unknown":"Independent review is requested but output depth is not specified.","what_would_resolve_it":"Direct description of the artifact/result needed to clear rollout.","blocked_conclusions":["advisory fit","pentest fit","enterprise assurance fit"]},
+   {"id":"U3","title":"Completion deadline","dimension_id":"D3","why_unknown":"Booking explicitly says the deadline is not fixed.","what_would_resolve_it":"Latest useful date for findings before launch.","blocked_conclusions":["delivery sequence","retest feasibility"]}
+  ]},
+  "premium_brief_markdown":"Supabase's public documentation already removes several low-value questions. The platform is SOC 2 Type 2 compliant, ISO 27001 certified, and operates a documented shared-responsibility model. The booking is more specific: VP Engineering owns the evaluation for an enterprise OAuth 2.1 rollout this quarter and wants an independent review of the OAuth/RLS boundary before launch. The useful work is therefore not baseline maturity discovery. It is fixing the review boundary, the review output, and the delivery deadline.\n\nSupabase Auth can act as an OAuth 2.1/OIDC provider using Authorization Code + PKCE and dynamic client registration [E1]. More importantly, Supabase states that OAuth scopes govern OIDC identity information, not database access; Row Level Security controls database/API access and can use the OAuth client_id claim [E2][R1]. For this booking, that makes the phrase 'OAuth/RLS boundary' technically meaningful: a review focused only on OAuth scopes could miss the authorization boundary the prospect explicitly wants examined.\n\nThe first call should resolve three things. First, which exact path needs independent review: OAuth authorization/PKCE and client registration, token issuance/refresh, RLS enforcement for OAuth clients, or the end-to-end chain [U1]. Second, what 'independent security review' must produce to clear rollout: architecture findings, hands-on technical validation and a report, remediation/retest, customer-facing assurance, or another artifact [U2]. Third, because the prospect explicitly says the review deadline is not fixed, establish the latest date findings need to be available for this quarter's launch to remain viable [U3].\n\nDo not spend time asking whether Supabase has SOC 2 or ISO 27001; first-party documentation already answers that [E3]. Do not ask who owns the evaluation; the booking already says VP Engineering does. Do not infer a vulnerability from the OAuth/RLS architecture or the launch. The shared-responsibility model matters only for scoping: distinguish what Supabase provides from the rollout-specific OAuth/RLS configuration and application controls the review must validate [E4][R2].\n\nService fit should remain conditional. Architecture/design review can map to Advisory vCISO. Hands-on independent validation can map to Penetration Testing. Customer-facing assurance can map to Enterprise Sales Security Enablement. The correct path depends on the three answers above, not on public research alone. The consultant should leave the call with a bounded review plan, not a generic security checklist."
+}

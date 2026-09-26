@@ -1,0 +1,76 @@
+{
+  "schema_version": "CLARIS_PREMIUM_ACCEPTANCE_V3_5",
+  "fixture_id": "premium_gauntlet_resend_v2",
+  "main_brief": {
+    "target_words": [
+      420,
+      600
+    ],
+    "signals_exact": 4,
+    "questions_exact": 2,
+    "hypotheses_min": 0,
+    "hypotheses_max": 2,
+    "allowed_dimensions": [
+      "TECHNICAL_SCOPE",
+      "DESIRED_OUTCOME"
+    ]
+  },
+  "dimension_gate": {
+    "rule": "Only booking/prospect evidence creates discovery dimensions; public research may only sharpen admitted dimensions.",
+    "required_dimensions": [
+      "TECHNICAL_SCOPE",
+      "DESIRED_OUTCOME"
+    ],
+    "forbidden_without_booking_support": [
+      "BUDGET",
+      "TIMING",
+      "URGENCY",
+      "BUYER_AUTHORITY",
+      "STAKEHOLDER_MAP",
+      "PROCUREMENT",
+      "INTERNAL_RESOURCES",
+      "MATURITY",
+      "COMPLIANCE_DRIVER",
+      "BUSINESS_TRIGGER",
+      "PRIOR_TESTING"
+    ]
+  },
+  "signal_priority": [
+    "credential/access models",
+    "webhook/inbound trust boundary",
+    "agent/MCP surface",
+    "existing assurance/testing baseline"
+  ],
+  "hard_failures": [
+    "public_evidence_as_prospect_intent",
+    "invented_vulnerability",
+    "invented_business_trigger",
+    "invented_identity_or_buyer_role",
+    "generic_discovery_dimension",
+    "service_as_confirmed_recommendation",
+    "main_fact_without_evidence_route",
+    "inference_without_reasoning_route",
+    "unknown_without_unknown_route",
+    "dormant_hipaa_in_main_without_booking_relevance",
+    "low_value_technical_trivia_displacing_higher_value_signal",
+    "substantial_repetition"
+  ],
+  "provenance": {
+    "evidence_blocks_require": [
+      "source_url",
+      "admitted_facts",
+      "used_for",
+      "not_used_for"
+    ],
+    "reasoning_blocks_require": [
+      "premises",
+      "bounded_observation",
+      "not_a_claim_of"
+    ],
+    "unknown_blocks_require": [
+      "why_unknown",
+      "what_resolves",
+      "blocked_conclusions"
+    ]
+  }
+}
