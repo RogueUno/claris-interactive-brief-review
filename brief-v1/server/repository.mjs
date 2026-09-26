@@ -13,21 +13,79 @@ function assertId(value, code) {
 }
 function cloneJson(value) { return JSON.parse(JSON.stringify(value)); }
 
+function validateCreateInput({ consultantId, company, payload, ttlMs }) {
+  const consultant_id = assertId(consultantId, 'INVALID_CONSULTANT_ID');
+  const companyName = String(company || '').trim();
+  if (!companyName || companyName.length > 160) throw new Error('INVALID_COMPANY');
+  if (!payload || typeof payload !== 'object' || Array.isArray(payload)) throw new Error('INVALID_BRIEF_PAYLOAD');
+  const bytes = Buffer.byteLength(JSON.stringify(payload), 'utf8');
+  if (bytes > 512 * 1024) throw new Error('BRIEF_PAYLOAD_TOO_LARGE');
+  if (!Number.isFinite(ttlMs) || ttlMs < 3600000 || ttlMs > 30 * 86400000) throw new Error('BRIEF_TTL_INVALID');
+  return { consultant_id, companyName };
+}
+
+function publicationIdentity(identity) {
+  if (!identity) return null;
+  const brief_id = assertId(identity.brief_id, 'INVALID_PUBLICATION_BRIEF_ID');
+  const publication_id = assertId(identity.publication_id, 'INVALID_PUBLICATION_ID');
+  const token = String(identity.token || '').trim();
+  const fingerprint = String(identity.fingerprint || '').trim();
+  if (token.length < 32) throw new Error('INVALID_PUBLICATION_TOKEN');
+  if (!fingerprint) throw new Error('INVALID_PUBLICATION_FINGERPRINT');
+  if (publication_id !== brief_id) throw new Error('PUBLICATION_ID_MISMATCH');
+  return { brief_id, publication_id, token, fingerprint };
+}
+
 export function createBriefRepository(storage) {
   if (!storage?.getJson || !storage?.putJson) throw new Error('JSON_STORAGE_ADAPTER_REQUIRED');
   return {
-    async create({ consultantId, company, payload, now = Date.now(), ttlMs = 7 * 86400000 }) {
-      const consultant_id = assertId(consultantId, 'INVALID_CONSULTANT_ID');
-      const companyName = String(company || '').trim();
-      if (!companyName || companyName.length > 160) throw new Error('INVALID_COMPANY');
-      if (!payload || typeof payload !== 'object' || Array.isArray(payload)) throw new Error('INVALID_BRIEF_PAYLOAD');
-      const bytes = Buffer.byteLength(JSON.stringify(payload), 'utf8');
-      if (bytes > 512 * 1024) throw new Error('BRIEF_PAYLOAD_TOO_LARGE');
-      if (!Number.isFinite(ttlMs) || ttlMs < 3600000 || ttlMs > 30 * 86400000) throw new Error('BRIEF_TTL_INVALID');
+    async create({
+      consultantId,
+      company,
+      payload,
+      identity = null,
+      now = Date.now(),
+      ttlMs = 7 * 86400000
+    }) {
+      const { consultant_id, companyName } = validateCreateInput({ consultantId, company, payload, ttlMs });
+      const publication = publicationIdentity(identity);
 
-      const briefId = createOpaqueToken(24);
-      const token = createOpaqueToken(32);
+      const briefId = publication?.brief_id || createOpaqueToken(24);
+      const token = publication?.token || createOpaqueToken(32);
       const tokenHash = hashOpaqueToken(token);
+      const existingBrief = publication ? await storage.getJson(briefPath(briefId)) : null;
+
+      if (existingBrief) {
+        if (
+          existingBrief.schema_version !== BRIEF_VERSION ||
+          existingBrief.consultant_id !== consultant_id ||
+          existingBrief.company !== companyName ||
+          existingBrief.publication_id !== publication.publication_id ||
+          existingBrief.publication_fingerprint !== publication.fingerprint
+        ) {
+          throw new Error('BRIEF_PUBLICATION_COLLISION');
+        }
+
+        const existingAccess = await storage.getJson(accessPath(tokenHash));
+        if (
+          !existingAccess ||
+          existingAccess.schema_version !== ACCESS_VERSION ||
+          existingAccess.brief_id !== briefId
+        ) {
+          await storage.putJson(accessPath(tokenHash), {
+            schema_version: ACCESS_VERSION,
+            token_hash: tokenHash,
+            brief_id: briefId,
+            publication_id: publication.publication_id,
+            status: 'ACTIVE',
+            created_at: existingBrief.created_at,
+            expires_at: existingBrief.expires_at,
+            last_resolved_at: null
+          });
+        }
+        return { token, brief: existingBrief, reused: true };
+      }
+
       const createdAt = new Date(now).toISOString();
       const expiresAt = new Date(now + ttlMs).toISOString();
       const brief = {
@@ -38,12 +96,17 @@ export function createBriefRepository(storage) {
         status: 'ACTIVE',
         created_at: createdAt,
         expires_at: expiresAt,
+        ...(publication ? {
+          publication_id: publication.publication_id,
+          publication_fingerprint: publication.fingerprint
+        } : {}),
         payload: cloneJson(payload)
       };
       const access = {
         schema_version: ACCESS_VERSION,
         token_hash: tokenHash,
         brief_id: briefId,
+        ...(publication ? { publication_id: publication.publication_id } : {}),
         status: 'ACTIVE',
         created_at: createdAt,
         expires_at: expiresAt,
@@ -51,7 +114,7 @@ export function createBriefRepository(storage) {
       };
       await storage.putJson(briefPath(briefId), brief);
       await storage.putJson(accessPath(tokenHash), access);
-      return { token, brief };
+      return { token, brief, reused: false };
     },
 
     async resolveToken(token, { now = Date.now() } = {}) {
