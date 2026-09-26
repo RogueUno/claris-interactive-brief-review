@@ -196,3 +196,26 @@ test('publish-ready compiler requires opportunity id for deterministic publicati
     consultant_sot: sot
   }), /OPPORTUNITY_ID_REQUIRED/);
 });
+
+
+test('publish-ready service projection is stable when SOT service order changes', () => {
+  const a = compileBriefPublishReady({
+    opportunity_id: 'opp_service_order',
+    consultant_id: 'consultant_test_1',
+    consultant_delivery_email: 'sarah@example.com',
+    company: 'Acme',
+    prepare,
+    discovery,
+    consultant_sot: sot
+  });
+  const b = compileBriefPublishReady({
+    opportunity_id: 'opp_service_order',
+    consultant_id: 'consultant_test_1',
+    consultant_delivery_email: 'sarah@example.com',
+    company: 'Acme',
+    prepare,
+    discovery,
+    consultant_sot: { ...sot, services: [...sot.services].reverse() }
+  });
+  assert.deepEqual(a.body.validation_context.services, b.body.validation_context.services);
+});
