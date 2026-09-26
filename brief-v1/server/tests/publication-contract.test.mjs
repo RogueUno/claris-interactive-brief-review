@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {
   compileBriefPublication,
+  compileBriefPublishReady,
   compileBriefReadyNotification
 } from '../publication-contract.mjs';
 
@@ -56,6 +57,43 @@ test('publication compiler sends only delivery-required consultant policy', () =
   assert.deepEqual(result.body.validation_context.commercial_rules, {
     budget_required_before_first_call: false
   });
+  const serialized = JSON.stringify(result);
+  assert.doesNotMatch(serialized, /minimum_viable_engagement/);
+  assert.doesNotMatch(serialized, /private_notes/);
+  assert.doesNotMatch(serialized, /internal_margin/);
+  assert.doesNotMatch(serialized, /budget_rule/);
+});
+
+
+test('publish-ready compiler emits one minimized atomic gateway request', () => {
+  const result = compileBriefPublishReady({
+    opportunity_id: 'opp_1',
+    consultant_id: 'consultant_test_1',
+    consultant_delivery_email: 'sarah@example.com',
+    consultant_first_name: 'Sarah',
+    company: 'Acme',
+    prospect_name: 'Alex Morgan',
+    meeting_time: '2026-09-30T14:00:00Z',
+    prepare,
+    discovery,
+    consultant_sot: sot,
+    ttl_days: 9
+  });
+
+  assert.equal(result.operation, 'brief_publish_ready');
+  assert.equal(result.body.consultant_id, 'consultant_test_1');
+  assert.equal(result.body.consultant_delivery_email, 'sarah@example.com');
+  assert.equal(result.body.ttl_days, 9);
+  assert.equal(result.body.brief_payload.prepare.schema_version, 'CLARIS_PREMIUM_PREPARE_V3_6');
+  assert.equal(result.body.brief_payload.discovery.schema_version, 'CLARIS_DISCOVERY_INTELLIGENCE_V1_2');
+  assert.deepEqual(result.body.validation_context.services, [
+    { service_id: 'SVC_ADVISORY', name: 'Advisory vCISO' },
+    { service_id: 'SVC_PENTEST', name: 'Penetration Testing' }
+  ]);
+  assert.deepEqual(result.body.validation_context.commercial_rules, {
+    budget_required_before_first_call: false
+  });
+
   const serialized = JSON.stringify(result);
   assert.doesNotMatch(serialized, /minimum_viable_engagement/);
   assert.doesNotMatch(serialized, /private_notes/);
