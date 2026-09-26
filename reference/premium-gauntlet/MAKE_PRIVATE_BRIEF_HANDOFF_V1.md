@@ -31,6 +31,11 @@ Required body:
 - brief_payload.discovery = CLARIS_DISCOVERY_INTELLIGENCE_V1_2
 - validation_context.services = service_id + name only
 - validation_context.commercial_rules.budget_required_before_first_call = boolean only
+- certification.schema_version = CLARIS_PRECALL_CERTIFICATION_V1
+- certification.premium_semantic_pass = true
+- certification.discovery_semantic_pass = true
+- certification.premium_deterministic_pass = true
+- certification.discovery_deterministic_pass = true
 
 Never send:
 - full calibration profile
@@ -49,6 +54,8 @@ The request may be emitted only when all are true:
 4. Discovery deterministic validation ok = true
 
 If any precondition fails, do not publish and do not email.
+
+The delivery gateway independently enforces the certification envelope. Missing certification or any false gate returns HTTP 422 before persistence.
 
 ## Successful response
 HTTP 201 first publication, HTTP 200 idempotent reuse.
