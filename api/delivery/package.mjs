@@ -31,6 +31,10 @@ function defaultAcceptedKeys() {
   return [process.env.CLARIS_MAKE_KEY, process.env.CLARIS_ADMIN_KEY];
 }
 
+function defaultAdminKeys() {
+  return [process.env.CLARIS_ADMIN_KEY];
+}
+
 function defaultBriefBaseUrl(request) {
   const configured = String(process.env.CLARIS_BRIEF_BASE_URL || '').trim();
   return (configured || `${new URL(request.url).origin}/brief-v1/`).replace(/\/?$/, '/');
@@ -80,6 +84,7 @@ export function createDeliveryGateway({
   briefServiceProvider = async () => (await import('../../brief-v1/server/api-shared.mjs')).briefServerContext().service,
   deliveryBuilder = buildDeliveryPackage,
   acceptedKeysProvider = defaultAcceptedKeys,
+  adminKeysProvider = defaultAdminKeys,
   briefBaseUrlProvider = defaultBriefBaseUrl
 } = {}) {
   async function handleBriefOperation(request, operation, body) {
@@ -108,7 +113,7 @@ export function createDeliveryGateway({
     }
 
     if (operation === 'brief_create') {
-      if (!authorized(request, acceptedKeysProvider())) return json({ ok: false, error: 'MAKE_UNAUTHORIZED' }, 401);
+      if (!authorized(request, adminKeysProvider())) return json({ ok: false, error: 'ADMIN_UNAUTHORIZED' }, 401);
       const created = await service.create({
         consultantId: body?.consultant_id,
         company: body?.company,
