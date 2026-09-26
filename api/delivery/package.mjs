@@ -128,11 +128,17 @@ export function createDeliveryGateway({
       if (!created?.brief) return json(created, 422);
 
       const briefUrl = `${base}#brief=${encodeURIComponent(created.token)}`;
-      const delivery = deliveryBuilder('CONSULTANT_BRIEF_READY', notificationInput(body, {
-        briefId: created.brief.brief_id,
-        briefUrl,
-        expiresAt: created.brief.expires_at
-      }));
+      let delivery;
+      try {
+        delivery = deliveryBuilder('CONSULTANT_BRIEF_READY', notificationInput(body, {
+          briefId: created.brief.brief_id,
+          briefUrl,
+          expiresAt: created.brief.expires_at
+        }));
+      } catch (error) {
+        try { await service.revoke(created.brief.brief_id); } catch {}
+        throw error;
+      }
 
       return json({
         ok: true,
