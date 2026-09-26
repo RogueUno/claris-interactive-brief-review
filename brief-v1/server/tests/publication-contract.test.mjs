@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import fs from 'node:fs';
 import {
   compileBriefPublication,
   compileBriefPublishReady,
@@ -99,6 +100,39 @@ test('publish-ready compiler emits one minimized atomic gateway request', () => 
   assert.doesNotMatch(serialized, /private_notes/);
   assert.doesNotMatch(serialized, /internal_margin/);
   assert.doesNotMatch(serialized, /budget_rule/);
+});
+
+
+test('Supabase gold fixture compiles through atomic publish-ready contract', () => {
+  const fixture = new URL('../../../reference/premium-gauntlet/fixtures/supabase-v1/', import.meta.url);
+  const goldPrepare = JSON.parse(fs.readFileSync(new URL('premium-prepare.json', fixture), 'utf8'));
+  const goldDiscovery = JSON.parse(fs.readFileSync(new URL('discovery-plan.json', fixture), 'utf8'));
+  const goldSot = JSON.parse(fs.readFileSync(new URL('consultant-sot.json', fixture), 'utf8'));
+
+  const result = compileBriefPublishReady({
+    opportunity_id: 'premium_gauntlet_supabase_v1',
+    consultant_id: 'consultant_supabase_fixture',
+    consultant_delivery_email: 'consultant@example.com',
+    consultant_first_name: 'Chase',
+    company: 'Supabase',
+    prospect_name: 'VP Engineering',
+    meeting_time: '2026-09-30T14:00:00Z',
+    prepare: goldPrepare,
+    discovery: goldDiscovery,
+    consultant_sot: goldSot,
+    ttl_days: 7
+  });
+
+  assert.equal(result.operation, 'brief_publish_ready');
+  assert.equal(result.body.brief_payload.prepare.open_dimensions.length, 3);
+  assert.equal(result.body.brief_payload.discovery.primary_questions.length, 3);
+  assert.equal(result.body.validation_context.services.length, 3);
+  assert.equal(result.body.validation_context.commercial_rules.budget_required_before_first_call, false);
+
+  const serialized = JSON.stringify(result);
+  assert.doesNotMatch(serialized, /minimum_viable_engagement_usd/);
+  assert.doesNotMatch(serialized, /budget_rule/);
+  assert.doesNotMatch(serialized, /3000/);
 });
 
 test('notification compiler binds published URL to compact consultant email package', () => {
