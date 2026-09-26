@@ -10,7 +10,7 @@ permissions:
   contents: read
 
 jobs:
-  brief:
+  premium:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
@@ -20,4 +20,5 @@ jobs:
           node-version: '22'
           cache: npm
       - run: npm ci
+      - run: npm run test:premium
       - run: npm run test:brief
