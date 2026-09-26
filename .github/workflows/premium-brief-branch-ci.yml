@@ -22,6 +22,7 @@ jobs:
         with:
           node-version: '22'
       - run: npm install --no-audit --no-fund
+      - run: npm run test:premium
       - run: npm run test:brief
 
   preview-smoke:
