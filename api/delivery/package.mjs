@@ -95,12 +95,6 @@ export function createDeliveryGateway({
         company: body?.company,
         payload: body?.brief_payload,
         validationContext: body?.validation_context,
-        context: {
-          opportunity_id: body?.opportunity_id,
-          prospect_name: body?.prospect_name,
-          prospect_role: body?.prospect_role,
-          meeting_time: body?.meeting_time
-        },
         ttlMs: ttlMs(body)
       });
       if (!created?.brief) return json(created, 422);
@@ -129,6 +123,12 @@ export function createDeliveryGateway({
         company: body?.company,
         payload: body?.brief_payload,
         validationContext: body?.validation_context,
+        context: {
+          opportunity_id: body?.opportunity_id,
+          prospect_name: body?.prospect_name,
+          prospect_role: body?.prospect_role,
+          meeting_time: body?.meeting_time
+        },
         ttlMs: ttlMs(body)
       });
       if (!created?.brief) {
