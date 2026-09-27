@@ -33,19 +33,17 @@ function classification(source, key, allowed, code) {
 }
 function gradeFor(rate, coverage) {
   if (!Number.isFinite(rate) || coverage < 40) return null;
-  if (rate >= 85) return 'A';
-  if (rate >= 70) return 'B';
-  if (rate >= 55) return 'C';
-  if (rate >= 40) return 'D';
-  return 'E';
+  if (rate >= 75) return 'A';
+  if (rate >= 50) return 'B';
+  if (rate >= 25) return 'C';
+  return 'D';
 }
 function fitDescriptor(rate, coverage) {
   if (!Number.isFinite(rate)) return 'Not yet scorable';
   if (coverage < 40) return 'Early evaluated signal';
-  if (rate >= 85) return 'Very strong evaluated fit';
-  if (rate >= 70) return 'Strong evaluated fit';
-  if (rate >= 55) return 'Mixed evaluated fit';
-  if (rate >= 40) return 'Weak evaluated fit';
+  if (rate >= 75) return 'Very strong evaluated fit';
+  if (rate >= 50) return 'Strong evaluated fit';
+  if (rate >= 25) return 'Mixed evaluated fit';
   return 'Low evaluated fit';
 }
 
