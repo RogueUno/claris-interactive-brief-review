@@ -91,20 +91,38 @@ test('suppresses letter grade when less than 40 fit points are scorable',()=>{
 });
 
 
-test('uses deterministic A-D grade buckets at exact boundaries',()=>{
-  const cases=[
-    [0,'D'],[24.9,'D'],
-    [25,'C'],[49.9,'C'],
-    [50,'B'],[74.9,'B'],
-    [75,'A'],[100,'A']
-  ];
-  // Build the desired weighted rate using one fully scorable synthetic dimension mix.
-  // We test the public contract through equivalent classification combinations where practical,
-  // and assert the locked boundary policy directly via representative expected grades below.
-  assert.deepEqual(cases,[
-    [0,'D'],[24.9,'D'],
-    [25,'C'],[49.9,'C'],
-    [50,'B'],[74.9,'B'],
-    [75,'A'],[100,'A']
-  ]);
+test('uses deterministic A-D buckets through the real weighted compiler',()=>{
+  const fullMismatch=()=>{
+    const b=structuredClone(score_basis);
+    b.canonical_match_classifications={
+      service_need_alignment:{status:'MISMATCH',basis_ids:['BOOK-001','SOT:services'],reason:'Mismatch.'},
+      icp_company_fit:{status:'MISMATCH',basis_ids:['SOT:icp','PE-001'],reason:'Mismatch.'},
+      business_trigger:{status:'MISMATCH',basis_ids:['BOOK-001'],reason:'Mismatch.'},
+      buyer_stakeholder_fit:{status:'MISMATCH',basis_ids:['BOOK-001'],reason:'Mismatch.'},
+      engagement_economics:{status:'MISMATCH',basis_ids:['BOOK-001'],reason:'Mismatch.'},
+      timing_urgency:{status:'MISMATCH',basis_ids:['BOOK-001'],reason:'Mismatch.'},
+      expansion_potential:{status:'MISMATCH',basis_ids:['BOOK-001','SOT:services'],reason:'Mismatch.'}
+    };
+    return b;
+  };
+  const grade=b=>compilePrecallScorecard({score_basis:b,prepare,discovery,certification}).lead_fit.grade;
+
+  const d=fullMismatch();
+  assert.equal(grade(d),'D');
+
+  const c=fullMismatch();
+  c.canonical_match_classifications.service_need_alignment.status='MATCH';
+  assert.equal(grade(c),'C');
+
+  const b=fullMismatch();
+  b.canonical_match_classifications.service_need_alignment.status='MATCH';
+  b.canonical_match_classifications.icp_company_fit.status='MATCH';
+  assert.equal(grade(b),'B');
+
+  const a=fullMismatch();
+  a.canonical_match_classifications.service_need_alignment.status='MATCH';
+  a.canonical_match_classifications.icp_company_fit.status='MATCH';
+  a.canonical_match_classifications.business_trigger.status='MATCH';
+  a.canonical_match_classifications.buyer_stakeholder_fit.status='MATCH';
+  assert.equal(grade(a),'A');
 });
