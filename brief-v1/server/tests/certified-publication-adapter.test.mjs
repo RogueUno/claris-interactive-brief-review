@@ -92,20 +92,20 @@ test('compiles traceable scorecard while keeping raw scoring basis out of public
   const basis={
     gate_status:'PASS',
     canonical_match_classifications:{
-      service_need_alignment:{status:'MATCH',basis_ids:['BOOK-001'],reason:'Direct requested service fit.'},
-      icp_company_fit:{status:'MATCH',basis_ids:['FAC-001'],reason:'Company matches consultant ICP.'},
+      service_need_alignment:{status:'MATCH',basis_ids:['BOOK-001','SOT:services'],reason:'Direct requested service fit.'},
+      icp_company_fit:{status:'UNKNOWN',basis_ids:[],reason:'No explicit ICP policy is present.'},
       business_trigger:{status:'PARTIAL_MATCH',basis_ids:['BOOK-001'],reason:'Trigger present but depth remains open.'},
-      buyer_stakeholder_fit:{status:'MATCH',basis_ids:['BOOK-001'],reason:'Relevant owner named.'},
+      buyer_stakeholder_fit:{status:'UNKNOWN',basis_ids:[],reason:'Buyer fit is not established.'},
       engagement_economics:{status:'UNKNOWN',basis_ids:[],reason:'No authorized economics evidence yet.'},
       timing_urgency:{status:'UNKNOWN',basis_ids:[],reason:'No resolved delivery date yet.'},
-      expansion_potential:{status:'MISMATCH',basis_ids:['PROS-001'],reason:'No distinct second need confirmed.'}
+      expansion_potential:{status:'UNKNOWN',basis_ids:[],reason:'No distinct second need is established.'}
     },
     canonical_completeness_classifications:{
-      critical_question_coverage:{status:'COMPLETE',basis_ids:['BOOK-001'],reason:'Critical unknown is mapped.'},
-      source_authority:{status:'COMPLETE',basis_ids:['FAC-001'],reason:'First-party evidence dominates.'},
-      corroboration_depth:{status:'PARTIAL',basis_ids:['FAC-002'],reason:'Some claims have one authoritative source.'},
-      freshness:{status:'COMPLETE',basis_ids:['FAC-003'],reason:'Material evidence is current.'},
-      conflict_ambiguity_control:{status:'COMPLETE',basis_ids:['FAC-004'],reason:'Conflicts are bounded.'}
+      critical_question_coverage:{status:'COMPLETE',basis_ids:['E1'],reason:'Critical unknown is mapped.'},
+      source_authority:{status:'COMPLETE',basis_ids:['PE-001'],reason:'First-party evidence dominates.'},
+      corroboration_depth:{status:'PARTIAL',basis_ids:['PE-002'],reason:'Some claims have one authoritative source.'},
+      freshness:{status:'MISSING',basis_ids:[],reason:'No explicit freshness metadata is attached.'},
+      conflict_ambiguity_control:{status:'COMPLETE',basis_ids:['PE-003'],reason:'Conflicts are bounded.'}
     },
     basis_resolution:{all_scored_basis_resolvable:true,unresolved_basis_ids:[]}
   };
