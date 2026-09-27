@@ -15,8 +15,34 @@
     "company",
     "premium_prepare_json",
     "discovery_plan_json",
-    "consultant_sot_json"
+    "consultant_services_projection_json",
+    "budget_required_before_first_call",
+    "certification_json"
   ],
+  "forbidden_inputs": [
+    "consultant_sot_json",
+    "commercial_floor",
+    "private_consultant_notes",
+    "service_margins",
+    "audit_chain_of_thought"
+  ],
+  "certification_contract": {
+    "schema_version": "CLARIS_PRECALL_CERTIFICATION_V1",
+    "required_true_flags": [
+      "premium_semantic_pass",
+      "discovery_semantic_pass",
+      "premium_deterministic_pass",
+      "discovery_deterministic_pass"
+    ],
+    "source": "upstream_certified_publication_path",
+    "make_may_synthesize": false
+  },
+  "validation_context_contract": {
+    "services": "service_id + name only",
+    "commercial_rules": {
+      "budget_required_before_first_call": "boolean only"
+    }
+  },
   "optional_inputs": [
     "consultant_first_name",
     "prospect_name",
@@ -27,6 +53,7 @@
   "response_contract": {
     "first_publish_status": 201,
     "identical_retry_status": 200,
+    "success_requires_body_ok_true": true,
     "fields": [
       "publication_id",
       "reused",
