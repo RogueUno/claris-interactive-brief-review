@@ -109,7 +109,15 @@ test('compiles traceable scorecard while keeping raw scoring basis out of public
     },
     basis_resolution:{all_scored_basis_resolvable:true,unresolved_basis_ids:[]}
   };
-  const result=compileCertifiedBriefPublication({...base,booking_text:'We need an API security review.',precall_score_basis:basis});
+  const research={findings:[
+    {evidence_id:'PE-001'},{evidence_id:'PE-002'},{evidence_id:'PE-003'}
+  ]};
+  const result=compileCertifiedBriefPublication({
+    ...base,
+    booking_text:'We need an API security review.',
+    precall_score_basis:basis,
+    precall_research_evidence:research
+  });
   assert.equal(result.body.booking_text,'We need an API security review.');
   assert.equal(result.body.brief_payload.scorecard.schema_version,'CLARIS_PRECALL_SCORECARD_V1');
   assert.equal(result.body.brief_payload.scorecard.lead_fit.grade,'A');
@@ -117,4 +125,32 @@ test('compiles traceable scorecard while keeping raw scoring basis out of public
   const serialized=JSON.stringify(result.body);
   assert.doesNotMatch(serialized,/canonical_match_classifications/);
   assert.doesNotMatch(serialized,/basis_resolution/);
+});
+
+
+test('score publication fails closed without the research evidence packet used to resolve basis ids',()=>{
+  const basis={
+    gate_status:'PASS',
+    canonical_match_classifications:{
+      service_need_alignment:{status:'MATCH',basis_ids:['BOOK-001','SOT:services'],reason:'Direct fit.'},
+      icp_company_fit:{status:'UNKNOWN',basis_ids:[],reason:'No ICP policy.'},
+      business_trigger:{status:'UNKNOWN',basis_ids:[],reason:'No trigger.'},
+      buyer_stakeholder_fit:{status:'UNKNOWN',basis_ids:[],reason:'No buyer evidence.'},
+      engagement_economics:{status:'UNKNOWN',basis_ids:[],reason:'No economics.'},
+      timing_urgency:{status:'UNKNOWN',basis_ids:[],reason:'No timing.'},
+      expansion_potential:{status:'UNKNOWN',basis_ids:[],reason:'No expansion.'}
+    },
+    canonical_completeness_classifications:{
+      critical_question_coverage:{status:'COMPLETE',basis_ids:['E1'],reason:'Covered.'},
+      source_authority:{status:'MISSING',basis_ids:[],reason:'No packet.'},
+      corroboration_depth:{status:'MISSING',basis_ids:[],reason:'No packet.'},
+      freshness:{status:'MISSING',basis_ids:[],reason:'No packet.'},
+      conflict_ambiguity_control:{status:'MISSING',basis_ids:[],reason:'No packet.'}
+    },
+    basis_resolution:{all_scored_basis_resolvable:true,unresolved_basis_ids:[]}
+  };
+  assert.throws(
+    ()=>compileCertifiedBriefPublication({...base,booking_text:'Need help.',precall_score_basis:basis}),
+    /PRECALL_RESEARCH_EVIDENCE_REQUIRED/
+  );
 });
