@@ -12,7 +12,6 @@ async function requestJson(url,options={}){const {headers={},...rest}=options;co
 function gate(title,detail){root.innerHTML=`<section class="gate glass"><div class="eyebrow">CLARIS · Private Opportunity Intelligence</div><h1>${esc(title)}</h1><p>${esc(detail)}</p></section>`;}
 function readableTime(value){const raw=text(value);if(!raw)return null;const d=new Date(raw);return Number.isNaN(d.getTime())?raw:d.toLocaleString([], {dateStyle:'medium',timeStyle:'short'});}
 function hostname(url){try{return new URL(url).hostname.replace(/^www\./,'');}catch{return 'Source';}}
-function percent(v){return Number.isFinite(Number(v))?`${Math.round(Number(v))}%`:'—';}
 function scoreArc(value){const n=clamp(Number(value)||0,0,100);return `<div class="score-ring" style="--score:${n}"><span>${Math.round(n)}</span></div>`;}
 function statusTone(status){if(['MATCH','COMPLETE','READY'].includes(status))return'good';if(['PARTIAL_MATCH','PARTIAL','WEAK'].includes(status))return'partial';if(['MISMATCH','MISSING','NOT_READY'].includes(status))return'bad';return'unknown';}
 
@@ -43,9 +42,9 @@ function scorecardMarkup(scorecard){
       <details class="metric-card">
         <summary>
           <span class="metric-label">Lead fit</span>
-          <div class="metric-visual grade"><strong>${esc(fit.grade||'—')}</strong><span>${percent(fit.evaluated_fit_rate)}</span></div>
+          <div class="metric-visual grade"><strong>${esc(fit.grade||'—')}</strong></div>
           <p>${esc(fit.descriptor||'Not yet scorable')}</p>
-          <small>${esc(fit.scorable_coverage??0)} / 100 fit points currently scorable · Why ↘</small>
+          <small>Coverage · ${esc(fit.scorable_coverage??0)} of 100 weighted criteria currently resolved · Why ↘</small>
         </summary>
         <div class="metric-detail"><ul class="dimension-list">${scoreDimensions(fit.dimensions)}</ul></div>
       </details>
