@@ -19,6 +19,14 @@ Current supported policy mapping:
 ## Conditional probes
 A hidden probe may open a new ontology family only when its `trigger_if` hypothetical prospect answer explicitly introduces that family.
 
+### Ownership / stakeholder branches
+A conditional probe may open `D09 ownership_stakeholders` only when its `trigger_if` explicitly introduces ownership, responsibility, a stakeholder, approver, decision-maker, engineering team ownership, or security team responsibility.
+
+Merely saying engineering or sales personnel perform a task is not sufficient authority to open D09. If ownership is not explicitly introduced by the hypothetical answer, omit the D09 branch or keep the follow-up inside the already-authorized dimension.
+
+### Observable listen-fors
+`listen_for.pattern` should describe a recognizable prospect statement, artifact, workflow, or behavior—not an abstract consultant interpretation. Prefer concrete patterns such as spreadsheet questionnaires, manual evidence retrieval, or engineering answering customer security forms.
+
 ## Threat/problem firewall
 Do not introduce vulnerability, incident, breach, auth bypass, weakness or similar unless the prospect answer itself introduces it. Public technical surfaces never imply weakness.
 
