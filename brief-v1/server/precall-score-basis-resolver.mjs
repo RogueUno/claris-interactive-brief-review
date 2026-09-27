@@ -29,6 +29,14 @@ export function resolvePrecallScoreBasis(input={}){
   const research=input.research_evidence||{};
   const prepare=input.prepare||{};
   const discovery=input.discovery||{};
+  const booking=text(input.booking_text);
+
+  const hasEconomics=/[$€£]|\b(?:usd|eur|gbp|budget|pricing|price|spend|commercial|investment|procurement)\b/i.test(booking);
+  const hasTiming=/\b(?:today|tomorrow|this\s+(?:week|month|quarter|year)|next\s+(?:week|month|quarter)|q[1-4]|deadline|due|asap|urgent|urgency|launch|rollout|before|by\s+\w+|within\s+\d+\s+(?:day|week|month)s?)\b/i.test(booking);
+  const hasStakeholder=/\b(?:owner|owns|responsible|approver|decision[-\s]?maker|vp|vice president|director|head of|ciso|cto|cio|ceo|founder|principal)\b/i.test(booking);
+  const hasFreshness=arr(research?.findings).some(f=>[
+    f?.published_at,f?.updated_at,f?.fetched_at,f?.date,f?.last_modified
+  ].some(v=>text(v)));
 
   const fit=basis.canonical_match_classifications||{};
   const completeness=basis.canonical_completeness_classifications||{};
@@ -84,6 +92,10 @@ export function resolvePrecallScoreBasis(input={}){
   requireBasis(fit.timing_urgency,'timing_urgency',['BOOK-001']);
   requireBasis(fit.expansion_potential,'expansion_potential',['BOOK-001','SOT:services']);
 
+  if(fit.engagement_economics.status!=='UNKNOWN' && !hasEconomics) fail('DIRECT_EVIDENCE_REQUIRED','engagement_economics');
+  if(fit.timing_urgency.status!=='UNKNOWN' && !hasTiming) fail('DIRECT_EVIDENCE_REQUIRED','timing_urgency');
+  if(fit.buyer_stakeholder_fit.status!=='UNKNOWN' && !hasStakeholder) fail('DIRECT_EVIDENCE_REQUIRED','buyer_stakeholder_fit');
+
   if(fit.icp_company_fit.status!=='UNKNOWN'){
     requireBasis(fit.icp_company_fit,'icp_company_fit',['SOT:icp']);
     if(!fit.icp_company_fit.basis_ids.some(id=>/^E\d+$/.test(id)||/^PE-/.test(id))) {
@@ -103,6 +115,9 @@ export function resolvePrecallScoreBasis(input={}){
   }
   if(completeness.corroboration_depth.status!=='MISSING') {
     completeness.corroboration_depth.basis_ids=peIds.length?peIds:eIds;
+  }
+  if(completeness.freshness.status!=='MISSING' && !hasFreshness) {
+    fail('FRESHNESS_EVIDENCE_REQUIRED','freshness');
   }
   if(completeness.freshness.status==='MISSING') {
     completeness.freshness.basis_ids=[];
