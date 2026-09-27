@@ -178,3 +178,26 @@ Latest same-head CI evidence:
 - API function footprint remains 12
 
 Live PREPARE and Discovery model-runtime certification is complete across Supabase, Resend and Linear. The critical path is now interactive brief smoke and a real pilot.
+
+
+## Pre-call score reliability V1
+
+State: CERTIFIED — GOLDEN REPEATABILITY + DETERMINISTIC PUBLICATION GATE.
+
+- Grade policy: D 0-<25, C 25-<50, B 50-<75, A 75-100.
+- No letter is displayed below 40/100 scorable fit coverage.
+- UNKNOWN is neutral and excluded from scorable coverage.
+- Numeric fit percentage is not published.
+- Make scorer: 7648115.
+- Deterministic resolver: 7649118.
+- Controlled one-shot repair: 7648203.
+- Supabase: 3 identical-input runs -> identical canonical fit/provenance; 65/100 scorable -> A.
+- Resend: 3 identical-input runs -> identical canonical fit/provenance; 30/100 scorable -> grade suppressed.
+- Linear: 3 identical-input runs -> identical canonical fit/provenance; 45/100 scorable -> A.
+- Resolver canonicalizes booking basis aliases, clears UNKNOWN basis IDs, and normalizes completeness provenance.
+- Server publication adapter re-resolves score basis against booking, SOT, research evidence, PREPARE and Discovery before compiling a grade.
+- Deterministic guards reject unsupported economics, timing, stakeholder and freshness classifications.
+- Adversarial regression tests cover invented basis, public-to-commercial leakage, low coverage and missing direct evidence.
+- Code checkpoint 215b3a966f5c137bc35683ad52aadb315920b030: GitHub Actions PASS; matching Vercel deployment READY.
+
+Scope note: this certifies repeatability on the three gold fixtures and deterministic grade/basis safeguards. It does not claim universal semantic-model repeatability for every future lead; real-pilot calibration remains required.
