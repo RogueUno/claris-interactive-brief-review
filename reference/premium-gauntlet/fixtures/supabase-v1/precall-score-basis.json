@@ -1,0 +1,115 @@
+{
+  "gate_status": "CORRECTED",
+  "canonical_match_classifications": {
+    "service_need_alignment": {
+      "status": "MATCH",
+      "basis_ids": [
+        "BOOK-001",
+        "SOT:services"
+      ],
+      "reason": "The booking explicitly requests an independent security review of the OAuth/RLS boundary, which maps directly to Advisory vCISO and Penetration Testing services."
+    },
+    "icp_company_fit": {
+      "status": "UNKNOWN",
+      "basis_ids": [],
+      "reason": "The consultant SOT contains no explicit ICP or company-type policy rules to evaluate company fit against."
+    },
+    "business_trigger": {
+      "status": "MATCH",
+      "basis_ids": [
+        "BOOK-001"
+      ],
+      "reason": "The booking explicitly states an operational driver and why-now event: an enterprise OAuth 2.1 rollout planned for this quarter requiring pre-launch review."
+    },
+    "buyer_stakeholder_fit": {
+      "status": "MATCH",
+      "basis_ids": [
+        "BOOK-001"
+      ],
+      "reason": "The booking establishes that the prospect is the VP Engineering and directly owns the evaluation."
+    },
+    "engagement_economics": {
+      "status": "UNKNOWN",
+      "basis_ids": [],
+      "reason": "The booking contains no direct budget or economic figures to evaluate against consultant commercial rules."
+    },
+    "timing_urgency": {
+      "status": "MATCH",
+      "basis_ids": [
+        "BOOK-001"
+      ],
+      "reason": "The booking explicitly states a delivery timeframe tied to an enterprise rollout planned for this quarter."
+    },
+    "expansion_potential": {
+      "status": "UNKNOWN",
+      "basis_ids": [],
+      "reason": "The booking focuses on a single specific review scope without indicating distinct additional needs mapping to other SOT services."
+    }
+  },
+  "canonical_completeness_classifications": {
+    "critical_question_coverage": {
+      "status": "COMPLETE",
+      "basis_ids": [
+        "PE-001",
+        "PE-002",
+        "PE-003",
+        "PE-004"
+      ],
+      "reason": "The certified Discovery plan provides targeted questions covering all open dimensions (scope, review output, and timeline)."
+    },
+    "source_authority": {
+      "status": "COMPLETE",
+      "basis_ids": [
+        "PE-001",
+        "PE-002",
+        "PE-003",
+        "PE-004"
+      ],
+      "reason": "All material evidence items originate directly from first-party official documentation."
+    },
+    "corroboration_depth": {
+      "status": "COMPLETE",
+      "basis_ids": [
+        "PE-001",
+        "PE-002",
+        "PE-003",
+        "PE-004"
+      ],
+      "reason": "Core platform and compliance capabilities are supported by distinct official first-party documentation sources."
+    },
+    "freshness": {
+      "status": "MISSING",
+      "basis_ids": [],
+      "reason": "The curated research evidence packet does not contain explicit publication or fetch date metadata for the sources."
+    },
+    "conflict_ambiguity_control": {
+      "status": "COMPLETE",
+      "basis_ids": [
+        "PE-001",
+        "PE-002",
+        "PE-003",
+        "PE-004"
+      ],
+      "reason": "Uncertainties, scope boundaries, and prohibited inferences are explicitly bounded and documented across the prepare and discovery materials."
+    }
+  },
+  "corrected_strategy": {
+    "recommended_action": "Conduct the planned diagnostic call with the VP Engineering to lock the exact review boundary, define the required deliverable, and confirm the timeline.",
+    "primary_service_id": "",
+    "qualification_status": "PROMISING",
+    "rationale": "The prospect has a clear, immediate technical driver (enterprise rollout this quarter) and defined stakeholder ownership, but technical review scope and depth remain open for the discovery call.",
+    "key_talking_points": [
+      "Confirm whether the independent review focuses on architecture/design or hands-on technical validation of the OAuth/RLS boundary.",
+      "Define what exact artifact or report is required to clear the rollout for launch.",
+      "Establish the latest useful findings date within the current quarter."
+    ],
+    "risk_factors": [
+      "Review scope is currently broad and spans both identity flow and database access layers.",
+      "The delivery deadline is explicitly unresolved in the booking truth."
+    ]
+  },
+  "basis_resolution": {
+    "all_scored_basis_resolvable": true,
+    "unresolved_basis_ids": []
+  }
+}
