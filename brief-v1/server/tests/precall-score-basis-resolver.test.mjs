@@ -64,3 +64,100 @@ test('fails closed on noncanonical unresolved fit id',()=>{
     /SCORE_BASIS_UNRESOLVED/
   );
 });
+
+
+test('rejects economics classification without direct booking economics',()=>{
+  const broken=structuredClone(basis);
+  broken.canonical_match_classifications.engagement_economics={
+    status:'MATCH',basis_ids:['BOOK-001'],reason:'Budget looks aligned.'
+  };
+  assert.throws(
+    ()=>resolvePrecallScoreBasis({
+      score_basis:broken,
+      booking_text:'Interested in discussing API security.',
+      consultant_sot:sot,
+      research_evidence:research,
+      prepare,
+      discovery
+    }),
+    /DIRECT_EVIDENCE_REQUIRED:engagement_economics/
+  );
+});
+
+test('rejects timing classification without direct booking timing',()=>{
+  const broken=structuredClone(basis);
+  broken.canonical_match_classifications.timing_urgency={
+    status:'PARTIAL_MATCH',basis_ids:['BOOK-001'],reason:'Timing inferred.'
+  };
+  assert.throws(
+    ()=>resolvePrecallScoreBasis({
+      score_basis:broken,
+      booking_text:'Interested in discussing API security.',
+      consultant_sot:sot,
+      research_evidence:research,
+      prepare,
+      discovery
+    }),
+    /DIRECT_EVIDENCE_REQUIRED:timing_urgency/
+  );
+});
+
+test('rejects stakeholder classification without direct role or ownership language',()=>{
+  const broken=structuredClone(basis);
+  broken.canonical_match_classifications.buyer_stakeholder_fit={
+    status:'MATCH',basis_ids:['BOOK-001'],reason:'Buyer inferred.'
+  };
+  assert.throws(
+    ()=>resolvePrecallScoreBasis({
+      score_basis:broken,
+      booking_text:'Interested in discussing API security.',
+      consultant_sot:sot,
+      research_evidence:research,
+      prepare,
+      discovery
+    }),
+    /DIRECT_EVIDENCE_REQUIRED:buyer_stakeholder_fit/
+  );
+});
+
+test('rejects scored freshness when research carries no freshness metadata',()=>{
+  const broken=structuredClone(basis);
+  broken.canonical_completeness_classifications.freshness={
+    status:'COMPLETE',basis_ids:['PE-001'],reason:'Looks current.'
+  };
+  assert.throws(
+    ()=>resolvePrecallScoreBasis({
+      score_basis:broken,
+      booking_text:'Interested in discussing API security.',
+      consultant_sot:sot,
+      research_evidence:research,
+      prepare,
+      discovery
+    }),
+    /FRESHNESS_EVIDENCE_REQUIRED:freshness/
+  );
+});
+
+test('accepts objective dimensions only when direct booking signals exist',()=>{
+  const enriched=structuredClone(basis);
+  enriched.canonical_match_classifications.buyer_stakeholder_fit={
+    status:'MATCH',basis_ids:['BOOK-001'],reason:'VP owns evaluation.'
+  };
+  enriched.canonical_match_classifications.engagement_economics={
+    status:'PARTIAL_MATCH',basis_ids:['BOOK-001'],reason:'Budget stated.'
+  };
+  enriched.canonical_match_classifications.timing_urgency={
+    status:'MATCH',basis_ids:['BOOK-001'],reason:'Rollout this quarter.'
+  };
+  const out=resolvePrecallScoreBasis({
+    score_basis:enriched,
+    booking_text:"I'm VP Engineering and own the evaluation. Budget is $20k. Rollout is this quarter.",
+    consultant_sot:sot,
+    research_evidence:research,
+    prepare,
+    discovery
+  });
+  assert.equal(out.canonical_match_classifications.buyer_stakeholder_fit.status,'MATCH');
+  assert.equal(out.canonical_match_classifications.engagement_economics.status,'PARTIAL_MATCH');
+  assert.equal(out.canonical_match_classifications.timing_urgency.status,'MATCH');
+});
