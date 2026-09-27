@@ -80,7 +80,7 @@ Body:
   }
 }
 
-Expected HTTP 201.
+Successful HTTP response:\n- 201 = first publication\n- 200 = idempotent reuse of the same certified publication\n\nBoth are valid only when body.ok=true.
 
 Response:
 {
@@ -117,12 +117,12 @@ Response:
 5xx:
 - status = PUBLISH_INFRA_FAILED
 - allow normal bounded scenario retry policy
-- do not email until a 201 exists
+- do not email until a successful 200/201 response with body.ok=true exists
 - do not fall back to full brief email
 
 ## Module 3 — Gmail Send Email
 
-Run only after Module 2 returns HTTP 201 and body.ok=true.
+Run only after Module 2 returns HTTP 200 or 201 and body.ok=true.\n\nBefore sending, dedupe on notification_dedupe_key. If an existing SENT receipt is found for that key, skip Gmail and return the existing delivery receipt.
 
 Map:
 - To = delivery.to
@@ -209,7 +209,7 @@ Do not connect this publisher to Production Booking Adapter or Calendly until:
 The server side of this handoff is already certified on the premium branch:
 
 - Vercel preview build: PASS
-- GitHub Actions Node 22 private-brief suite: 18/18 PASS
+- GitHub Actions Node 22 private-brief suite: 39/39 PASS
 - brief_publish_ready integration: PASS
 - legacy CONSULTANT_FINAL delivery compatibility: PASS
 - economics leakage rejection before persistence: PASS
@@ -221,7 +221,7 @@ The only currently unexecuted piece is the live Make scenario because the Make f
 
 ## Duplicate-prevention rule
 
-If Module 2 returned HTTP 201, treat its brief and delivery objects as the canonical publication result for that scenario execution.
+If Module 2 returned HTTP 200 or 201 with body.ok=true, treat its publication_id, notification_dedupe_key, brief and delivery objects as the canonical publication result for that scenario execution.
 
 If Gmail fails:
 - retry Gmail from the retained Module 2 response;
