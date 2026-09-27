@@ -28,6 +28,12 @@ r=validateDiscoveryV12(badBranch,prepare,sot);
 assert.equal(r.ok,false);
 assert(r.errors.some(e=>e.code==='BRANCH_AUTHORITY'));
 
+const pluralAssuranceBranch=structuredClone(plan);
+pluralAssuranceBranch.primary_questions[0].conditional_probes[0].opens_ontology_intent='D13 assurance_requirements';
+pluralAssuranceBranch.primary_questions[0].conditional_probes[0].trigger_if='The prospect reports that delays are driven by complex custom security questionnaires and portal submissions.';
+r=validateDiscoveryV12(pluralAssuranceBranch,prepare,sot);
+assert.equal(r.ok,true,JSON.stringify(r.errors));
+
 const capSot=structuredClone(sot);
 capSot.services.push({service_id:'SVC_HIPAA',name:'HIPAA Readiness'});
 const capPlan=structuredClone(plan);
