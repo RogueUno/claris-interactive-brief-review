@@ -1,13 +1,14 @@
 {
   "schema_version": "CLARIS_MVP_PROMOTION_GATE_V1",
   "candidate_branch": "premium-gauntlet-v3-1",
+  "candidate_head": "9922fd59559ad3515bd2b0e901c2d6b9ae770bd9",
   "gates": {
     "consultant_intelligence": {
       "status": "PASS"
     },
     "premium_research": {
       "status": "PARTIAL",
-      "reason": "Gold/design pass; live Make integration sandbox-only."
+      "reason": "Gold/design pass; live Make integration remains sandbox-only."
     },
     "premium_prepare_v3_6": {
       "status": "PARTIAL",
@@ -32,16 +33,20 @@
     "secure_private_brief": {
       "status": "PASS",
       "github_ci": "PASS",
+      "explicit_test_brief": "39/39 PASS",
+      "vercel_preview": "PASS",
       "vercel_function_count": 12,
       "vercel_hobby_function_cap": 12,
-      "preview_protection": "ENABLED"
+      "preview_protection": "ENABLED",
+      "browser_app_smoke": "PENDING_ACCESS"
     },
     "retry_idempotency": {
       "status": "PASS"
     },
     "make_publisher": {
       "status": "PENDING",
-      "blueprint": "reference/premium-gauntlet/make-publisher-v1/BLUEPRINT.md"
+      "blueprint": "reference/premium-gauntlet/make-publisher-v1/BLUEPRINT.md",
+      "connector_probe_2026_09_27": "INTERNAL_ERROR"
     },
     "real_end_to_end_pilot": {
       "status": "PENDING"
@@ -53,9 +58,9 @@
   "blockers": [
     "Make fallback connector internal errors",
     "Live V3.6 + Discovery V1.2 certification",
-    "Make Publisher V1 scenario implementation",
-    "Real end-to-end pilot",
-    "Vercel free deployment quota reset if new preview required"
+    "Make Publisher V1 live scenario implementation/certification",
+    "Protected preview browser access for app-level smoke",
+    "Real end-to-end pilot"
   ],
   "production_ingress_policy": "KEEP_INACTIVE_UNTIL_GATES_C_THROUGH_H_GREEN"
 }
