@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import fs from 'node:fs';
 import { compilePrecallScorecard } from '../precall-scorecard.mjs';
 import { compileCertifiedBriefPublication } from '../certified-publication-adapter.mjs';
+import { resolvePrecallScoreBasis } from '../precall-score-basis-resolver.mjs';
 
 const certification={
   schema_version:'CLARIS_PRECALL_CERTIFICATION_V1',
@@ -39,7 +40,15 @@ for(const fixture of fixtures){
       }))
     };
 
-    const scorecard=compilePrecallScorecard({score_basis:basis,prepare,discovery,certification});
+    const resolvedBasis=resolvePrecallScoreBasis({
+      score_basis:basis,
+      booking_text:booking,
+      consultant_sot:sot,
+      research_evidence:research,
+      prepare,
+      discovery
+    });
+    const scorecard=compilePrecallScorecard({score_basis:resolvedBasis,prepare,discovery,certification});
     assert.equal(scorecard.lead_fit.grade,fixture.expected.grade);
     assert.equal(scorecard.lead_fit.scorable_coverage,fixture.expected.coverage);
     assert.equal('evaluated_fit_rate' in scorecard.lead_fit,false);
