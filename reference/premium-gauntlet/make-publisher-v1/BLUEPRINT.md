@@ -10,7 +10,8 @@ Make MUST NOT:
 - decide discovery dimensions;
 - rewrite PREPARE or Discovery;
 - re-score the opportunity;
-- receive the consultant's full rich profile beyond the Runtime/SOT material already needed upstream;
+- receive the consultant's full rich profile or full consultant SOT;
+- synthesize certification flags;
 - construct public brief URLs itself;
 - persist raw private brief tokens.
 
@@ -32,7 +33,17 @@ Required:
 - company
 - premium_prepare_json
 - discovery_plan_json
-- consultant_sot_json
+- consultant_services_projection_json
+  - array of { service_id, name } only
+- budget_required_before_first_call
+  - boolean only
+- certification_json
+  - must already be produced by the upstream certified-publication path
+  - schema_version = CLARIS_PRECALL_CERTIFICATION_V1
+  - premium_semantic_pass = true
+  - discovery_semantic_pass = true
+  - premium_deterministic_pass = true
+  - discovery_deterministic_pass = true
 
 Optional presentation context:
 - consultant_first_name
@@ -41,29 +52,26 @@ Optional presentation context:
 - meeting_time
 - ttl_days (default 7)
 
-## Step 1 — Compile minimized publish-ready body
+Never accept the full consultant SOT when the minimized services projection and budget policy boolean are available.
+
+## Step 1 — Validate and map minimized publish-ready body
 
 Parse:
 - premium_prepare_json -> prepare
 - discovery_plan_json -> discovery
-- consultant_sot_json -> sot
+- consultant_services_projection_json -> services
+- certification_json -> certification
 
 Fail closed unless:
 - prepare.schema_version == CLARIS_PREMIUM_PREPARE_V3_6
 - discovery.schema_version == CLARIS_DISCOVERY_INTELLIGENCE_V1_2
+- certification.schema_version == CLARIS_PRECALL_CERTIFICATION_V1
+- all four certification pass flags are exactly true
+- services is a non-empty array containing only service_id + name
+- budget_required_before_first_call is boolean
 - opportunity_id, consultant_id, consultant_delivery_email, company are non-empty
 
-Project consultant policy to ONLY:
-- services[].service_id
-- services[].name
-- commercial_rules.budget_required_before_first_call
-
-Never send:
-- commercial floor amount
-- budget_rule text
-- private notes
-- margins/economics
-- profile-only calibration content
+Make must only transport the upstream certification envelope. It must not infer PASS from model text, invent missing gates, or coerce failed gates to true.
 
 Request body:
 ```json
@@ -88,9 +96,25 @@ Request body:
     "commercial_rules": {
       "budget_required_before_first_call": false
     }
+  },
+  "certification": {
+    "schema_version": "CLARIS_PRECALL_CERTIFICATION_V1",
+    "premium_semantic_pass": true,
+    "discovery_semantic_pass": true,
+    "premium_deterministic_pass": true,
+    "discovery_deterministic_pass": true
   }
 }
 ```
+
+Never send:
+- commercial floor amount
+- budget_rule text
+- private notes
+- margins/economics
+- profile-only calibration content
+- the full consultant SOT
+- audit chain-of-thought
 
 ## Step 2 — Publish through existing delivery gateway
 
@@ -101,15 +125,18 @@ HTTP:
 - X-Claris-Delivery: brief_publish_ready
 
 The gateway:
-1. preflights the consultant notification package;
-2. re-runs deterministic delivery validation;
-3. derives an idempotent publication identity from opportunity + consultant + certified artifact + validation policy;
-4. persists the private brief;
-5. creates the private fragment-token URL;
-6. returns the ready-to-send email package.
+1. verifies the certification envelope;
+2. preflights the consultant notification package;
+3. re-runs deterministic delivery validation;
+4. derives an idempotent publication identity from opportunity + consultant + certified artifact + validation policy;
+5. persists the private brief;
+6. creates the private fragment-token URL;
+7. returns the ready-to-send email package.
 
 Expected first response: HTTP 201.
 Expected identical retry: HTTP 200 with reused=true.
+
+Both are successful only when body.ok=true.
 
 Response fields used by Make:
 - publication_id
@@ -196,7 +223,7 @@ Revoked publication:
 Do not send Gmail when gateway returns:
 - 401 MAKE_UNAUTHORIZED
 - 410 BRIEF_PUBLICATION_REVOKED / BRIEF_PUBLICATION_EXPIRED
-- 422 deterministic artifact/policy validation error
+- 422 certification/artifact/policy validation error
 - 5xx packaging/storage error
 
 Do not fall back to old CONSULTANT_FINAL email if premium publication fails.
@@ -209,6 +236,7 @@ Publisher sandbox may be considered certified only after:
 3. Supabase gold publishes and sends once;
 4. identical retry skips duplicate email;
 5. changed meeting time reuses the same publication;
-6. bad economics-leak payload is rejected before persistence;
-7. revoked brief cannot be reopened or republished;
-8. production Calendly ingress remains inactive during certification.
+6. missing/false certification is rejected before persistence;
+7. bad economics-leak payload is rejected before persistence;
+8. revoked brief cannot be reopened or republished;
+9. production Calendly ingress remains inactive during certification.
