@@ -26,6 +26,18 @@ for(const fixture of fixtures){
     const prepare=JSON.parse(fs.readFileSync(new URL('premium-prepare.json',base),'utf8'));
     const discovery=JSON.parse(fs.readFileSync(new URL('discovery-plan.json',base),'utf8'));
     const basis=JSON.parse(fs.readFileSync(new URL('precall-score-basis.json',base),'utf8'));
+    const research={
+      schema_version:'CLARIS_PREMIUM_EVIDENCE_V1',
+      company:fixture.company,
+      booking_truth:booking,
+      findings:(prepare.expandable_blocks?.evidence||[]).map((e,i)=>({
+        evidence_id:`PE-${String(i+1).padStart(3,'0')}`,
+        category:'FIRST_PARTY',
+        fact:e.claims?.[0]||'',
+        source_url:e.sources?.[0]?.url||'',
+        source_type:e.sources?.[0]?.source_type||'FIRST_PARTY'
+      }))
+    };
 
     const scorecard=compilePrecallScorecard({score_basis:basis,prepare,discovery,certification});
     assert.equal(scorecard.lead_fit.grade,fixture.expected.grade);
@@ -51,7 +63,8 @@ for(const fixture of fixtures){
       discovery_audit:{audit_status:'PASS'},
       premium_validation:{ok:true,errors:[]},
       discovery_validation:{ok:true,errors:[]},
-      precall_score_basis:basis
+      precall_score_basis:basis,
+      precall_research_evidence:research
     });
 
     assert.equal(published.operation,'brief_publish_ready');
