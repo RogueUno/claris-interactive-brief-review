@@ -47,39 +47,57 @@ Executable promotion status:
 | Layer | State | Notes |
 |---|---|---|
 | Server repository/token/session model | CERTIFIED | Opaque tokens; SHA-256 token hash only; expiry; revocation; sessions never outlive brief. |
-| Secure brief service tests | CERTIFIED — GITHUB ACTIONS | Current explicit Node 22 brief suite passes 39/39. |
+| Secure brief service tests | CERTIFIED — GITHUB ACTIONS | Current explicit Node 22 brief suite passes 40/40. |
 | Deterministic delivery validator | CERTIFIED — GITHUB ACTIONS | Rejects uncertified schemas, unauthorized economics and invalid service mappings before persistence. |
 | Consolidated /api/delivery/package gateway | PREVIEW-BUILD GREEN | Multiplexed into existing API function to remain inside Vercel Hobby 12-function cap. |
 | Hobby function-cap regression | CERTIFIED BY DEPLOYMENT | Adding API function #13 failed; removing redundant /api/brief/* routes restored successful Vercel preview builds. |
 | brief_publish_ready one-call operation | CERTIFIED — GITHUB ACTIONS + VERCEL BUILD | Server preflights email, validates/persists brief, creates URL and returns CONSULTANT_BRIEF_READY package in one call. |
 | Orphan-link revocation hardening | CERTIFIED — GITHUB ACTIONS | Unexpected post-persist notification-packaging failure revokes the created brief; regression passes. |
-| Gateway integration suite | CERTIFIED — GITHUB ACTIONS | Explicit `npm run test:brief` completed 39/39 on branch head `9922fd59559ad3515bd2b0e901c2d6b9ae770bd9`, including create→resolve→session→data→revoke, publish-ready, idempotent reuse, notification preflight, orphan-link revocation, economics leakage rejection, invalid-service rejection, and Resend/Linear/Supabase publication paths. |
-| Browser private-link smoke test | DEPLOYMENT PROTECTED / APP TEST PENDING | App-level browser verification still requires access to the protected `claris-calibration` preview. Current connected Vercel account does not expose that project. This is an access limitation, not a failed CLARIS route. |
+| Gateway integration suite | CERTIFIED — GITHUB ACTIONS | Explicit `npm run test:brief` completed 40/40 on branch head `32b332535fb565f74b00de66db1f1b53ee6875d9`, including create→resolve→session→data→revoke, publish-ready, idempotent reuse, notification preflight, orphan-link revocation, economics leakage rejection, invalid-service rejection, and Resend/Linear/Supabase publication paths. |
+| Browser private-link smoke test | APP TEST PENDING | Correct Vercel project access is restored and automation bypass works for Make; interactive private-link browser smoke remains separate. |
 | Consultant web brief renderer | PREVIEW-BUILD GREEN | Displays executive readout, signals, live diagnostic map, call objective/targets, answer effects, call flow, end-of-call decisions and expandable E/R/U provenance. |
 | Brief-ready text email | PREVIEW-BUILD GREEN | Summary + max 3 questions + private URL; no full brief. |
 | Brief-ready HTML email | CERTIFIED CONTRACT / PREVIEW-BUILD GREEN | Restrained inline HTML, plain-text fallback and compact question list are covered by delivery integration tests; visual email-client verification remains later. |
 
 ## Make publisher
 
-Preferred future sandbox:
+Live sandbox:
 StartSubscenario
-→ one HTTP brief_publish_ready call
-→ Gmail
-→ receipt
+→ authenticated brief_publish_ready HTTP
+→ dedicated notification dedupe store
+→ Gmail using server-authored package only
+→ SENT marker
+→ minimal ReturnData receipt
 
-State: PENDING LIVE.
+State: CERTIFIED — LIVE SANDBOX.
 
-Reason:
-A fresh read-only Make fallback environment probe on 2026-09-27 still returned an internal connector error. Per operating rules, no repeated retries or alternate-account workaround was attempted.
+Live Make artifacts:
+- Publisher scenario: 7643611 — CLARIS Lab — Premium Brief Publisher V1
+- Receipt store: 199489 — CLARIS Premium Brief Delivery Receipts V1
+- Revoke certifier: 7644247 — CLARIS TEST — Premium Brief Revoke Certifier
+- Both scenarios are inactive after certification.
+- Execution history is confidential for the publisher.
+- Vercel Deployment Protection stays enabled; Make uses Vercel Protection Bypass for Automation.
 
-When connector recovers:
-1. create inactive sandbox publisher only;
-2. use existing CLARIS Make authorization;
-3. certify Supabase, Resend, Linear;
-4. verify Gmail HTML/text output;
-5. verify private link/session/revocation;
-6. only then consider wiring Production Booking Adapter;
-7. keep Calendly ingress inactive until full certification.
+Executed live evidence on 2026-09-27:
+1. Supabase gold → DELIVERED, first publication.
+2. Identical Supabase retry → reused=true + SKIPPED_DUPLICATE; no second Gmail.
+3. Supabase presentation-only meeting-time change → same publication + SKIPPED_DUPLICATE.
+4. Missing certification envelope → HTTP 422 before Gmail.
+5. Unauthorized economics target → HTTP 422 before Gmail.
+6. Resend gold → DELIVERED.
+7. Linear gold → DELIVERED.
+8. Supabase publication revoked through authenticated gateway.
+9. Retry after revocation → HTTP 410 Gone before Gmail.
+
+Publisher authority boundary:
+- Make accepts one upstream-certified minimized publish_ready_body_json.
+- Make does not reconstruct PREPARE/Discovery, consultant policy, or certification.
+- Full consultant SOT is not accepted.
+- Private brief URL/token is not persisted in the Make receipt store.
+- notification_dedupe_key is written only after Gmail succeeds.
+
+Production Booking Adapter and Calendly ingress remain untouched/unwired.
 
 ## Payment/model status
 
@@ -90,13 +108,14 @@ Model upgrade remains a quality/reliability benchmark decision after the determi
 
 ## Current blockers
 
-External/integration only:
-1. Make fallback connector internal error.
-2. Live V3.6 + Discovery V1.2 model/runtime certification in Make.
-3. Make Publisher V1 live scenario execution.
-4. Protected Vercel preview prevents direct app-level browser smoke with the currently connected Vercel account.
-5. Real end-to-end consultant pilot.
+Remaining:
+1. Live Premium PREPARE V3.6 model/runtime certification in Make.
+2. Live Discovery Intelligence V1.2 model/runtime certification in Make.
+3. Interactive private-link browser smoke.
+4. Real end-to-end consultant pilot.
+5. Production promotion decision only after those gates are green.
 
+Make Publisher V1 itself is no longer a blocker.
 No current blocker requires modifying frozen production PREPARE/FINALIZE or activating Calendly.
 
 ## Repository reproducibility update
@@ -117,10 +136,10 @@ package.json exposes:
 
 Latest same-head CI evidence:
 - `npm run test:premium`: PASS
-- `npm run test:brief`: 39/39 PASS
+- `npm run test:brief`: 40/40 PASS
 - broader branch server suite: no new failures versus main baseline
 - GitHub Actions run 203: SUCCESS
 - matching Vercel preview build on `9922fd59559ad3515bd2b0e901c2d6b9ae770bd9`: SUCCESS
 - API function footprint remains 12
 
-The remaining critical gap is live Make model/publisher execution and then real-pilot evidence, not server-side publication architecture.
+The remaining critical gap is live Make PREPARE/Discovery model-runtime certification, interactive brief smoke, and then real-pilot evidence. Publisher execution is certified.
