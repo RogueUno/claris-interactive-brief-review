@@ -105,7 +105,7 @@ test('compiles traceable scorecard while keeping raw scoring basis out of public
       source_authority:{status:'COMPLETE',basis_ids:['PE-001'],reason:'First-party evidence dominates.'},
       corroboration_depth:{status:'PARTIAL',basis_ids:['PE-002'],reason:'Some claims have one authoritative source.'},
       freshness:{status:'MISSING',basis_ids:[],reason:'No explicit freshness metadata is attached.'},
-      conflict_ambiguity_control:{status:'COMPLETE',basis_ids:['PE-003'],reason:'Conflicts are bounded.'}
+      conflict_ambiguity_control:{status:'MISSING',basis_ids:[],reason:'No reasoning/unknown provenance is attached in this minimal fixture.'}
     },
     basis_resolution:{all_scored_basis_resolvable:true,unresolved_basis_ids:[]}
   };
