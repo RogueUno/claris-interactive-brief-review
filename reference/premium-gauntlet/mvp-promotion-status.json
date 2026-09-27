@@ -1,7 +1,7 @@
 {
   "schema_version": "CLARIS_MVP_PROMOTION_GATE_V1",
   "candidate_branch": "premium-gauntlet-v3-1",
-  "candidate_head": "e80d237a9f71e59d787e7c9ce98447a16b3320af",
+  "candidate_head": "5121676f6c3ad8508df134dc2afc5f8658171989",
   "gates": {
     "consultant_intelligence": {
       "status": "PASS"
@@ -28,14 +28,14 @@
       ]
     },
     "discovery_intelligence_v1_2": {
-      "status": "PARTIAL_LIVE",
+      "status": "PASS_LIVE_SANDBOX",
       "golden_fixtures": {
         "Supabase": "SEMANTIC_20_20_DETERMINISTIC_PASS",
         "Resend": "SEMANTIC_20_20_DETERMINISTIC_PASS",
-        "Linear": "SEMANTIC_20_20_PENDING_MAKE_VALIDATOR_MIRROR_RECHECK"
+        "Linear": "SEMANTIC_20_20_DETERMINISTIC_PASS"
       },
       "deterministic_validator_scenario_id": 7629432,
-      "blocker": "Make mirror regex accepts singular questionnaire only; versioned validator accepts plural questionnaires and regression test passes. Make write currently rate-limited."
+      "linear_final_revalidation_execution_id": "19d4ae1b0dfe4805bc1d5ebf4bd5781e"
     },
     "secure_private_brief": {
       "status": "PASS",
@@ -75,7 +75,6 @@
     }
   },
   "blockers": [
-    "Mirror plural D13 questionnaire validator rule into Make after rate-limit cooldown and revalidate Linear",
     "Interactive private-link browser smoke",
     "Real end-to-end pilot"
   ],
