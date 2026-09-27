@@ -1,4 +1,5 @@
 import { compileBriefPublishReady } from './publication-contract.mjs';
+import { compilePrecallScorecard } from './precall-scorecard.mjs';
 
 function parseMaybeJson(value, code) {
   if (value && typeof value === 'object') return value;
@@ -28,6 +29,21 @@ export function compileCertifiedBriefPublication(input = {}) {
   const premiumValidation = assertValidation(input.premium_validation, 'PREMIUM_VALIDATION_PASS_REQUIRED');
   const discoveryValidation = assertValidation(input.discovery_validation, 'DISCOVERY_VALIDATION_PASS_REQUIRED');
 
+  const certification = {
+    schema_version: 'CLARIS_PRECALL_CERTIFICATION_V1',
+    premium_semantic_pass: premiumAudit.audit_status === 'PASS',
+    discovery_semantic_pass: discoveryAudit.audit_status === 'PASS',
+    premium_deterministic_pass: premiumValidation.ok === true,
+    discovery_deterministic_pass: discoveryValidation.ok === true
+  };
+
+  const scoreBasis = input.precall_score_basis == null
+    ? null
+    : parseMaybeJson(input.precall_score_basis, 'PRECALL_SCORE_BASIS_INVALID');
+  const scorecard = scoreBasis
+    ? compilePrecallScorecard({ score_basis: scoreBasis, prepare, discovery, certification })
+    : null;
+
   const compiled = compileBriefPublishReady({
     opportunity_id: input.opportunity_id,
     consultant_id: input.consultant_id,
@@ -37,19 +53,13 @@ export function compileCertifiedBriefPublication(input = {}) {
     prospect_name: input.prospect_name,
     prospect_role: input.prospect_role,
     meeting_time: input.meeting_time,
+    booking_text: input.booking_text,
     ttl_days: input.ttl_days,
     prepare,
     discovery,
+    scorecard,
     consultant_sot: input.consultant_sot
   });
-
-  const certification = {
-    schema_version: 'CLARIS_PRECALL_CERTIFICATION_V1',
-    premium_semantic_pass: premiumAudit.audit_status === 'PASS',
-    discovery_semantic_pass: discoveryAudit.audit_status === 'PASS',
-    premium_deterministic_pass: premiumValidation.ok === true,
-    discovery_deterministic_pass: discoveryValidation.ok === true
-  };
 
   return {
     ...compiled,
