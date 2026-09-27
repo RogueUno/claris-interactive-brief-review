@@ -104,6 +104,14 @@ export function compilePrecallScorecard(input = {}) {
     return { ...def, ...item, points };
   });
   evidenceScore = round1(evidenceScore);
+  const strategySource = input.score_basis.corrected_strategy || {};
+  const strategy = {
+    recommended_action: text(strategySource.recommended_action) || null,
+    primary_service_id: text(strategySource.primary_service_id) || null,
+    qualification_status: text(strategySource.qualification_status) || null,
+    rationale: text(strategySource.rationale) || null
+  };
+
   return {
     schema_version: 'CLARIS_PRECALL_SCORECARD_V1',
     lead_fit: {
@@ -119,7 +127,8 @@ export function compilePrecallScorecard(input = {}) {
       descriptor: evidenceDescriptor(evidenceScore),
       dimensions: evidenceDimensions
     },
-    call_readiness: readiness(input.prepare, input.discovery, input.certification)
+    call_readiness: readiness(input.prepare, input.discovery, input.certification),
+    strategy
   };
 }
 export const precallScorecardContract = Object.freeze({
