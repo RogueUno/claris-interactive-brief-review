@@ -1,34 +1,41 @@
 {
   "schema_version": "CLARIS_MVP_PROMOTION_GATE_V1",
   "candidate_branch": "premium-gauntlet-v3-1",
-  "candidate_head": "32b332535fb565f74b00de66db1f1b53ee6875d9",
+  "candidate_head": "e80d237a9f71e59d787e7c9ce98447a16b3320af",
   "gates": {
     "consultant_intelligence": {
       "status": "PASS"
     },
     "premium_research": {
       "status": "PARTIAL",
-      "reason": "Gold/design pass; live model integration remains sandbox-only."
+      "reason": "Golden evidence packets certified; real pilot research path remains later."
     },
     "premium_prepare_v3_6": {
-      "status": "PARTIAL",
-      "golden_fixtures": [
-        "Resend",
-        "Linear",
-        "Supabase"
-      ],
-      "deterministic_gate": "PASS",
-      "live_make_model_certification": "PENDING"
+      "status": "PASS_LIVE_SANDBOX",
+      "deterministic_validator_scenario_id": 7644561,
+      "golden_fixtures": {
+        "Supabase": "SEMANTIC_PASS_DETERMINISTIC_PASS",
+        "Resend": "SEMANTIC_PASS_DETERMINISTIC_PASS",
+        "Linear": "SEMANTIC_PASS_DETERMINISTIC_PASS"
+      },
+      "structural_hardening": [
+        "structured_output_schema",
+        "planner_json_parse_gate",
+        "provenance_normalizer",
+        "bounded_markdown_only_repair",
+        "repair_mutation_guard",
+        "audit_json_parse_gate"
+      ]
     },
     "discovery_intelligence_v1_2": {
-      "status": "PARTIAL",
-      "golden_fixtures": [
-        "Resend",
-        "Linear",
-        "Supabase"
-      ],
-      "deterministic_gate": "PASS",
-      "live_make_model_certification": "PENDING"
+      "status": "PARTIAL_LIVE",
+      "golden_fixtures": {
+        "Supabase": "SEMANTIC_20_20_DETERMINISTIC_PASS",
+        "Resend": "SEMANTIC_20_20_DETERMINISTIC_PASS",
+        "Linear": "SEMANTIC_20_20_PENDING_MAKE_VALIDATOR_MIRROR_RECHECK"
+      },
+      "deterministic_validator_scenario_id": 7629432,
+      "blocker": "Make mirror regex accepts singular questionnaire only; versioned validator accepts plural questionnaires and regression test passes. Make write currently rate-limited."
     },
     "secure_private_brief": {
       "status": "PASS",
@@ -68,8 +75,7 @@
     }
   },
   "blockers": [
-    "Live Premium PREPARE V3.6 model/runtime certification in Make",
-    "Live Discovery Intelligence V1.2 model/runtime certification in Make",
+    "Mirror plural D13 questionnaire validator rule into Make after rate-limit cooldown and revalidate Linear",
     "Interactive private-link browser smoke",
     "Real end-to-end pilot"
   ],
