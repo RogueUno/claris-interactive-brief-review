@@ -32,6 +32,12 @@ function assertSchemas(prepare, discovery) {
   if (discovery?.schema_version !== 'CLARIS_DISCOVERY_INTELLIGENCE_V1_2') throw new Error('DISCOVERY_V1_2_REQUIRED');
 }
 
+function briefPayload(prepare, discovery, scorecard) {
+  if (scorecard == null) return { prepare, discovery };
+  if (scorecard?.schema_version !== 'CLARIS_PRECALL_SCORECARD_V1') throw new Error('PRECALL_SCORECARD_V1_REQUIRED');
+  return { prepare, discovery, scorecard };
+}
+
 export function compileBriefPublication(input = {}) {
   const consultantId = required(input.consultant_id, 'CONSULTANT_ID_REQUIRED');
   const company = required(input.company, 'COMPANY_REQUIRED');
@@ -46,7 +52,7 @@ export function compileBriefPublication(input = {}) {
       consultant_id: consultantId,
       company,
       ttl_days: integerInRange(input.ttl_days, 1, 30, 7),
-      brief_payload: { prepare, discovery },
+      brief_payload: briefPayload(prepare, discovery, input.scorecard),
       validation_context: {
         services: serviceProjection(consultantSot),
         commercial_rules: {
@@ -79,8 +85,9 @@ export function compileBriefPublishReady(input = {}) {
       prospect_name: text(input.prospect_name) || null,
       prospect_role: text(input.prospect_role) || null,
       meeting_time: text(input.meeting_time) || null,
+      booking_text: text(input.booking_text) || null,
       ttl_days: integerInRange(input.ttl_days, 1, 30, 7),
-      brief_payload: { prepare, discovery },
+      brief_payload: briefPayload(prepare, discovery, input.scorecard),
       validation_context: {
         services: serviceProjection(consultantSot),
         commercial_rules: {
