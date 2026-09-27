@@ -169,3 +169,15 @@ test('publication identity ignores JSON object key order', async()=>{
   assert.equal(first.token,second.token);
   assert.equal(second.reused,true);
 });
+
+
+test('presentation-only booking context can update an idempotent publication without changing identity', async()=>{
+  const storage=memoryStorage();
+  const service=createBriefService({repository:createBriefRepository(storage),sessionSecret:secret});
+  const baseInput={opportunityId:'opp_context_1',consultantId:'consultant_test_1',company:'Acme',payload,validationContext,ttlMs:86400000};
+  const first=await service.publish({...baseInput,context:{prospect_name:'Alex',booking_text:'Initial booking request.'}},{now:1000});
+  const second=await service.publish({...baseInput,context:{prospect_name:'Alex',booking_text:'Expanded booking request with more detail.'}},{now:2000});
+  assert.equal(second.reused,true);
+  assert.equal(second.publication_id,first.publication_id);
+  assert.equal(second.brief.context.booking_text,'Expanded booking request with more detail.');
+});
