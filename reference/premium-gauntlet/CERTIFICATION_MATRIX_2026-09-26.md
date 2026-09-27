@@ -22,12 +22,12 @@
 |---|---|---|
 | Premium Research first-party-first | STRUCTURALLY GREEN | Resend live search-first retrieval proved domain-first evidence quality. Search-first design replaces raw crawl for premium path. |
 | Evidence Curator | STRUCTURALLY GREEN | Resend compact packet reached 7/7 first-party findings and materially reduced prompt tokens. |
-| Premium PREPARE V3.6 authority contract | LIVE PARTIAL — 3/3 PREPARE FIXTURES PASS | Supabase, Resend and Linear now pass semantic + deterministic V3.6 gates in Make. Live sandbox adds real JSON syntax gates, structured Gemini output, deterministic provenance normalization, and bounded markdown-only repair. |
+| Premium PREPARE V3.6 authority contract | CERTIFIED — LIVE SANDBOX 3/3 | Supabase, Resend and Linear now pass semantic + deterministic V3.6 gates in Make. Live sandbox adds real JSON syntax gates, structured Gemini output, deterministic provenance normalization, and bounded markdown-only repair. |
 | Discovery Intent Catalog — 15 families | CERTIFIED + VERSIONED | Machine-readable 15-intent catalog and human-readable ontology contract are versioned on the premium branch. |
 | Authorized Dimensions Compiler | CERTIFIED + VERSIONED | PREPARE + explicit consultant policy compile deterministic writable dimensions. Compiler + portable regression test are versioned. |
 | Discovery Plan Skeleton Compiler | CERTIFIED + VERSIONED | Model receives authorized question slots rather than deciding what may be asked. Compiler + portable regression test are versioned. |
 | Discovery deterministic validator | CERTIFIED + VERSIONED | Rejects economics leakage, invalid services, bad branch authority and capability-as-disqualifier failures. Validator + regression test are versioned. |
-| Discovery semantic model path | LIVE PARTIAL — 2/3 FULLY CERTIFIED | Supabase and Resend pass semantic + deterministic Discovery V1.2 gates. Linear semantic audit passes 20/20; final deterministic revalidation is pending only because the Make mirror validator has a stale singular-only questionnaire regex and Make is currently rate-limiting writes. Versioned repo validator already accepts plural questionnaires, with regression coverage added. |
+| Discovery semantic model path | CERTIFIED — LIVE SANDBOX 3/3 | Supabase, Resend and Linear all pass semantic + deterministic Discovery V1.2 gates. Linear final revalidation passed unchanged after mirroring the versioned plural-questionnaire branch rule into Make. |
 
 ## Golden fixtures
 
@@ -94,7 +94,7 @@ Discovery V1.2 hardening:
 Live Discovery results:
 - Supabase: semantic 20/20 PASS + deterministic PASS.
 - Resend: semantic 20/20 PASS + deterministic PASS.
-- Linear: semantic 20/20 PASS. The generated D13 probe is semantically authorized by “security questionnaires”; the Make validator copy incorrectly rejects plural questionnaires because of a word-boundary regex. The versioned repo validator already accepts it, and run 222 certifies a dedicated plural-questionnaire regression test. Final Make mirror revalidation is pending after Make rate-limit cooldown.
+- Linear: semantic 20/20 PASS + deterministic PASS after correcting Make validator drift for plural security questionnaires. The unchanged Linear Discovery artifact revalidated with zero errors.
 
 ## Make publisher
 
@@ -146,10 +146,9 @@ Model upgrade remains a quality/reliability benchmark decision after the determi
 ## Current blockers
 
 Remaining:
-1. Mirror the already-correct plural D13 questionnaire validator rule into Make after rate-limit cooldown and revalidate unchanged Linear Discovery output.
-2. Interactive private-link browser smoke.
-3. Real end-to-end consultant pilot.
-4. Production promotion decision only after those gates are green.
+1. Interactive private-link browser smoke.
+2. Real end-to-end consultant pilot.
+3. Production promotion decision only after those gates are green.
 
 Make Publisher V1 itself is no longer a blocker.
 No current blocker requires modifying frozen production PREPARE/FINALIZE or activating Calendly.
@@ -178,4 +177,4 @@ Latest same-head CI evidence:
 - matching Vercel preview build on `9922fd59559ad3515bd2b0e901c2d6b9ae770bd9`: SUCCESS
 - API function footprint remains 12
 
-The remaining model-runtime gap is one Make-validator mirror revalidation for Linear; Supabase and Resend are fully live-certified and all three PREPARE fixtures pass. After that, the critical path is interactive brief smoke and a real pilot.
+Live PREPARE and Discovery model-runtime certification is complete across Supabase, Resend and Linear. The critical path is now interactive brief smoke and a real pilot.
