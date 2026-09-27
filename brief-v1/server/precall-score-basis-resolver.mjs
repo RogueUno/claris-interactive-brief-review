@@ -36,12 +36,13 @@ export function resolvePrecallScoreBasis(input={}){
   for(const key of MATCH_KEYS){
     const node=fit[key];
     if(!node || !MATCH_STATUSES.has(text(node.status))) fail('MATCH_STATUS_INVALID',key);
-    node.basis_ids=normalizeIds(node.basis_ids);
+    node.basis_ids=node.status==='UNKNOWN' ? [] : normalizeIds(node.basis_ids);
     requireReason(node,key);
     requireIds(node,key,'UNKNOWN');
   }
   for(const key of COMPLETENESS_KEYS){
     const node=completeness[key];
+    if(node?.status==='MISSING') node.basis_ids=[];
     if(!node || !COMPLETENESS_STATUSES.has(text(node.status))) fail('COMPLETENESS_STATUS_INVALID',key);
     node.basis_ids=normalizeIds(node.basis_ids);
     requireReason(node,key);
