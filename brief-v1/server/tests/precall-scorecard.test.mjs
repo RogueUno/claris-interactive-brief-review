@@ -35,10 +35,10 @@ const certification = {
 };
 test('reproduces frozen weighting and excludes UNKNOWN from evaluated-fit denominator',()=>{
   const r=compilePrecallScorecard({score_basis,prepare,discovery,certification});
-  assert.equal(r.lead_fit.supported_match,67.5);
   assert.equal(r.lead_fit.scorable_coverage,80);
-  assert.equal(r.lead_fit.evaluated_fit_rate,84.4);
   assert.equal(r.lead_fit.grade,'B');
+  assert.equal('evaluated_fit_rate' in r.lead_fit,false);
+  assert.equal('supported_match' in r.lead_fit,false);
   assert.equal(r.evidence_coverage.score,94);
   assert.equal(r.call_readiness.status,'READY');
   assert.equal(r.call_readiness.open_variables,3);
@@ -85,7 +85,7 @@ test('suppresses letter grade when less than 40 fit points are scorable',()=>{
   };
   const result=compilePrecallScorecard({score_basis:sparse,prepare,discovery,certification});
   assert.equal(result.lead_fit.scorable_coverage,30);
-  assert.equal(result.lead_fit.evaluated_fit_rate,50);
   assert.equal(result.lead_fit.grade,null);
+  assert.equal('evaluated_fit_rate' in result.lead_fit,false);
   assert.equal(result.lead_fit.descriptor,'Early evaluated signal');
 });
