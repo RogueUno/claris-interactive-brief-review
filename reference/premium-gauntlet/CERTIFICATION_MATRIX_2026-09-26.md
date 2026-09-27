@@ -46,15 +46,15 @@ Executable promotion status:
 
 | Layer | State | Notes |
 |---|---|---|
-| Server repository/token/session model | CERTIFIED LOCALLY | Opaque tokens; SHA-256 token hash only; expiry; revocation; sessions never outlive brief. |
-| Secure brief service tests | CERTIFIED LOCALLY | Earlier private-brief service suite passed locally, including revocation and fail-closed validation. |
-| Deterministic delivery validator | CERTIFIED LOCALLY | Rejects uncertified schemas, unauthorized economics and invalid service mappings before persistence. |
+| Server repository/token/session model | CERTIFIED | Opaque tokens; SHA-256 token hash only; expiry; revocation; sessions never outlive brief. |
+| Secure brief service tests | CERTIFIED — GITHUB ACTIONS | Current explicit Node 22 brief suite passes 39/39. |
+| Deterministic delivery validator | CERTIFIED — GITHUB ACTIONS | Rejects uncertified schemas, unauthorized economics and invalid service mappings before persistence. |
 | Consolidated /api/delivery/package gateway | PREVIEW-BUILD GREEN | Multiplexed into existing API function to remain inside Vercel Hobby 12-function cap. |
 | Hobby function-cap regression | CERTIFIED BY DEPLOYMENT | Adding API function #13 failed; removing redundant /api/brief/* routes restored successful Vercel preview builds. |
-| brief_publish_ready one-call operation | CERTIFIED — GITHUB ACTIONS + VERCEL BUILD | Server preflights email, validates/persists brief, creates URL and returns CONSULTANT_BRIEF_READY package in one call. Clean Node 22 integration run passed. |
-| Orphan-link revocation hardening | CERTIFIED — GITHUB ACTIONS | Unexpected post-persist notification-packaging failure revokes the created brief; clean-run regression passed. |
-| Gateway integration suite | CERTIFIED — GITHUB ACTIONS | Node 22 clean runner executed 18/18 brief/gateway/publication tests successfully, including legacy delivery compatibility, create→resolve→session→data→revoke, publish-ready, notification preflight, orphan-link revocation, economics leakage rejection and invalid service rejection. |
-| Browser private-link smoke test | DEPLOYMENT PROTECTED / APP TEST PENDING | Branch alias resolves HTTP 200, but GitHub smoke sees Vercel's Login – Vercel interstitial. App-level browser verification therefore requires Vercel preview access/bypass. This is an access limitation, not a failed CLARIS route. |
+| brief_publish_ready one-call operation | CERTIFIED — GITHUB ACTIONS + VERCEL BUILD | Server preflights email, validates/persists brief, creates URL and returns CONSULTANT_BRIEF_READY package in one call. |
+| Orphan-link revocation hardening | CERTIFIED — GITHUB ACTIONS | Unexpected post-persist notification-packaging failure revokes the created brief; regression passes. |
+| Gateway integration suite | CERTIFIED — GITHUB ACTIONS | Explicit `npm run test:brief` completed 39/39 on branch head `9922fd59559ad3515bd2b0e901c2d6b9ae770bd9`, including create→resolve→session→data→revoke, publish-ready, idempotent reuse, notification preflight, orphan-link revocation, economics leakage rejection, invalid-service rejection, and Resend/Linear/Supabase publication paths. |
+| Browser private-link smoke test | DEPLOYMENT PROTECTED / APP TEST PENDING | App-level browser verification still requires access to the protected `claris-calibration` preview. Current connected Vercel account does not expose that project. This is an access limitation, not a failed CLARIS route. |
 | Consultant web brief renderer | PREVIEW-BUILD GREEN | Displays executive readout, signals, live diagnostic map, call objective/targets, answer effects, call flow, end-of-call decisions and expandable E/R/U provenance. |
 | Brief-ready text email | PREVIEW-BUILD GREEN | Summary + max 3 questions + private URL; no full brief. |
 | Brief-ready HTML email | CERTIFIED CONTRACT / PREVIEW-BUILD GREEN | Restrained inline HTML, plain-text fallback and compact question list are covered by delivery integration tests; visual email-client verification remains later. |
@@ -70,7 +70,7 @@ StartSubscenario
 State: PENDING LIVE.
 
 Reason:
-Make fallback connector is currently globally unavailable for this account surface: both scenario_get and scenario_list return internal tool errors. This is not isolated to one CLARIS scenario. Alternate Make connector is not linked to the required account. No production workaround has been attempted.
+A fresh read-only Make fallback environment probe on 2026-09-27 still returned an internal connector error. Per operating rules, no repeated retries or alternate-account workaround was attempted.
 
 When connector recovers:
 1. create inactive sandbox publisher only;
@@ -92,15 +92,16 @@ Model upgrade remains a quality/reliability benchmark decision after the determi
 
 External/integration only:
 1. Make fallback connector internal error.
-2. Direct preview browser smoke test blocked by Vercel connector scope for claris-calibration.
-3. Direct app-level preview smoke is blocked by Vercel preview protection; server/build/integration tests are green.
+2. Live V3.6 + Discovery V1.2 model/runtime certification in Make.
+3. Make Publisher V1 live scenario execution.
+4. Protected Vercel preview prevents direct app-level browser smoke with the currently connected Vercel account.
+5. Real end-to-end consultant pilot.
 
 No current blocker requires modifying frozen production PREPARE/FINALIZE or activating Calendly.
 
+## Repository reproducibility update
 
-## Repository reproducibility update — 2026-09-26 evening
-
-The premium branch now contains the deterministic core required by the Supabase regression suite:
+The premium branch contains the deterministic core:
 - authorized-dimensions-compiler.mjs + test
 - discovery-plan-skeleton-compiler.mjs + test
 - discovery-validator-v12.mjs + test
@@ -110,41 +111,16 @@ The premium branch now contains the deterministic core required by the Supabase 
 - discovery-ontology-v1.md
 - complete Supabase fixture: booking, consultant SOT, source manifest, Premium PREPARE gold, Discovery V1.2 gold, Discovery skeleton
 
-package.json now exposes:
-`npm run test:premium`
+package.json exposes:
+- `npm run test:premium`
+- `npm run test:brief`
 
-The branch CI runs:
-1. `npm run test:premium`
-2. `npm run test:brief`
+Latest same-head CI evidence:
+- `npm run test:premium`: PASS
+- `npm run test:brief`: 39/39 PASS
+- broader branch server suite: no new failures versus main baseline
+- GitHub Actions run 203: SUCCESS
+- matching Vercel preview build on `9922fd59559ad3515bd2b0e901c2d6b9ae770bd9`: SUCCESS
+- API function footprint remains 12
 
-Latest direct executable proof from the recovery checkpoint after portable-path correction:
-- tests: 4
-- pass: 4
-- fail: 0
-
-This proof covers the deterministic Premium/Discovery core. It does not substitute for the still-pending live Make model/runtime certification or live private-link browser smoke test.
-
-
-## Evening certification update — secure delivery
-
-Current premium branch head has all of:
-- Vercel preview build: SUCCESS
-- Node 22 GitHub Actions brief suite: 18/18 PASS
-- branch HTTP smoke: preview alias resolves, but content is Vercel protected (Login – Vercel)
-- API function count: exactly 12, preserving Hobby compatibility
-- compileBriefPublishReady(): deterministic minimized one-call publication body; strips minimum engagement, private notes, margins and unrelated consultant policy
-- brief_publish_ready: atomic server operation for validate → persist → secure URL → compact consultant delivery package
-
-Current Make handoff contract is therefore one authenticated HTTP call followed by Gmail, with no PREPARE/Discovery logic rebuilt in Make.
-
-
-## Certified baseline update — three-fixture publication
-
-Latest executable evidence on the premium branch:
-- npm run test:premium: 8/8 PASS, including the shared Resend / Linear / Supabase golden-fixture certification.
-- npm run test:brief: 23/23 PASS.
-- Resend, Linear and Supabase each complete validate → minimized publish-ready compile → private brief persistence → opaque fragment URL → HttpOnly session → payload load in the consolidated gateway regression.
-- Matching Vercel preview build: SUCCESS.
-- API function footprint remains exactly 12.
-
-The remaining critical external gap is live Make model/publisher execution, not server-side publication architecture.
+The remaining critical gap is live Make model/publisher execution and then real-pilot evidence, not server-side publication architecture.
