@@ -97,6 +97,23 @@
       "github_ci": "PASS",
       "vercel_preview": "READY",
       "scope_note": "Gold-fixture repeatability certified; universal semantic repeatability remains a real-pilot validation question."
+    },
+    "certified_brief_package_compiler_v1": {
+      "status": "PASS_LIVE_SANDBOX",
+      "scenario_id": 7649501,
+      "server_operation": "brief_compile_publish_ready",
+      "side_effect_free_compile": true,
+      "live_supabase_compile_execution_id": "4c0567018c0247788632b66947aa60b1",
+      "live_publisher_execution_id": "06f4c330e17149c1bc4675518ad115e1",
+      "live_publication_id": "pub_vhMKXVpf1f2LCkpWKUJalYzFDqYnBQ1Hrr8g",
+      "minimized_body": {
+        "raw_score_basis_leaked": false,
+        "raw_research_marker_leaked": false,
+        "commercial_floor_leaked": false,
+        "published_fit_percentage": false
+      },
+      "publisher_handoff": "PASS_DELIVERED",
+      "inactive_after_certification": true
     }
   },
   "blockers": [
