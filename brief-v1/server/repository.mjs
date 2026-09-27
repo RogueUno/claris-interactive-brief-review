@@ -24,7 +24,8 @@ function normalizeContext(value) {
     opportunity_id: compactText(value.opportunity_id, 128),
     prospect_name: compactText(value.prospect_name, 160),
     prospect_role: compactText(value.prospect_role, 160),
-    meeting_time: compactText(value.meeting_time, 128)
+    meeting_time: compactText(value.meeting_time, 128),
+    booking_text: compactText(value.booking_text, 4000)
   };
   return Object.values(context).some(Boolean) ? context : null;
 }
