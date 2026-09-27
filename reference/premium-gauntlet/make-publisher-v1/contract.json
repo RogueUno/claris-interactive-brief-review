@@ -1,55 +1,32 @@
 {
   "schema_version": "CLARIS_MAKE_PUBLISHER_V1",
   "operation": "brief_publish_ready",
-  "method": "POST",
-  "path": "/api/delivery/package",
-  "headers": {
-    "Authorization": "Bearer <CLARIS_MAKE_KEY>",
-    "Content-Type": "application/json",
-    "X-Claris-Delivery": "brief_publish_ready"
-  },
+  "role": "transport_only",
+  "scenario_id": 7643611,
+  "receipt_store_id": 199489,
   "required_inputs": [
-    "opportunity_id",
-    "consultant_id",
-    "consultant_delivery_email",
-    "company",
-    "premium_prepare_json",
-    "discovery_plan_json",
-    "consultant_services_projection_json",
-    "budget_required_before_first_call",
-    "certification_json"
+    "publish_ready_body_json"
   ],
   "forbidden_inputs": [
     "consultant_sot_json",
     "commercial_floor",
     "private_consultant_notes",
     "service_margins",
-    "audit_chain_of_thought"
+    "audit_chain_of_thought",
+    "raw_brief_token"
   ],
-  "certification_contract": {
-    "schema_version": "CLARIS_PRECALL_CERTIFICATION_V1",
-    "required_true_flags": [
-      "premium_semantic_pass",
-      "discovery_semantic_pass",
-      "premium_deterministic_pass",
-      "discovery_deterministic_pass"
-    ],
-    "source": "upstream_certified_publication_path",
-    "make_may_synthesize": false
+  "upstream_body_contract": {
+    "source": "compileCertifiedBriefPublication(...).body",
+    "make_may_reconstruct": false,
+    "make_may_synthesize_certification": false,
+    "certification_schema_version": "CLARIS_PRECALL_CERTIFICATION_V1"
   },
-  "validation_context_contract": {
-    "services": "service_id + name only",
-    "commercial_rules": {
-      "budget_required_before_first_call": "boolean only"
-    }
+  "request_contract": {
+    "method": "POST",
+    "path": "/api/delivery/package",
+    "header_operation": "brief_publish_ready",
+    "body_transport": "unchanged_serialized_json"
   },
-  "optional_inputs": [
-    "consultant_first_name",
-    "prospect_name",
-    "prospect_role",
-    "meeting_time",
-    "ttl_days"
-  ],
   "response_contract": {
     "first_publish_status": 201,
     "identical_retry_status": 200,
@@ -62,10 +39,15 @@
       "delivery"
     ]
   },
-  "receipt_key": "notification_dedupe_key",
+  "dedupe_contract": {
+    "key": "notification_dedupe_key",
+    "persistent_store_may_contain_private_url": false,
+    "gmail_runs_only_when_key_absent": true,
+    "receipt_written_only_after_gmail_success": true
+  },
   "scenario_settings": {
-    "keep_data_confidential": true,
-    "rely_on_incomplete_execution_payloads": false,
-    "persist_private_url_or_token": false
+    "confidential": true,
+    "on_demand": true,
+    "production_ingress_connected": false
   }
 }
