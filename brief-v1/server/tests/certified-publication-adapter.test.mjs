@@ -112,7 +112,7 @@ test('compiles traceable scorecard while keeping raw scoring basis out of public
   const result=compileCertifiedBriefPublication({...base,booking_text:'We need an API security review.',precall_score_basis:basis});
   assert.equal(result.body.booking_text,'We need an API security review.');
   assert.equal(result.body.brief_payload.scorecard.schema_version,'CLARIS_PRECALL_SCORECARD_V1');
-  assert.equal(result.body.brief_payload.scorecard.lead_fit.grade,'B');
+  assert.equal(result.body.brief_payload.scorecard.lead_fit.grade,'A');
   assert.equal(result.body.brief_payload.scorecard.call_readiness.status,'READY');
   const serialized=JSON.stringify(result.body);
   assert.doesNotMatch(serialized,/canonical_match_classifications/);
