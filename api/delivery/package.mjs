@@ -152,7 +152,8 @@ export function createDeliveryGateway({
           opportunity_id: body?.opportunity_id,
           prospect_name: body?.prospect_name,
           prospect_role: body?.prospect_role,
-          meeting_time: body?.meeting_time
+          meeting_time: body?.meeting_time,
+          booking_text: body?.booking_text
         },
         ttlMs: ttlMs(body)
       });
