@@ -448,3 +448,107 @@ test('revoked publish-ready publication stays revoked on retry', async () => {
   assert.equal(stored.context.prospect_role, 'VP Engineering');
   assert.equal(stored.context.meeting_time, '2026-09-30T14:00:00Z');
 });
+
+
+test('compile-only certified package stays side-effect free and feeds publish-ready unchanged', async () => {
+  const { gateway, storage } = setup();
+
+  const scoreBasis = {
+    gate_status: 'PASS',
+    canonical_match_classifications: {
+      service_need_alignment: {
+        status: 'MATCH',
+        basis_ids: ['BOOK-001', 'SOT:services'],
+        reason: 'Direct request maps to advisory.'
+      },
+      icp_company_fit: { status: 'UNKNOWN', basis_ids: [], reason: 'No ICP policy.' },
+      business_trigger: {
+        status: 'MATCH',
+        basis_ids: ['BOOK-001'],
+        reason: 'The prospect needs the review before launch.'
+      },
+      buyer_stakeholder_fit: { status: 'UNKNOWN', basis_ids: [], reason: 'No buyer evidence.' },
+      engagement_economics: { status: 'UNKNOWN', basis_ids: [], reason: 'No economics evidence.' },
+      timing_urgency: { status: 'UNKNOWN', basis_ids: [], reason: 'No separate timing score.' },
+      expansion_potential: { status: 'UNKNOWN', basis_ids: [], reason: 'No expansion evidence.' }
+    },
+    canonical_completeness_classifications: {
+      critical_question_coverage: { status: 'COMPLETE', basis_ids: ['D1'], reason: 'Open dimension is mapped.' },
+      source_authority: { status: 'COMPLETE', basis_ids: ['PE-001'], reason: 'First-party source.' },
+      corroboration_depth: { status: 'PARTIAL', basis_ids: ['PE-001'], reason: 'Single authoritative source.' },
+      freshness: { status: 'MISSING', basis_ids: [], reason: 'No freshness metadata.' },
+      conflict_ambiguity_control: { status: 'MISSING', basis_ids: [], reason: 'No R/U fixture in this minimal case.' }
+    },
+    corrected_strategy: {
+      recommended_action: 'Run the scoped discovery call.',
+      primary_service_id: 'SVC_ADVISORY',
+      qualification_status: 'PROMISING',
+      rationale: 'Direct need and trigger are present.'
+    },
+    basis_resolution: { all_scored_basis_resolvable: true, unresolved_basis_ids: [] }
+  };
+
+  const compileInput = {
+    opportunity_id: 'opp_compile_publish_1',
+    consultant_id: 'consultant_test_1',
+    consultant_delivery_email: 'sarah@example.com',
+    consultant_first_name: 'Sarah',
+    company: 'Acme',
+    prospect_name: 'Alex Morgan',
+    prospect_role: 'VP Engineering',
+    meeting_time: '2026-09-30T14:00:00Z',
+    booking_text: 'Need an advisory API security review before launch.',
+    ttl_days: 7,
+    prepare: payload.prepare,
+    discovery: payload.discovery,
+    consultant_sot: {
+      services: [{ service_id: 'SVC_ADVISORY', name: 'Advisory vCISO', private_margin_percent: 72 }],
+      commercial_rules: {
+        budget_required_before_first_call: false,
+        minimum_viable_engagement_usd: 7500
+      }
+    },
+    premium_audit: { audit_status: 'PASS' },
+    discovery_audit: { audit_status: 'PASS' },
+    premium_validation: { ok: true, errors: [] },
+    discovery_validation: { ok: true, errors: [] },
+    precall_score_basis: scoreBasis,
+    precall_research_evidence: {
+      schema_version: 'CLARIS_PREMIUM_EVIDENCE_V1',
+      company: 'Acme',
+      findings: [{
+        evidence_id: 'PE-001',
+        category: 'FIRST_PARTY',
+        fact: 'Acme publishes an API security page.',
+        source_url: 'https://acme.example/security',
+        source_type: 'FIRST_PARTY'
+      }]
+    }
+  };
+
+  const compile = await gateway.fetch(request('brief_compile_publish_ready', compileInput, { auth: true }));
+  assert.equal(compile.status, 200);
+  const compiled = await body(compile);
+  assert.equal(compiled.ok, true);
+  assert.equal(compiled.operation, 'brief_publish_ready');
+  assert.equal(storage.data.size, 0);
+
+  const publishBody = JSON.parse(compiled.publish_ready_body_json);
+  assert.equal(publishBody.brief_payload.scorecard.lead_fit.grade, 'A');
+  assert.equal(publishBody.brief_payload.scorecard.lead_fit.scorable_coverage, 45);
+  assert.equal('evaluated_fit_rate' in publishBody.brief_payload.scorecard.lead_fit, false);
+
+  const serialized = compiled.publish_ready_body_json;
+  assert.equal(serialized.includes('canonical_match_classifications'), false);
+  assert.equal(serialized.includes('Acme publishes an API security page.'), false);
+  assert.equal(serialized.includes('private_margin_percent'), false);
+  assert.equal(serialized.includes('7500'), false);
+
+  const publish = await gateway.fetch(request('brief_publish_ready', publishBody, { auth: true }));
+  assert.equal(publish.status, 201);
+  const result = await body(publish);
+  assert.equal(result.ok, true);
+  assert.equal(result.delivery.kind, 'CONSULTANT_BRIEF_READY');
+  assert.equal(result.delivery.to, 'sarah@example.com');
+  assert.equal(result.brief.brief_id.startsWith('pub_'), true);
+});
