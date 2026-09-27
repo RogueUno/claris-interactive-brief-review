@@ -145,9 +145,7 @@ export function compilePrecallScorecard(input = {}) {
     lead_fit: {
       grade: gradeFor(evaluatedFitRate, scorableCoverage),
       descriptor: fitDescriptor(evaluatedFitRate, scorableCoverage),
-      supported_match: supportedMatch,
       scorable_coverage: scorableCoverage,
-      evaluated_fit_rate: evaluatedFitRate,
       dimensions: fitDimensions
     },
     evidence_coverage: {
