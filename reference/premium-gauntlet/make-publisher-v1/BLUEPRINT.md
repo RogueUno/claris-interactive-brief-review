@@ -4,239 +4,157 @@ Status: sandbox contract only. Do not activate production ingress.
 
 ## Goal
 
-Publish one already-certified Premium PREPARE V3.6 + Discovery Intelligence V1.2 artifact, receive one private brief link plus one compact consultant email package, and send that email exactly once as far as the Make runtime can reasonably guarantee.
+Make is a transport-only publisher for an already-certified private brief request.
+
+It receives one upstream-produced `publish_ready_body_json`, posts it unchanged to the certified delivery gateway, dedupes notification delivery, sends the server-authored consultant email, and returns a minimal receipt.
 
 Make MUST NOT:
 - decide discovery dimensions;
 - rewrite PREPARE or Discovery;
 - re-score the opportunity;
-- receive the consultant's full rich profile or full consultant SOT;
+- receive or reconstruct the full consultant SOT;
 - synthesize certification flags;
-- construct public brief URLs itself;
-- persist raw private brief tokens.
+- rebuild the publish-ready body field-by-field;
+- construct private brief URLs itself;
+- persist raw private brief URLs/tokens.
+
+## Upstream authority
+
+`publish_ready_body_json` MUST already be the serialized `body` emitted by the certified publication adapter.
+
+The upstream adapter is responsible for:
+- PREPARE V3.6 schema enforcement;
+- Discovery V1.2 schema enforcement;
+- consultant-policy minimization;
+- service projection to `service_id + name` only;
+- `budget_required_before_first_call` boolean only;
+- certification envelope;
+- all four PASS gates.
+
+Make transports this body unchanged.
 
 ## Mandatory scenario settings
 
-- **Keep data confidential: YES.** The publish response/email package contains a private fragment-token URL. Do not retain module input/output payloads in Make execution history.
-- Do not rely on incomplete-execution payload recovery for this scenario. If a run fails, rerun from the upstream certified opportunity state; publication idempotency will reuse the same brief for unchanged artifacts.
-- Keep production publisher inactive until Gate G certification.
-- Do not place the private URL/token in persistent Make variables, notes, or generic data stores. Only the notification receipt stores the dedupe key/publication id, never the raw URL.
-
-Reference: Make Scenario settings — https://help.make.com/scenario-settings
+- Keep data confidential: YES.
+- On-demand only.
+- Do not rely on incomplete-execution payload recovery.
+- Do not persist the private URL/token in Make Data Stores.
+- Keep production Calendly ingress inactive until Gate G/H certification.
 
 ## Scenario input
 
 Required:
-- opportunity_id
-- consultant_id
-- consultant_delivery_email
-- company
-- premium_prepare_json
-- discovery_plan_json
-- consultant_services_projection_json
-  - array of { service_id, name } only
-- budget_required_before_first_call
-  - boolean only
-- certification_json
-  - must already be produced by the upstream certified-publication path
-  - schema_version = CLARIS_PRECALL_CERTIFICATION_V1
-  - premium_semantic_pass = true
-  - discovery_semantic_pass = true
-  - premium_deterministic_pass = true
-  - discovery_deterministic_pass = true
+- `publish_ready_body_json` — one valid JSON document from the certified upstream adapter.
 
-Optional presentation context:
-- consultant_first_name
-- prospect_name
-- prospect_role
-- meeting_time
-- ttl_days (default 7)
+No other intelligence/profile inputs are accepted by the publisher.
 
-Never accept the full consultant SOT when the minimized services projection and budget policy boolean are available.
-
-## Step 1 — Validate and map minimized publish-ready body
-
-Parse:
-- premium_prepare_json -> prepare
-- discovery_plan_json -> discovery
-- consultant_services_projection_json -> services
-- certification_json -> certification
-
-Fail closed unless:
-- prepare.schema_version == CLARIS_PREMIUM_PREPARE_V3_6
-- discovery.schema_version == CLARIS_DISCOVERY_INTELLIGENCE_V1_2
-- certification.schema_version == CLARIS_PRECALL_CERTIFICATION_V1
-- all four certification pass flags are exactly true
-- services is a non-empty array containing only service_id + name
-- budget_required_before_first_call is boolean
-- opportunity_id, consultant_id, consultant_delivery_email, company are non-empty
-
-Make must only transport the upstream certification envelope. It must not infer PASS from model text, invent missing gates, or coerce failed gates to true.
-
-Request body:
-```json
-{
-  "opportunity_id": "...",
-  "consultant_id": "...",
-  "consultant_delivery_email": "...",
-  "consultant_first_name": "...",
-  "company": "...",
-  "prospect_name": "...",
-  "prospect_role": "...",
-  "meeting_time": "...",
-  "ttl_days": 7,
-  "brief_payload": {
-    "prepare": {},
-    "discovery": {}
-  },
-  "validation_context": {
-    "services": [
-      {"service_id":"...","name":"..."}
-    ],
-    "commercial_rules": {
-      "budget_required_before_first_call": false
-    }
-  },
-  "certification": {
-    "schema_version": "CLARIS_PRECALL_CERTIFICATION_V1",
-    "premium_semantic_pass": true,
-    "discovery_semantic_pass": true,
-    "premium_deterministic_pass": true,
-    "discovery_deterministic_pass": true
-  }
-}
-```
-
-Never send:
-- commercial floor amount
-- budget_rule text
-- private notes
-- margins/economics
-- profile-only calibration content
-- the full consultant SOT
-- audit chain-of-thought
-
-## Step 2 — Publish through existing delivery gateway
+## Step 1 — Publish through delivery gateway
 
 HTTP:
-- POST /api/delivery/package
-- Authorization: Bearer <CLARIS_MAKE_KEY>
-- Content-Type: application/json
-- X-Claris-Delivery: brief_publish_ready
+- POST `/api/delivery/package`
+- authenticated with existing CLARIS Make credential
+- `Content-Type: application/json`
+- `X-Claris-Delivery: brief_publish_ready`
+- body = `publish_ready_body_json` unchanged
 
-The gateway:
-1. verifies the certification envelope;
-2. preflights the consultant notification package;
-3. re-runs deterministic delivery validation;
-4. derives an idempotent publication identity from opportunity + consultant + certified artifact + validation policy;
-5. persists the private brief;
-6. creates the private fragment-token URL;
-7. returns the ready-to-send email package.
+Expected first response:
+- HTTP 201
+- `ok=true`
+- `reused=false`
 
-Expected first response: HTTP 201.
-Expected identical retry: HTTP 200 with reused=true.
-
-Both are successful only when body.ok=true.
+Expected identical retry:
+- HTTP 200
+- `ok=true`
+- `reused=true`
 
 Response fields used by Make:
 - publication_id
 - reused
 - notification_dedupe_key
 - brief.brief_id
-- brief.brief_url
 - brief.expires_at
-- delivery.kind
 - delivery.to
 - delivery.subject
 - delivery.text_body
 - delivery.html_body
-- delivery.metadata
 
-Make MUST NOT extract/store the fragment token separately from brief.brief_url.
+The private URL may flow transiently inside the HTTP response/email body but MUST NOT be copied into a persistent Make store.
 
-## Step 3 — Notification dedupe check
+## Step 2 — Notification dedupe
 
-Use notification_dedupe_key as the stable receipt key.
+Dedicated store:
+- `CLARIS Premium Brief Delivery Receipts V1`
 
-Before Gmail send:
-- look up key in a dedicated CLARIS delivery receipt store;
-- if status=SENT, skip send and return existing receipt;
-- otherwise continue.
+Key:
+- `notification_dedupe_key`
 
-Do not reuse consultant Runtime/SOT keychain storage for notification receipts.
+If key exists:
+- skip Gmail
+- return `SKIPPED_DUPLICATE`
 
-Receipt record minimum:
-```json
-{
-  "notification_dedupe_key":"CONSULTANT_BRIEF_READY:pub_...",
-  "publication_id":"pub_...",
-  "opportunity_id":"...",
-  "status":"SENT",
-  "sent_at":"...",
-  "provider_message_id":"..."
-}
-```
+If key does not exist:
+- continue to Gmail
 
-## Step 4 — Gmail Send
+The store is intentionally key-only for the first certification pass. It must never contain the private URL/token or full intelligence payload.
 
-Map only the returned delivery package:
-- To = delivery.to
-- Subject = delivery.subject
-- HTML body = delivery.html_body
-- Plain fallback = delivery.text_body if module supports it
+## Step 3 — Gmail
 
-No Make-authored prose.
+Map only the server-authored delivery package:
+- To = `delivery.to`
+- Subject = `delivery.subject`
+- HTML body = `delivery.html_body`
 
-## Step 5 — Persist delivery receipt
+No Make-authored consultant copy.
 
-Only after Gmail confirms success:
-- write SENT receipt;
-- include provider message id when available.
+## Step 4 — Mark SENT
+
+Only after Gmail success:
+- add the `notification_dedupe_key` to the dedicated receipt store with overwrite disabled.
 
 If Gmail fails:
-- do not mark SENT;
-- surface failure for retry.
+- no receipt is written.
 
-## Retry semantics
+## Step 5 — Return receipt
 
-Same opportunity + same certified artifact:
-- same publication_id
-- same private brief URL
-- reused=true on retry
-- same notification_dedupe_key
+Return:
+- status
+- publication_id
+- reused
+- notification_dedupe_key
+- brief_id
+- expires_at
+- delivery_to
+- provider_message_id
 
-Changed certified PREPARE/Discovery/policy projection:
-- new publication_id
-- new private brief URL
+Do not return:
+- full brief payload
+- private URL/token
+- consultant profile/SOT
 
-Changed meeting time/prospect presentation context only:
-- same publication_id
-- same private URL
-- private brief context updates in place
+## Current live sandbox
 
-Revoked publication:
-- retry returns HTTP 410 BRIEF_PUBLICATION_REVOKED
-- never resurrect automatically
+Make scenario:
+- ID: 7643611
+- Name: CLARIS Lab — Premium Brief Publisher V1
+- Team: 2357105
+- State: INACTIVE
+- Confidential execution: enabled
+- Receipt store: 199489
 
-## Fail-closed branches
+First controlled Supabase fixture execution reached the HTTP module and failed `Unauthorized` before Gmail.
+The scenario was immediately deactivated.
 
-Do not send Gmail when gateway returns:
-- 401 MAKE_UNAUTHORIZED
-- 410 BRIEF_PUBLICATION_REVOKED / BRIEF_PUBLICATION_EXPIRED
-- 422 certification/artifact/policy validation error
-- 5xx packaging/storage error
-
-Do not fall back to old CONSULTANT_FINAL email if premium publication fails.
+Because the same CLARIS HTTP keychain is already used by known-good production-domain certifier scenarios, and `main` does not contain `brief_publish_ready`, the remaining live blocker is the protected Vercel branch preview boundary. Do not weaken production or redirect to `main` to bypass it.
 
 ## Promotion gate
 
-Publisher sandbox may be considered certified only after:
-1. Resend gold publishes and sends once;
-2. Linear gold publishes and sends once;
-3. Supabase gold publishes and sends once;
-4. identical retry skips duplicate email;
-5. changed meeting time reuses the same publication;
+Publisher sandbox is certified only after:
+1. Supabase gold publishes and sends once;
+2. Resend gold publishes and sends once;
+3. Linear gold publishes and sends once;
+4. identical retry skips duplicate Gmail;
+5. changed presentation context reuses the same publication;
 6. missing/false certification is rejected before persistence;
-7. bad economics-leak payload is rejected before persistence;
-8. revoked brief cannot be reopened or republished;
-9. production Calendly ingress remains inactive during certification.
+7. economics leakage is rejected before persistence;
+8. revoked publication cannot be resurrected;
+9. production Calendly ingress remains inactive throughout certification.
