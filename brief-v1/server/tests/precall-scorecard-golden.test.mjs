@@ -13,9 +13,9 @@ const certification={
 };
 
 const fixtures=[
-  {dir:'supabase-v1',company:'Supabase',expected:{grade:'A',fit:100,coverage:65,evidence:85}},
-  {dir:'resend-v3',company:'Resend',expected:{grade:null,fit:null,coverage:0,evidence:85}},
-  {dir:'linear-v1',company:'Linear',expected:{grade:'A',fit:100,coverage:45,evidence:85}}
+  {dir:'supabase-v1',company:'Supabase',expected:{grade:'A',coverage:65,evidence:85}},
+  {dir:'resend-v3',company:'Resend',expected:{grade:null,coverage:0,evidence:85}},
+  {dir:'linear-v1',company:'Linear',expected:{grade:'A',coverage:45,evidence:85}}
 ];
 
 for(const fixture of fixtures){
@@ -29,8 +29,9 @@ for(const fixture of fixtures){
 
     const scorecard=compilePrecallScorecard({score_basis:basis,prepare,discovery,certification});
     assert.equal(scorecard.lead_fit.grade,fixture.expected.grade);
-    assert.equal(scorecard.lead_fit.evaluated_fit_rate,fixture.expected.fit);
     assert.equal(scorecard.lead_fit.scorable_coverage,fixture.expected.coverage);
+    assert.equal('evaluated_fit_rate' in scorecard.lead_fit,false);
+    assert.equal('supported_match' in scorecard.lead_fit,false);
     assert.equal(scorecard.evidence_coverage.score,fixture.expected.evidence);
     assert.equal(scorecard.call_readiness.status,'READY');
 
