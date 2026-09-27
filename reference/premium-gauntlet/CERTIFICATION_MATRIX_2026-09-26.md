@@ -201,3 +201,22 @@ State: CERTIFIED — GOLDEN REPEATABILITY + DETERMINISTIC PUBLICATION GATE.
 - Code checkpoint 215b3a966f5c137bc35683ad52aadb315920b030: GitHub Actions PASS; matching Vercel deployment READY.
 
 Scope note: this certifies repeatability on the three gold fixtures and deterministic grade/basis safeguards. It does not claim universal semantic-model repeatability for every future lead; real-pilot calibration remains required.
+
+
+## Certified brief package compiler
+
+State: CERTIFIED — LIVE SANDBOX.
+
+- Server operation: `brief_compile_publish_ready` on the existing `/api/delivery/package` gateway; no extra Vercel function.
+- Make client scenario: 7649501 — CLARIS Lab — Certified Brief Package Compiler V1.
+- Role: transport-only client to the server compiler; no scoring, publication, Gmail, Blob persistence or token creation in Make.
+- Server re-resolves score basis against booking, consultant SOT, research evidence, PREPARE and Discovery before compiling the scorecard.
+- Live Supabase compile execution `4c0567018c0247788632b66947aa60b1`: PASS.
+- Returned scorecard: grade A; scorable coverage 65; evidence coverage 85; readiness READY; no published fit percentage.
+- Raw score classifications, raw-only research marker and consultant commercial floor were absent from the minimized publish-ready body.
+- Exact compiled body handed unchanged to certified publisher.
+- Publisher execution `06f4c330e17149c1bc4675518ad115e1`: DELIVERED.
+- Publication: `pub_vhMKXVpf1f2LCkpWKUJalYzFDqYnBQ1Hrr8g`.
+- Compiler and publisher were returned inactive after certification.
+
+Production ingress remains untouched.
