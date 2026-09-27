@@ -31,21 +31,36 @@ function classification(source, key, allowed, code) {
   if (!reason) throw new Error(`SCORE_REASON_REQUIRED:${key}`);
   return { status, basis_ids: [...new Set(basisIds)], reason };
 }
-function gradeFor(rate) {
-  if (!Number.isFinite(rate)) return null;
+function gradeFor(rate, coverage) {
+  if (!Number.isFinite(rate) || coverage < 40) return null;
   if (rate >= 85) return 'A';
   if (rate >= 70) return 'B';
   if (rate >= 55) return 'C';
   if (rate >= 40) return 'D';
   return 'E';
 }
-function fitDescriptor(rate) {
+function fitDescriptor(rate, coverage) {
   if (!Number.isFinite(rate)) return 'Not yet scorable';
+  if (coverage < 40) return 'Early evaluated signal';
   if (rate >= 85) return 'Very strong evaluated fit';
   if (rate >= 70) return 'Strong evaluated fit';
   if (rate >= 55) return 'Mixed evaluated fit';
   if (rate >= 40) return 'Weak evaluated fit';
   return 'Low evaluated fit';
+}
+
+function requireBasis(dimension, requiredIds) {
+  if (dimension.status === 'UNKNOWN') return;
+  for (const id of requiredIds) {
+    if (!dimension.basis_ids.includes(id)) throw new Error(`SCORE_BASIS_COMPOSITION:${dimension.key}:${id}`);
+  }
+}
+
+function requireAnyEvidenceBasis(dimension) {
+  if (dimension.status === 'UNKNOWN') return;
+  if (!dimension.basis_ids.some(id => /^E\d+$/.test(id) || /^PE-/.test(id))) {
+    throw new Error(`SCORE_BASIS_COMPOSITION:${dimension.key}:PUBLIC_EVIDENCE`);
+  }
 }
 function evidenceDescriptor(score) {
   if (score >= 85) return 'Very strong evidence basis';
@@ -93,6 +108,19 @@ export function compilePrecallScorecard(input = {}) {
     scorableCoverage += scorablePoints;
     return { ...def, ...item, supported_points: supportedPoints, scorable_points: scorablePoints };
   });
+
+  const fitByKey = Object.fromEntries(fitDimensions.map(item => [item.key, item]));
+  requireBasis(fitByKey.service_need_alignment, ['BOOK-001', 'SOT:services']);
+  requireBasis(fitByKey.business_trigger, ['BOOK-001']);
+  requireBasis(fitByKey.buyer_stakeholder_fit, ['BOOK-001']);
+  requireBasis(fitByKey.engagement_economics, ['BOOK-001']);
+  requireBasis(fitByKey.timing_urgency, ['BOOK-001']);
+  requireBasis(fitByKey.expansion_potential, ['BOOK-001', 'SOT:services']);
+  if (fitByKey.icp_company_fit.status !== 'UNKNOWN') {
+    requireBasis(fitByKey.icp_company_fit, ['SOT:icp']);
+    requireAnyEvidenceBasis(fitByKey.icp_company_fit);
+  }
+
   supportedMatch = round1(supportedMatch);
   scorableCoverage = round1(scorableCoverage);
   const evaluatedFitRate = scorableCoverage > 0 ? round1(100 * supportedMatch / scorableCoverage) : null;
@@ -115,8 +143,8 @@ export function compilePrecallScorecard(input = {}) {
   return {
     schema_version: 'CLARIS_PRECALL_SCORECARD_V1',
     lead_fit: {
-      grade: gradeFor(evaluatedFitRate),
-      descriptor: fitDescriptor(evaluatedFitRate),
+      grade: gradeFor(evaluatedFitRate, scorableCoverage),
+      descriptor: fitDescriptor(evaluatedFitRate, scorableCoverage),
       supported_match: supportedMatch,
       scorable_coverage: scorableCoverage,
       evaluated_fit_rate: evaluatedFitRate,
