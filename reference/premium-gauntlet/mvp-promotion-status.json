@@ -1,7 +1,7 @@
 {
   "schema_version": "CLARIS_MVP_PROMOTION_GATE_V1",
   "candidate_branch": "premium-gauntlet-v3-1",
-  "candidate_head": "215b3a966f5c137bc35683ad52aadb315920b030",
+  "candidate_head": "18c2f07815399d9a9e98791ae9c88364c1d1b51f",
   "gates": {
     "consultant_intelligence": {
       "status": "PASS"
@@ -114,6 +114,28 @@
       },
       "publisher_handoff": "PASS_DELIVERED",
       "inactive_after_certification": true
+    },
+    "certified_brief_package_compiler": {
+      "status": "PASS_LIVE_SANDBOX",
+      "server_operation": "brief_compile_publish_ready",
+      "scenario_id": 7649501,
+      "publisher_scenario_id": 7643611,
+      "compiler_execution_id": "4c0567018c0247788632b66947aa60b1",
+      "publisher_execution_id": "06f4c330e17149c1bc4675518ad115e1",
+      "publication_id": "pub_vhMKXVpf1f2LCkpWKUJalYzFDqYnBQ1Hrr8g",
+      "scorecard": {
+        "lead_fit_grade": "A",
+        "scorable_coverage": 65,
+        "evidence_coverage": 85,
+        "call_readiness": "READY",
+        "fit_percentage_published": false
+      },
+      "minimization": {
+        "raw_score_basis": false,
+        "raw_research_only_marker": false,
+        "consultant_commercial_floor": false
+      },
+      "publisher_inactive_after_run": true
     }
   },
   "blockers": [
