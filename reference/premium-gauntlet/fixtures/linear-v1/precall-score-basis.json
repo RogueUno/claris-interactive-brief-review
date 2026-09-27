@@ -1,0 +1,112 @@
+{
+  "gate_status": "PASS",
+  "canonical_match_classifications": {
+    "service_need_alignment": {
+      "status": "MATCH",
+      "basis_ids": [
+        "BOOK-001",
+        "SOT:services"
+      ],
+      "reason": "The booking explicitly requests help with enterprise customer security reviews, directly matching the Enterprise Sales Security Enablement service."
+    },
+    "icp_company_fit": {
+      "status": "UNKNOWN",
+      "basis_ids": [],
+      "reason": "The consultant SOT contains no explicit ICP or company-type policy rules."
+    },
+    "business_trigger": {
+      "status": "MATCH",
+      "basis_ids": [
+        "BOOK-001"
+      ],
+      "reason": "The booking states a concrete operational event: an increase in enterprise customer security reviews requiring process improvement."
+    },
+    "buyer_stakeholder_fit": {
+      "status": "UNKNOWN",
+      "basis_ids": [],
+      "reason": "The booking and SOT do not establish specific buyer authority or role requirements beyond general advisory context."
+    },
+    "engagement_economics": {
+      "status": "UNKNOWN",
+      "basis_ids": [],
+      "reason": "The booking contains no direct budget or economic evidence to evaluate against commercial rules."
+    },
+    "timing_urgency": {
+      "status": "UNKNOWN",
+      "basis_ids": [],
+      "reason": "The booking does not specify a concrete delivery window, deadline, or timing constraint."
+    },
+    "expansion_potential": {
+      "status": "UNKNOWN",
+      "basis_ids": [],
+      "reason": "The booking focuses strictly on security reviews and does not explicitly request additional distinct services."
+    }
+  },
+  "canonical_completeness_classifications": {
+    "critical_question_coverage": {
+      "status": "COMPLETE",
+      "basis_ids": [
+        "PE-001",
+        "PE-002",
+        "PE-003",
+        "PE-004",
+        "PE-005"
+      ],
+      "reason": "Certified prepare dimensions and discovery questions thoroughly map the open variables and suppress known public baseline controls."
+    },
+    "source_authority": {
+      "status": "COMPLETE",
+      "basis_ids": [
+        "PE-001",
+        "PE-002",
+        "PE-003",
+        "PE-004",
+        "PE-005"
+      ],
+      "reason": "All evidence items rely directly on authoritative first-party documentation and trust center resources."
+    },
+    "corroboration_depth": {
+      "status": "COMPLETE",
+      "basis_ids": [
+        "PE-001",
+        "PE-002"
+      ],
+      "reason": "Claims regarding certifications and trust center infrastructure are directly supported by canonical first-party documentation."
+    },
+    "freshness": {
+      "status": "MISSING",
+      "basis_ids": [],
+      "reason": "The curated research evidence contains no explicit publication, update, or fetched date metadata."
+    },
+    "conflict_ambiguity_control": {
+      "status": "COMPLETE",
+      "basis_ids": [
+        "PE-001",
+        "PE-002",
+        "PE-003",
+        "PE-004",
+        "PE-005"
+      ],
+      "reason": "Uncertainties, potential bottlenecks, and boundaries are explicitly constrained in the prepare brief and discovery plan."
+    }
+  },
+  "corrected_strategy": {
+    "recommended_action": "Run the planned diagnostic call to locate the exact review-friction layer and define the target operating outcome before proposing enablement services.",
+    "primary_service_id": "SVC_ENTERPRISE_SECURITY",
+    "qualification_status": "PROMISING",
+    "rationale": "The booking presents a clear operational pain point around enterprise security reviews that aligns directly with enterprise security enablement, while public documentation successfully suppresses baseline certification questions.",
+    "key_talking_points": [
+      "Acknowledge existing public assurance baseline and Trust Center resources.",
+      "Locate where enterprise security reviews still consume manual time or create friction.",
+      "Define the target operating outcome for making the review process smoother."
+    ],
+    "risk_factors": [
+      "Treating the review process as an undifferentiated problem without isolating the specific bottleneck.",
+      "Re-discovering public baseline controls such as SOC 2, ISO 27001, SAML, or SCIM."
+    ]
+  },
+  "basis_resolution": {
+    "all_scored_basis_resolvable": true,
+    "unresolved_basis_ids": []
+  }
+}
