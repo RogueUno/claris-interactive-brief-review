@@ -1,7 +1,7 @@
 {
   "schema_version": "CLARIS_MVP_PROMOTION_GATE_V1",
   "candidate_branch": "premium-gauntlet-v3-1",
-  "candidate_head": "5121676f6c3ad8508df134dc2afc5f8658171989",
+  "candidate_head": "9ea2b15e1fe79b371a3d829677cb156ad94af13b",
   "gates": {
     "consultant_intelligence": {
       "status": "PASS"
@@ -45,7 +45,8 @@
       "vercel_function_count": 12,
       "preview_protection": "ENABLED",
       "make_automation_bypass": "CERTIFIED",
-      "browser_app_smoke": "PENDING"
+      "browser_app_smoke": "PARTIAL_ROUTE_200_JS_SESSION_PENDING_ENV_BLOCK",
+      "route_shell_200": "PASS"
     },
     "retry_idempotency": {
       "status": "PASS"
@@ -75,7 +76,7 @@
     }
   },
   "blockers": [
-    "Interactive private-link browser smoke",
+    "Interactive fragment-token/session browser smoke (local browser outbound access blocked by environment)",
     "Real end-to-end pilot"
   ],
   "production_ingress_policy": "KEEP_INACTIVE_UNTIL_GATES_C_THROUGH_H_GREEN"
