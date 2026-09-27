@@ -1,7 +1,7 @@
 {
   "schema_version": "CLARIS_MVP_PROMOTION_GATE_V1",
   "candidate_branch": "premium-gauntlet-v3-1",
-  "candidate_head": "9ea2b15e1fe79b371a3d829677cb156ad94af13b",
+  "candidate_head": "215b3a966f5c137bc35683ad52aadb315920b030",
   "gates": {
     "consultant_intelligence": {
       "status": "PASS"
@@ -73,6 +73,30 @@
     },
     "commercial_readiness": {
       "status": "PENDING"
+    },
+    "precall_score_reliability_v1": {
+      "status": "PASS_GOLDEN_REPEATABILITY",
+      "grade_scale": "D_0_25_C_25_50_B_50_75_A_75_100",
+      "minimum_scorable_coverage_for_letter": 40,
+      "fit_percentage_published": false,
+      "scorer_scenario_id": 7648115,
+      "resolver_scenario_id": 7649118,
+      "controlled_repair_scenario_id": 7648203,
+      "repeatability": {
+        "Supabase": "3_OF_3_IDENTICAL_CANONICAL_A_COVERAGE_65",
+        "Resend": "3_OF_3_IDENTICAL_CANONICAL_NO_GRADE_COVERAGE_30",
+        "Linear": "3_OF_3_IDENTICAL_CANONICAL_A_COVERAGE_45"
+      },
+      "server_reresolution_before_publication": true,
+      "direct_evidence_guards": [
+        "economics",
+        "timing",
+        "buyer_stakeholder",
+        "freshness"
+      ],
+      "github_ci": "PASS",
+      "vercel_preview": "READY",
+      "scope_note": "Gold-fixture repeatability certified; universal semantic repeatability remains a real-pilot validation question."
     }
   },
   "blockers": [
