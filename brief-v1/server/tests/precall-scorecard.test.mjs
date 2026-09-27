@@ -6,20 +6,20 @@ const completeness = (status, id) => ({ status, basis_ids: id ? [id] : [], reaso
 const score_basis = {
   gate_status: 'PASS',
   canonical_match_classifications: {
-    service_need_alignment: match('MATCH','BOOK-001'),
-    icp_company_fit: match('MATCH','FAC-001'),
+    service_need_alignment: { status:'MATCH', basis_ids:['BOOK-001','SOT:services'], reason:'MATCH basis' },
+    icp_company_fit: { status:'MATCH', basis_ids:['SOT:icp','PE-001'], reason:'MATCH basis' },
     business_trigger: match('PARTIAL_MATCH','BOOK-001'),
     buyer_stakeholder_fit: match('MATCH','BOOK-001'),
     engagement_economics: match('UNKNOWN'),
     timing_urgency: match('UNKNOWN'),
-    expansion_potential: match('MISMATCH','PROS-001')
+    expansion_potential: { status:'MISMATCH', basis_ids:['BOOK-001','SOT:services'], reason:'MISMATCH basis' }
   },
   canonical_completeness_classifications: {
-    critical_question_coverage: completeness('COMPLETE','BOOK-001'),
-    source_authority: completeness('COMPLETE','FAC-001'),
-    corroboration_depth: completeness('PARTIAL','FAC-002'),
-    freshness: completeness('COMPLETE','FAC-003'),
-    conflict_ambiguity_control: completeness('COMPLETE','FAC-004')
+    critical_question_coverage: completeness('COMPLETE','E1'),
+    source_authority: completeness('COMPLETE','PE-001'),
+    corroboration_depth: completeness('PARTIAL','PE-002'),
+    freshness: completeness('COMPLETE','PE-003'),
+    conflict_ambiguity_control: completeness('COMPLETE','PE-004')
   },
   basis_resolution: { all_scored_basis_resolvable: true, unresolved_basis_ids: [] }
 };
@@ -46,7 +46,7 @@ test('reproduces frozen weighting and excludes UNKNOWN from evaluated-fit denomi
 test('keeps traceable basis ids and reasons',()=>{
   const r=compilePrecallScorecard({score_basis,prepare,discovery,certification});
   const d=r.lead_fit.dimensions.find(x=>x.key==='service_need_alignment');
-  assert.deepEqual(d.basis_ids,['BOOK-001']);
+  assert.deepEqual(d.basis_ids,['BOOK-001','SOT:services']);
   assert.match(d.reason,/MATCH basis/);
 });
 test('fails closed when scored basis is unresolved',()=>{
@@ -61,4 +61,31 @@ test('readiness blocks uncovered admitted dimensions',()=>{
   const r=compilePrecallScorecard({score_basis,prepare,discovery:{...discovery,primary_questions:discovery.primary_questions.slice(0,2)},certification});
   assert.equal(r.call_readiness.status,'NOT_READY');
   assert.deepEqual(r.call_readiness.uncovered_dimensions,['D3']);
+});
+
+
+test('fails closed when fit basis composition omits required booking truth',()=>{
+  const broken=structuredClone(score_basis);
+  broken.canonical_match_classifications.service_need_alignment.basis_ids=['SOT:services'];
+  assert.throws(
+    ()=>compilePrecallScorecard({score_basis:broken,prepare,discovery,certification}),
+    /SCORE_BASIS_COMPOSITION:service_need_alignment:BOOK-001/
+  );
+});
+
+test('suppresses letter grade when less than 40 fit points are scorable',()=>{
+  const sparse=structuredClone(score_basis);
+  for(const key of Object.keys(sparse.canonical_match_classifications)){
+    sparse.canonical_match_classifications[key]={status:'UNKNOWN',basis_ids:[],reason:'Not established before the call.'};
+  }
+  sparse.canonical_match_classifications.service_need_alignment={
+    status:'PARTIAL_MATCH',
+    basis_ids:['BOOK-001','SOT:services'],
+    reason:'Direct need is relevant but desired service shape remains unresolved.'
+  };
+  const result=compilePrecallScorecard({score_basis:sparse,prepare,discovery,certification});
+  assert.equal(result.lead_fit.scorable_coverage,30);
+  assert.equal(result.lead_fit.evaluated_fit_rate,50);
+  assert.equal(result.lead_fit.grade,null);
+  assert.equal(result.lead_fit.descriptor,'Early evaluated signal');
 });
