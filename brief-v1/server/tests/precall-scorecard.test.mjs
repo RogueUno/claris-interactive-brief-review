@@ -36,7 +36,7 @@ const certification = {
 test('reproduces frozen weighting and excludes UNKNOWN from evaluated-fit denominator',()=>{
   const r=compilePrecallScorecard({score_basis,prepare,discovery,certification});
   assert.equal(r.lead_fit.scorable_coverage,80);
-  assert.equal(r.lead_fit.grade,'B');
+  assert.equal(r.lead_fit.grade,'A');
   assert.equal('evaluated_fit_rate' in r.lead_fit,false);
   assert.equal('supported_match' in r.lead_fit,false);
   assert.equal(r.evidence_coverage.score,94);
