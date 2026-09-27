@@ -1,5 +1,6 @@
 import { compileBriefPublishReady } from './publication-contract.mjs';
 import { compilePrecallScorecard } from './precall-scorecard.mjs';
+import { resolvePrecallScoreBasis } from './precall-score-basis-resolver.mjs';
 
 function parseMaybeJson(value, code) {
   if (value && typeof value === 'object') return value;
@@ -40,9 +41,26 @@ export function compileCertifiedBriefPublication(input = {}) {
   const scoreBasis = input.precall_score_basis == null
     ? null
     : parseMaybeJson(input.precall_score_basis, 'PRECALL_SCORE_BASIS_INVALID');
-  const scorecard = scoreBasis
-    ? compilePrecallScorecard({ score_basis: scoreBasis, prepare, discovery, certification })
-    : null;
+
+  let scorecard = null;
+  if (scoreBasis) {
+    const consultantSot = parseMaybeJson(input.consultant_sot, 'CONSULTANT_SOT_REQUIRED_FOR_SCORE');
+    const researchEvidence = parseMaybeJson(input.precall_research_evidence, 'PRECALL_RESEARCH_EVIDENCE_REQUIRED');
+    const resolvedScoreBasis = resolvePrecallScoreBasis({
+      score_basis: scoreBasis,
+      booking_text: input.booking_text,
+      consultant_sot: consultantSot,
+      research_evidence: researchEvidence,
+      prepare,
+      discovery
+    });
+    scorecard = compilePrecallScorecard({
+      score_basis: resolvedScoreBasis,
+      prepare,
+      discovery,
+      certification
+    });
+  }
 
   const compiled = compileBriefPublishReady({
     opportunity_id: input.opportunity_id,
