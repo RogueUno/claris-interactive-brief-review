@@ -1,6 +1,7 @@
 import { buildDeliveryPackage } from '../../calibration-v3/server/pilot-delivery.mjs';
 import { json, methodNotAllowed, parseJson, cookieValue } from '../../calibration-v3/server/http.mjs';
 import { briefSessionCookie } from '../../brief-v1/server/http.mjs';
+import { compileCertifiedBriefPublication } from '../../brief-v1/server/certified-publication-adapter.mjs';
 
 function normalizeAcceptedKeys(values = []) {
   return values.map((value) => String(value || '').trim()).filter(Boolean);
@@ -230,6 +231,15 @@ export function createDeliveryGateway({
       const operation = headerOperation || String(parsed.value?.operation || '').trim();
 
       try {
+        if (operation === 'brief_compile_publish_ready') {
+          const compiled = compileCertifiedBriefPublication(parsed.value);
+          return json({
+            ok: true,
+            operation: compiled.operation,
+            publish_ready_body_json: JSON.stringify(compiled.body)
+          }, 200);
+        }
+
         if (operation === 'brief_create' || operation === 'brief_publish_ready' || operation === 'brief_revoke') {
           const briefResponse = await handleBriefOperation(request, operation, parsed.value);
           return briefResponse || json({ ok: false, error: 'BRIEF_OPERATION_INVALID' }, 422);
@@ -239,7 +249,17 @@ export function createDeliveryGateway({
         return json({ ok: true, delivery: packageResult }, 200);
       } catch (error) {
         const code = error?.message || 'DELIVERY_PACKAGE_FAILED';
-        const clientError = code.endsWith('_REQUIRED') || code.endsWith('_INVALID') || code.startsWith('BRIEF_CERTIFICATION_') || code === 'DELIVERY_OPERATION_INVALID';
+        const clientError = code.endsWith('_REQUIRED')
+          || code.endsWith('_INVALID')
+          || code.startsWith('BRIEF_CERTIFICATION_')
+          || code.startsWith('SCORE_')
+          || code.startsWith('MATCH_')
+          || code.startsWith('COMPLETENESS_')
+          || code.startsWith('DIRECT_')
+          || code.startsWith('FRESHNESS_')
+          || code.startsWith('PRECALL_')
+          || code.startsWith('CONSULTANT_SOT_')
+          || code === 'DELIVERY_OPERATION_INVALID';
         return json({ ok: false, error: code }, clientError ? 422 : 500);
       }
     }
