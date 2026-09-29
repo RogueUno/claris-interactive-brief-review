@@ -54,37 +54,41 @@ function evidenceLevel(score){
 function levelScale(level){
   return `<span class="grade-scale evidence-scale" aria-hidden="true">${[1,2,3,4].map(i=>`<i class="${i<=level?'on':''}"></i>`).join('')}</span>`;
 }
-function gaugeArc({value=0,display='—',caption='',tone='accent',badge=''}) {
-  const v=Math.max(0,Math.min(100,Number(value)||0));
-  return `<div class="gauge gauge-${esc(tone)}" aria-hidden="true">
+function evidenceGauge(score,label){
+  const v=Math.max(0,Math.min(100,Number(score)||0));
+  return `<div class="gauge gauge-accent" aria-hidden="true">
     <svg viewBox="0 0 180 108" role="presentation">
       <path class="gauge-track" d="M18 91 A72 72 0 0 1 162 91" pathLength="100"/>
       <path class="gauge-value" d="M18 91 A72 72 0 0 1 162 91" pathLength="100" style="stroke-dasharray:${v} 100"/>
-      <g class="gauge-ticks">
-        <path d="M28 71l8 4"/><path d="M52 41l6 7"/><path d="M89 28v10"/><path d="M128 41l-6 7"/><path d="M152 71l-8 4"/>
-      </g>
-      <text class="gauge-display" x="90" y="82" text-anchor="middle">${esc(display)}</text>
-      <text class="gauge-caption" x="90" y="100" text-anchor="middle">${esc(caption)}</text>
+      <g class="gauge-ticks"><path d="M28 71l8 4"/><path d="M52 41l6 7"/><path d="M89 28v10"/><path d="M128 41l-6 7"/><path d="M152 71l-8 4"/></g>
+      <text class="gauge-display gauge-number" x="90" y="80" text-anchor="middle">${esc(Math.round(v))}</text>
+      <text class="gauge-caption" x="90" y="99" text-anchor="middle">${esc(label)}</text>
     </svg>
-    ${badge?`<span class="gauge-badge">${esc(badge)}</span>`:''}
+    <span class="gauge-badge">${esc(Math.round(v))}/100</span>
   </div>`;
 }
-function gradeGauge(letter){
-  const rank={D:18,C:42,B:68,A:94}[text(letter).toUpperCase()]||0;
-  return gaugeArc({value:rank,display:text(letter)||'—',caption:'Lead fit',tone:'deep'});
+function gradeInstrument(letter){
+  const active=text(letter).toUpperCase();
+  return `<div class="categorical-instrument">
+    <strong class="categorical-value">${esc(active||'—')}</strong>
+    <div class="grade-states" aria-label="Lead fit grade ${esc(active||'not available')}">
+      ${['D','C','B','A'].map(g=>`<span class="${g===active?'is-active':''}"><i></i><b>${g}</b></span>`).join('')}
+    </div>
+  </div>`;
 }
-function readinessGauge(ready){
-  const isReady=text(ready?.status)==='READY';
-  return gaugeArc({
-    value:isReady?94:58,
-    display:isReady?'READY':'OPEN',
-    caption:'Call readiness',
-    tone:isReady?'accent':'warm',
-    badge:ready?.open_variables?`${ready.open_variables} open`:''
-  });
+function readinessInstrument(ready){
+  const state=text(ready?.status)==='READY'?'READY':'OPEN';
+  return `<div class="state-instrument">
+    <strong class="state-value">${state}</strong>
+    <div class="state-track" aria-label="Call readiness ${state}">
+      <span class="${state==='OPEN'?'is-active':''}">OPEN</span>
+      <span class="${state==='READY'?'is-active':''}">READY</span>
+    </div>
+    ${ready?.open_variables!=null?`<small>${esc(ready.open_variables)} open variable${Number(ready.open_variables)===1?'':'s'}</small>`:''}
+  </div>`;
 }
 
-function scoreDetail(key,scorecard){
+function scoreDetail(key,scorecard){function scoreDetail(key,scorecard){
   const fit=scorecard?.lead_fit||{},ev=scorecard?.evidence_coverage||{},ready=scorecard?.call_readiness||{};
   if(key==='fit')return{
     title:'Lead fit',answer:fit.grade||'—',descriptor:fit.grade?fit.descriptor:'Early evaluated signal',icon:'spark',
@@ -106,25 +110,25 @@ function scoreMarkup(scorecard){
   const fit=scorecard.lead_fit||{},ev=scorecard.evidence_coverage||{},ready=scorecard.call_readiness||{},eq=evidenceLevel(ev.score);
   return `<section class="signal-block instrument-deck panel">
     <div class="instrument-header">
-      <div><span class="eyebrow">Decision instruments</span><strong>Three signals. Details only when you ask for them.</strong></div>
+      <div><span class="eyebrow">Decision instruments</span><strong>Grade · evidence strength · readiness state</strong></div>
       <span class="instrument-live">${icon('radar','mini-icon')} Pre-call state</span>
     </div>
     <div class="signal-row">
       <button class="signal instrument-tile" data-score="fit" aria-expanded="false">
         <span class="signal-label">${icon('spark','small-icon')} Lead fit</span>
-        ${gradeGauge(fit.grade)}
+        ${gradeInstrument(fit.grade)}
         <span class="signal-desc">${esc(fit.grade?fit.descriptor:'Early evaluated signal')}</span>
         <span class="why">Why ${icon('arrow','mini-icon')}</span>
       </button>
       <button class="signal instrument-tile" data-score="evidence" aria-expanded="false">
         <span class="signal-label">${icon('shield','small-icon')} Evidence coverage</span>
-        ${gaugeArc({value:Number(ev.score)||0,display:eq.label,caption:'Evidence breadth',tone:'accent',badge:Number.isFinite(Number(ev.score))?`${Math.round(Number(ev.score))}/100`:''})}
+        ${evidenceGauge(ev.score,eq.label)}
         <span class="signal-desc">Source support & diagnostic coverage</span>
         <span class="why">Why ${icon('arrow','mini-icon')}</span>
       </button>
       <button class="signal instrument-tile" data-score="ready" aria-expanded="false">
         <span class="signal-label">${icon('target','small-icon')} Call readiness</span>
-        ${readinessGauge(ready)}
+        ${readinessInstrument(ready)}
         <span class="signal-desc">${esc(ready.open_variables?`${ready.open_variables} material variable${ready.open_variables===1?'':'s'} mapped`:'Diagnostic state')}</span>
         <span class="why">Why ${icon('arrow','mini-icon')}</span>
       </button>
@@ -158,14 +162,17 @@ function orientationMarkup(brief,context){
 function bookingMarkup(value){
   const raw=text(value);if(!raw)return'';
   const long=raw.length>230;
-  return `<details class="booking-row panel" ${long?'':'open'}>
-    <summary>
+  return `<section class="booking-row panel ${long?'is-collapsible':''}" data-booking>
+    <div class="booking-shell">
       <span class="booking-icon">${icon('message')}</span>
-      <div><span class="eyebrow">Booking request</span><blockquote>${esc(long?excerpt(raw,220):raw)}</blockquote></div>
+      <div class="booking-copy-wrap">
+        <span class="eyebrow">Booking request</span>
+        <blockquote class="booking-copy ${long?'is-clamped':''}" data-booking-copy>${esc(raw)}</blockquote>
+        ${long?`<button type="button" class="booking-toggle" data-booking-toggle aria-expanded="false">Read full request ${icon('arrow','mini-icon')}</button>`:''}
+      </div>
       <span class="source-chip">Prospect provided</span>
-    </summary>
-    ${long?`<div class="booking-full">${esc(raw)}</div>`:''}
-  </details>`;
+    </div>
+  </section>`;
 }
 
 function knownGoingIn(discovery){
@@ -183,6 +190,27 @@ function contextSignals(prepare,known){
     const source=`${text(s.signal)} ${text(s.observation)}`;
     return !knownText.some(k=>overlap(source,k)>=.55);
   });
+}
+function companySnapshotFacts(prepare){
+  const facts=[];
+  const seen=new Set();
+  for(const e of arr(prepare?.expandable_blocks?.evidence)){
+    const label=text(e?.title), claim=text(arr(e?.claims)[0]);
+    const key=(label+' '+claim).toLowerCase();
+    if(!label||!claim||seen.has(key))continue;
+    seen.add(key);
+    facts.push({label,claim});
+    if(facts.length>=4)break;
+  }
+  return facts;
+}
+function companySnapshotMarkup(prepare){
+  const facts=companySnapshotFacts(prepare);
+  if(!facts.length)return'';
+  return `<section class="company-snapshot panel">
+    <div class="snapshot-head"><div>${icon('radar')}<span><span class="eyebrow">Company snapshot</span><strong>Context already established</strong></span></div><small>Public evidence only</small></div>
+    <div class="snapshot-grid">${facts.map(f=>`<article><span class="snapshot-marker"></span><small>${esc(f.label)}</small><strong>${esc(excerpt(f.claim,118))}</strong></article>`).join('')}</div>
+  </section>`;
 }
 function contextMarkup(prepare,known){
   const signals=contextSignals(prepare,known),visible=signals.slice(0,3),rest=signals.slice(3);
@@ -252,18 +280,24 @@ function branchesMarkup(q){
     </div>
   </details>`;
 }
+function routeLabel(step,index,q,dim,flowLength){
+  if(dim?.label)return text(dim.label).replace(/^exact\s+/i,'');
+  if(index===flowLength-1)return'Next step';
+  const cleaned=cleanMove(step?.move,q?.question_id).replace(/[.?!].*$/,'');
+  return excerpt(cleaned,28);
+}
 function runCallMarkup(discovery,prepare){
   const questions=arr(discovery?.primary_questions),dims=dimensionMap(prepare),flow=arr(discovery?.call_flow);
   const phaseRefs=flow.map((step,i)=>{
-    const q=questionForStep(step,i,questions);
+    const q=questionForStep(step,i,questions),dim=q?dims.get(text(q.dimension_id)):null;
     const id=q?`phase-${q.question_id}`:`phase-${i+1}`;
-    return {id,label:cleanMove(step.move,q?.question_id),q};
+    return {id,label:routeLabel(step,i,q,dim,flow.length),q};
   });
   return `<div class="run-call panel">
-    <nav class="route-strip" aria-label="Call route">
-      ${phaseRefs.map((p,i)=>`<a href="#${esc(p.id)}"><span class="route-dot">${String(i+1).padStart(2,'0')}</span><small>${esc(excerpt(p.label,46))}</small></a>`).join('')}
+    <nav class="route-strip" aria-label="Call route" style="--phase-count:${Math.max(1,flow.length)}">
+      ${phaseRefs.map((p,i)=>`<a href="#${esc(p.id)}"><span class="route-dot">${String(i+1).padStart(2,'0')}</span><small>${esc(p.label)}</small></a>`).join('')}
     </nav>
-    <div class="call-phases">
+    <div class="call-phases" style="--phase-count:${Math.max(1,flow.length)}">
     ${flow.map((step,i)=>{
       const q=questionForStep(step,i,questions),dim=q?dims.get(text(q.dimension_id)):null;
       return `<article class="call-phase" id="${q?`phase-${esc(q.question_id)}`:`phase-${i+1}`}">
@@ -325,6 +359,17 @@ function proofMarkup(prepare,groups){
   </details>`;
 }
 
+function callDirectionMarkup(prepare,discovery){
+  const known=knownGoingIn(discovery);
+  const dims=arr(prepare?.open_dimensions).slice(0,3).map(d=>text(d.label)).filter(Boolean);
+  const hasBranches=arr(discovery?.primary_questions).some(q=>arr(q?.conditional_probes).length);
+  const parts=[];
+  if(known.length) parts.push(`Start from the established public baseline rather than reopening ${known.slice(0,2).map(x=>x.topic).filter(Boolean).join(' / ')}.`);
+  if(dims.length) parts.push(`Resolve ${dims.join(' → ')} in that order.`);
+  if(hasBranches) parts.push('Open secondary branches only when the prospect earns them.');
+  return parts.length?`<p class="call-direction"><span>Direction</span> ${esc(parts.join(' '))}</p>`:'';
+}
+
 function render(brief){
   const prepare=brief?.payload?.prepare||{},discovery=brief?.payload?.discovery||{},scorecard=brief?.payload?.scorecard||null,context=brief?.context||{};
   const known=knownGoingIn(discovery),groups=sourceIndex(prepare);
@@ -335,7 +380,8 @@ function render(brief){
     <section class="section overview">
       <div class="section-head compact"><span class="eyebrow">At a glance</span><h2>Opportunity signal</h2></div>
       ${scoreMarkup(scorecard)}
-      <article class="call-focus panel"><div class="focus-icon">${icon('target')}</div><div><span class="eyebrow">Call focus</span><h2>${esc(discovery.call_objective||prepare?.call_strategy?.opening_move||'Run a focused diagnostic conversation.')}</h2>${prepare.executive_readout?`<details><summary>Working model</summary><p>${esc(prepare.executive_readout)}</p></details>`:''}</div></article>
+      ${companySnapshotMarkup(prepare)}
+      <article class="call-focus panel"><div class="focus-icon">${icon('target')}</div><div><span class="eyebrow">Call focus</span><h2>${esc(discovery.call_objective||prepare?.call_strategy?.opening_move||'Run a focused diagnostic conversation.')}</h2>${callDirectionMarkup(prepare,discovery)}${prepare.executive_readout?`<details><summary>Working model</summary><p>${esc(prepare.executive_readout)}</p></details>`:''}</div></article>
     </section>
 
     <section id="matters" class="section">
@@ -353,9 +399,20 @@ function render(brief){
     <section id="next" class="section"><div class="section-head compact"><span class="eyebrow">Next move</span><h2>Conditional decision</h2></div>${nextMoveMarkup(scorecard,discovery)}</section>
     <section id="evidence" class="section evidence-section">${proofMarkup(prepare,groups)}</section>
   `;
-  bindScore(scorecard);bindCountdown();bindProof(groups);
+  bindBooking();bindScore(scorecard);bindCountdown();bindProof(groups);
 }
 
+function bindBooking(){
+  const button=root.querySelector('[data-booking-toggle]');
+  const copy=root.querySelector('[data-booking-copy]');
+  if(!button||!copy)return;
+  button.addEventListener('click',()=>{
+    const expanded=button.getAttribute('aria-expanded')==='true';
+    button.setAttribute('aria-expanded',String(!expanded));
+    copy.classList.toggle('is-clamped',expanded);
+    button.innerHTML=(expanded?'Read full request ':'Collapse ')+icon('arrow','mini-icon');
+  });
+}
 function bindScore(scorecard){
   if(scorecard?.schema_version!=='CLARIS_PRECALL_SCORECARD_V1')return;
   const tray=root.querySelector('[data-score-tray]'),buttons=[...root.querySelectorAll('[data-score]')];
