@@ -1,6 +1,7 @@
 import { compileBriefPublishReady } from './publication-contract.mjs';
 import { compilePrecallScorecard } from './precall-scorecard.mjs';
 import { resolvePrecallScoreBasis } from './precall-score-basis-resolver.mjs';
+import { projectServiceAuthority } from './service-authority-projection.mjs';
 
 function parseMaybeJson(value, code) {
   if (value && typeof value === 'object') return value;
@@ -38,13 +39,13 @@ export function compileCertifiedBriefPublication(input = {}) {
     discovery_deterministic_pass: discoveryValidation.ok === true
   };
 
+  const consultantSot = parseMaybeJson(input.consultant_sot, 'CONSULTANT_SOT_REQUIRED');
   const scoreBasis = input.precall_score_basis == null
     ? null
     : parseMaybeJson(input.precall_score_basis, 'PRECALL_SCORE_BASIS_INVALID');
 
   let scorecard = null;
   if (scoreBasis) {
-    const consultantSot = parseMaybeJson(input.consultant_sot, 'CONSULTANT_SOT_REQUIRED_FOR_SCORE');
     const researchEvidence = parseMaybeJson(input.precall_research_evidence, 'PRECALL_RESEARCH_EVIDENCE_REQUIRED');
     const resolvedScoreBasis = resolvePrecallScoreBasis({
       score_basis: scoreBasis,
@@ -62,6 +63,13 @@ export function compileCertifiedBriefPublication(input = {}) {
     });
   }
 
+  const projected = projectServiceAuthority({
+    prepare,
+    discovery,
+    scorecard,
+    consultant_sot: consultantSot
+  });
+
   const compiled = compileBriefPublishReady({
     opportunity_id: input.opportunity_id,
     consultant_id: input.consultant_id,
@@ -73,10 +81,10 @@ export function compileCertifiedBriefPublication(input = {}) {
     meeting_time: input.meeting_time,
     booking_text: input.booking_text,
     ttl_days: input.ttl_days,
-    prepare,
-    discovery,
-    scorecard,
-    consultant_sot: input.consultant_sot
+    prepare: projected.prepare,
+    discovery: projected.discovery,
+    scorecard: projected.scorecard,
+    consultant_sot: consultantSot
   });
 
   return {
