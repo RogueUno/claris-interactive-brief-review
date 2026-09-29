@@ -41,6 +41,10 @@ jobs:
         working-directory: baseline
         run: npm install --no-audit --no-fund
 
+      - name: Check Brief V5 ES-module syntax
+        working-directory: branch
+        run: node --check brief-v5/app.mjs
+
       - name: Premium intelligence certification
         working-directory: branch
         run: npm run test:premium
