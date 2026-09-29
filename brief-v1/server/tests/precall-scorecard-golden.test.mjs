@@ -4,6 +4,7 @@ import fs from 'node:fs';
 import { compilePrecallScorecard } from '../precall-scorecard.mjs';
 import { compileCertifiedBriefPublication } from '../certified-publication-adapter.mjs';
 import { resolvePrecallScoreBasis } from '../precall-score-basis-resolver.mjs';
+import { projectServiceAuthority } from '../service-authority-projection.mjs';
 
 const certification={
   schema_version:'CLARIS_PRECALL_CERTIFICATION_V1',
@@ -79,7 +80,14 @@ for(const fixture of fixtures){
     assert.equal(published.operation,'brief_publish_ready');
     assert.equal(published.body.booking_text,booking);
     assert.equal(published.body.brief_payload.scorecard.schema_version,'CLARIS_PRECALL_SCORECARD_V1');
-    assert.deepEqual(published.body.brief_payload.scorecard,scorecard);
+    const projected=projectServiceAuthority({prepare,discovery,scorecard,consultant_sot:sot});
+    assert.deepEqual(published.body.brief_payload.scorecard,projected.scorecard);
+    assert.equal(published.body.brief_payload.scorecard.strategy.primary_service_id,null);
+    assert.equal(published.body.brief_payload.discovery.service_authority.mode,'HYPOTHESIS_ONLY');
+    for(const q of published.body.brief_payload.discovery.primary_questions){
+      assert.equal('linked_service_paths' in q,false);
+      assert.ok(Array.isArray(q.possible_service_paths));
+    }
 
     const serialized=JSON.stringify(published.body);
     assert.doesNotMatch(serialized,/canonical_match_classifications/);
