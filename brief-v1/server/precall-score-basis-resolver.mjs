@@ -54,7 +54,6 @@ export function resolvePrecallScoreBasis(input={}){
     if(!node || !COMPLETENESS_STATUSES.has(text(node.status))) fail('COMPLETENESS_STATUS_INVALID',key);
     node.basis_ids=normalizeIds(node.basis_ids);
     requireReason(node,key);
-    requireIds(node,key,'MISSING');
   }
 
   const allowed=new Set(['BOOK-001']);
@@ -127,6 +126,9 @@ export function resolvePrecallScoreBasis(input={}){
   }
 
   for(const key of COMPLETENESS_KEYS){
+    if(completeness[key].status!=='MISSING' && !completeness[key].basis_ids.length){
+      fail('SCORE_BASIS_REQUIRED',key);
+    }
     for(const id of completeness[key].basis_ids){
       if(!allowed.has(id)) fail('SCORE_BASIS_UNRESOLVED','completeness.'+key+':'+id);
     }
