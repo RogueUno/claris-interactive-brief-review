@@ -50,8 +50,13 @@ test('certified adapter emits one brief_publish_ready request',()=>{
   const result=compileCertifiedBriefPublication(base);
   assert.equal(result.operation,'brief_publish_ready');
   assert.equal(result.body.opportunity_id,'opp_123');
-  assert.equal(result.body.brief_payload.prepare,prepare);
-  assert.equal(result.body.brief_payload.discovery,discovery);
+  assert.notEqual(result.body.brief_payload.prepare,prepare);
+  assert.notEqual(result.body.brief_payload.discovery,discovery);
+  assert.equal('conditional_service_paths' in result.body.brief_payload.prepare,false);
+  assert.equal(result.body.brief_payload.prepare.service_authority.mode,'HYPOTHESIS_ONLY');
+  assert.equal('linked_service_paths' in result.body.brief_payload.discovery.primary_questions[0],false);
+  assert.equal(result.body.brief_payload.discovery.primary_questions[0].possible_service_paths[0].authority,'HYPOTHESIS_ONLY');
+  assert.equal(result.body.brief_payload.discovery.primary_questions[0].possible_service_paths[0].display_label,'Possible path if confirmed');
   assert.equal(result.body.validation_context.commercial_rules.budget_required_before_first_call,false);
   assert.equal(JSON.stringify(result.body).includes('7500'),false);
   assert.deepEqual(result.body.certification,{
