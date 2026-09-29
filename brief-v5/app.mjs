@@ -53,6 +53,35 @@ function evidenceLevel(score){
 function levelScale(level){
   return `<span class="grade-scale evidence-scale" aria-hidden="true">${[1,2,3,4].map(i=>`<i class="${i<=level?'on':''}"></i>`).join('')}</span>`;
 }
+function gaugeArc({value=0,display='—',caption='',tone='accent',badge=''}) {
+  const v=Math.max(0,Math.min(100,Number(value)||0));
+  return `<div class="gauge gauge-${esc(tone)}" aria-hidden="true">
+    <svg viewBox="0 0 180 108" role="presentation">
+      <path class="gauge-track" d="M18 91 A72 72 0 0 1 162 91" pathLength="100"/>
+      <path class="gauge-value" d="M18 91 A72 72 0 0 1 162 91" pathLength="100" style="stroke-dasharray:${v} 100"/>
+      <g class="gauge-ticks">
+        <path d="M28 71l8 4"/><path d="M52 41l6 7"/><path d="M89 28v10"/><path d="M128 41l-6 7"/><path d="M152 71l-8 4"/>
+      </g>
+      <text class="gauge-display" x="90" y="82" text-anchor="middle">${esc(display)}</text>
+      <text class="gauge-caption" x="90" y="100" text-anchor="middle">${esc(caption)}</text>
+    </svg>
+    ${badge?`<span class="gauge-badge">${esc(badge)}</span>`:''}
+  </div>`;
+}
+function gradeGauge(letter){
+  const rank={D:18,C:42,B:68,A:94}[text(letter).toUpperCase()]||0;
+  return gaugeArc({value:rank,display:text(letter)||'—',caption:'Lead fit',tone:'deep'});
+}
+function readinessGauge(ready){
+  const isReady=text(ready?.status)==='READY';
+  return gaugeArc({
+    value:isReady?94:58,
+    display:isReady?'READY':'OPEN',
+    caption:'Call readiness',
+    tone:isReady?'accent':'warm',
+    badge:ready?.open_variables?`${ready.open_variables} open`:''
+  });
+}
 
 function scoreDetail(key,scorecard){
   const fit=scorecard?.lead_fit||{},ev=scorecard?.evidence_coverage||{},ready=scorecard?.call_readiness||{};
@@ -74,24 +103,28 @@ function scoreDetail(key,scorecard){
 function scoreMarkup(scorecard){
   if(scorecard?.schema_version!=='CLARIS_PRECALL_SCORECARD_V1')return'';
   const fit=scorecard.lead_fit||{},ev=scorecard.evidence_coverage||{},ready=scorecard.call_readiness||{},eq=evidenceLevel(ev.score);
-  return `<section class="signal-block">
+  return `<section class="signal-block instrument-deck panel">
+    <div class="instrument-header">
+      <div><span class="eyebrow">Decision instruments</span><strong>Three signals. Details only when you ask for them.</strong></div>
+      <span class="instrument-live">${icon('radar','mini-icon')} Pre-call state</span>
+    </div>
     <div class="signal-row">
-      <button class="signal" data-score="fit" aria-expanded="false">
+      <button class="signal instrument-tile" data-score="fit" aria-expanded="false">
         <span class="signal-label">${icon('spark','small-icon')} Lead fit</span>
-        <div class="signal-value"><strong class="grade">${esc(fit.grade||'—')}</strong>${gradeScale(fit.grade)}</div>
+        ${gradeGauge(fit.grade)}
         <span class="signal-desc">${esc(fit.grade?fit.descriptor:'Early evaluated signal')}</span>
         <span class="why">Why ${icon('arrow','mini-icon')}</span>
       </button>
-      <button class="signal" data-score="evidence" aria-expanded="false">
+      <button class="signal instrument-tile" data-score="evidence" aria-expanded="false">
         <span class="signal-label">${icon('shield','small-icon')} Evidence coverage</span>
-        <div class="signal-value"><strong>${esc(eq.label)}</strong>${levelScale(eq.level)}</div>
+        ${gaugeArc({value:Number(ev.score)||0,display:eq.label,caption:'Evidence breadth',tone:'accent',badge:Number.isFinite(Number(ev.score))?`${Math.round(Number(ev.score))}/100`:''})}
         <span class="signal-desc">Source support & diagnostic coverage</span>
         <span class="why">Why ${icon('arrow','mini-icon')}</span>
       </button>
-      <button class="signal" data-score="ready" aria-expanded="false">
+      <button class="signal instrument-tile" data-score="ready" aria-expanded="false">
         <span class="signal-label">${icon('target','small-icon')} Call readiness</span>
-        <div class="signal-value"><strong>${esc(text(ready.status||'—').replaceAll('_',' '))}</strong><span class="readiness-dots"><i class="on"></i><i class="on"></i><i class="${ready.status==='READY'?'on':''}"></i></span></div>
-        <span class="signal-desc">${esc(ready.open_variables?`${ready.open_variables} variables mapped`:'Diagnostic state')}</span>
+        ${readinessGauge(ready)}
+        <span class="signal-desc">${esc(ready.open_variables?`${ready.open_variables} material variable${ready.open_variables===1?'':'s'} mapped`:'Diagnostic state')}</span>
         <span class="why">Why ${icon('arrow','mini-icon')}</span>
       </button>
     </div>
@@ -165,7 +198,7 @@ function knownMarkup(known){
   if(!known.length)return'';
   return `<aside class="known-strip panel">
     <div class="known-title">${icon('check')}<div><span class="eyebrow">Known going in</span><strong>Don't spend call time rediscovering these.</strong></div></div>
-    <div class="known-items">${known.map(x=>`<div><span>${esc(x.topic)}</span><strong>${esc(x.detail)}</strong></div>`).join('')}</div>
+    <div class="known-items">${known.map(x=>`<div class="known-item"><span class="known-check">${icon('check','mini-icon')}</span><span class="known-topic">${esc(x.topic)}</span><strong>${esc(x.detail)}</strong></div>`).join('')}</div>
   </aside>`;
 }
 
@@ -186,11 +219,16 @@ function cleanMove(move,qid){
 }
 function blindspotMarkup(prepare,discovery){
   const qByDim=new Map(arr(discovery?.primary_questions).map(q=>[text(q.dimension_id),q]));
+  const dims=arr(prepare?.open_dimensions);
   return `<section class="blindspots panel">
     <div class="blindspot-heading">${icon('alert')}<div><span class="eyebrow">Critical blindspots</span><h3>What the call still has to resolve</h3></div></div>
-    <div class="blindspot-list">${arr(prepare?.open_dimensions).map(d=>{
+    <div class="blindspot-rail">${dims.map((d,i)=>{
       const q=qByDim.get(text(d.dimension_id));
-      return `<article><span class="unknown-badge">Unknown</span><div><strong>${esc(d.label)}</strong><p>${esc(d.why_open)}</p></div>${q?`<a href="#phase-${esc(q.question_id)}">Resolved by ${esc(q.question_id)} ${icon('arrow','mini-icon')}</a>`:''}</article>`;
+      return `<article>
+        <div class="blindspot-node"><span>${String(i+1).padStart(2,'0')}</span>${icon('alert','mini-icon')}</div>
+        <div class="blindspot-copy"><span class="unknown-badge">Unknown</span><strong>${esc(d.label)}</strong><p>${esc(d.why_open)}</p></div>
+        ${q?`<a href="#phase-${esc(q.question_id)}">${icon('question','mini-icon')} Resolved by ${esc(q.question_id)}</a>`:''}
+      </article>`;
     }).join('')}</div>
   </section>`;
 }
@@ -215,22 +253,35 @@ function branchesMarkup(q){
 }
 function runCallMarkup(discovery,prepare){
   const questions=arr(discovery?.primary_questions),dims=dimensionMap(prepare),flow=arr(discovery?.call_flow);
+  const phaseRefs=flow.map((step,i)=>{
+    const q=questionForStep(step,i,questions);
+    const id=q?`phase-${q.question_id}`:`phase-${i+1}`;
+    return {id,label:cleanMove(step.move,q?.question_id),q};
+  });
   return `<div class="run-call panel">
+    <nav class="route-strip" aria-label="Call route">
+      ${phaseRefs.map((p,i)=>`<a href="#${esc(p.id)}"><span class="route-dot">${String(i+1).padStart(2,'0')}</span><small>${esc(excerpt(p.label,46))}</small></a>`).join('')}
+    </nav>
+    <div class="call-phases">
     ${flow.map((step,i)=>{
       const q=questionForStep(step,i,questions),dim=q?dims.get(text(q.dimension_id)):null;
       return `<article class="call-phase" id="${q?`phase-${esc(q.question_id)}`:`phase-${i+1}`}">
-        <div class="phase-index"><span>${String(i+1).padStart(2,'0')}</span>${icon(q?'target':'arrow')}</div>
+        <div class="phase-index"><span>${String(i+1).padStart(2,'0')}</span><span class="phase-icon-tile">${icon(q?'target':'arrow')}</span></div>
         <div class="phase-content">
-          <div class="phase-heading"><span class="phase-label">${q?'Must establish':'Close the loop'}</span>${dim?`<span class="resolves">Resolves · ${esc(dim.label)}</span>`:''}</div>
+          <div class="phase-heading"><span class="phase-label">${q?'Must establish':'Close the loop'}</span>${dim?`<span class="resolves">${icon('alert','mini-icon')} Resolves · ${esc(dim.label)}</span>`:''}</div>
           <h3>${esc(cleanMove(step.move,q?.question_id))}</h3>
-          ${q?`<div class="question-core"><span class="question-kicker">Ask</span><blockquote>${esc(q.ask)}</blockquote></div>
-            <div class="listener-grid"><section><span class="sub-label">Why this matters</span><p>${esc(q.why_now)}</p></section><section><span class="sub-label">${icon('ear','mini-icon')} Listen for</span>${listenMarkup(q.listen_for)}</section></div>
+          ${q?`<div class="question-core"><span class="question-kicker">${icon('target','mini-icon')} Ask</span><blockquote>${esc(q.ask)}</blockquote></div>
+            <div class="listener-grid">
+              <section class="why-tile"><span class="sub-label">${icon('spark','mini-icon')} Why this matters</span><p>${esc(q.why_now)}</p></section>
+              <section class="listen-tile"><span class="sub-label">${icon('ear','mini-icon')} Listen for</span>${listenMarkup(q.listen_for)}</section>
+            </div>
             ${branchesMarkup(q)}`:
             `<p class="phase-close">${esc(step.advance_when)}</p>`}
-          ${q&&text(step.advance_when)?`<details class="done-when"><summary>Done when</summary><p>${esc(step.advance_when)}</p></details>`:''}
+          ${q&&text(step.advance_when)?`<details class="done-when"><summary>${icon('check','mini-icon')} Done when</summary><p>${esc(step.advance_when)}</p></details>`:''}
         </div>
       </article>`;
     }).join('')}
+    </div>
   </div>`;
 }
 
@@ -277,7 +328,7 @@ function render(brief){
   const prepare=brief?.payload?.prepare||{},discovery=brief?.payload?.discovery||{},scorecard=brief?.payload?.scorecard||null,context=brief?.context||{};
   const known=knownGoingIn(discovery),groups=sourceIndex(prepare);
   root.innerHTML=`
-    <header class="topbar"><a class="brand" href="#top">${icon('spark','brand-icon')}<span>CLARIS</span></a><nav><a href="#matters">What matters</a><a href="#run">Run the call</a><a href="#next">Next move</a><a href="#evidence">Evidence</a></nav><span class="private">${icon('lock','mini-icon')} Private · expires ${esc(new Date(brief.expires_at).toLocaleDateString())}</span></header>
+    <header class="topbar"><a class="brand" href="#top">${icon('spark','brand-icon')}<span>CLARIS</span></a><nav class="segmented-nav"><a href="#matters">${icon('radar','mini-icon')} What matters</a><a href="#run">${icon('route','mini-icon')} Run the call</a><a href="#next">${icon('arrow','mini-icon')} Next move</a><a href="#evidence">${icon('file','mini-icon')} Evidence</a></nav><span class="private">${icon('lock','mini-icon')} Private · expires ${esc(new Date(brief.expires_at).toLocaleDateString())}</span></header>
     <div id="top">${orientationMarkup(brief,context)}</div>
 
     <section class="section overview">
