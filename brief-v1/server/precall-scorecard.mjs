@@ -10,7 +10,7 @@ const MATCH_DIMENSIONS = Object.freeze([
 const EVIDENCE_DIMENSIONS = Object.freeze([
   { key: 'critical_question_coverage', label: 'Critical-question coverage', weight: 35 },
   { key: 'source_authority', label: 'Source authority', weight: 25 },
-  { key: 'corroboration_depth', label: 'Corroboration depth', weight: 15 },
+  { key: 'corroboration_depth', label: 'Evidence breadth', weight: 15 },
   { key: 'freshness', label: 'Freshness', weight: 15 },
   { key: 'conflict_ambiguity_control', label: 'Conflict / ambiguity control', weight: 10 }
 ]);
