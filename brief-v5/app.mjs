@@ -88,7 +88,7 @@ function readinessInstrument(ready){
   </div>`;
 }
 
-function scoreDetail(key,scorecard){function scoreDetail(key,scorecard){
+function scoreDetail(key,scorecard){
   const fit=scorecard?.lead_fit||{},ev=scorecard?.evidence_coverage||{},ready=scorecard?.call_readiness||{};
   if(key==='fit')return{
     title:'Lead fit',answer:fit.grade||'—',descriptor:fit.grade?fit.descriptor:'Early evaluated signal',icon:'spark',
