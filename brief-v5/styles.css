@@ -441,3 +441,189 @@ linear-gradient(145deg,rgba(255,255,255,.98),rgba(236,243,239,.96))}
   .phase-icon-tile{width:44px;height:44px;border-radius:14px}
   .known-items{grid-template-columns:1fr}
 }
+
+
+/* V5 semantic + compression refinement */
+html,body,p,h1,h2,h3,h4,h5,h6,span,a,button,input,textarea,label,blockquote,small,strong{
+  font-family:InterVariable,Inter,-apple-system,BlinkMacSystemFont,"Helvetica Neue",sans-serif;
+  font-feature-settings:"liga" 1,"calt" 1,"ss07" 1,"ss08" 1,"cv10" 1,"cv01" 1,"zero" 1;
+  -webkit-font-feature-settings:"liga" 1,"calt" 1,"ss07" 1,"ss08" 1,"cv10" 1,"cv01" 1,"zero" 1;
+  font-optical-sizing:auto
+}
+body{font-weight:360}
+.identity-card h1,.call-time{font-weight:300}
+.section-head>div h2,.section-head.compact h2{font-weight:330}
+.matter-card>strong,.blindspot-copy strong,.phase-content h3,.question-core blockquote{font-weight:430}
+.eyebrow,.sub-label,.signal-label,.truth-badge,.unknown-badge,.phase-label,.resolves{font-weight:580}
+.gauge-display,.gauge-caption{font-family:inherit!important}
+
+/* Booking: one source of truth, clamp expands in place */
+.booking-row{overflow:hidden}
+.booking-shell{
+  display:grid;grid-template-columns:38px 1fr auto;gap:14px;align-items:start;padding:20px 23px
+}
+.booking-copy-wrap{min-width:0}
+.booking-copy{
+  margin:7px 0 0;
+  max-width:850px;
+  color:var(--ink-2);
+  font-size:15px;
+  line-height:1.55;
+  transition:max-height .28s ease
+}
+.booking-copy.is-clamped{
+  display:-webkit-box;
+  -webkit-line-clamp:3;
+  -webkit-box-orient:vertical;
+  overflow:hidden
+}
+.booking-toggle{
+  appearance:none;border:0;background:transparent;
+  display:inline-flex;align-items:center;gap:5px;
+  margin:9px 0 0;padding:0;
+  color:var(--accent);font-size:11px;cursor:pointer
+}
+.booking-toggle .mini-icon{transition:transform .24s ease}
+.booking-toggle[aria-expanded="true"] .mini-icon{transform:rotate(-90deg)}
+
+/* Honest instrument semantics */
+.categorical-instrument,.state-instrument{
+  min-height:128px;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:15px 10px 4px
+}
+.categorical-value,.state-value{
+  color:var(--deep);font-size:48px;line-height:.95;font-weight:300;letter-spacing:-.055em
+}
+.grade-states{
+  width:min(220px,92%);display:grid;grid-template-columns:repeat(4,1fr);
+  gap:7px;margin-top:24px;position:relative
+}
+.grade-states:before{
+  content:"";position:absolute;left:7%;right:7%;top:6px;height:1px;background:var(--line)
+}
+.grade-states span{position:relative;display:grid;place-items:center;gap:7px;color:var(--quiet)}
+.grade-states i{
+  position:relative;z-index:1;width:13px;height:13px;border-radius:50%;
+  background:#e2e9e5;border:1px solid #c8d5ce;box-shadow:0 0 0 4px rgba(238,243,239,.9)
+}
+.grade-states b{font-size:9px;font-weight:560}
+.grade-states span.is-active{color:var(--deep)}
+.grade-states span.is-active i{background:var(--deep);border-color:var(--deep);box-shadow:0 0 0 4px #dbe8e1}
+.grade-states span.is-active b{font-weight:650}
+.state-value{font-size:33px;letter-spacing:-.035em}
+.state-track{
+  width:min(220px,92%);display:grid;grid-template-columns:1fr 1fr;gap:5px;
+  margin-top:22px;padding:4px;border-radius:999px;background:#dce5e0
+}
+.state-track span{
+  display:grid;place-items:center;min-height:29px;border-radius:999px;
+  color:var(--quiet);font-size:9px;font-weight:600;letter-spacing:.08em
+}
+.state-track span.is-active{
+  background:var(--deep);color:white;box-shadow:0 4px 12px rgba(32,60,62,.12)
+}
+.state-instrument>small{margin-top:9px;color:var(--muted);font-size:10px}
+.gauge-number{font-size:30px}
+.instrument-deck .signal{min-height:236px}
+.instrument-deck .signal-desc{min-height:33px}
+
+/* Dynamic Company Snapshot from existing certified public facts */
+.company-snapshot{
+  margin-top:18px;padding:21px 24px;border-radius:24px;box-shadow:none;
+  background:linear-gradient(145deg,rgba(251,252,250,.9),rgba(232,240,235,.86))
+}
+.snapshot-head{display:flex;justify-content:space-between;align-items:center;gap:18px}
+.snapshot-head>div{display:flex;align-items:center;gap:10px}
+.snapshot-head>div>.icon{width:22px;height:22px;color:var(--accent)}
+.snapshot-head strong{display:block;margin-top:3px;font-size:12px;font-weight:450;color:var(--ink-2)}
+.snapshot-head>small{color:var(--quiet);font-size:9px}
+.snapshot-grid{
+  display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0;
+  margin-top:17px;border-top:1px solid var(--line)
+}
+.snapshot-grid article{position:relative;min-width:0;padding:15px 16px 2px 17px;border-right:1px solid var(--line)}
+.snapshot-grid article:last-child{border-right:0}
+.snapshot-marker{
+  position:absolute;left:0;top:19px;width:7px;height:7px;border-radius:50%;
+  background:var(--accent);box-shadow:0 0 0 4px rgba(111,144,133,.09)
+}
+.snapshot-grid small{
+  display:block;color:var(--accent);font-size:9px;line-height:1.3;
+  text-transform:uppercase;letter-spacing:.07em
+}
+.snapshot-grid strong{
+  display:block;margin-top:7px;color:var(--ink-2);
+  font-size:12px;line-height:1.45;font-weight:390
+}
+
+/* One sharp operating direction under Call Focus */
+.call-direction{
+  max-width:830px;margin:17px 0 0;padding-top:14px;border-top:1px solid rgba(255,255,255,.12);
+  color:rgba(255,255,255,.78);font-size:13px;line-height:1.55;font-weight:350
+}
+.call-direction>span{
+  display:inline-block;margin-right:7px;color:#bed3ca;
+  font-size:9px;font-weight:580;letter-spacing:.11em;text-transform:uppercase
+}
+
+/* Route geometry follows real flow length */
+.route-strip{
+  grid-template-columns:repeat(var(--phase-count),minmax(0,1fr))!important
+}
+.route-strip a{padding-inline:10px}
+.route-strip small{font-size:9.5px;font-weight:430;-webkit-line-clamp:2}
+.call-phases{
+  position:relative;
+  padding:3px 0
+}
+.call-phases:before{
+  content:"";position:absolute;
+  left:56px;top:34px;bottom:34px;width:1px;
+  background:linear-gradient(180deg,transparent,var(--line) 5%,var(--line) 95%,transparent)
+}
+.phase-index:after{display:none!important}
+.phase-icon-tile{
+  position:relative;z-index:2;
+  border:6px solid #edf3ef;
+  box-sizing:content-box
+}
+
+/* Compress the call strategy layers */
+.listener-grid{margin-top:11px}
+.why-tile,.listen-tile{padding:14px 16px}
+.phase-advanced{margin-top:12px}
+.phase-advanced>summary,.done-when>summary{font-size:10px}
+.done-when>summary{opacity:.88}
+.advanced-body{font-size:11px}
+
+/* Calibration-like confirmed markers */
+.known-check{
+  width:17px;height:17px;display:grid;place-items:center;border-radius:50%;
+  border:1px solid rgba(88,118,108,.28);
+  background:rgba(111,144,133,.08);color:var(--accent)
+}
+.known-check .mini-icon{width:10px;height:10px}
+.known-item{align-items:start}
+
+/* Quiet proof layer */
+.proof-drawer>summary{min-height:56px}
+.proof-drawer>summary strong{font-weight:430}
+
+/* Mobile semantics */
+@media(max-width:900px){
+  .snapshot-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .snapshot-grid article:nth-child(2){border-right:0}
+  .snapshot-grid article:nth-child(n+3){border-top:1px solid var(--line)}
+  .route-strip{grid-template-columns:repeat(var(--phase-count),minmax(135px,1fr))!important}
+  .call-phases:before{left:46px}
+}
+@media(max-width:600px){
+  .booking-shell{grid-template-columns:28px 1fr}
+  .source-chip{grid-column:2}
+  .snapshot-grid{grid-template-columns:1fr}
+  .snapshot-grid article{border-right:0!important;border-top:1px solid var(--line)}
+  .snapshot-grid article:first-child{border-top:0}
+  .call-phases:before{display:none}
+  .categorical-value{font-size:42px}
+}
