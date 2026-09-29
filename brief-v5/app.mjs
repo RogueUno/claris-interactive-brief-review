@@ -54,41 +54,46 @@ function evidenceLevel(score){
 function levelScale(level){
   return `<span class="grade-scale evidence-scale" aria-hidden="true">${[1,2,3,4].map(i=>`<i class="${i<=level?'on':''}"></i>`).join('')}</span>`;
 }
-function evidenceGauge(score,label){
-  const v=Math.max(0,Math.min(100,Number(score)||0));
-  return `<div class="gauge gauge-accent" aria-hidden="true">
+function arcInstrument({fill=0,display='—',caption='',tone='accent',badge=''}) {
+  const v=Math.max(0,Math.min(100,Number(fill)||0));
+  return `<div class="gauge gauge-${esc(tone)}" aria-hidden="true">
     <svg viewBox="0 0 180 108" role="presentation">
       <path class="gauge-track" d="M18 91 A72 72 0 0 1 162 91" pathLength="100"/>
       <path class="gauge-value" d="M18 91 A72 72 0 0 1 162 91" pathLength="100" style="stroke-dasharray:${v} 100"/>
       <g class="gauge-ticks"><path d="M28 71l8 4"/><path d="M52 41l6 7"/><path d="M89 28v10"/><path d="M128 41l-6 7"/><path d="M152 71l-8 4"/></g>
-      <text class="gauge-display gauge-number" x="90" y="80" text-anchor="middle">${esc(Math.round(v))}</text>
-      <text class="gauge-caption" x="90" y="99" text-anchor="middle">${esc(label)}</text>
+      <text class="gauge-display" x="90" y="81" text-anchor="middle">${esc(display)}</text>
+      <text class="gauge-caption" x="90" y="100" text-anchor="middle">${esc(caption)}</text>
     </svg>
-    <span class="gauge-badge">${esc(Math.round(v))}/100</span>
+    ${badge?`<span class="gauge-badge">${esc(badge)}</span>`:''}
   </div>`;
 }
-function gradeInstrument(letter){
-  const active=text(letter).toUpperCase();
-  return `<div class="categorical-instrument">
-    <strong class="categorical-value">${esc(active||'—')}</strong>
-    <div class="grade-states" aria-label="Lead fit grade ${esc(active||'not available')}">
-      ${['D','C','B','A'].map(g=>`<span class="${g===active?'is-active':''}"><i></i><b>${g}</b></span>`).join('')}
-    </div>
-  </div>`;
+function gradeArc(letter){
+  const grade=text(letter).toUpperCase();
+  const fill={D:25,C:50,B:75,A:100}[grade]||0;
+  return arcInstrument({fill,display:grade||'—',caption:'Lead fit',tone:'deep'});
 }
-function readinessInstrument(ready){
+function evidenceArc(score,label){
+  const n=Number(score);
+  return arcInstrument({
+    fill:Number.isFinite(n)?n:0,
+    display:Number.isFinite(n)?String(Math.round(n)):'—',
+    caption:label,
+    tone:'accent',
+    badge:Number.isFinite(n)?`${Math.round(n)}/100`:''
+  });
+}
+function readinessArc(ready){
   const state=text(ready?.status)==='READY'?'READY':'OPEN';
-  return `<div class="state-instrument">
-    <strong class="state-value">${state}</strong>
-    <div class="state-track" aria-label="Call readiness ${state}">
-      <span class="${state==='OPEN'?'is-active':''}">OPEN</span>
-      <span class="${state==='READY'?'is-active':''}">READY</span>
-    </div>
-    ${ready?.open_variables!=null?`<small>${esc(ready.open_variables)} open variable${Number(ready.open_variables)===1?'':'s'}</small>`:''}
-  </div>`;
+  return arcInstrument({
+    fill:state==='READY'?100:50,
+    display:state,
+    caption:'Call readiness',
+    tone:state==='READY'?'accent':'warm',
+    badge:ready?.open_variables!=null?`${ready.open_variables} open`:''
+  });
 }
 
-function scoreDetail(key,scorecard){
+function scoreDetail(key,scorecard){function scoreDetail(key,scorecard){
   const fit=scorecard?.lead_fit||{},ev=scorecard?.evidence_coverage||{},ready=scorecard?.call_readiness||{};
   if(key==='fit')return{
     title:'Lead fit',answer:fit.grade||'—',descriptor:fit.grade?fit.descriptor:'Early evaluated signal',icon:'spark',
@@ -110,25 +115,25 @@ function scoreMarkup(scorecard){
   const fit=scorecard.lead_fit||{},ev=scorecard.evidence_coverage||{},ready=scorecard.call_readiness||{},eq=evidenceLevel(ev.score);
   return `<section class="signal-block instrument-deck panel">
     <div class="instrument-header">
-      <div><span class="eyebrow">Decision instruments</span><strong>Grade · evidence strength · readiness state</strong></div>
+      <div><span class="eyebrow">Decision instruments</span><strong>Lead grade · evidence score · readiness state</strong></div>
       <span class="instrument-live">${icon('radar','mini-icon')} Pre-call state</span>
     </div>
     <div class="signal-row">
       <button class="signal instrument-tile" data-score="fit" aria-expanded="false">
         <span class="signal-label">${icon('spark','small-icon')} Lead fit</span>
-        ${gradeInstrument(fit.grade)}
+        ${gradeArc(fit.grade)}
         <span class="signal-desc">${esc(fit.grade?fit.descriptor:'Early evaluated signal')}</span>
         <span class="why">Why ${icon('arrow','mini-icon')}</span>
       </button>
       <button class="signal instrument-tile" data-score="evidence" aria-expanded="false">
         <span class="signal-label">${icon('shield','small-icon')} Evidence coverage</span>
-        ${evidenceGauge(ev.score,eq.label)}
+        ${evidenceArc(ev.score,eq.label)}
         <span class="signal-desc">Source support & diagnostic coverage</span>
         <span class="why">Why ${icon('arrow','mini-icon')}</span>
       </button>
       <button class="signal instrument-tile" data-score="ready" aria-expanded="false">
         <span class="signal-label">${icon('target','small-icon')} Call readiness</span>
-        ${readinessInstrument(ready)}
+        ${readinessArc(ready)}
         <span class="signal-desc">${esc(ready.open_variables?`${ready.open_variables} material variable${ready.open_variables===1?'':'s'} mapped`:'Diagnostic state')}</span>
         <span class="why">Why ${icon('arrow','mini-icon')}</span>
       </button>
@@ -335,6 +340,21 @@ function nextMoveMarkup(scorecard,discovery){
   </article>`;
 }
 
+function externalSignalMarkup(prepare){
+  for(const evidence of arr(prepare?.expandable_blocks?.evidence)){
+    const third=arr(evidence?.sources).find(source=>text(source?.source_type)==='THIRD_PARTY');
+    const claim=text(arr(evidence?.claims)[0]);
+    if(!third||!claim)continue;
+    const url=safeUrl(third.url);
+    return `<aside class="external-signal panel">
+      <div class="external-signal-icon">${icon('radar')}</div>
+      <div><span class="eyebrow">External public signal</span><strong>${esc(claim)}</strong><p>Curated third-party evidence. Treat as context only — not as proof of prospect intent, cause, urgency or vulnerability.</p></div>
+      ${url!=='#'?`<a href="${url}" target="_blank" rel="noopener noreferrer">${esc(hostname(url))} ${icon('link','mini-icon')}</a>`:''}
+    </aside>`;
+  }
+  return '';
+}
+
 function sourceIndex(prepare){
   const groups=new Map();
   for(const evidence of arr(prepare?.expandable_blocks?.evidence)){
@@ -380,8 +400,8 @@ function render(brief){
     <section class="section overview">
       <div class="section-head compact"><span class="eyebrow">At a glance</span><h2>Opportunity signal</h2></div>
       ${scoreMarkup(scorecard)}
-      ${companySnapshotMarkup(prepare)}
       <article class="call-focus panel"><div class="focus-icon">${icon('target')}</div><div><span class="eyebrow">Call focus</span><h2>${esc(discovery.call_objective||prepare?.call_strategy?.opening_move||'Run a focused diagnostic conversation.')}</h2>${callDirectionMarkup(prepare,discovery)}${prepare.executive_readout?`<details><summary>Working model</summary><p>${esc(prepare.executive_readout)}</p></details>`:''}</div></article>
+      ${externalSignalMarkup(prepare)}
     </section>
 
     <section id="matters" class="section">
