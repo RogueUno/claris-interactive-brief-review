@@ -299,12 +299,6 @@ function routeLabel(step,index,q,dim,flowLength){
   const cleaned=cleanMove(step?.move,q?.question_id).replace(/[.?!].*$/,'');
   return excerpt(cleaned,28);
 }
-function routeLabel(step,index,q,dim,flowLength){
-  if(dim?.label)return text(dim.label).replace(/^exact\s+/i,'');
-  if(index===flowLength-1)return'Next step';
-  const cleaned=cleanMove(step?.move,q?.question_id).replace(/[.?!].*$/,'');
-  return excerpt(cleaned,28);
-}
 function runCallMarkup(discovery,prepare){
   const questions=arr(discovery?.primary_questions),dims=dimensionMap(prepare),flow=arr(discovery?.call_flow);
   const phaseRefs=flow.map((step,i)=>{
