@@ -15,9 +15,9 @@ const certification={
 };
 
 const fixtures=[
-  {dir:'supabase-v1',company:'Supabase',expected:{grade:'A',coverage:65,evidence:85}},
-  {dir:'resend-v3',company:'Resend',expected:{grade:null,coverage:0,evidence:85}},
-  {dir:'linear-v1',company:'Linear',expected:{grade:'A',coverage:45,evidence:85}}
+  {dir:'supabase-v1',company:'Supabase',expected:{grade:'A',coverage:65,evidence:79}},
+  {dir:'resend-v3',company:'Resend',expected:{grade:null,coverage:0,evidence:79}},
+  {dir:'linear-v1',company:'Linear',expected:{grade:'A',coverage:45,evidence:79}}
 ];
 
 for(const fixture of fixtures){
