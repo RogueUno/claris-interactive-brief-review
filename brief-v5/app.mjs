@@ -18,6 +18,7 @@ const ICONS={
   radar:'<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><path d="M12 12 18 6M12 3v2M21 12h-2"/>',
   check:'<circle cx="12" cy="12" r="9"/><path d="m8 12 2.5 2.5L16 9"/>',
   alert:'<circle cx="12" cy="12" r="9"/><path d="M12 7v6M12 17h.01"/>',
+  question:'<circle cx="12" cy="12" r="9"/><path d="M9.8 9a2.4 2.4 0 0 1 4.6 1c0 2-2.4 2.2-2.4 4M12 18h.01"/>',
   route:'<circle cx="6" cy="5" r="2"/><circle cx="18" cy="19" r="2"/><path d="M8 5h5a3 3 0 0 1 3 3v1a3 3 0 0 1-3 3H9a3 3 0 0 0-3 3v2"/>',
   ear:'<path d="M6 10a6 6 0 1 1 12 0c0 4-3 4-3 7a3 3 0 0 1-6 0"/><path d="M9 10a3 3 0 1 1 6 0c0 2-2 2-2 4"/>',
   branch:'<path d="M6 3v12a4 4 0 0 0 4 4h8"/><circle cx="6" cy="3" r="2"/><circle cx="18" cy="19" r="2"/><path d="M6 9h6a4 4 0 0 0 4-4V3"/><circle cx="16" cy="3" r="2"/>',
