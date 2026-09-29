@@ -51,6 +51,14 @@ function evidenceLevel(score){
   if(n>=40)return{label:'Thin',level:1};
   return{label:'Insufficient',level:1};
 }
+function evidenceGrade(score){
+  const n=Number(score);
+  if(!Number.isFinite(n))return null;
+  if(n>=75)return'A';
+  if(n>=50)return'B';
+  if(n>=25)return'C';
+  return'D';
+}
 function levelScale(level){
   return `<span class="grade-scale evidence-scale" aria-hidden="true">${[1,2,3,4].map(i=>`<i class="${i<=level?'on':''}"></i>`).join('')}</span>`;
 }
@@ -67,27 +75,27 @@ function arcInstrument({fill=0,display='—',caption='',tone='accent',badge=''})
     ${badge?`<span class="gauge-badge">${esc(badge)}</span>`:''}
   </div>`;
 }
-function gradeArc(letter){
+function gradeArc(letter,meaning='Fit'){
   const grade=text(letter).toUpperCase();
   const fill={D:25,C:50,B:75,A:100}[grade]||0;
-  return arcInstrument({fill,display:grade||'—',caption:'Lead fit',tone:'deep'});
+  return arcInstrument({fill,display:grade||'—',caption:meaning,tone:'deep'});
 }
-function evidenceArc(score,label){
-  const n=Number(score);
+function evidenceArc(score,meaning='Coverage'){
+  const n=Number(score),grade=evidenceGrade(n);
   return arcInstrument({
     fill:Number.isFinite(n)?n:0,
-    display:Number.isFinite(n)?String(Math.round(n)):'—',
-    caption:label,
+    display:grade||'—',
+    caption:meaning,
     tone:'accent',
     badge:Number.isFinite(n)?`${Math.round(n)}/100`:''
   });
 }
-function readinessArc(ready){
+function readinessArc(ready,meaning='Prepared'){
   const state=text(ready?.status)==='READY'?'READY':'OPEN';
   return arcInstrument({
     fill:state==='READY'?100:50,
     display:state,
-    caption:'Call readiness',
+    caption:meaning,
     tone:state==='READY'?'accent':'warm',
     badge:ready?.open_variables!=null?`${ready.open_variables} open`:''
   });
@@ -121,19 +129,19 @@ function scoreMarkup(scorecard){
     <div class="signal-row">
       <button class="signal instrument-tile" data-score="fit" aria-expanded="false">
         <span class="signal-label">${icon('spark','small-icon')} Lead fit</span>
-        ${gradeArc(fit.grade)}
+        ${gradeArc(fit.grade,fit.grade?fit.descriptor:'Unscored')}
         <span class="signal-desc">${esc(fit.grade?fit.descriptor:'Early evaluated signal')}</span>
         <span class="why">Why ${icon('arrow','mini-icon')}</span>
       </button>
       <button class="signal instrument-tile" data-score="evidence" aria-expanded="false">
         <span class="signal-label">${icon('shield','small-icon')} Evidence coverage</span>
-        ${evidenceArc(ev.score,eq.label)}
+        ${evidenceArc(ev.score,eq.label==='Very strong'?'Very strong':eq.label==='Strong'?'Strong':eq.label==='Usable'?'Usable':eq.label==='Thin'?'Thin':'Low')}
         <span class="signal-desc">Source support & diagnostic coverage</span>
         <span class="why">Why ${icon('arrow','mini-icon')}</span>
       </button>
       <button class="signal instrument-tile" data-score="ready" aria-expanded="false">
         <span class="signal-label">${icon('target','small-icon')} Call readiness</span>
-        ${readinessArc(ready)}
+        ${readinessArc(ready,ready.status==='READY'?'Prepared':'Open')}
         <span class="signal-desc">${esc(ready.open_variables?`${ready.open_variables} material variable${ready.open_variables===1?'':'s'} mapped`:'Diagnostic state')}</span>
         <span class="why">Why ${icon('arrow','mini-icon')}</span>
       </button>
@@ -291,6 +299,12 @@ function routeLabel(step,index,q,dim,flowLength){
   const cleaned=cleanMove(step?.move,q?.question_id).replace(/[.?!].*$/,'');
   return excerpt(cleaned,28);
 }
+function routeLabel(step,index,q,dim,flowLength){
+  if(dim?.label)return text(dim.label).replace(/^exact\s+/i,'');
+  if(index===flowLength-1)return'Next step';
+  const cleaned=cleanMove(step?.move,q?.question_id).replace(/[.?!].*$/,'');
+  return excerpt(cleaned,28);
+}
 function runCallMarkup(discovery,prepare){
   const questions=arr(discovery?.primary_questions),dims=dimensionMap(prepare),flow=arr(discovery?.call_flow);
   const phaseRefs=flow.map((step,i)=>{
@@ -305,20 +319,31 @@ function runCallMarkup(discovery,prepare){
     <div class="call-phases" style="--phase-count:${Math.max(1,flow.length)}">
     ${flow.map((step,i)=>{
       const q=questionForStep(step,i,questions),dim=q?dims.get(text(q.dimension_id)):null;
-      return `<article class="call-phase" id="${q?`phase-${esc(q.question_id)}`:`phase-${i+1}`}">
-        <div class="phase-index"><span>${String(i+1).padStart(2,'0')}</span><span class="phase-icon-tile">${icon(q?'target':'arrow')}</span></div>
-        <div class="phase-content">
-          <div class="phase-heading"><span class="phase-label">${q?'Must establish':'Close the loop'}</span>${dim?`<span class="resolves">${icon('alert','mini-icon')} Resolves · ${esc(dim.label)}</span>`:''}</div>
-          <h3>${esc(cleanMove(step.move,q?.question_id))}</h3>
-          ${q?`<div class="question-core"><span class="question-kicker">${icon('target','mini-icon')} Ask</span><blockquote>${esc(q.ask)}</blockquote></div>
+      if(q){
+        return `<details class="call-phase question-phase" id="phase-${esc(q.question_id)}">
+          <summary class="phase-summary">
+            <div class="phase-index"><span>${String(i+1).padStart(2,'0')}</span><span class="phase-icon-tile">${icon('target')}</span></div>
+            <div class="phase-summary-copy">
+              <div class="phase-heading"><span class="phase-label">Must establish</span>${dim?`<span class="resolves">${icon('alert','mini-icon')} Resolves · ${esc(dim.label)}</span>`:''}</div>
+              <strong>${esc(q.ask)}</strong>
+            </div>
+            <span class="phase-toggle">Open ${icon('arrow','mini-icon')}</span>
+          </summary>
+          <div class="phase-content phase-expanded">
+            <h3>${esc(cleanMove(step.move,q.question_id))}</h3>
+            <div class="question-core"><span class="question-kicker">${icon('target','mini-icon')} Ask</span><blockquote>${esc(q.ask)}</blockquote></div>
             <div class="listener-grid">
               <section class="why-tile"><span class="sub-label">${icon('spark','mini-icon')} Why this matters</span><p>${esc(q.why_now)}</p></section>
               <section class="listen-tile"><span class="sub-label">${icon('ear','mini-icon')} Listen for</span>${listenMarkup(q.listen_for)}</section>
             </div>
-            ${branchesMarkup(q)}`:
-            `<p class="phase-close">${esc(step.advance_when)}</p>`}
-          ${q&&text(step.advance_when)?`<details class="done-when"><summary>${icon('check','mini-icon')} Done when</summary><p>${esc(step.advance_when)}</p></details>`:''}
-        </div>
+            ${branchesMarkup(q)}
+            ${text(step.advance_when)?`<details class="done-when"><summary>${icon('check','mini-icon')} Done when</summary><p>${esc(step.advance_when)}</p></details>`:''}
+          </div>
+        </details>`;
+      }
+      return `<article class="call-phase close-phase" id="phase-${i+1}">
+        <div class="phase-index"><span>${String(i+1).padStart(2,'0')}</span><span class="phase-icon-tile">${icon('arrow')}</span></div>
+        <div class="phase-content"><div class="phase-heading"><span class="phase-label">Close the loop</span></div><h3>${esc(cleanMove(step.move,null))}</h3><p class="phase-close">${esc(step.advance_when)}</p></div>
       </article>`;
     }).join('')}
     </div>
@@ -419,9 +444,21 @@ function render(brief){
     <section id="next" class="section"><div class="section-head compact"><span class="eyebrow">Next move</span><h2>Conditional decision</h2></div>${nextMoveMarkup(scorecard,discovery)}</section>
     <section id="evidence" class="section evidence-section">${proofMarkup(prepare,groups)}</section>
   `;
-  bindBooking();bindScore(scorecard);bindCountdown();bindProof(groups);
+  bindQuestionPhases();bindBooking();bindScore(scorecard);bindCountdown();bindProof(groups);
 }
 
+function bindQuestionPhases(){
+  const phases=[...root.querySelectorAll('details.question-phase')];
+  phases.forEach(phase=>phase.addEventListener('toggle',()=>{
+    const label=phase.querySelector('.phase-toggle');
+    if(label)label.innerHTML=(phase.open?'Close ':'Open ')+icon('arrow','mini-icon');
+  }));
+  root.querySelectorAll('a[href^="#phase-"]').forEach(link=>link.addEventListener('click',()=>{
+    const id=link.getAttribute('href')?.slice(1);
+    const target=id?root.querySelector('#'+CSS.escape(id)):null;
+    if(target?.matches('details.question-phase'))target.open=true;
+  }));
+}
 function bindBooking(){
   const button=root.querySelector('[data-booking-toggle]');
   const copy=root.querySelector('[data-booking-copy]');
