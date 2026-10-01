@@ -241,14 +241,19 @@ function companySnapshotMarkup(snapshot){
   const intro=snapshot?.intro?.supported===true?text(snapshot.intro.display):'';
   const lastRowStart=Math.floor((metrics.length-1)/2)*2;
   return `<aside class="company-snapshot-v52 panel" aria-label="Company snapshot">
-    <div class="snapshot-v52-head"><div><span class="eyebrow">Company snapshot</span><strong>Who this company is</strong></div><span class="snapshot-v52-icon">${icon('building')}</span></div>
+    <div class="snapshot-v52-head">
+      <div class="snapshot-v52-title"><span class="snapshot-v52-title-icon">${icon('building','small-icon')}</span><div><span class="eyebrow">Company snapshot</span><strong>Who this company is</strong></div></div>
+      <span class="snapshot-v52-state">Public facts</span>
+    </div>
     ${intro?`<p class="snapshot-v52-intro">${esc(intro)}</p>`:''}
     <div class="snapshot-v52-metrics">
       ${metrics.map(({key,item},index)=>`<article class="snapshot-v52-metric ${key==='company_type'?'is-company-type ':''}${index>=lastRowStart?'is-last-row ':''}${metrics.length%2===1&&index===metrics.length-1?'is-wide-last':''}">
-        <span class="snapshot-v52-metric-icon">${icon(snapshotMetricIcon(key))}</span>
-        <strong>${esc(item.display)}</strong>
-        <span>${esc(item.label)}</span>
-        <small>${esc(item.source_label||'Public source')}</small>
+        <span class="snapshot-v52-metric-icon">${icon(snapshotMetricIcon(key),'small-icon')}</span>
+        <div class="snapshot-v52-metric-copy">
+          <span class="snapshot-v52-metric-label">${esc(item.label)}</span>
+          <strong>${esc(item.display)}</strong>
+          <small>${esc(item.source_label||'Public source')}</small>
+        </div>
       </article>`).join('')}
     </div>
   </aside>`;
