@@ -244,7 +244,7 @@ function companySnapshotMarkup(snapshot){
     <div class="snapshot-v52-head"><div><span class="eyebrow">Company snapshot</span><strong>Who this company is</strong></div><span class="snapshot-v52-icon">${icon('building')}</span></div>
     ${intro?`<p class="snapshot-v52-intro">${esc(intro)}</p>`:''}
     <div class="snapshot-v52-metrics">
-      ${metrics.map(({key,item},index)=>`<article class="snapshot-v52-metric ${key==='company_type'?'is-company-type ':''}${index>=lastRowStart?'is-last-row':''}">
+      ${metrics.map(({key,item},index)=>`<article class="snapshot-v52-metric ${key==='company_type'?'is-company-type ':''}${index>=lastRowStart?'is-last-row ':''}${metrics.length%2===1&&index===metrics.length-1?'is-wide-last':''}">
         <span class="snapshot-v52-metric-icon">${icon(snapshotMetricIcon(key))}</span>
         <strong>${esc(item.display)}</strong>
         <span>${esc(item.label)}</span>
