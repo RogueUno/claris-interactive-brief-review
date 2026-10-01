@@ -143,6 +143,7 @@ function findFoundedYear(results,domainHost){
     const hay=evidence(result);
     for(const {label,re} of [
       {label:'Founded',re:/\bfounded\s*(?:in|:|-)?\s*((?:18|19|20)\d{2})\b/i},
+      {label:'Founded',re:/\bfounded\s+(?:in\s+)?(?:january|february|march|april|may|june|july|august|september|october|november|december)\s+((?:18|19|20)\d{2})\b/i},
       {label:'Established',re:/\bestablished\s*(?:in|:|-)?\s*((?:18|19|20)\d{2})\b/i}
     ]){
       const match=hay.match(re);if(!match)continue;
