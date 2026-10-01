@@ -2,7 +2,7 @@ import { compileBriefPublishReady } from './publication-contract.mjs';
 import { compilePrecallScorecard } from './precall-scorecard.mjs';
 import { resolvePrecallScoreBasis } from './precall-score-basis-resolver.mjs';
 import { projectServiceAuthority } from './service-authority-projection.mjs';
-import { validateCompanySnapshotV1 } from './company-snapshot-v1.mjs';
+import { compileCompanySnapshotV1, validateCompanySnapshotV1 } from './company-snapshot-v1.mjs';
 
 function parseMaybeJson(value, code) {
   if (value && typeof value === 'object') return value;
@@ -31,6 +31,26 @@ function optionalCompanySnapshot(value, context) {
   const validation = validateCompanySnapshotV1(parsed, context);
   if (!validation.ok) return null;
   return { ...parsed, validation };
+}
+
+function derivedCompanySnapshot(input, context) {
+  const supplied = optionalCompanySnapshot(input.company_snapshot_v1 || input.company_snapshot, context);
+  if (supplied) return supplied;
+  const hasEvidence = input.canonical_truth_json != null
+    || input.stage_output_json != null
+    || input.research_bundle != null;
+  if (!hasEvidence) return null;
+  const compiled = compileCompanySnapshotV1({
+    company: input.company,
+    domain_host: input.domain_host || input.domain,
+    prospect_name: input.prospect_name,
+    prospect_role: input.prospect_role,
+    canonical_truth_json: input.canonical_truth_json,
+    stage_output_json: input.stage_output_json,
+    research_bundle: input.research_bundle
+  });
+  if (compiled?.validation?.ok !== true || compiled?.coverage?.renderable !== true) return null;
+  return compiled;
 }
 
 export function compileCertifiedBriefPublication(input = {}) {
@@ -81,8 +101,8 @@ export function compileCertifiedBriefPublication(input = {}) {
     consultant_sot: consultantSot
   });
 
-  const companySnapshot = optionalCompanySnapshot(input.company_snapshot_v1 || input.company_snapshot, {
-    domain_host: input.domain_host,
+  const companySnapshot = derivedCompanySnapshot(input, {
+    domain_host: input.domain_host || input.domain,
     prospect_name: input.prospect_name,
     company: input.company
   });
