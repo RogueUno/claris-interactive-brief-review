@@ -438,9 +438,51 @@ function render(brief){
     <section id="next" class="section"><div class="section-head compact"><span class="eyebrow">Next move</span><h2>Conditional decision</h2></div>${nextMoveMarkup(scorecard,discovery)}</section>
     <section id="evidence" class="section evidence-section">${proofMarkup(prepare,groups)}</section>
   `;
-  bindQuestionPhases();bindBooking();bindScore(scorecard);bindCountdown();bindProof(groups);
+  bindMotionPolish();bindQuestionPhases();bindBooking();bindScore(scorecard);bindCountdown();bindProof(groups);
 }
 
+function bindMotionPolish(){
+  const reduce=window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+  if(reduce)return;
+
+  root.classList.add('motion-ready');
+  const selector=[
+    '.orientation-grid > *',
+    '.booking-row',
+    '.section-head',
+    '.instrument-deck',
+    '.call-focus',
+    '.external-signal',
+    '.matter-card',
+    '.known-strip',
+    '.blindspots',
+    '.run-call',
+    '.call-phase',
+    '.next-move',
+    '.proof-drawer'
+  ].join(',');
+
+  const items=[...root.querySelectorAll(selector)];
+  items.forEach((el,index)=>{
+    el.classList.add('reveal-item');
+    el.style.setProperty('--reveal-delay',Math.min(index*28,168)+'ms');
+  });
+
+  if(!('IntersectionObserver' in window)){
+    items.forEach(el=>el.classList.add('is-visible'));
+    return;
+  }
+
+  const observer=new IntersectionObserver(entries=>{
+    for(const entry of entries){
+      if(!entry.isIntersecting)continue;
+      entry.target.classList.add('is-visible');
+      observer.unobserve(entry.target);
+    }
+  },{rootMargin:'0px 0px -7% 0px',threshold:.08});
+
+  items.forEach(el=>observer.observe(el));
+}
 function bindQuestionPhases(){
   const phases=[...root.querySelectorAll('details.question-phase')];
   phases.forEach(phase=>phase.addEventListener('toggle',()=>{
