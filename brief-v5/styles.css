@@ -1434,17 +1434,18 @@ body{
 }
 .snapshot-v52-head{
   display:flex;
-  align-items:center;
+  align-items:flex-start;
   justify-content:space-between;
   gap:18px;
-  padding:17px 19px 13px
+  padding:17px 19px 14px
 }
 .snapshot-v52-title{
   display:flex;
-  align-items:center;
+  align-items:flex-start;
   gap:10px;
   min-width:0
 }
+.snapshot-v52-title-copy{min-width:0}
 .snapshot-v52-title-icon{
   display:grid;
   place-items:center;
@@ -1467,6 +1468,7 @@ body{
 }
 .snapshot-v52-state{
   flex:0 0 auto;
+  margin-top:2px;
   color:var(--quiet);
   font-size:9px;
   line-height:1;
@@ -1475,12 +1477,14 @@ body{
   font-weight:560
 }
 .snapshot-v52-intro{
-  margin:0;
-  padding:0 19px 14px;
-  color:var(--muted);
+  max-width:52ch;
+  margin:4px 0 0;
+  padding:0;
+  color:var(--ink-2);
   font-size:12.5px;
-  line-height:1.5;
-  font-weight:350
+  line-height:1.45;
+  font-weight:390;
+  letter-spacing:-.006em
 }
 .snapshot-v52-metrics{
   display:grid!important;
