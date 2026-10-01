@@ -1398,7 +1398,7 @@ body{
 }
 
 
-/* Optional V5.2 company snapshot sidecar — renders only with validated snapshot payload */
+/* Optional V5.2 company snapshot sidecar — Planoly-era divider language in current CLARIS palette */
 .identity-linkedin{
   display:inline-flex;
   align-items:center;
@@ -1422,66 +1422,78 @@ body{
   border-color:var(--cal-line-strong)
 }
 
-.understand-grid-v52{
-  display:grid;
-  grid-template-columns:minmax(0,1.16fr) minmax(330px,.84fr);
-  gap:12px;
-  align-items:stretch
-}
-.understand-grid-v52>.call-focus{
-  margin:0;
-  height:100%
-}
 .company-snapshot-v52{
   margin:0;
-  padding:20px 21px 18px;
+  padding:0;
   border-radius:24px;
-  overflow:hidden
+  overflow:hidden;
+  background:linear-gradient(180deg,rgba(251,253,251,.83),rgba(239,245,241,.72));
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.78),
+    0 10px 28px rgba(42,66,61,.045)
 }
 .snapshot-v52-head{
   display:flex;
-  align-items:flex-start;
+  align-items:center;
   justify-content:space-between;
-  gap:16px
+  gap:18px;
+  padding:17px 19px 13px
 }
-.snapshot-v52-head>div>strong{
-  display:block;
-  margin-top:4px;
-  color:var(--ink-2);
-  font-size:var(--type-p2);
-  line-height:1.35;
-  font-weight:390
+.snapshot-v52-title{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  min-width:0
 }
-.snapshot-v52-icon{
-  width:37px;
-  height:37px;
-  flex:0 0 37px;
+.snapshot-v52-title-icon{
   display:grid;
   place-items:center;
-  border-radius:12px;
+  width:28px;
+  height:28px;
+  flex:0 0 28px;
   color:var(--accent);
-  background:rgba(111,144,133,.09);
-  border:1px solid rgba(83,112,103,.10);
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.56)
+  border:1px solid var(--cal-line);
+  border-radius:9px;
+  background:rgba(255,255,255,.44)
 }
-.snapshot-v52-icon .icon{width:18px;height:18px}
+.snapshot-v52-title-icon .small-icon{width:14px;height:14px}
+.snapshot-v52-head strong{
+  display:block;
+  margin-top:2px;
+  color:var(--ink-2);
+  font-size:12px;
+  line-height:1.35;
+  font-weight:430
+}
+.snapshot-v52-state{
+  flex:0 0 auto;
+  color:var(--quiet);
+  font-size:9px;
+  line-height:1;
+  text-transform:uppercase;
+  letter-spacing:.08em;
+  font-weight:560
+}
 .snapshot-v52-intro{
-  margin:15px 0 16px;
-  max-width:50ch;
+  margin:0;
+  padding:0 19px 14px;
   color:var(--muted);
-  font-size:var(--type-p2);
-  line-height:1.48;
-  font-weight:340
+  font-size:12.5px;
+  line-height:1.5;
+  font-weight:350
 }
 .snapshot-v52-metrics{
-  display:grid;
-  grid-template-columns:repeat(2,minmax(0,1fr));
+  display:grid!important;
+  grid-template-columns:repeat(2,minmax(0,1fr))!important;
   border-top:1px solid var(--cal-line)
 }
 .snapshot-v52-metric{
-  position:relative;
+  display:grid;
+  grid-template-columns:24px minmax(0,1fr);
+  gap:9px;
+  align-items:start;
   min-width:0;
-  padding:15px 13px 12px 28px;
+  padding:13px 14px 12px 15px;
   border-right:1px solid var(--cal-line);
   border-bottom:1px solid var(--cal-line)
 }
@@ -1492,59 +1504,64 @@ body{
   border-right:0
 }
 .snapshot-v52-metric-icon{
-  position:absolute;
-  left:0;
-  top:17px;
+  display:grid;
+  place-items:center;
+  width:24px;
+  height:24px;
+  margin-top:1px;
   color:var(--accent)
 }
-.snapshot-v52-metric-icon .icon{width:16px;height:16px}
-.snapshot-v52-metric>strong{
+.snapshot-v52-metric-icon .small-icon{width:15px;height:15px}
+.snapshot-v52-metric-copy{min-width:0}
+.snapshot-v52-metric-label{
+  display:block;
+  margin:0 0 3px;
+  color:var(--quiet);
+  font-size:9px;
+  line-height:1.25;
+  text-transform:uppercase;
+  letter-spacing:.075em;
+  font-weight:580
+}
+.snapshot-v52-metric strong{
   display:block;
   color:var(--ink);
-  font-size:var(--type-h3);
+  font-size:17px;
   line-height:1.16;
-  font-weight:330;
+  font-weight:360;
   letter-spacing:-.018em;
   overflow-wrap:anywhere
 }
-.snapshot-v52-metric.is-company-type>strong{
-  font-size:var(--type-p1);
+.snapshot-v52-metric.is-company-type strong{
+  font-size:13.5px;
   line-height:1.28;
-  font-weight:390;
-  letter-spacing:-.01em
+  font-weight:430;
+  letter-spacing:-.008em
 }
-.snapshot-v52-metric>span{
+.snapshot-v52-metric small{
   display:block;
-  margin-top:5px;
-  color:var(--ink-2);
-  font-size:var(--type-p3);
-  line-height:1.3;
-  font-weight:460
-}
-.snapshot-v52-metric>small{
-  display:block;
-  margin-top:3px;
+  margin-top:4px;
   color:var(--quiet);
-  font-size:10px;
+  font-size:9px;
   line-height:1.3;
   font-weight:350
 }
 
 @media(max-width:900px){
-  .understand-grid-v52{grid-template-columns:1fr}
-  .company-snapshot-v52{padding:19px}
+  .company-snapshot-v52{min-width:0}
 }
 @media(max-width:520px){
-  .snapshot-v52-metrics{grid-template-columns:1fr}
+  .snapshot-v52-metrics{grid-template-columns:1fr!important}
   .snapshot-v52-metric,
   .snapshot-v52-metric:nth-child(2n),
-  .snapshot-v52-metric.is-last-row{
+  .snapshot-v52-metric.is-last-row,
+  .snapshot-v52-metric.is-wide-last{
+    grid-column:auto;
     border-right:0;
     border-bottom:1px solid var(--cal-line)
   }
   .snapshot-v52-metric:last-child{border-bottom:0}
 }
-
 
 /* V5 summary hierarchy refinement — identity → instruments → booking/snapshot → call focus */
 .identity-card:after,
@@ -1619,31 +1636,6 @@ body{
 @media(min-width:901px){
   .booking-snapshot-grid .booking-copy.is-clamped{-webkit-line-clamp:5!important}
   .booking-snapshot-grid .booking-shell{padding:18px 19px!important}
-  .booking-snapshot-grid .company-snapshot-v52{padding:16px 18px 14px}
-  .booking-snapshot-grid .snapshot-v52-intro{
-    margin:10px 0 10px;
-    font-size:12px;
-    line-height:1.42
-  }
-  .booking-snapshot-grid .snapshot-v52-metric{
-    padding:10px 10px 9px 24px
-  }
-  .booking-snapshot-grid .snapshot-v52-metric-icon{
-    top:12px
-  }
-  .booking-snapshot-grid .snapshot-v52-metric>strong{
-    font-size:16px;
-    line-height:1.18
-  }
-  .booking-snapshot-grid .snapshot-v52-metric.is-company-type>strong{
-    font-size:13px;
-    line-height:1.25
-  }
-  .booking-snapshot-grid .snapshot-v52-metric>span{margin-top:3px}
-  .booking-snapshot-grid .snapshot-v52-metric>small{
-    margin-top:2px;
-    font-size:9px
-  }
 }
 @media(max-width:600px){
   .booking-snapshot-grid{margin-top:10px}
