@@ -159,3 +159,77 @@ test('score publication fails closed without the research evidence packet used t
     /PRECALL_RESEARCH_EVIDENCE_REQUIRED/
   );
 });
+
+
+test('validated company snapshot is presentation-only and additive to certified publication',()=>{
+  const snapshot={
+    schema_version:'CLARIS_COMPANY_SNAPSHOT_V1',
+    authority:'PRESENTATION_ONLY',
+    company_name:'Acme',
+    domain_host:'acme.com',
+    intro:null,
+    fields:{
+      founded_year:{
+        value:2016,display:'2016',label:'Founded',
+        source_url:'https://acme.com/about',source_label:'acme.com',
+        source_type:'FIRST_PARTY',supported:true,confidence:'HIGH',
+        evidence_quote:'Acme was founded in 2016.'
+      },
+      headquarters:{
+        value:'Paris, France',display:'Paris, France',label:'Headquarters',
+        source_url:'https://www.linkedin.com/company/acme/',source_label:'linkedin.com',
+        source_type:'PUBLIC_INDEX',supported:true,confidence:'MEDIUM',
+        evidence_quote:'Acme — Headquarters: Paris, France.'
+      },
+      employee_size:null,
+      company_type:{
+        value:'security advisory firm',display:'security advisory firm',label:'Company type',
+        source_url:'https://acme.com/about',source_label:'acme.com',
+        source_type:'FIRST_PARTY',supported:true,confidence:'MEDIUM',
+        evidence_quote:'Acme is a security advisory firm.'
+      },
+      scale_metric:null
+    },
+    prospect:{name:'Alex Morgan',role:'VP Engineering',linkedin_url:null},
+    sources:[
+      {url:'https://acme.com/about',source_type:'FIRST_PARTY',source_label:'acme.com'},
+      {url:'https://www.linkedin.com/company/acme/',source_type:'PUBLIC_INDEX',source_label:'linkedin.com'}
+    ],
+    validation:{ok:true,errors:[]}
+  };
+  const result=compileCertifiedBriefPublication({
+    ...base,
+    prospect_name:'Alex Morgan',
+    domain_host:'acme.com',
+    company_snapshot_v1:snapshot
+  });
+  assert.equal(result.body.brief_payload.company_snapshot.authority,'PRESENTATION_ONLY');
+  assert.equal(result.body.brief_payload.company_snapshot.fields.founded_year.display,'2016');
+  assert.equal(result.body.brief_payload.prepare.service_authority.mode,'HYPOTHESIS_ONLY');
+});
+
+test('invalid optional snapshot is omitted rather than poisoning a certified legacy brief',()=>{
+  const result=compileCertifiedBriefPublication({
+    ...base,
+    domain_host:'acme.com',
+    company_snapshot_v1:{
+      schema_version:'CLARIS_COMPANY_SNAPSHOT_V1',
+      authority:'PRESENTATION_ONLY',
+      company_name:'Acme',
+      domain_host:'acme.com',
+      fields:{
+        founded_year:{
+          value:2016,display:'2016',label:'Founded',
+          source_url:'https://example.com/about',source_label:'example.com',
+          source_type:'FIRST_PARTY',supported:true,confidence:'HIGH',
+          evidence_quote:'Acme was founded in 2016.'
+        },
+        headquarters:null,employee_size:null,company_type:null,scale_metric:null
+      },
+      prospect:{name:'Alex',linkedin_url:null},
+      sources:[]
+    }
+  });
+  assert.equal('company_snapshot' in result.body.brief_payload,false);
+  assert.equal(result.operation,'brief_publish_ready');
+});
