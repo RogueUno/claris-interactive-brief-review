@@ -174,7 +174,6 @@ function orientationMarkup(brief,context,companySnapshot){
         <div class="call-chips"><span>Private brief</span><span>Pre-call</span></div>
       </article>
     </div>
-    ${bookingMarkup(context.booking_text)}
   </section>`;
 }
 function bookingMarkup(value){
@@ -191,6 +190,13 @@ function bookingMarkup(value){
       <span class="source-chip">Prospect provided</span>
     </div>
   </section>`;
+}
+
+function bookingSnapshotMarkup(bookingText,snapshotMarkup){
+  const booking=bookingMarkup(bookingText);
+  if(!booking&&!snapshotMarkup)return'';
+  if(booking&&snapshotMarkup)return `<div class="booking-snapshot-grid">${booking}${snapshotMarkup}</div>`;
+  return `<div class="booking-snapshot-grid is-single">${booking||snapshotMarkup}</div>`;
 }
 
 function knownGoingIn(discovery){
@@ -443,7 +449,8 @@ function render(brief){
     <section class="section overview">
       <div class="section-head compact"><span class="eyebrow">At a glance</span><h2>Opportunity signal</h2></div>
       ${scoreMarkup(scorecard)}
-      ${snapshotMarkup?`<div class="understand-grid-v52"><article class="call-focus panel"><div class="focus-icon">${icon('target')}</div><div><span class="eyebrow">Call focus</span><h2>${esc(discovery.call_objective||prepare?.call_strategy?.opening_move||'Run a focused diagnostic conversation.')}</h2>${callDirectionMarkup(prepare,discovery)}${prepare.executive_readout?`<details><summary>Working model</summary><p>${esc(prepare.executive_readout)}</p></details>`:''}</div></article>${snapshotMarkup}</div>`:`<article class="call-focus panel"><div class="focus-icon">${icon('target')}</div><div><span class="eyebrow">Call focus</span><h2>${esc(discovery.call_objective||prepare?.call_strategy?.opening_move||'Run a focused diagnostic conversation.')}</h2>${callDirectionMarkup(prepare,discovery)}${prepare.executive_readout?`<details><summary>Working model</summary><p>${esc(prepare.executive_readout)}</p></details>`:''}</div></article>`}
+      ${bookingSnapshotMarkup(context.booking_text,snapshotMarkup)}
+      <article class="call-focus panel"><div class="focus-icon">${icon('target')}</div><div><span class="eyebrow">Call focus</span><h2>${esc(discovery.call_objective||prepare?.call_strategy?.opening_move||'Run a focused diagnostic conversation.')}</h2>${callDirectionMarkup(prepare,discovery)}${prepare.executive_readout?`<details><summary>Working model</summary><p>${esc(prepare.executive_readout)}</p></details>`:''}</div></article>
       ${externalSignalMarkup(prepare)}
     </section>
 
