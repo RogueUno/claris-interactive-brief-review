@@ -1611,6 +1611,36 @@ body{
 @media(max-width:900px){
   .booking-snapshot-grid{grid-template-columns:1fr}
 }
+/* Balance the V5.2-inspired pair without hiding supported snapshot facts. */
+@media(min-width:901px){
+  .booking-snapshot-grid .booking-copy.is-clamped{-webkit-line-clamp:5!important}
+  .booking-snapshot-grid .booking-shell{padding:18px 19px!important}
+  .booking-snapshot-grid .company-snapshot-v52{padding:16px 18px 14px}
+  .booking-snapshot-grid .snapshot-v52-intro{
+    margin:10px 0 10px;
+    font-size:12px;
+    line-height:1.42
+  }
+  .booking-snapshot-grid .snapshot-v52-metric{
+    padding:10px 10px 9px 24px
+  }
+  .booking-snapshot-grid .snapshot-v52-metric-icon{
+    top:12px
+  }
+  .booking-snapshot-grid .snapshot-v52-metric>strong{
+    font-size:16px;
+    line-height:1.18
+  }
+  .booking-snapshot-grid .snapshot-v52-metric.is-company-type>strong{
+    font-size:13px;
+    line-height:1.25
+  }
+  .booking-snapshot-grid .snapshot-v52-metric>span{margin-top:3px}
+  .booking-snapshot-grid .snapshot-v52-metric>small{
+    margin-top:2px;
+    font-size:9px
+  }
+}
 @media(max-width:600px){
   .booking-snapshot-grid{margin-top:10px}
 }
