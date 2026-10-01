@@ -297,16 +297,77 @@ function findScaleMetric(results,domainHost){
   }
   return null;
 }
-function findDescription(results,domainHost){
-  const candidates=firstPartySources(results,domainHost).slice().sort((a,b)=>{
+function cleanDescriptorPhrase(value){
+  return compactSpaces(value)
+    .replace(/^(?:the|a|an)\s+/i,'')
+    .replace(/\s+(?:for|serving|used by|with)\s+[^,.;]{1,90}$/i,'')
+    .replace(/[,:;\-\s]+$/,'')
+    .trim();
+}
+function safeDescriptor(value){
+  const raw=compactSpaces(value);
+  if(raw.length<18||raw.length>150)return'';
+  if(/[€£$]/.test(raw))return'';
+  if(/\b(?:raised|valuation|funding|employees?|customers?|users?|teams?|founded|headquartered|based in|breach|incident|attack|vulnerab(?:ility|le))\b/i.test(raw))return'';
+  return raw.endsWith('.')?raw:raw+'.';
+}
+function explicitDescriptor(result,company){
+  const raw=compactSpaces(result.content);
+  if(!raw)return'';
+  const companyNorm=normalized(company);
+  for(const sentence of raw.split(/(?<=[.!?])\s+/)){
+    const norm=normalized(sentence);
+    if(companyNorm&&!norm.includes(companyNorm))continue;
+    const match=sentence.match(/\b(?:is|are)\s+(?:an?\s+)?([^.!?]{8,120})/i);
+    if(!match)continue;
+    const phrase=cleanDescriptorPhrase(match[1]).replace(/\s+(?:that|which)\s+.*$/i,'').trim();
+    const descriptor=safeDescriptor(phrase);
+    if(descriptor)return descriptor;
+  }
+  return'';
+}
+function functionalDescriptor(result){
+  const raw=compactSpaces(result.content);
+  if(!raw)return'';
+  const relative=raw.match(/\b(?:the\s+)?company\s*,?\s*which\s+(?:provides?|offers?|builds?|develops?|hosts?|operates?)\s+(?:the\s+)?([^.;]{4,90})/i);
+  if(!relative)return'';
+  const phrase=cleanDescriptorPhrase(relative[1]);
+  if(!phrase)return'';
+  const modifier=/\bopen[- ]source\b/i.test(raw)?'Open-source ':'';
+  return safeDescriptor(modifier+phrase+' company');
+}
+function titleDescriptor(result,company){
+  const title=compactSpaces(result.title);
+  if(!title||!company)return'';
+  const lower=title.toLowerCase();
+  const companyIndex=lower.indexOf(company.toLowerCase());
+  if(companyIndex<=0)return'';
+  const before=cleanDescriptorPhrase(title.slice(0,companyIndex));
+  if(!/\b(?:startup|platform|provider|software|company)$/i.test(before))return'';
+  return safeDescriptor(before);
+}
+function findDescription(results,domainHost,company){
+  const firstParty=firstPartySources(results,domainHost).slice().sort((a,b)=>{
     const aAbout=/about|company|home/i.test(a.title+' '+a.url)?1:0;
     const bAbout=/about|company|home/i.test(b.title+' '+b.url)?1:0;
     return bAbout-aAbout+(Number(b.score||0)-Number(a.score||0));
   });
-  for(const result of candidates){
+  for(const result of firstParty){
+    const explicit=explicitDescriptor(result,company);
+    if(explicit)return candidate({value:explicit,display:explicit,label:'Company',result,sourceType:'FIRST_PARTY',confidence:'HIGH'});
     const sentence=firstSentence(result.content);
-    if(sentence.length<24)continue;
-    return candidate({value:sentence,display:sentence,label:'Company',result,sourceType:'FIRST_PARTY',confidence:'MEDIUM'});
+    const safe=safeDescriptor(sentence);
+    if(safe)return candidate({value:safe,display:safe,label:'Company',result,sourceType:'FIRST_PARTY',confidence:'MEDIUM'});
+  }
+  const admitted=companySources(results,domainHost)
+    .filter(result=>result?.source_type==='ADMITTED_PUBLIC'||linkedinKind(result.url)==='company');
+  for(const result of admitted){
+    const explicit=explicitDescriptor(result,company);
+    if(explicit)return candidate({value:explicit,display:explicit,label:'Company',result,sourceType:sourceType(result,domainHost),confidence:'MEDIUM'});
+    const functional=functionalDescriptor(result);
+    if(functional)return candidate({value:functional,display:functional,label:'Company',result,sourceType:sourceType(result,domainHost),confidence:'MEDIUM',extra:{derived_descriptor:true}});
+    const titled=titleDescriptor(result,company);
+    if(titled)return candidate({value:titled,display:titled,label:'Company',result,sourceType:sourceType(result,domainHost),confidence:'MEDIUM',extra:{derived_descriptor:true}});
   }
   return null;
 }
@@ -412,7 +473,7 @@ export function compileCompanySnapshotV1(input={}){
     company_type:findCompanyType(results,domainHost,company),
     scale_metric:findScaleMetric(results,domainHost)
   };
-  const intro=findDescription(results,domainHost);
+  const intro=findDescription(results,domainHost,company);
   const linkedin=findLinkedIn(results,prospectName,company,prospectRole);
   const snapshot={
     schema_version:'CLARIS_COMPANY_SNAPSHOT_V1',
