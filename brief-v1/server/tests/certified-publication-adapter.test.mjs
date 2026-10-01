@@ -233,3 +233,61 @@ test('invalid optional snapshot is omitted rather than poisoning a certified leg
   assert.equal('company_snapshot' in result.body.brief_payload,false);
   assert.equal(result.operation,'brief_publish_ready');
 });
+
+
+test('canonical identity evidence can derive a presentation-only snapshot at publication',()=>{
+  const canonical={
+    canonical_evidence_registry:[
+      {
+        channel:'IDENTITY_PRODUCT',admission_status:'ADMITTED',authority:'THIRD_PARTY_REPORTED',strength:'MEDIUM',
+        source_url:'https://www.cbinsights.com/company/acme',
+        source_title:'Acme profile',
+        source_excerpt:'Acme is based in Paris, France.'
+      },
+      {
+        channel:'IDENTITY_PRODUCT',admission_status:'ADMITTED',authority:'THIRD_PARTY_REPORTED',strength:'MEDIUM',
+        source_url:'https://example.com/acme-origin',
+        source_title:'Acme origin',
+        source_excerpt:'Acme was founded in 2019.'
+      },
+      {
+        channel:'IDENTITY_PRODUCT',admission_status:'ADMITTED',authority:'THIRD_PARTY_REPORTED',strength:'MEDIUM',
+        source_url:'https://example.com/acme-scale',
+        source_title:'Acme scale',
+        source_excerpt:'Acme has 125 employees and serves over 8,000 customers.'
+      }
+    ]
+  };
+  const result=compileCertifiedBriefPublication({
+    ...base,
+    domain:'https://acme.com',
+    prospect_name:'Alex Morgan',
+    canonical_truth_json:canonical
+  });
+  const snapshot=result.body.brief_payload.company_snapshot;
+  assert.equal(snapshot.schema_version,'CLARIS_COMPANY_SNAPSHOT_V1');
+  assert.equal(snapshot.authority,'PRESENTATION_ONLY');
+  assert.equal(snapshot.fields.founded_year.display,'2019');
+  assert.equal(snapshot.fields.headquarters.display,'Paris, France');
+  assert.equal(snapshot.fields.employee_size.display,'51–200');
+  assert.equal(snapshot.coverage.renderable,true);
+  assert.equal(snapshot.validation.ok,true);
+});
+
+test('canonical evidence that is too sparse leaves legacy publication unchanged',()=>{
+  const result=compileCertifiedBriefPublication({
+    ...base,
+    domain:'https://acme.com',
+    canonical_truth_json:{
+      canonical_evidence_registry:[
+        {
+          channel:'IDENTITY_PRODUCT',admission_status:'ADMITTED',authority:'THIRD_PARTY_REPORTED',strength:'MEDIUM',
+          source_url:'https://example.com/acme',
+          source_title:'Acme',
+          source_excerpt:'Acme was founded in 2019.'
+        }
+      ]
+    }
+  });
+  assert.equal('company_snapshot' in result.body.brief_payload,false);
+});
