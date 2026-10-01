@@ -219,3 +219,62 @@ test('publish-ready service projection is stable when SOT service order changes'
   });
   assert.deepEqual(a.body.validation_context.services, b.body.validation_context.services);
 });
+
+
+test('valid presentation-only company snapshot is additive to publish-ready payload', () => {
+  const snapshot = {
+    schema_version: 'CLARIS_COMPANY_SNAPSHOT_V1',
+    authority: 'PRESENTATION_ONLY',
+    validation: { ok: true, errors: [] },
+    fields: {
+      founded_year: { display: '2016' },
+      headquarters: { display: 'Paris, France' },
+      employee_size: null,
+      company_type: { display: 'Security advisory firm' },
+      scale_metric: null
+    }
+  };
+  const result = compileBriefPublishReady({
+    opportunity_id: 'opp_snapshot',
+    consultant_id: 'consultant_test_1',
+    consultant_delivery_email: 'sarah@example.com',
+    company: 'Acme',
+    prepare,
+    discovery,
+    consultant_sot: sot,
+    company_snapshot_v1: snapshot
+  });
+  assert.equal(result.body.brief_payload.company_snapshot, snapshot);
+  assert.equal(result.body.brief_payload.prepare, prepare);
+  assert.equal(result.body.brief_payload.discovery, discovery);
+});
+
+test('invalid or absent company snapshot is omitted without changing legacy payload shape', () => {
+  const legacy = compileBriefPublishReady({
+    opportunity_id: 'opp_legacy',
+    consultant_id: 'consultant_test_1',
+    consultant_delivery_email: 'sarah@example.com',
+    company: 'Acme',
+    prepare,
+    discovery,
+    consultant_sot: sot
+  });
+  const invalid = compileBriefPublishReady({
+    opportunity_id: 'opp_invalid_snapshot',
+    consultant_id: 'consultant_test_1',
+    consultant_delivery_email: 'sarah@example.com',
+    company: 'Acme',
+    prepare,
+    discovery,
+    consultant_sot: sot,
+    company_snapshot_v1: {
+      schema_version: 'CLARIS_COMPANY_SNAPSHOT_V1',
+      authority: 'DECISION_INPUT',
+      validation: { ok: true }
+    }
+  });
+  assert.equal('company_snapshot' in legacy.body.brief_payload, false);
+  assert.equal('company_snapshot' in invalid.body.brief_payload, false);
+  assert.deepEqual(Object.keys(legacy.body.brief_payload).sort(), ['discovery','prepare']);
+  assert.deepEqual(Object.keys(invalid.body.brief_payload).sort(), ['discovery','prepare']);
+});
