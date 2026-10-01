@@ -1062,3 +1062,337 @@ html,body,p,h1,h2,h3,h4,h5,h6,span,a,button,input,textarea,label,blockquote,smal
   .phase-toggle{grid-column:2}
   .phase-expanded{padding:16px 15px 22px!important}
 }
+
+
+/* V5 Calibration-brand polish — layout-preserving */
+:root{
+  --premium-ease:cubic-bezier(.16,1,.3,1);
+  --premium-ease-soft:cubic-bezier(.25,.9,.25,1);
+  --cal-line:rgba(58,83,76,.14);
+  --cal-line-strong:rgba(58,83,76,.22);
+  --cal-glass-top:rgba(255,255,255,.66);
+  --cal-glass-bottom:rgba(225,236,230,.42);
+  --cal-glass-shadow:rgba(42,67,60,.08);
+  --cal-glass-shadow-strong:rgba(42,67,60,.12);
+  --line:var(--cal-line);
+  --line-soft:rgba(58,83,76,.095)
+}
+
+/* Light-field translation of Calibration V3 material */
+body{
+  background:
+    radial-gradient(66rem 42rem at 82% 8%,rgba(161,187,177,.17),transparent 63%),
+    radial-gradient(54rem 38rem at 4% 56%,rgba(190,207,199,.18),transparent 68%),
+    linear-gradient(180deg,#f3f6f3 0%,#edf3ef 44%,#e9efeb 100%)!important
+}
+.ambient{
+  inset:-8%;
+  background:
+    radial-gradient(closest-side at 27% 30%,rgba(255,255,255,.58),transparent 72%),
+    radial-gradient(closest-side at 72% 66%,rgba(126,158,147,.10),transparent 78%);
+  filter:blur(34px);
+  opacity:.72;
+  animation:brief-atmosphere-drift 22s ease-in-out infinite alternate
+}
+@keyframes brief-atmosphere-drift{
+  from{transform:translate3d(-.7%,-.5%,0) scale(1)}
+  to{transform:translate3d(1.1%,.8%,0) scale(1.022)}
+}
+
+.panel,
+.matter-card,
+.known-item,
+.why-tile,
+.listen-tile{
+  border-color:var(--cal-line)!important;
+  box-shadow:
+    inset 0 0 0 .65px rgba(255,255,255,.56),
+    inset 0 1px 0 rgba(255,255,255,.72),
+    inset 0 -1px 0 rgba(68,94,85,.025),
+    0 8px 26px var(--cal-glass-shadow)!important;
+  backdrop-filter:blur(12px) saturate(118%);
+  -webkit-backdrop-filter:blur(12px) saturate(118%);
+  transition:
+    transform .5s var(--premium-ease),
+    background .48s var(--premium-ease-soft),
+    border-color .42s var(--premium-ease-soft),
+    box-shadow .48s var(--premium-ease-soft),
+    opacity .38s ease
+}
+.panel:not(.call-focus),
+.matter-card,
+.known-item,
+.why-tile,
+.listen-tile{
+  background:
+    linear-gradient(180deg,var(--cal-glass-top),var(--cal-glass-bottom))!important
+}
+.panel:hover,
+.matter-card:hover,
+.known-item:hover,
+.why-tile:hover,
+.listen-tile:hover{
+  transform:translate3d(0,-1px,0);
+  border-color:var(--cal-line-strong)!important;
+  box-shadow:
+    inset 0 0 0 .65px rgba(255,255,255,.66),
+    inset 0 1px 0 rgba(255,255,255,.82),
+    inset 0 -1px 0 rgba(68,94,85,.035),
+    0 11px 30px var(--cal-glass-shadow-strong)!important
+}
+
+/* Orientation keeps its composition, gains the same CLARIS material character */
+.identity-card{
+  background:
+    radial-gradient(circle at 92% 6%,rgba(142,172,161,.15),transparent 16rem),
+    radial-gradient(circle at 4% 116%,rgba(214,228,220,.48),transparent 22rem),
+    linear-gradient(145deg,rgba(255,255,255,.76),rgba(228,238,232,.52))!important
+}
+.meeting-card{
+  background:
+    radial-gradient(circle at 88% 8%,rgba(255,255,255,.66),transparent 11rem),
+    linear-gradient(145deg,rgba(239,247,243,.78),rgba(216,232,223,.58))!important
+}
+.booking-row{
+  background:linear-gradient(180deg,rgba(255,255,255,.58),rgba(230,239,234,.40))!important
+}
+
+/* Top chrome now speaks the same material language as Calibration */
+.topbar{
+  background:rgba(239,244,241,.70)!important;
+  border-bottom:1px solid rgba(58,83,76,.08)!important;
+  box-shadow:0 7px 24px rgba(42,67,60,.035);
+  backdrop-filter:blur(18px) saturate(122%);
+  -webkit-backdrop-filter:blur(18px) saturate(122%)
+}
+.segmented-nav{
+  background:linear-gradient(180deg,rgba(36,62,64,.96),rgba(27,48,50,.96))!important;
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,.10),
+    inset 0 0 0 .65px rgba(255,255,255,.08),
+    0 8px 24px rgba(26,48,46,.12)!important
+}
+.segmented-nav a{
+  transition:color .34s ease,background .42s var(--premium-ease-soft),transform .5s var(--premium-ease)!important
+}
+.segmented-nav a:hover{transform:translate3d(0,-1px,0)!important}
+
+/* Decision instruments feel like one calibrated glass assembly */
+.instrument-deck{
+  background:
+    linear-gradient(180deg,rgba(250,252,250,.66),rgba(222,234,227,.43))!important;
+  box-shadow:
+    inset 0 0 0 .65px rgba(255,255,255,.62),
+    inset 0 1px 0 rgba(255,255,255,.86),
+    0 10px 30px rgba(43,68,62,.075)!important
+}
+.instrument-deck .signal{
+  background:rgba(255,255,255,.18)!important;
+  border-color:transparent!important;
+  transition:
+    transform .5s var(--premium-ease),
+    background .42s var(--premium-ease-soft),
+    border-color .4s var(--premium-ease-soft),
+    box-shadow .45s var(--premium-ease-soft)!important
+}
+.instrument-deck .signal:hover,
+.instrument-deck .signal.is-active{
+  background:rgba(255,255,255,.50)!important;
+  transform:translate3d(0,-1px,0)
+}
+.score-tray{
+  background:linear-gradient(180deg,rgba(255,255,255,.66),rgba(229,238,233,.52))!important;
+  animation:brief-resolve .52s var(--premium-ease) both
+}
+.gauge-value{
+  stroke-dashoffset:0;
+  transition:stroke-dashoffset .92s var(--premium-ease),stroke .4s ease
+}
+.motion-ready .instrument-deck.reveal-item:not(.is-visible) .gauge-value{stroke-dashoffset:100}
+
+/* Dark authority surfaces use Calibration's restrained glass, not a solid slab */
+.call-focus,
+.next-move{
+  border:1px solid rgba(231,240,235,.10)!important;
+  box-shadow:
+    inset 0 0 0 .65px rgba(255,255,255,.08),
+    inset 0 1px 0 rgba(255,255,255,.10),
+    0 14px 38px rgba(29,53,52,.14)!important;
+  backdrop-filter:blur(13px) saturate(114%);
+  -webkit-backdrop-filter:blur(13px) saturate(114%)
+}
+.call-focus{
+  background:
+    radial-gradient(circle at 88% 18%,rgba(182,209,198,.15),transparent 17rem),
+    linear-gradient(145deg,rgba(30,58,60,.98),rgba(38,75,73,.96))!important
+}
+.next-move{
+  background:
+    radial-gradient(circle at 88% 16%,rgba(183,210,199,.14),transparent 17rem),
+    linear-gradient(145deg,rgba(29,55,57,.98),rgba(42,80,77,.96))!important
+}
+
+/* Hairlines / dividers */
+.signal-row,
+.metric-list li,
+.context-card,
+.implication,
+.known-item,
+.blindspot-copy,
+.call-phase+.call-phase,
+.question-phase+.question-phase,
+.question-phase+.close-phase,
+.close-phase+.question-phase,
+.listener-grid section,
+.listen-list li,
+.phase-advanced,
+.done-when,
+.proof-tabs,
+.audit-item,
+.source-grid,
+.route-strip:before,
+.blindspot-rail:before,
+.call-phases:before{
+  border-color:var(--cal-line)!important
+}
+.route-strip:before,
+.blindspot-rail:before,
+.call-phases:before{
+  background-color:var(--cal-line)!important
+}
+
+/* Calibration-like controls and markers */
+.source-chip,
+.call-chips span,
+.instrument-live,
+.why,
+.booking-toggle,
+.phase-toggle,
+.phase-label,
+.resolves,
+.truth-badge,
+.unknown-badge,
+.source-pill,
+.done-when>summary,
+.phase-advanced>summary{
+  border-color:rgba(64,92,83,.13)!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.42);
+  transition:
+    transform .48s var(--premium-ease),
+    background .42s var(--premium-ease-soft),
+    color .34s ease,
+    border-color .38s ease
+}
+.why:hover,
+.booking-toggle:hover,
+.phase-toggle:hover,
+.inspect:hover,
+.blindspot-rail article>a:hover,
+.source-links a:hover{
+  transform:translate3d(2px,0,0)
+}
+.why .mini-icon,
+.booking-toggle .mini-icon,
+.phase-toggle .mini-icon,
+.inspect .mini-icon,
+.blindspot-rail article>a .mini-icon,
+.source-links .mini-icon{
+  transition:transform .46s var(--premium-ease)
+}
+.why:hover .mini-icon,
+.booking-toggle:hover .mini-icon,
+.inspect:hover .mini-icon,
+.blindspot-rail article>a:hover .mini-icon,
+.source-links a:hover .mini-icon{
+  transform:translate3d(2px,0,0)
+}
+.question-phase[open] .phase-toggle .mini-icon{
+  transform:rotate(90deg)!important
+}
+
+/* Icon tiles share one quiet interaction vocabulary */
+.focus-icon,
+.phase-icon-tile,
+.matter-icon,
+.external-signal-icon,
+.decision-icon,
+.blindspot-node{
+  transition:
+    transform .52s var(--premium-ease),
+    background .46s var(--premium-ease-soft),
+    box-shadow .46s var(--premium-ease-soft)
+}
+.call-focus:hover .focus-icon,
+.question-phase:hover .phase-icon-tile,
+.matter-card:hover .matter-icon,
+.external-signal:hover .external-signal-icon,
+.next-move:hover .decision-icon{
+  transform:translate3d(0,-1px,0) scale(1.015)
+}
+
+/* Native details retain behavior but resolve more gracefully */
+.question-phase[open]>.phase-expanded,
+.phase-advanced[open]>.advanced-body,
+.done-when[open]>p,
+.proof-drawer[open]>.proof-body,
+.audit-item[open]>div{
+  animation:brief-resolve .58s var(--premium-ease) both
+}
+@keyframes brief-resolve{
+  from{opacity:0;transform:translate3d(0,8px,0)}
+  to{opacity:1;transform:translate3d(0,0,0)}
+}
+
+/* Scroll choreography: no text blur, only Calibration-style resolve */
+.motion-ready .reveal-item{
+  opacity:0;
+  transform:translate3d(0,11px,0);
+  transition:
+    opacity .62s ease var(--reveal-delay,0ms),
+    transform .76s var(--premium-ease) var(--reveal-delay,0ms)
+}
+.motion-ready .reveal-item.is-visible{
+  opacity:1;
+  transform:translate3d(0,0,0)
+}
+
+/* Slight stagger inside first-load instrument cluster */
+.motion-ready .instrument-deck.is-visible .signal:nth-child(1){transition-delay:.03s}
+.motion-ready .instrument-deck.is-visible .signal:nth-child(2){transition-delay:.07s}
+.motion-ready .instrument-deck.is-visible .signal:nth-child(3){transition-delay:.11s}
+
+/* Section separators are quiet and deliberate */
+.section+.section{position:relative}
+.section+.section:before{
+  content:"";
+  position:absolute;
+  top:28px;
+  left:50%;
+  width:min(760px,72%);
+  height:1px;
+  transform:translateX(-50%);
+  background:linear-gradient(90deg,transparent,rgba(68,94,85,.10),transparent);
+  pointer-events:none
+}
+
+/* Preserve the clear brief background on small screens */
+@media(max-width:900px){
+  .panel:hover,
+  .matter-card:hover,
+  .known-item:hover,
+  .why-tile:hover,
+  .listen-tile:hover{transform:none}
+  .segmented-nav{background:rgba(239,244,241,.58)!important;box-shadow:none!important}
+  .segmented-nav a{color:var(--muted)!important}
+  .segmented-nav a:first-child{background:rgba(216,232,223,.72)!important;color:var(--deep)!important}
+}
+@media(prefers-reduced-motion:reduce){
+  .ambient{animation:none!important}
+  .motion-ready .reveal-item{opacity:1!important;transform:none!important;transition:none!important}
+  .gauge-value{transition:none!important;stroke-dashoffset:0!important}
+  .question-phase[open]>.phase-expanded,
+  .phase-advanced[open]>.advanced-body,
+  .done-when[open]>p,
+  .proof-drawer[open]>.proof-body,
+  .audit-item[open]>div{animation:none!important}
+}
