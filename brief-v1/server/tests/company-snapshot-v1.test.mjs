@@ -45,6 +45,7 @@ test('rich profile compiles supported facts, qualifiers, sources and valid Linke
   assert.equal(out.employee_size.display,'201–500');
   assert.equal(out.employee_size.approximate,true);
   assert.equal(out.company_type.display,'developer infrastructure platform');
+  assert.equal(out.intro.display,'developer infrastructure platform.');
   assert.equal(out.scale_metric.display,'more than 20k organizations');
   assert.equal(out.scale_metric.qualifier,'more than');
   assert.equal(out.prospect_linkedin_url,'https://www.linkedin.com/in/alice-smith/');
@@ -286,4 +287,50 @@ test('canonical registry inside stage output is accepted and LinkedIn remains ab
   assert.equal(out.fields.employee_size.display,'51–200');
   assert.equal(out.prospect_linkedin_url,null);
   assert.equal(out.validation.ok,true);
+});
+
+
+test('admitted identity evidence can derive a neutral one-line company descriptor',()=>{
+  const out=compileCompanySnapshotV1({
+    company:'Supabase',
+    domain_host:'supabase.com',
+    canonical_truth_json:{
+      canonical_evidence_registry:[
+        {
+          channel:'IDENTITY_PRODUCT',
+          admission_status:'ADMITTED',
+          authority:'THIRD_PARTY_REPORTED',
+          strength:'MEDIUM',
+          source_url:'https://www.cbinsights.com/company/supabase',
+          source_title:'Supabase - Products, Competitors, Financials, Employees, Headquarters Locations',
+          source_excerpt:'The company, which hosts the back-end infrastructure for Lovable, saw rapid growth. The first reason developers choose Supabase is open-source.'
+        }
+      ]
+    }
+  });
+  assert.equal(out.intro.display,'Open-source back-end infrastructure company.');
+  assert.equal(out.intro.source_type,'ADMITTED_PUBLIC');
+  assert.equal(out.intro.derived_descriptor,true);
+  assert.equal(out.validation.ok,true);
+});
+
+test('descriptor refuses founding, funding and scale copy',()=>{
+  const out=compileCompanySnapshotV1({
+    company:'Acme',
+    domain_host:'acme.com',
+    canonical_truth_json:{
+      canonical_evidence_registry:[
+        {
+          channel:'IDENTITY_PRODUCT',
+          admission_status:'ADMITTED',
+          authority:'THIRD_PARTY_REPORTED',
+          strength:'MEDIUM',
+          source_url:'https://example.com/acme',
+          source_title:'Acme company profile',
+          source_excerpt:'Acme was founded in 2020, raised $50 million and now serves 20,000 customers.'
+        }
+      ]
+    }
+  });
+  assert.equal(out.intro,null);
 });
