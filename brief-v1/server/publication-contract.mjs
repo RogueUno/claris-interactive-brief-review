@@ -32,10 +32,23 @@ function assertSchemas(prepare, discovery) {
   if (discovery?.schema_version !== 'CLARIS_DISCOVERY_INTELLIGENCE_V1_2') throw new Error('DISCOVERY_V1_2_REQUIRED');
 }
 
-function briefPayload(prepare, discovery, scorecard) {
-  if (scorecard == null) return { prepare, discovery };
-  if (scorecard?.schema_version !== 'CLARIS_PRECALL_SCORECARD_V1') throw new Error('PRECALL_SCORECARD_V1_REQUIRED');
-  return { prepare, discovery, scorecard };
+function optionalCompanySnapshot(value) {
+  if (value == null) return null;
+  if (value?.schema_version !== 'CLARIS_COMPANY_SNAPSHOT_V1') return null;
+  if (value?.authority !== 'PRESENTATION_ONLY') return null;
+  if (value?.validation?.ok !== true) return null;
+  return value;
+}
+
+function briefPayload(prepare, discovery, scorecard, companySnapshot) {
+  const payload = { prepare, discovery };
+  if (scorecard != null) {
+    if (scorecard?.schema_version !== 'CLARIS_PRECALL_SCORECARD_V1') throw new Error('PRECALL_SCORECARD_V1_REQUIRED');
+    payload.scorecard = scorecard;
+  }
+  const snapshot = optionalCompanySnapshot(companySnapshot);
+  if (snapshot) payload.company_snapshot = snapshot;
+  return payload;
 }
 
 export function compileBriefPublication(input = {}) {
@@ -52,7 +65,7 @@ export function compileBriefPublication(input = {}) {
       consultant_id: consultantId,
       company,
       ttl_days: integerInRange(input.ttl_days, 1, 30, 7),
-      brief_payload: briefPayload(prepare, discovery, input.scorecard),
+      brief_payload: briefPayload(prepare, discovery, input.scorecard, input.company_snapshot_v1 || input.company_snapshot),
       validation_context: {
         services: serviceProjection(consultantSot),
         commercial_rules: {
@@ -87,7 +100,7 @@ export function compileBriefPublishReady(input = {}) {
       meeting_time: text(input.meeting_time) || null,
       booking_text: text(input.booking_text) || null,
       ttl_days: integerInRange(input.ttl_days, 1, 30, 7),
-      brief_payload: briefPayload(prepare, discovery, input.scorecard),
+      brief_payload: briefPayload(prepare, discovery, input.scorecard, input.company_snapshot_v1 || input.company_snapshot),
       validation_context: {
         services: serviceProjection(consultantSot),
         commercial_rules: {
