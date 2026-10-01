@@ -207,3 +207,83 @@ test('validator rejects presentation authority, source and employee precision vi
   assert.ok(checked.errors.includes('employee_size:APPROXIMATE_REQUIRED'));
   assert.ok(checked.errors.includes('employee_size:BAND_REQUIRED'));
 });
+
+
+test('admitted canonical identity evidence compiles a renderable Supabase-like snapshot without extra research',()=>{
+  const canonical={
+    canonical_evidence_registry:[
+      {
+        channel:'IDENTITY_PRODUCT',admission_status:'ADMITTED',authority:'THIRD_PARTY_REPORTED',strength:'MEDIUM',
+        source_url:'https://www.cbinsights.com/company/supabase',
+        source_title:'Supabase - Products, Competitors, Financials, Employees, Headquarters Locations',
+        source_excerpt:'Supabase is based in San Francisco, California.'
+      },
+      {
+        channel:'IDENTITY_PRODUCT',admission_status:'ADMITTED',authority:'THIRD_PARTY_REPORTED',strength:'MEDIUM',
+        source_url:'https://www.stacksync.com/blog/supabase',
+        source_title:'Supabase: Founders, HQ, and the Origin Story',
+        source_excerpt:'Supabase was founded in January 2020 by Paul Copplestone and Ant Wilson.'
+      },
+      {
+        channel:'IDENTITY_PRODUCT',admission_status:'ADMITTED',authority:'THIRD_PARTY_REPORTED',strength:'MEDIUM',
+        source_url:'https://www.cnbc.com/2026/06/04/supabase.html',
+        source_title:'Database startup Supabase',
+        source_excerpt:'Since launching the company in 2020, Supabase has lured over 250,000 customers and built a staff of 350 employees.'
+      },
+      {
+        channel:'CYBER_PUBLIC_SIGNAL',admission_status:'ADMITTED',authority:'THIRD_PARTY_REPORTED',strength:'MEDIUM',
+        source_url:'https://example.com/incident',
+        source_title:'Sensitive public signal',
+        source_excerpt:'This must never enter the company snapshot.'
+      },
+      {
+        channel:'IDENTITY_PRODUCT',admission_status:'REJECTED',authority:'REJECTED',strength:'NONE',
+        source_url:'https://example.com/rejected',
+        source_title:'Rejected identity claim',
+        source_excerpt:'Headquarters: London, UK.'
+      }
+    ]
+  };
+  const out=compileCompanySnapshotV1({
+    company:'Supabase',
+    domain_host:'supabase.com',
+    prospect_name:'Paul Copplestone',
+    canonical_truth_json:canonical
+  });
+  assert.equal(out.fields.founded_year.display,'2020');
+  assert.equal(out.fields.headquarters.display,'San Francisco, California');
+  assert.equal(out.fields.employee_size.display,'201–500');
+  assert.equal(out.fields.scale_metric.display,'over 250,000 customers');
+  assert.equal(out.fields.company_type,null);
+  assert.equal(out.coverage.renderable,true);
+  assert.equal(out.validation.ok,true);
+  assert.ok(Object.values(out.fields).filter(Boolean).every(item=>item.source_type==='ADMITTED_PUBLIC'));
+  assert.equal(out.sources.some(source=>source.url==='https://example.com/incident'),false);
+  assert.equal(out.sources.some(source=>source.url==='https://example.com/rejected'),false);
+});
+
+test('canonical registry inside stage output is accepted and LinkedIn remains absent when not evidenced',()=>{
+  const stage={
+    canonical_truth_json:JSON.stringify({
+      canonical_evidence_registry:[
+        {
+          channel:'IDENTITY_PRODUCT',admission_status:'ADMITTED',authority:'THIRD_PARTY_REPORTED',strength:'MEDIUM',
+          source_url:'https://example.com/company',
+          source_title:'Acme profile',
+          source_excerpt:'Acme was founded in 2021. Headquarters: Paris, France. Acme has 75 employees.'
+        }
+      ]
+    })
+  };
+  const out=compileCompanySnapshotV1({
+    company:'Acme',
+    domain_host:'acme.com',
+    prospect_name:'Alice Smith',
+    stage_output_json:JSON.stringify(stage)
+  });
+  assert.equal(out.fields.founded_year.display,'2021');
+  assert.equal(out.fields.headquarters.display,'Paris, France');
+  assert.equal(out.fields.employee_size.display,'51–200');
+  assert.equal(out.prospect_linkedin_url,null);
+  assert.equal(out.validation.ok,true);
+});
