@@ -210,10 +210,12 @@ function contextSignals(prepare,known){
   });
 }
 function validCompanySnapshot(snapshot){
-  return snapshot?.schema_version==='CLARIS_COMPANY_SNAPSHOT_V1' && snapshot?.validation?.ok===true;
+  return snapshot?.schema_version==='CLARIS_COMPANY_SNAPSHOT_V1'
+    && snapshot?.authority==='PRESENTATION_ONLY'
+    && snapshot?.validation?.ok===true;
 }
 function snapshotMetricIcon(key){
-  return ({origin_year:'calendar',headquarters:'map',employee_size:'users',scale_metric:'radar'})[key]||'radar';
+  return ({founded_year:'calendar',headquarters:'map',employee_size:'users',company_type:'building',scale_metric:'radar'})[key]||'radar';
 }
 function prospectLinkedinMarkup(snapshot){
   if(!validCompanySnapshot(snapshot))return'';
@@ -223,18 +225,20 @@ function prospectLinkedinMarkup(snapshot){
   return `<a class="identity-linkedin" href="${url}" target="_blank" rel="noopener noreferrer" aria-label="Open prospect LinkedIn profile">${icon('linkedin','mini-icon')} LinkedIn</a>`;
 }
 function companySnapshotMarkup(snapshot){
-  if(!validCompanySnapshot(snapshot))return'';
+  if(!validCompanySnapshot(snapshot)||snapshot?.coverage?.renderable!==true)return'';
   const fields=snapshot?.fields||{};
-  const keys=['origin_year','headquarters','employee_size','scale_metric'];
-  const metrics=keys.map(key=>({key,item:fields[key]})).filter(entry=>entry.item?.display);
-  const core=Number(snapshot?.coverage?.core_fields_populated||0);
-  if(core<2||metrics.length<2)return'';
-  const intro=text(snapshot?.intro?.display);
+  const keys=['founded_year','headquarters','employee_size','company_type','scale_metric'];
+  const metrics=keys
+    .map(key=>({key,item:fields[key]||snapshot?.[key]||null}))
+    .filter(entry=>entry.item?.supported===true&&entry.item?.display&&entry.item?.source_url);
+  if(metrics.length<3)return'';
+  const intro=snapshot?.intro?.supported===true?text(snapshot.intro.display):'';
+  const lastRowStart=Math.floor((metrics.length-1)/2)*2;
   return `<aside class="company-snapshot-v52 panel" aria-label="Company snapshot">
-    <div class="snapshot-v52-head"><div><span class="eyebrow">Company snapshot</span><strong>Company context</strong></div><span class="snapshot-v52-icon">${icon('building')}</span></div>
+    <div class="snapshot-v52-head"><div><span class="eyebrow">Company snapshot</span><strong>Who this company is</strong></div><span class="snapshot-v52-icon">${icon('building')}</span></div>
     ${intro?`<p class="snapshot-v52-intro">${esc(intro)}</p>`:''}
     <div class="snapshot-v52-metrics">
-      ${metrics.map(({key,item})=>`<article class="snapshot-v52-metric">
+      ${metrics.map(({key,item},index)=>`<article class="snapshot-v52-metric ${key==='company_type'?'is-company-type ':''}${index>=lastRowStart?'is-last-row':''}">
         <span class="snapshot-v52-metric-icon">${icon(snapshotMetricIcon(key))}</span>
         <strong>${esc(item.display)}</strong>
         <span>${esc(item.label)}</span>
