@@ -159,7 +159,7 @@ function orientationMarkup(brief,context,companySnapshot){
   const valid=meeting&&!Number.isNaN(meeting.getTime());
   return `<section class="orientation">
     <div class="orientation-grid">
-      <article class="identity-card panel">
+      <article class="identity-card identity-card--dark panel">
         <span class="eyebrow">Brief for the scheduled conversation</span>
         <h1>${esc(context.prospect_name||brief.company)}</h1>
         <p class="role">${icon('briefcase','small-icon')}${esc(context.prospect_role||'Prospect')} <span>at</span> ${esc(brief.company)}</p>
@@ -233,7 +233,7 @@ function prospectLinkedinMarkup(snapshot){
 function companySnapshotMarkup(snapshot){
   if(!validCompanySnapshot(snapshot)||snapshot?.coverage?.renderable!==true)return'';
   const fields=snapshot?.fields||{};
-  const keys=['founded_year','headquarters','employee_size','company_type','scale_metric'];
+  const keys=['founded_year','headquarters','employee_size','company_type'];
   const metrics=keys
     .map(key=>({key,item:fields[key]||snapshot?.[key]||null}))
     .filter(entry=>entry.item?.supported===true&&entry.item?.display&&entry.item?.source_url);
