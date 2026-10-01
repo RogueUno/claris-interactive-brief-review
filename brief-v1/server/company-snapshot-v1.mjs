@@ -66,6 +66,33 @@ function normalizeResults(value){
     score:Number.isFinite(Number(item?.score))?Number(item.score):null
   })).filter(item=>parseHttpsUrl(item.url)&&(item.title||item.content));
 }
+function canonicalTruth(input){
+  const direct=parseMaybeJson(input?.canonical_truth_json);
+  if(arr(direct?.canonical_evidence_registry).length)return direct;
+  const stage=parseMaybeJson(input?.stage_output_json);
+  const nested=parseMaybeJson(stage?.canonical_truth_json);
+  return arr(nested?.canonical_evidence_registry).length?nested:{};
+}
+function normalizeCanonicalResults(input,domainHost){
+  const truth=canonicalTruth(input);
+  return arr(truth?.canonical_evidence_registry)
+    .filter(item=>item?.admission_status==='ADMITTED'&&item?.channel==='IDENTITY_PRODUCT')
+    .map(item=>{
+      const url=text(item?.source_url);
+      const first=isFirstParty(url,domainHost);
+      const linked=linkedinKind(url);
+      return {
+        title:compactSpaces(item?.source_title),
+        url,
+        content:compactSpaces(item?.source_excerpt),
+        score:null,
+        source_type:first?'FIRST_PARTY':linked?'PUBLIC_INDEX':'ADMITTED_PUBLIC',
+        evidence_strength:text(item?.strength)||'MEDIUM',
+        evidence_id:text(item?.evidence_id)||null
+      };
+    })
+    .filter(item=>parseHttpsUrl(item.url)&&(item.title||item.content));
+}
 function evidence(result){return compactSpaces([result.title,result.content].filter(Boolean).join(' — '));}
 function candidate({value,display,label,result,sourceType,confidence='MEDIUM',extra={}}){
   if(value==null||!parseHttpsUrl(result?.url))return null;
@@ -83,7 +110,11 @@ function candidate({value,display,label,result,sourceType,confidence='MEDIUM',ex
   };
 }
 function companySources(results,domainHost){
-  return results.filter(result=>isFirstParty(result.url,domainHost)||linkedinKind(result.url)==='company');
+  return results.filter(result=>
+    isFirstParty(result.url,domainHost)
+    || linkedinKind(result.url)==='company'
+    || result?.source_type==='ADMITTED_PUBLIC'
+  );
 }
 function firstPartySources(results,domainHost){
   return results.filter(result=>isFirstParty(result.url,domainHost));
@@ -91,6 +122,7 @@ function firstPartySources(results,domainHost){
 function sourceType(result,domainHost){
   if(isFirstParty(result.url,domainHost))return'FIRST_PARTY';
   if(linkedinKind(result.url))return'PUBLIC_INDEX';
+  if(result?.source_type==='ADMITTED_PUBLIC')return'ADMITTED_PUBLIC';
   return null;
 }
 function consistentCandidate(candidates,keyFn=item=>normalized(item?.display)){
@@ -239,7 +271,10 @@ function findScaleMetric(results,domainHost){
     new RegExp('\\b(?:trusted by|serves?|used by|supports?|powers?)\\s+(?:(more than|over|approximately|approx\\.?|about|around|nearly)\\s+)?([0-9][0-9,.]*\\s*(?:k|m|b|million|billion)?\\+?)\\s+('+units+')\\b','i'),
     new RegExp('\\b(?:(more than|over|approximately|approx\\.?|about|around|nearly)\\s+)?([0-9][0-9,.]*\\s*(?:k|m|b|million|billion)?\\+?)\\s+('+units+')\\b','i')
   ];
-  const ranked=firstPartySources(results,domainHost).slice().sort((a,b)=>Number(b.score||0)-Number(a.score||0));
+  const ranked=companySources(results,domainHost).slice().sort((a,b)=>{
+    const aFirst=isFirstParty(a.url,domainHost)?1:0,bFirst=isFirstParty(b.url,domainHost)?1:0;
+    return bFirst-aFirst+(Number(b.score||0)-Number(a.score||0));
+  });
   for(const result of ranked){
     const hay=evidence(result);
     for(const re of patterns){
@@ -253,8 +288,8 @@ function findScaleMetric(results,domainHost){
         display,
         label:titleCase(unit),
         result,
-        sourceType:'FIRST_PARTY',
-        confidence:'HIGH',
+        sourceType:sourceType(result,domainHost),
+        confidence:isFirstParty(result.url,domainHost)?'HIGH':'MEDIUM',
         extra:{qualifier,as_of:extractAsOf(hay)}
       });
     }
@@ -329,7 +364,7 @@ export function validateCompanySnapshotV1(snapshot={},context={}){
     if(!text(item.source_url)||!text(item.evidence_quote)||!parseHttpsUrl(item.source_url))errors.push(key+':SOURCE_REQUIRED');
     if(item.source_type==='FIRST_PARTY'&&!isFirstParty(item.source_url,domainHost))errors.push(key+':FIRST_PARTY_HOST_MISMATCH');
     if(item.source_type==='PUBLIC_INDEX'&&key!=='intro'&&linkedinKind(item.source_url)!=='company')errors.push(key+':PUBLIC_INDEX_URL_INVALID');
-    if(!['FIRST_PARTY','PUBLIC_INDEX'].includes(item.source_type))errors.push(key+':SOURCE_TYPE');
+    if(!['FIRST_PARTY','PUBLIC_INDEX','ADMITTED_PUBLIC'].includes(item.source_type))errors.push(key+':SOURCE_TYPE');
   }
   if(fields.employee_size){
     if(fields.employee_size.approximate!==true)errors.push('employee_size:APPROXIMATE_REQUIRED');
@@ -365,7 +400,10 @@ export function compileCompanySnapshotV1(input={}){
   const domainHost=normalizeHost(input.domain_host||fixture.domain_host);
   const prospectName=text(input.prospect_name||fixture.prospect_name);
   const prospectRole=text(input.prospect_role||fixture.prospect_role);
-  const results=normalizeResults(bundle?.company_prospect_context);
+  const results=[
+    ...normalizeResults(bundle?.company_prospect_context),
+    ...normalizeCanonicalResults(input,domainHost)
+  ];
   const fields={
     founded_year:findFoundedYear(results,domainHost),
     headquarters:findHeadquarters(results,domainHost),
