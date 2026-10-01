@@ -1487,6 +1487,10 @@ body{
 }
 .snapshot-v52-metric:nth-child(2n){border-right:0}
 .snapshot-v52-metric.is-last-row{border-bottom:0}
+.snapshot-v52-metric.is-wide-last{
+  grid-column:1/-1;
+  border-right:0
+}
 .snapshot-v52-metric-icon{
   position:absolute;
   left:0;
