@@ -1486,7 +1486,7 @@ body{
   border-bottom:1px solid var(--cal-line)
 }
 .snapshot-v52-metric:nth-child(2n){border-right:0}
-.snapshot-v52-metric:nth-last-child(-n+2){border-bottom:0}
+.snapshot-v52-metric.is-last-row{border-bottom:0}
 .snapshot-v52-metric-icon{
   position:absolute;
   left:0;
@@ -1502,6 +1502,12 @@ body{
   font-weight:330;
   letter-spacing:-.018em;
   overflow-wrap:anywhere
+}
+.snapshot-v52-metric.is-company-type>strong{
+  font-size:var(--type-p1);
+  line-height:1.28;
+  font-weight:390;
+  letter-spacing:-.01em
 }
 .snapshot-v52-metric>span{
   display:block;
@@ -1528,7 +1534,7 @@ body{
   .snapshot-v52-metrics{grid-template-columns:1fr}
   .snapshot-v52-metric,
   .snapshot-v52-metric:nth-child(2n),
-  .snapshot-v52-metric:nth-last-child(-n+2){
+  .snapshot-v52-metric.is-last-row{
     border-right:0;
     border-bottom:1px solid var(--cal-line)
   }
