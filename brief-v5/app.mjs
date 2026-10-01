@@ -27,7 +27,11 @@ const ICONS={
   link:'<path d="M10 13a5 5 0 0 0 7.1.1l2-2a5 5 0 0 0-7.1-7.1l-1.1 1.1"/><path d="M14 11a5 5 0 0 0-7.1-.1l-2 2A5 5 0 0 0 12 20l1.1-1.1"/>',
   lock:'<rect x="5" y="10" width="14" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/>',
   hypothesis:'<path d="M4 18c3-8 7-12 16-12M6 7l-2 11 11-2"/><circle cx="18" cy="6" r="2"/>',
-  fact:'<path d="M5 4h14v16H5z"/><path d="M8 9h8M8 13h8M8 17h5"/>'
+  fact:'<path d="M5 4h14v16H5z"/><path d="M8 9h8M8 13h8M8 17h5"/>',
+  building:'<path d="M4 21V7l8-4 8 4v14"/><path d="M9 21v-5h6v5M8 9h1M12 9h1M16 9h1M8 12h1M12 12h1M16 12h1"/>',
+  map:'<path d="M9 18 3 21V6l6-3 6 3 6-3v15l-6 3z"/><path d="M9 3v15M15 6v15"/>',
+  users:'<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/>',
+  linkedin:'<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M8 11v6M8 8h.01M12 17v-6M12 14a3 3 0 0 1 6 0v3"/>'
 };
 function icon(name,cls='icon'){return `<svg class="${cls}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${ICONS[name]||ICONS.spark}</svg>`;}
 
@@ -150,7 +154,7 @@ function scoreMarkup(scorecard){
   </section>`;
 }
 
-function orientationMarkup(brief,context){
+function orientationMarkup(brief,context,companySnapshot){
   const meeting=context.meeting_time?new Date(context.meeting_time):null;
   const valid=meeting&&!Number.isNaN(meeting.getTime());
   return `<section class="orientation">
@@ -159,6 +163,7 @@ function orientationMarkup(brief,context){
         <span class="eyebrow">Brief for the scheduled conversation</span>
         <h1>${esc(context.prospect_name||brief.company)}</h1>
         <p class="role">${icon('briefcase','small-icon')}${esc(context.prospect_role||'Prospect')} <span>at</span> ${esc(brief.company)}</p>
+        ${prospectLinkedinMarkup(companySnapshot)}
         <div class="identity-meta"><span>${icon('lock','mini-icon')} Private opportunity intelligence</span></div>
       </article>
       <article class="meeting-card panel">
@@ -204,26 +209,39 @@ function contextSignals(prepare,known){
     return !knownText.some(k=>overlap(source,k)>=.55);
   });
 }
-function companySnapshotFacts(prepare){
-  const facts=[];
-  const seen=new Set();
-  for(const e of arr(prepare?.expandable_blocks?.evidence)){
-    const label=text(e?.title), claim=text(arr(e?.claims)[0]);
-    const key=(label+' '+claim).toLowerCase();
-    if(!label||!claim||seen.has(key))continue;
-    seen.add(key);
-    facts.push({label,claim});
-    if(facts.length>=4)break;
-  }
-  return facts;
+function validCompanySnapshot(snapshot){
+  return snapshot?.schema_version==='CLARIS_COMPANY_SNAPSHOT_V1' && snapshot?.validation?.ok===true;
 }
-function companySnapshotMarkup(prepare){
-  const facts=companySnapshotFacts(prepare);
-  if(!facts.length)return'';
-  return `<section class="company-snapshot panel">
-    <div class="snapshot-head"><div>${icon('radar')}<span><span class="eyebrow">Company snapshot</span><strong>Context already established</strong></span></div><small>Public evidence only</small></div>
-    <div class="snapshot-grid">${facts.map(f=>`<article><span class="snapshot-marker"></span><small>${esc(f.label)}</small><strong>${esc(excerpt(f.claim,118))}</strong></article>`).join('')}</div>
-  </section>`;
+function snapshotMetricIcon(key){
+  return ({origin_year:'calendar',headquarters:'map',employee_size:'users',scale_metric:'radar'})[key]||'radar';
+}
+function prospectLinkedinMarkup(snapshot){
+  if(!validCompanySnapshot(snapshot))return'';
+  const linkedin=snapshot?.prospect?.linkedin_url;
+  const url=safeUrl(linkedin?.value);
+  if(url==='#')return'';
+  return `<a class="identity-linkedin" href="${url}" target="_blank" rel="noopener noreferrer" aria-label="Open prospect LinkedIn profile">${icon('linkedin','mini-icon')} LinkedIn</a>`;
+}
+function companySnapshotMarkup(snapshot){
+  if(!validCompanySnapshot(snapshot))return'';
+  const fields=snapshot?.fields||{};
+  const keys=['origin_year','headquarters','employee_size','scale_metric'];
+  const metrics=keys.map(key=>({key,item:fields[key]})).filter(entry=>entry.item?.display);
+  const core=Number(snapshot?.coverage?.core_fields_populated||0);
+  if(core<2||metrics.length<2)return'';
+  const intro=text(snapshot?.intro?.display);
+  return `<aside class="company-snapshot-v52 panel" aria-label="Company snapshot">
+    <div class="snapshot-v52-head"><div><span class="eyebrow">Company snapshot</span><strong>Company context</strong></div><span class="snapshot-v52-icon">${icon('building')}</span></div>
+    ${intro?`<p class="snapshot-v52-intro">${esc(intro)}</p>`:''}
+    <div class="snapshot-v52-metrics">
+      ${metrics.map(({key,item})=>`<article class="snapshot-v52-metric">
+        <span class="snapshot-v52-metric-icon">${icon(snapshotMetricIcon(key))}</span>
+        <strong>${esc(item.display)}</strong>
+        <span>${esc(item.label)}</span>
+        <small>${esc(item.source_label||'Public source')}</small>
+      </article>`).join('')}
+    </div>
+  </aside>`;
 }
 function contextMarkup(prepare,known){
   const signals=contextSignals(prepare,known),visible=signals.slice(0,3),rest=signals.slice(3);
@@ -411,15 +429,17 @@ function callDirectionMarkup(prepare,discovery){
 
 function render(brief){
   const prepare=brief?.payload?.prepare||{},discovery=brief?.payload?.discovery||{},scorecard=brief?.payload?.scorecard||null,context=brief?.context||{};
+  const companySnapshot=brief?.payload?.company_snapshot||null;
   const known=knownGoingIn(discovery),groups=sourceIndex(prepare);
+  const snapshotMarkup=companySnapshotMarkup(companySnapshot);
   root.innerHTML=`
     <header class="topbar"><a class="brand" href="#top">${icon('spark','brand-icon')}<span>CLARIS</span></a><nav class="segmented-nav"><a href="#matters">${icon('radar','mini-icon')} What matters</a><a href="#run">${icon('route','mini-icon')} Run the call</a><a href="#next">${icon('arrow','mini-icon')} Next move</a><a href="#evidence">${icon('file','mini-icon')} Evidence</a></nav><span class="private">${icon('lock','mini-icon')} Private · expires ${esc(new Date(brief.expires_at).toLocaleDateString())}</span></header>
-    <div id="top">${orientationMarkup(brief,context)}</div>
+    <div id="top">${orientationMarkup(brief,context,companySnapshot)}</div>
 
     <section class="section overview">
       <div class="section-head compact"><span class="eyebrow">At a glance</span><h2>Opportunity signal</h2></div>
       ${scoreMarkup(scorecard)}
-      <article class="call-focus panel"><div class="focus-icon">${icon('target')}</div><div><span class="eyebrow">Call focus</span><h2>${esc(discovery.call_objective||prepare?.call_strategy?.opening_move||'Run a focused diagnostic conversation.')}</h2>${callDirectionMarkup(prepare,discovery)}${prepare.executive_readout?`<details><summary>Working model</summary><p>${esc(prepare.executive_readout)}</p></details>`:''}</div></article>
+      ${snapshotMarkup?`<div class="understand-grid-v52"><article class="call-focus panel"><div class="focus-icon">${icon('target')}</div><div><span class="eyebrow">Call focus</span><h2>${esc(discovery.call_objective||prepare?.call_strategy?.opening_move||'Run a focused diagnostic conversation.')}</h2>${callDirectionMarkup(prepare,discovery)}${prepare.executive_readout?`<details><summary>Working model</summary><p>${esc(prepare.executive_readout)}</p></details>`:''}</div></article>${snapshotMarkup}</div>`:`<article class="call-focus panel"><div class="focus-icon">${icon('target')}</div><div><span class="eyebrow">Call focus</span><h2>${esc(discovery.call_objective||prepare?.call_strategy?.opening_move||'Run a focused diagnostic conversation.')}</h2>${callDirectionMarkup(prepare,discovery)}${prepare.executive_readout?`<details><summary>Working model</summary><p>${esc(prepare.executive_readout)}</p></details>`:''}</div></article>`}
       ${externalSignalMarkup(prepare)}
     </section>
 
@@ -452,6 +472,7 @@ function bindMotionPolish(){
     '.section-head',
     '.instrument-deck',
     '.call-focus',
+    '.company-snapshot-v52',
     '.external-signal',
     '.matter-card',
     '.known-strip',
