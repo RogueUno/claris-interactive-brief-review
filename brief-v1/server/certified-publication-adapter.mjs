@@ -2,6 +2,7 @@ import { compileBriefPublishReady } from './publication-contract.mjs';
 import { compilePrecallScorecard } from './precall-scorecard.mjs';
 import { resolvePrecallScoreBasis } from './precall-score-basis-resolver.mjs';
 import { projectServiceAuthority } from './service-authority-projection.mjs';
+import { validateCompanySnapshotV1 } from './company-snapshot-v1.mjs';
 
 function parseMaybeJson(value, code) {
   if (value && typeof value === 'object') return value;
@@ -20,6 +21,16 @@ function assertValidation(value, code) {
   const parsed = parseMaybeJson(value, code);
   if (parsed?.ok !== true) throw new Error(code);
   return parsed;
+}
+
+function optionalCompanySnapshot(value, context) {
+  if (value == null || value === '') return null;
+  let parsed;
+  try { parsed = parseMaybeJson(value, 'COMPANY_SNAPSHOT_INVALID'); }
+  catch { return null; }
+  const validation = validateCompanySnapshotV1(parsed, context);
+  if (!validation.ok) return null;
+  return { ...parsed, validation };
 }
 
 export function compileCertifiedBriefPublication(input = {}) {
@@ -70,6 +81,12 @@ export function compileCertifiedBriefPublication(input = {}) {
     consultant_sot: consultantSot
   });
 
+  const companySnapshot = optionalCompanySnapshot(input.company_snapshot_v1 || input.company_snapshot, {
+    domain_host: input.domain_host,
+    prospect_name: input.prospect_name,
+    company: input.company
+  });
+
   const compiled = compileBriefPublishReady({
     opportunity_id: input.opportunity_id,
     consultant_id: input.consultant_id,
@@ -84,6 +101,7 @@ export function compileCertifiedBriefPublication(input = {}) {
     prepare: projected.prepare,
     discovery: projected.discovery,
     scorecard: projected.scorecard,
+    company_snapshot_v1: companySnapshot,
     consultant_sot: consultantSot
   });
 
