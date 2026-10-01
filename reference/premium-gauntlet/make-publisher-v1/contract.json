@@ -1,0 +1,53 @@
+{
+  "schema_version": "CLARIS_MAKE_PUBLISHER_V1",
+  "operation": "brief_publish_ready",
+  "role": "transport_only",
+  "scenario_id": 7643611,
+  "receipt_store_id": 199489,
+  "required_inputs": [
+    "publish_ready_body_json"
+  ],
+  "forbidden_inputs": [
+    "consultant_sot_json",
+    "commercial_floor",
+    "private_consultant_notes",
+    "service_margins",
+    "audit_chain_of_thought",
+    "raw_brief_token"
+  ],
+  "upstream_body_contract": {
+    "source": "compileCertifiedBriefPublication(...).body",
+    "make_may_reconstruct": false,
+    "make_may_synthesize_certification": false,
+    "certification_schema_version": "CLARIS_PRECALL_CERTIFICATION_V1"
+  },
+  "request_contract": {
+    "method": "POST",
+    "path": "/api/delivery/package",
+    "header_operation": "brief_publish_ready",
+    "body_transport": "unchanged_serialized_json"
+  },
+  "response_contract": {
+    "first_publish_status": 201,
+    "identical_retry_status": 200,
+    "success_requires_body_ok_true": true,
+    "fields": [
+      "publication_id",
+      "reused",
+      "notification_dedupe_key",
+      "brief",
+      "delivery"
+    ]
+  },
+  "dedupe_contract": {
+    "key": "notification_dedupe_key",
+    "persistent_store_may_contain_private_url": false,
+    "gmail_runs_only_when_key_absent": true,
+    "receipt_written_only_after_gmail_success": true
+  },
+  "scenario_settings": {
+    "confidential": true,
+    "on_demand": true,
+    "production_ingress_connected": false
+  }
+}

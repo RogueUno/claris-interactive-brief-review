@@ -1,0 +1,112 @@
+{
+  "gate_status": "CORRECTED",
+  "canonical_match_classifications": {
+    "service_need_alignment": {
+      "status": "PARTIAL_MATCH",
+      "basis_ids": [
+        "BOOK-001",
+        "SOT:services"
+      ],
+      "reason": "The booking mentions API security, which conditionally aligns with advisory or penetration testing services, but the exact technical boundary and requested service deliverable remain ambiguous."
+    },
+    "icp_company_fit": {
+      "status": "UNKNOWN",
+      "basis_ids": [],
+      "reason": "The consultant SOT contains no explicit ICP or company-type policy rules to evaluate against."
+    },
+    "business_trigger": {
+      "status": "UNKNOWN",
+      "basis_ids": [],
+      "reason": "The booking states interest in discussing API security but provides no concrete business trigger or why-now event."
+    },
+    "buyer_stakeholder_fit": {
+      "status": "UNKNOWN",
+      "basis_ids": [],
+      "reason": "The booking does not specify stakeholder authority or role details, and the SOT contains no explicit buyer rules."
+    },
+    "engagement_economics": {
+      "status": "UNKNOWN",
+      "basis_ids": [],
+      "reason": "The prospect has provided no direct budget or commercial data to compare against the minimum viable engagement floor."
+    },
+    "timing_urgency": {
+      "status": "UNKNOWN",
+      "basis_ids": [],
+      "reason": "The booking does not state a delivery window, deadline, or timing urgency."
+    },
+    "expansion_potential": {
+      "status": "UNKNOWN",
+      "basis_ids": [],
+      "reason": "The booking mentions a single topic and does not express any distinct additional needs mapping to other services."
+    }
+  },
+  "canonical_completeness_classifications": {
+    "critical_question_coverage": {
+      "status": "COMPLETE",
+      "basis_ids": [
+        "DIM:D1",
+        "DIM:D2",
+        "Q:Q1",
+        "Q:Q2"
+      ],
+      "reason": "The certified Discovery Plan provides focused diagnostic questions covering all open dimensions (D1 technical scope and D2 desired outcome) without leaving material variables unmapped."
+    },
+    "source_authority": {
+      "status": "COMPLETE",
+      "basis_ids": [
+        "PE-001",
+        "PE-002",
+        "PE-003",
+        "PE-004",
+        "PE-005"
+      ],
+      "reason": "All material claims in the evidence packet are supported entirely by first-party source documentation."
+    },
+    "corroboration_depth": {
+      "status": "PARTIAL",
+      "basis_ids": [
+        "PE-001",
+        "PE-002",
+        "PE-003",
+        "PE-004",
+        "PE-005"
+      ],
+      "reason": "First-party evidence breadth is present across multiple official documentation pages, but lacks independent external sources."
+    },
+    "freshness": {
+      "status": "MISSING",
+      "basis_ids": [],
+      "reason": "The evidence packet contains no explicit publication, update, or fetched date metadata."
+    },
+    "conflict_ambiguity_control": {
+      "status": "COMPLETE",
+      "basis_ids": [
+        "R1",
+        "R2",
+        "U1",
+        "U2"
+      ],
+      "reason": "Uncertainties, scope boundaries, and unsupported assumptions are explicitly bounded and separated from confirmed facts."
+    }
+  },
+  "corrected_strategy": {
+    "recommended_action": "Run the planned diagnostic call to resolve the exact API/security boundary (D1) and desired external-help outcome (D2) before committing to a specific service path.",
+    "primary_service_id": "",
+    "qualification_status": "UNKNOWN",
+    "rationale": "The company has a mature public security baseline, but the booking is broad and uncommitted. The consultant should avoid generic maturity discovery and use targeted questions to determine exact scope and outcome.",
+    "key_talking_points": [
+      "Acknowledge the published security baseline (SOC 2 Type II, signed webhooks, OAuth support) to skip generic maturity discovery.",
+      "Ask which specific surface is in scope: API keys, OAuth flows, webhook verification, or MCP access.",
+      "Determine what specific deliverable or outcome is expected from external help."
+    ],
+    "risk_factors": [
+      "Treating 'API security' as a single generic surface rather than distinct trust boundaries.",
+      "Assuming a service fit (advisory or pentest) before the prospect's desired outcome is stated.",
+      "Wasting call time on baseline compliance or security-program discovery."
+    ]
+  },
+  "basis_resolution": {
+    "all_scored_basis_resolvable": true,
+    "unresolved_basis_ids": []
+  }
+}

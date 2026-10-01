@@ -1,0 +1,34 @@
+{
+  "sot_version": "PREMIUM_GAUNTLET_PUBLIC_FIXTURE_1",
+  "consultant": {
+    "consultant_name": "Chase Miller",
+    "firm": "vCISO.com"
+  },
+  "services": [
+    {
+      "service_id": "SVC_VCISO_ADVISORY",
+      "name": "Advisory vCISO"
+    },
+    {
+      "service_id": "SVC_PENTEST",
+      "name": "Penetration Testing"
+    },
+    {
+      "service_id": "SVC_ENTERPRISE_SECURITY",
+      "name": "Enterprise Sales Security Enablement"
+    },
+    {
+      "service_id": "SVC_SOC2",
+      "name": "SOC 2 Readiness"
+    },
+    {
+      "service_id": "SVC_HIPAA",
+      "name": "HIPAA Readiness"
+    }
+  ],
+  "commercial_rules": {
+    "minimum_viable_engagement_usd": 3000,
+    "budget_required_before_first_call": false,
+    "budget_rule": "Direct evidence only; never infer budget."
+  }
+}

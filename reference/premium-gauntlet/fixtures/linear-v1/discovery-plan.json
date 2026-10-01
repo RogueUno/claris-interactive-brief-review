@@ -1,0 +1,200 @@
+{
+  "schema_version": "CLARIS_DISCOVERY_INTELLIGENCE_V1_2",
+  "call_objective": "Locate where enterprise security reviews still become manual and define the operating outcome Linear wants, while suppressing baseline questions already answered by its assurance stack.",
+  "authorized_dimensions": [
+    {
+      "dimension_id": "D1",
+      "ontology_intent": "D04 problem_or_gap",
+      "authority": "PREPARE",
+      "policy_key": null,
+      "reason": "The booking says enterprise customer security reviews are increasing but not where friction occurs."
+    },
+    {
+      "dimension_id": "D2",
+      "ontology_intent": "D06 desired_outcome",
+      "authority": "PREPARE",
+      "policy_key": null,
+      "reason": "The booking explicitly asks to make the process smoother but does not define the desired operating state."
+    }
+  ],
+  "diagnostic_target": [
+    "Exact layer of enterprise-review friction.",
+    "Exact operational outcome that would make the review process materially smoother."
+  ],
+  "commercial_target": [],
+  "primary_questions": [
+    {
+      "question_id": "Q1",
+      "ontology_intent": "D04 problem_or_gap",
+      "dimension_id": "D1",
+      "authority": "PREPARE",
+      "policy_key": null,
+      "ask": "Where do enterprise security reviews still consume manual time despite the Trust Center: recurring questionnaires, evidence access, bespoke technical/control questions, customer calls, or somewhere else?",
+      "why_now": "Linear already publishes a broad assurance baseline and Trust Center, so the valuable unknown is the residual manual review layer.",
+      "already_known_context": [
+        "SOC 2 Type II, ISO 27001 and HIPAA/BAA support are documented.",
+        "A Trust Center distributes standard assurance material.",
+        "SAML/SCIM, audit logs and other enterprise controls are publicly documented."
+      ],
+      "listen_for": [
+        {
+          "pattern": "We keep rewriting the same questionnaire answers for every customer.",
+          "meaning": "The friction is response reuse and evidence workflow.",
+          "next_effect": "Makes SVC_ENTERPRISE_SECURITY a plausible conditional path."
+        },
+        {
+          "pattern": "Security or engineering has to join too many customer review calls.",
+          "meaning": "The bottleneck is recurring expert interruption.",
+          "next_effect": "Diagnose which questions escape standard evidence and whether enablement can absorb them."
+        },
+        {
+          "pattern": "Customers keep asking for evidence or technical explanations that are not in the Trust Center.",
+          "meaning": "The prospect has identified a recurring assurance-content gap.",
+          "next_effect": "Open an assurance-requirements branch and characterize the missing evidence."
+        }
+      ],
+      "conditional_probes": [
+        {
+          "trigger_if": "The prospect says the team loses hours repeatedly rewriting the same security questionnaires.",
+          "opens_ontology_intent": "D05 implication",
+          "ask": "How much of that work is genuinely bespoke versus repeatedly repackaging evidence you already have?",
+          "why": "The prospect has explicitly introduced time/effort impact, so quantifying the repeatable versus bespoke portion is earned.",
+          "listen_for": [
+            "Most answers are repeated with small wording changes.",
+            "A minority of reviews require genuinely new technical analysis."
+          ],
+          "what_changes": "Determines whether the leverage is primarily reusable response/evidence design or expert handling of complex reviews."
+        },
+        {
+          "trigger_if": "The prospect says customers need evidence or assurance that is not available in the Trust Center.",
+          "opens_ontology_intent": "D13 assurance_requirements",
+          "ask": "What are those customers repeatedly asking for that the current Trust Center material does not answer?",
+          "why": "The prospect has explicitly introduced a customer-assurance gap.",
+          "listen_for": [
+            "They want technical architecture/control narratives.",
+            "They want a specific assessment or evidence package."
+          ],
+          "what_changes": "Defines the missing assurance content and whether enterprise-security enablement is a fit."
+        }
+      ],
+      "what_the_answer_changes": "Identifies the actual review-process problem and prevents proposing a workflow solution to the wrong bottleneck.",
+      "stop_condition": "The recurring manual review layer is explicit and distinguishable from already-solved baseline evidence distribution.",
+      "linked_service_paths": [
+        {
+          "service_id": "SVC_ENTERPRISE_SECURITY",
+          "condition": "Recurring questionnaire, evidence or customer-review workflow friction is confirmed."
+        },
+        {
+          "service_id": "SVC_VCISO_ADVISORY",
+          "condition": "Reviews expose broader strategic control/governance issues beyond review operations."
+        }
+      ]
+    },
+    {
+      "question_id": "Q2",
+      "ontology_intent": "D06 desired_outcome",
+      "dimension_id": "D2",
+      "authority": "PREPARE",
+      "policy_key": null,
+      "ask": "What would a materially smoother review process look like for your team: faster standard responses, more reusable evidence, fewer security/engineering interruptions, hands-on support for complex reviews, or something else?",
+      "why_now": "The booking names smoother as the goal but not the operating result that would count as success.",
+      "already_known_context": [
+        "Standard assurance artifacts and several enterprise-control answers already exist publicly."
+      ],
+      "listen_for": [
+        {
+          "pattern": "We want most standard reviews answered without pulling security or engineering in.",
+          "meaning": "The goal is reduced expert interruption through reusable evidence/process.",
+          "next_effect": "Strengthens an enterprise-security enablement path."
+        },
+        {
+          "pattern": "We want to cut turnaround time for standard questionnaires.",
+          "meaning": "The target is response speed and reuse.",
+          "next_effect": "Focus the next step on reusable evidence and response workflow."
+        },
+        {
+          "pattern": "We need expert help only on the hard reviews while the standard ones become self-service.",
+          "meaning": "The desired state separates repeatable review operations from complex exceptions.",
+          "next_effect": "Design a service shape around standardization plus exception support."
+        }
+      ],
+      "conditional_probes": [
+        {
+          "trigger_if": "The prospect says delayed security reviews are slowing or blocking enterprise deals.",
+          "opens_ontology_intent": "D05 implication",
+          "ask": "Where in the review cycle does that delay usually appear, and what part of it is within your team’s control to change?",
+          "why": "The prospect has explicitly introduced deal impact, so diagnosing the operational consequence is now valid.",
+          "listen_for": [
+            "Questionnaire turnaround is the long pole.",
+            "Technical escalations or evidence requests stall late-stage reviews."
+          ],
+          "what_changes": "Prioritizes the review step with the greatest commercial/operational leverage without inventing a metric."
+        }
+      ],
+      "what_the_answer_changes": "Defines the desired operating state and therefore the scope of any follow-on enablement or advisory work.",
+      "stop_condition": "The prospect can describe what becomes faster, reusable or less interruptive if the engagement succeeds.",
+      "linked_service_paths": [
+        {
+          "service_id": "SVC_ENTERPRISE_SECURITY",
+          "condition": "The target is a repeatable enterprise-review/evidence operating system."
+        },
+        {
+          "service_id": "SVC_VCISO_ADVISORY",
+          "condition": "The target expands into broader governance/control remediation."
+        }
+      ]
+    }
+  ],
+  "do_not_ask": [
+    {
+      "topic": "Do you have SOC 2 or ISO 27001?",
+      "reason": "RESEARCH_ALREADY_ANSWERED",
+      "detail": "Linear publicly documents both."
+    },
+    {
+      "topic": "Do you support SAML or SCIM?",
+      "reason": "RESEARCH_ALREADY_ANSWERED",
+      "detail": "Enterprise SAML/SCIM support is documented."
+    },
+    {
+      "topic": "Budget",
+      "reason": "UNAUTHORIZED",
+      "detail": "Consultant policy does not require economics before the first call and PREPARE did not open economics."
+    },
+    {
+      "topic": "Who is the decision maker?",
+      "reason": "UNAUTHORIZED",
+      "detail": "The booking does not expose ownership/authority and no consultant policy requires it at this point."
+    }
+  ],
+  "call_flow": [
+    {
+      "step": 1,
+      "move": "Use Q1 to locate the residual manual review layer.",
+      "advance_when": "The recurring friction point is explicit."
+    },
+    {
+      "step": 2,
+      "move": "Use Q2 to define the target operating state.",
+      "advance_when": "The prospect can describe what materially improves."
+    },
+    {
+      "step": 3,
+      "move": "Follow only branches earned by the answer and map confirmed need to enterprise-security enablement, broader advisory or neither.",
+      "advance_when": "The next step is clear without generic commercial discovery."
+    }
+  ],
+  "end_of_call_decision": {
+    "ready_for_next_step_if": [
+      "The review-friction layer is explicit.",
+      "The desired smoother operating state is explicit and aligns with at least one consultant capability."
+    ],
+    "remain_in_discovery_if": [
+      "The prospect still describes enterprise reviews as one undifferentiated problem.",
+      "The desired operating change remains vague."
+    ],
+    "disqualify_or_deprioritize_if": [
+      "The prospect confirms a required service or operating outcome that falls entirely outside all available consultant services."
+    ]
+  }
+}
