@@ -300,7 +300,7 @@ function findScaleMetric(results,domainHost){
 function cleanDescriptorPhrase(value){
   return compactSpaces(value)
     .replace(/^(?:the|a|an)\s+/i,'')
-    .replace(/\s+(?:for|serving|used by|with)\s+[^,.;]{1,90}$/i,'')
+    .replace(/\s+(?:for|serving|used by|with)\s+.*$/i,'')
     .replace(/[,:;\-\s]+$/,'')
     .trim();
 }
