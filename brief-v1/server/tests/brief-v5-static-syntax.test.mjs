@@ -36,3 +36,22 @@ test('orientation no longer embeds booking request', () => {
   assert.ok(start>=0&&end>start,'orientation/booking functions missing');
   assert.doesNotMatch(source.slice(start,end),/bookingMarkup\(/);
 });
+
+
+test('company snapshot omits vanity scale metrics from the V5 presentation', () => {
+  const file=resolve(process.cwd(),'brief-v5/app.mjs');
+  const source=fs.readFileSync(file,'utf8');
+  const start=source.indexOf('function companySnapshotMarkup');
+  const end=source.indexOf('function contextMarkup',start);
+  assert.ok(start>=0&&end>start,'company snapshot renderer missing');
+  const renderer=source.slice(start,end);
+  assert.match(renderer,/\['founded_year','headquarters','employee_size','company_type'\]/);
+  assert.doesNotMatch(renderer,/scale_metric/);
+});
+
+test('lead identity card has a dedicated dark-surface class', () => {
+  const app=fs.readFileSync(resolve(process.cwd(),'brief-v5/app.mjs'),'utf8');
+  const css=fs.readFileSync(resolve(process.cwd(),'brief-v5/styles.css'),'utf8');
+  assert.match(app,/identity-card identity-card--dark panel/);
+  assert.match(css,/identity-card\.identity-card--dark\.panel/);
+});
