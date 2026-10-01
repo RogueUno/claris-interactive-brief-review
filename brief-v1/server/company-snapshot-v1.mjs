@@ -51,7 +51,6 @@ function normalized(value){
     .trim();
 }
 function firstSentence(value,max=150){
-function firstSentence(value,max=190){
   const raw=compactSpaces(value);
   if(!raw)return'';
   const cut=raw.match(/^(.{20,}?)(?:[.!?](?:\s|$)|$)/)?.[1]||raw;
@@ -68,31 +67,7 @@ function normalizeResults(value){
   })).filter(item=>parseHttpsUrl(item.url)&&(item.title||item.content));
 }
 function evidence(result){return compactSpaces([result.title,result.content].filter(Boolean).join(' — '));}
-function candidate({value,display,label,result,sourceType,confidence='MEDIUM'}){
-  if(value==null||!result?.url)return null;
-  return {
-    value,
-    display:display??String(value),
-    label,
-    source_url:result.url,
-    source_label:sourceHost(result.url)||'Source',
-    source_type:sourceType,
-    confidence,
-    evidence_quote:evidence(result)
-  };
-}
-function companySources(results,domainHost){
-  return results.filter(r=>isFirstParty(r.url,domainHost)||isLinkedIn(r.url,'company'));
-}
-function firstPartySources(results,domainHost){
-  return results.filter(r=>isFirstParty(r.url,domainHost));
-}
-function sourceType(result,domainHost){
-  if(isFirstParty(result.url,domainHost))return'FIRST_PARTY';
-  if(linkedinKind(result.url))return'PUBLIC_INDEX';
-  return'OTHER_PUBLIC';
-}
-function candidate({value,display,label,result,sourceType:kind,confidence='MEDIUM',extra={}}){
+function candidate({value,display,label,result,sourceType,confidence='MEDIUM',extra={}}){
   if(value==null||!parseHttpsUrl(result?.url))return null;
   return {
     value,
@@ -100,7 +75,7 @@ function candidate({value,display,label,result,sourceType:kind,confidence='MEDIU
     label,
     source_url:result.url,
     source_label:sourceHost(result.url)||'Source',
-    source_type:kind,
+    source_type:sourceType,
     supported:true,
     confidence,
     evidence_quote:evidence(result),
@@ -110,8 +85,15 @@ function candidate({value,display,label,result,sourceType:kind,confidence='MEDIU
 function companySources(results,domainHost){
   return results.filter(result=>isFirstParty(result.url,domainHost)||linkedinKind(result.url)==='company');
 }
-function firstPartySources(results,domainHost){return results.filter(result=>isFirstParty(result.url,domainHost));}
-function consistentCandidate(candidates,keyFn=value=>normalized(value?.display)){
+function firstPartySources(results,domainHost){
+  return results.filter(result=>isFirstParty(result.url,domainHost));
+}
+function sourceType(result,domainHost){
+  if(isFirstParty(result.url,domainHost))return'FIRST_PARTY';
+  if(linkedinKind(result.url))return'PUBLIC_INDEX';
+  return null;
+}
+function consistentCandidate(candidates,keyFn=item=>normalized(item?.display)){
   const usable=candidates.filter(Boolean);
   if(!usable.length)return null;
   const keys=new Set(usable.map(keyFn).filter(Boolean));
@@ -122,20 +104,25 @@ function extractAsOf(value){
   const match=compactSpaces(value).match(/\bas of\s+([^.;|]{4,40})/i);
   return match?compactSpaces(match[1]):null;
 }
-
 function findFoundedYear(results,domainHost){
   const currentYear=new Date().getUTCFullYear()+1;
   const candidates=[];
   for(const result of companySources(results,domainHost)){
     const hay=evidence(result);
-    const patterns=[
+    for(const {label,re} of [
       {label:'Founded',re:/\bfounded\s*(?:in|:|-)?\s*((?:18|19|20)\d{2})\b/i},
       {label:'Established',re:/\bestablished\s*(?:in|:|-)?\s*((?:18|19|20)\d{2})\b/i}
-    ];
-    for(const {label,re} of patterns){
+    ]){
       const match=hay.match(re);if(!match)continue;
       const year=Number(match[1]);if(year<1800||year>currentYear)continue;
-      candidates.push(candidate({value:year,display:String(year),label,result,sourceType:sourceType(result,domainHost),confidence:isFirstParty(result.url,domainHost)?'HIGH':'MEDIUM'}));
+      candidates.push(candidate({
+        value:year,
+        display:String(year),
+        label,
+        result,
+        sourceType:sourceType(result,domainHost),
+        confidence:isFirstParty(result.url,domainHost)?'HIGH':'MEDIUM'
+      }));
     }
   }
   return consistentCandidate(candidates,item=>String(item.value));
@@ -151,16 +138,22 @@ function findHeadquarters(results,domainHost){
   const candidates=[];
   for(const result of companySources(results,domainHost)){
     const hay=evidence(result);
-    const patterns=[
+    for(const {label,re} of [
       {label:'Headquarters',re:/\bheadquarters?\s*[:\-]\s*([^|.;\n]{2,90})/i},
       {label:'Headquarters',re:/\bheadquartered\s+in\s+([^|.;\n]{2,90})/i},
       {label:'Main location',re:/\bbased\s+in\s+([^|.;\n]{2,90})/i}
-    ];
-    for(const {label,re} of patterns){
+    ]){
       const match=hay.match(re);if(!match)continue;
       const location=cleanLocation(match[1]);
       if(location.length<2||location.length>80)continue;
-      candidates.push(candidate({value:location,display:location,label,result,sourceType:sourceType(result,domainHost),confidence:isFirstParty(result.url,domainHost)?'HIGH':'MEDIUM'}));
+      candidates.push(candidate({
+        value:location,
+        display:location,
+        label,
+        result,
+        sourceType:sourceType(result,domainHost),
+        confidence:isFirstParty(result.url,domainHost)?'HIGH':'MEDIUM'
+      }));
     }
   }
   return consistentCandidate(candidates,item=>normalized(item.value));
@@ -185,51 +178,59 @@ function findEmployeeSize(results,domainHost){
     const range=hay.match(/(?:company\s+size\s*[:\-]?\s*)?([0-9][0-9,]*\s*[-–—]\s*[0-9][0-9,]*)\s+employees\b/i);
     if(range){
       const display=compactSpaces(range[1]).replace(/\s*[-–—]\s*/,'–');
-      candidates.push(candidate({value:display,display,label:'Approx. employees',result,sourceType:sourceType(result,domainHost),confidence:'MEDIUM',extra:{approximate:true,as_of:asOf}}));
+      candidates.push(candidate({
+        value:display,
+        display,
+        label:'Approx. employees',
+        result,
+        sourceType:sourceType(result,domainHost),
+        confidence:'MEDIUM',
+        extra:{approximate:true,as_of:asOf}
+      }));
       continue;
     }
     const exact=hay.match(/\b(?:approximately|approx\.?|about|around)?\s*([0-9][0-9,]*)\s+employees\b/i);
     if(exact){
-      const display=employeeBand(exact[1]);
-      if(!display)continue;
-      candidates.push(candidate({value:display,display,label:'Approx. employees',result,sourceType:sourceType(result,domainHost),confidence:'MEDIUM',extra:{approximate:true,as_of:asOf,derived_from_exact_count:true}}));
+      const display=employeeBand(exact[1]);if(!display)continue;
+      candidates.push(candidate({
+        value:display,
+        display,
+        label:'Approx. employees',
+        result,
+        sourceType:sourceType(result,domainHost),
+        confidence:'MEDIUM',
+        extra:{approximate:true,as_of:asOf,derived_from_exact_count:true}
+      }));
     }
   }
   return consistentCandidate(candidates,item=>item.display);
 }
 function findCompanyType(results,domainHost,company){
-  const escaped=normalized(company).split(' ').filter(Boolean).map(part=>part.replace(/[-/\\^$*+?.()|[\]{}]/g,'\\$&')).join('\\s+');
-  const candidates=[];
-  for(const result of firstPartySources(results,domainHost)){
-    const raw=compactSpaces(result.content);
-    if(!raw)continue;
-    const patterns=[];
-    if(escaped)patterns.push(new RegExp('\\b'+escaped+'\\s+(?:is|are)\\s+(?:an?\\s+)?([^.!?]{4,120})','i'));
-    patterns.push(/\b(?:we|the company)\s+(?:are|is)\s+(?:an?\s+)?([^.!?]{4,120})/i);
-    let display='';
-    for(const re of patterns){
-      const match=raw.match(re);if(!match)continue;
-      display=compactSpaces(match[1]).replace(/\s+(?:that|which)\s+.*$/i,'').trim();
-      if(display)break;
+  const companyTokens=normalized(company).split(' ').filter(Boolean);
+  const candidates=firstPartySources(results,domainHost).slice().sort((a,b)=>{
+    const aAbout=/about|company|home/i.test(a.title+' '+a.url)?1:0;
+    const bAbout=/about|company|home/i.test(b.title+' '+b.url)?1:0;
+    return bAbout-aAbout+(Number(b.score||0)-Number(a.score||0));
+  });
+  for(const result of candidates){
+    const raw=compactSpaces(result.content);if(!raw)continue;
+    const sentences=raw.split(/(?<=[.!?])\s+/);
+    for(const sentence of sentences){
+      const norm=normalized(sentence);
+      if(companyTokens.length&&!companyTokens.every(token=>norm.includes(token)))continue;
+      const match=sentence.match(/\b(?:is|are)\s+(?:an?\s+)?([^.!?]{4,120})/i);
+      if(!match)continue;
+      const display=compactSpaces(match[1]).replace(/\s+(?:that|which)\s+.*$/i,'').trim();
+      if(display.length<3||display.length>120)continue;
+      return candidate({value:display,display,label:'Company type',result,sourceType:'FIRST_PARTY',confidence:'MEDIUM'});
     }
-    if(!display){
-      const industry=raw.match(/\bindustry\s*[:\-]\s*([^|.;]{3,80})/i);
-      if(industry)display=compactSpaces(industry[1]);
+    const industry=raw.match(/\bindustry\s*[:\-]\s*([^|.;]{3,80})/i);
+    if(industry){
+      const display=compactSpaces(industry[1]);
+      return candidate({value:display,display,label:'Company type',result,sourceType:'FIRST_PARTY',confidence:'MEDIUM'});
     }
-    if(display.length<3||display.length>120)continue;
-    candidates.push(candidate({value:display,display,label:'Company type',result,sourceType:'FIRST_PARTY',confidence:'MEDIUM'}));
   }
-  return consistentCandidate(candidates,item=>normalized(item.display));
-}
-function humanQualifier(value){
-  const raw=normalized(value);
-  if(raw==='more than')return'More than';
-  if(raw==='over')return'Over';
-  if(raw==='approximately'||raw==='approx')return'Approximately';
-  if(raw==='about')return'About';
-  if(raw==='around')return'Around';
-  if(raw==='nearly')return'Nearly';
-  return'';
+  return null;
 }
 function titleCase(value){return text(value).replace(/\b\w/g,char=>char.toUpperCase());}
 function findScaleMetric(results,domainHost){
@@ -238,30 +239,34 @@ function findScaleMetric(results,domainHost){
     new RegExp('\\b(?:trusted by|serves?|used by|supports?|powers?)\\s+(?:(more than|over|approximately|approx\\.?|about|around|nearly)\\s+)?([0-9][0-9,.]*\\s*(?:k|m|b|million|billion)?\\+?)\\s+('+units+')\\b','i'),
     new RegExp('\\b(?:(more than|over|approximately|approx\\.?|about|around|nearly)\\s+)?([0-9][0-9,.]*\\s*(?:k|m|b|million|billion)?\\+?)\\s+('+units+')\\b','i')
   ];
-  const candidates=[];
-  for(const result of firstPartySources(results,domainHost)){
+  const ranked=firstPartySources(results,domainHost).slice().sort((a,b)=>Number(b.score||0)-Number(a.score||0));
+  for(const result of ranked){
     const hay=evidence(result);
     for(const re of patterns){
       const match=hay.match(re);if(!match)continue;
-      const qualifier=humanQualifier(match[1]);
-      const number=compactSpaces(match[2]);
+      const qualifier=compactSpaces(match[1])||null;
+      const value=compactSpaces(match[2]);
       const unit=compactSpaces(match[3]);
-      const display=compactSpaces([qualifier,number,unit].filter(Boolean).join(' '));
-      candidates.push(candidate({value:number,display,label:titleCase(unit),result,sourceType:'FIRST_PARTY',confidence:'HIGH',extra:{qualifier:qualifier||null,as_of:extractAsOf(hay)}}));
-      break;
+      const display=compactSpaces([qualifier,value,unit].filter(Boolean).join(' '));
+      return candidate({
+        value,
+        display,
+        label:titleCase(unit),
+        result,
+        sourceType:'FIRST_PARTY',
+        confidence:'HIGH',
+        extra:{qualifier,as_of:extractAsOf(hay)}
+      });
     }
   }
-  return consistentCandidate(candidates,item=>normalized(item.display));
+  return null;
 }
 function findDescription(results,domainHost){
-function findDescription(results,domainHost){
-  const candidates=firstPartySources(results,domainHost)
-    .slice()
-    .sort((a,b)=>{
-      const aAbout=/about|company|home/i.test(a.title+' '+a.url)?1:0;
-      const bAbout=/about|company|home/i.test(b.title+' '+b.url)?1:0;
-      return bAbout-aAbout+(Number(b.score||0)-Number(a.score||0));
-    });
+  const candidates=firstPartySources(results,domainHost).slice().sort((a,b)=>{
+    const aAbout=/about|company|home/i.test(a.title+' '+a.url)?1:0;
+    const bAbout=/about|company|home/i.test(b.title+' '+b.url)?1:0;
+    return bAbout-aAbout+(Number(b.score||0)-Number(a.score||0));
+  });
   for(const result of candidates){
     const sentence=firstSentence(result.content);
     if(sentence.length<24)continue;
@@ -277,14 +282,12 @@ function personIdentityMatches(result,prospectName,company){
   const nameMatches=nameTokens.filter(token=>hay.includes(token)).length;
   if(nameMatches<Math.min(2,nameTokens.length))return false;
   const companyTokens=normalized(company).split(' ').filter(token=>token.length>1&&!COMPANY_STOP.has(token));
-  if(!companyTokens.length)return false;
-  return companyTokens.some(token=>hay.includes(token));
+  return Boolean(companyTokens.length&&companyTokens.some(token=>hay.includes(token)));
 }
 function findLinkedIn(results,prospectName,company,prospectRole){
   if(!text(prospectName)||!text(company))return null;
   for(const result of results){
-    const profileUrl=canonicalLinkedInProfileUrl(result.url);
-    if(!profileUrl)continue;
+    const profileUrl=canonicalLinkedInProfileUrl(result.url);if(!profileUrl)continue;
     if(!personIdentityMatches(result,prospectName,company))continue;
     const hay=normalized(result.title+' '+result.content);
     const roleTokens=normalized(prospectRole).split(' ').filter(token=>token.length>3);
@@ -309,6 +312,9 @@ function uniqueSources(items){
   }
   return [...map.values()];
 }
+function isEmployeeBand(value){
+  return /^(?:\d[\d,]*–\d[\d,]*|\d[\d,]*\+)$/.test(text(value));
+}
 
 export function validateCompanySnapshotV1(snapshot={},context={}){
   const errors=[];
@@ -323,18 +329,22 @@ export function validateCompanySnapshotV1(snapshot={},context={}){
     if(!text(item.source_url)||!text(item.evidence_quote)||!parseHttpsUrl(item.source_url))errors.push(key+':SOURCE_REQUIRED');
     if(item.source_type==='FIRST_PARTY'&&!isFirstParty(item.source_url,domainHost))errors.push(key+':FIRST_PARTY_HOST_MISMATCH');
     if(item.source_type==='PUBLIC_INDEX'&&key!=='intro'&&linkedinKind(item.source_url)!=='company')errors.push(key+':PUBLIC_INDEX_URL_INVALID');
+    if(!['FIRST_PARTY','PUBLIC_INDEX'].includes(item.source_type))errors.push(key+':SOURCE_TYPE');
   }
   if(fields.employee_size){
     if(fields.employee_size.approximate!==true)errors.push('employee_size:APPROXIMATE_REQUIRED');
-    if(!/^\d[\d,]*–(?:\d[\d,]*|\d[\d,]*\+)$/.test(text(fields.employee_size.display))&&!/^10,001\+$/.test(text(fields.employee_size.display))){
-      errors.push('employee_size:BAND_REQUIRED');
-    }
+    if(!isEmployeeBand(fields.employee_size.display))errors.push('employee_size:BAND_REQUIRED');
   }
   const linkedin=snapshot?.prospect?.linkedin_url;
   if(linkedin){
     const canonical=canonicalLinkedInProfileUrl(linkedin.value);
     if(!canonical||canonical!==linkedin.value)errors.push('prospect.linkedin_url:URL_INVALID');
-    if(!personIdentityMatches({title:'',content:linkedin.evidence_quote},context.prospect_name||snapshot?.prospect?.name,context.company||snapshot?.company_name||snapshot?.company)){
+    if(linkedin.source_type!=='PUBLIC_INDEX')errors.push('prospect.linkedin_url:SOURCE_TYPE');
+    if(!personIdentityMatches(
+      {title:'',content:linkedin.evidence_quote},
+      context.prospect_name||snapshot?.prospect?.name,
+      context.company||snapshot?.company_name||snapshot?.company
+    )){
       errors.push('prospect.linkedin_url:IDENTITY_MISMATCH');
     }
   }
@@ -394,6 +404,10 @@ export function compileCompanySnapshotV1(input={}){
     renderable:populatedFields>=3&&coreFields>=2,
     has_linkedin:Boolean(linkedin)
   };
-  const validation=validateCompanySnapshotV1(snapshot,{domain_host:domainHost,prospect_name:prospectName,company});
+  const validation=validateCompanySnapshotV1(snapshot,{
+    domain_host:domainHost,
+    prospect_name:prospectName,
+    company
+  });
   return{...snapshot,validation};
 }
