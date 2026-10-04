@@ -127,6 +127,10 @@ export function buildFinalizeBundle(envelope, opportunityVersion = null) {
     consultant_sot_json: context.consultant_sot_json,
     consultant_id: context.consultant_id,
     consultant_delivery_email: context.consultant_delivery_email,
+    // Admin-only observability. This is webhook dispatch status, not proof that
+    // FINALIZE or a consultant email has succeeded.
+    finalize_dispatch_status: envelope?.finalize_dispatch?.status || 'LEGACY_UNTRACKED',
+    finalize_dispatch_error: envelope?.finalize_dispatch?.failure_code || null,
     prospect_answers_json: JSON.stringify(prospectAnswers),
     prospect_answers: prospectAnswers
   };
