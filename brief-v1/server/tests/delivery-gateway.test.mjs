@@ -552,3 +552,60 @@ test('compile-only certified package stays side-effect free and feeds publish-re
   assert.equal(result.delivery.to, 'sarah@example.com');
   assert.equal(result.brief.brief_id.startsWith('pub_'), true);
 });
+
+
+test('publisher notification reservation and ACK stay authenticated, transport-only', async () => {
+  const calls = [];
+  const outbox = {
+    async claim(value) {
+      calls.push({ operation: 'claim', value });
+      return {
+        ok: true, status: 'CLAIMED',
+        consultant_delivery_email: 'registered@example.com',
+        claim_token: 'a'.repeat(64)
+      };
+    },
+    async acknowledge(value) {
+      calls.push({ operation: 'acknowledge', value });
+      return { ok: true, status: 'ACKNOWLEDGED', reused: false };
+    }
+  };
+  const { gateway } = setup({ notificationOutboxProvider: async () => outbox });
+  const data = { publication_id: 'pub_test_123', brief_url: 'https://preview.example/brief-v1/#brief=safe' };
+  const refused = await gateway.fetch(request('brief_notification_claim', data));
+  assert.equal(refused.status, 401);
+  assert.equal(calls.length, 0);
+
+  const claimed = await gateway.fetch(request('brief_notification_claim', data, { auth: true }));
+  assert.equal(claimed.status, 200);
+  const bodyClaim = await body(claimed);
+  assert.equal(bodyClaim.status, 'CLAIMED');
+  assert.equal(bodyClaim.consultant_delivery_email, 'registered@example.com');
+
+  const acknowledged = await gateway.fetch(request(
+    'brief_notification_ack',
+    { publication_id: 'pub_test_123', claim_token: bodyClaim.claim_token, provider_message_id: 'gmail-1' },
+    { auth: true }
+  ));
+  assert.equal(acknowledged.status, 200);
+  assert.equal((await body(acknowledged)).status, 'ACKNOWLEDGED');
+  assert.deepEqual(calls.map((x) => x.operation), ['claim', 'acknowledge']);
+});
+
+test('publisher outbox reconciliation never reaches a success status', async () => {
+  const { gateway } = setup({
+    notificationOutboxProvider: async () => ({
+      async claim() {
+        return { ok: false, status: 'RECONCILIATION_REQUIRED', error: 'SEND_OUTCOME_UNKNOWN' };
+      },
+      async acknowledge() {
+        return { ok: false, status: 'BLOCKED', error: 'ACK_MISSING' };
+      }
+    })
+  });
+  const uncertain = await gateway.fetch(request('brief_notification_claim', {}, { auth: true }));
+  assert.equal(uncertain.status, 409);
+  assert.equal((await body(uncertain)).ok, false);
+  const badAck = await gateway.fetch(request('brief_notification_ack', {}, { auth: true }));
+  assert.equal(badAck.status, 422);
+});
