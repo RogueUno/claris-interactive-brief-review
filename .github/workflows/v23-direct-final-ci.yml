@@ -2,11 +2,14 @@ name: V2.3 Direct Final Safety
 
 on:
   push:
-    branches: [v23-direct-final-outbox-20261004]
+    branches: [v23-direct-final-clean-20261004]
   pull_request:
     branches: [v23-delivery-owner-gate-20261004, main]
     paths:
       - 'api/delivery/package.mjs'
+      - 'api/calendly/normalize.mjs'
+      - 'calibration-v3/server/calendly-booking-normalizer.mjs'
+      - 'calibration-v3/server/tests/calendly-*.test.mjs'
       - 'calibration-v3/server/direct-final-outbox.mjs'
       - 'calibration-v3/server/blob-storage.mjs'
       - 'clarification-v1/server/tests/direct-final-*.test.mjs'
@@ -22,12 +25,16 @@ jobs:
       - name: Verify ES modules
         run: |
           node --check api/delivery/package.mjs
+          node --check api/calendly/normalize.mjs
+          node --check calibration-v3/server/calendly-booking-normalizer.mjs
           node --check calibration-v3/server/direct-final-outbox.mjs
           node --check calibration-v3/server/blob-storage.mjs
       - name: Offline no-provider delivery certification
         run: |
           node --test clarification-v1/server/tests/direct-final-outbox.test.mjs
           node --test clarification-v1/server/tests/direct-final-gateway.test.mjs
+          node --test calibration-v3/server/tests/calendly-booking-normalizer.test.mjs
+          node --test calibration-v3/server/tests/calendly-normalize-api.test.mjs
       - name: Original owner tests must remain safe
         run: |
           node --test clarification-v1/server/tests/verify-locked-delivery-owner.test.mjs
