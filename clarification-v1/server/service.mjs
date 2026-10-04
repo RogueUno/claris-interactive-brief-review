@@ -1,5 +1,6 @@
 import { normalizeClarificationPackage, normalizeProspectAnswers, normalizeProspectProgress, publicClarificationPackage } from './contract.mjs';
 import { signClarificationSession, verifyClarificationSession } from './session.mjs';
+import { pendingFinalizeDispatch } from './finalize-dispatch.mjs';
 
 const SESSION_TTL_MS = 14 * 24 * 60 * 60 * 1000;
 
@@ -214,6 +215,9 @@ export function createClarificationService({ repository, sessionSecret }) {
         package: { ...envelope.package, status: 'SUBMITTED' },
         progress: null,
         response,
+        // Atomic with the submitted answer: even a failed webhook call cannot
+        // leave the opportunity with no durable continuation state.
+        finalize_dispatch: pendingFinalizeDispatch(submittedAt),
         updated_at: submittedAt
       };
 
