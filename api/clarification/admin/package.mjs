@@ -1,5 +1,6 @@
 import { serverContext as calibrationServerContext } from '../../../calibration-v3/server/api-shared.mjs';
 import { verifyLockedDeliveryOwner } from '../../../clarification-v1/server/verify-locked-delivery-owner.mjs';
+import { claimFinalDelivery, acknowledgeFinalDelivery, checkFinalDeliveryEligibility } from '../../../clarification-v1/server/final-delivery-receipt.mjs';
 import { clarificationServerContext } from '../../../clarification-v1/server/api-shared.mjs';
 import { json, methodNotAllowed, parseJson } from '../../../clarification-v1/server/http.mjs';
 import { runClarificationProtocolStep } from '../../../clarification-v1/server/protocol.mjs';
@@ -10,6 +11,9 @@ const PROTOCOL_OPERATION = 'INTELLIGENCE_PROTOCOL';
 const FINALIZE_BUNDLE_OPERATION = 'FINALIZE_BUNDLE';
 const RENDER_FINAL_BRIEF_OPERATION = 'RENDER_FINAL_BRIEF';
 const MAX_PROTOCOL_BODY_BYTES = 450_000;
+const FINAL_DELIVERY_PREFLIGHT_OPERATION = 'FINAL_DELIVERY_PREFLIGHT';
+const FINAL_DELIVERY_CLAIM_OPERATION = 'FINAL_DELIVERY_CLAIM';
+const FINAL_DELIVERY_ACK_OPERATION = 'FINAL_DELIVERY_ACK';
 
 function adminAuthorized(request, acceptedKeys) {
   const keys = (Array.isArray(acceptedKeys) ? acceptedKeys : [acceptedKeys])
@@ -148,6 +152,36 @@ async function handleIntelligenceProtocol(request) {
   }
 }
 
+// Admin-only outbox control. No email provider is called from this route.
+// A reserved claim cannot automatically expire because the provider may have
+// sent an email before an ACK was lost. Such cases require reconciliation.
+async function handleFinalDeliveryOperation(request, operation) {
+  const parsed = await parseJson(request);
+  if (!parsed.ok) return parsed.response;
+  try {
+    const context = clarificationServerContext();
+    const repositories = {
+      repository: context.repository,
+      consultantRepository: calibrationServerContext().repository
+    };
+    const result = operation === FINAL_DELIVERY_PREFLIGHT_OPERATION
+      ? await checkFinalDeliveryEligibility(parsed.value, repositories)
+      : operation === FINAL_DELIVERY_CLAIM_OPERATION
+        ? await claimFinalDelivery(parsed.value, repositories)
+        : await acknowledgeFinalDelivery(parsed.value, repositories);
+    const status = result.status === 'ELIGIBLE' || result.status === 'CLAIMED' ||
+      result.status === 'ACKNOWLEDGED' || result.status === 'SKIPPED_ALREADY_SENT'
+      ? 200
+      : result.status === 'RECONCILIATION_REQUIRED' ||
+        result.status === 'CLAIM_CONFLICT' || result.status === 'ACK_CONFLICT'
+        ? 409 : 422;
+    return json(result, status);
+  } catch {
+    // Do not leak private storage exceptions or internal tokens to callers.
+    return json({ ok: false, status: 'BLOCKED', error: 'FINAL_DELIVERY_OPERATION_FAILED' }, 500);
+  }
+}
+
 export default {
   async fetch(request) {
     if (request.method !== 'POST') return methodNotAllowed('POST');
@@ -167,6 +201,10 @@ export default {
     }
     if (operation === RENDER_FINAL_BRIEF_OPERATION) {
       return handleRenderFinalBrief(request);
+    }
+    if ([FINAL_DELIVERY_PREFLIGHT_OPERATION, FINAL_DELIVERY_CLAIM_OPERATION,
+      FINAL_DELIVERY_ACK_OPERATION].includes(operation)) {
+      return handleFinalDeliveryOperation(request, operation);
     }
 
     const parsed = await parseJson(request);
