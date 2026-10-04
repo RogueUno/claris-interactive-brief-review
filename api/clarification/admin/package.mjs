@@ -175,9 +175,17 @@ export default {
 
     try {
       const directPackage = parsed.value?.package ?? parsed.value;
-      const finalizeContext = parsed.value?.finalize_context
-        ? buildFinalizeContext(parsed.value.finalize_context)
-        : null;
+      let finalizeContext = null;
+      if (parsed.value?.finalize_context) {
+        const proposedContext = buildFinalizeContext(parsed.value.finalize_context);
+        const verifiedOwner = await verifyLockedDeliveryOwner(proposedContext, {
+          repository: calibrationServerContext().repository
+        });
+        if (directPackage?.consultant?.consultant_id !== verifiedOwner.consultant_id) {
+          throw new Error('FINALIZE_CONSULTANT_ID_MISMATCH');
+        }
+        finalizeContext = { ...proposedContext, ...verifiedOwner };
+      }
       const result = await clarificationServerContext().service.createPackage(
         directPackage,
         {
