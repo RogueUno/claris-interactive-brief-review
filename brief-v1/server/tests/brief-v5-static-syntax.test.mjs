@@ -55,3 +55,12 @@ test('lead identity card has a dedicated dark-surface class', () => {
   assert.match(app,/identity-card identity-card--dark panel/);
   assert.match(css,/identity-card\.identity-card--dark\.panel/);
 });
+
+
+test('V5 typography retains alternate numeral one and intentional character variants', () => {
+  const css=fs.readFileSync(resolve(process.cwd(),'brief-v5/styles.css'),'utf8');
+  const features=/font-feature-settings:\s*"liga"\s*1,\s*"calt"\s*1,\s*"ss07"\s*1,\s*"ss08"\s*1,\s*"cv10"\s*1,\s*"cv01"\s*1/g;
+  assert.ok([...css.matchAll(features)].length>=2,'Inter alternate one must survive both typography declarations');
+  assert.match(css,/InterVariable,Inter/,'variable Inter should remain preferred when available');
+  assert.doesNotMatch(css,/font-feature-settings:[^;]*"zero"\s*1/,'keep normal zero glyph');
+});
