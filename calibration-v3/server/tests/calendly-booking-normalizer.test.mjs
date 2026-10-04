@@ -133,3 +133,142 @@ test('supports explicit structured Calendly questions when present', () => {
   assert.equal(result.provenance.domain, 'QUESTION_DOMAIN');
   assert.equal(result.provenance.role, 'QUESTION_ROLE');
 });
+
+
+test('real two-question Calendly setup derives company from website, not URL as name', () => {
+  const normalized = normalizeCalendlyBooking({
+    consultant_id: consultantId,
+    require_company_website_answer: true,
+    event: {
+      uri: 'https://api.calendly.com/scheduled_events/meeting-a12',
+      start_time: '2026-10-09T16:00:00Z'
+    },
+    invitee: {
+      uri: 'https://api.calendly.com/scheduled_events/meeting-a12/invitees/a12b34c5',
+      email: 'robin@gmail.com',
+      name: 'Robin Security',
+      questions_and_answers: [
+        { question: 'Company website', answer: 'https://www.acme-security.com/', position: 0 },
+        { question: 'Please share anything that will help prepare for our meeting.',
+          answer: 'We would like a security posture assessment.', position: 1 }
+      ]
+    }
+  });
+  assert.equal(normalized.ok, true);
+  assert.equal(normalized.booking.company, 'Acme Security');
+  assert.equal(normalized.booking.domain, 'https://acme-security.com');
+  assert.equal(normalized.booking.opportunity_id, 'calendly_a12b34c5');
+  assert.equal(normalized.provenance.company, 'DOMAIN_LABEL');
+  assert.equal(normalized.provenance.domain, 'QUESTION_DOMAIN');
+});
+
+test('strict company website rejects email-domain and free-text domain fallback', () => {
+  for(const answer of [
+    [{ question: 'Please share anything that will help prepare for our meeting.',
+      answer: 'Interested in your vCISO offering at acme-security.com.' }],
+    [{ question: 'Company website', answer: 'not supplied' }]
+  ]) {
+    const value = normalizeCalendlyBooking({
+      consultant_id: consultantId,
+      require_company_website_answer: true,
+      event: {
+        uri: 'https://api.calendly.com/scheduled_events/meeting-b34',
+        start_time: '2026-10-09T16:00:00Z'
+      },
+      invitee: {
+        uri: 'https://api.calendly.com/scheduled_events/meeting-b34/invitees/b34c56d7',
+        email: 'robin@acme-security.com',
+        name: 'Robin Security', questions_and_answers: answer
+      }
+    });
+    assert.equal(value.ok, false);
+    assert.ok(value.missing.includes('company_website_answer'));
+    assert.notEqual(value.provenance.domain, 'QUESTION_DOMAIN');
+  }
+});
+
+
+test('strict Company website blocks private targets and embedded addresses', () => {
+  const invalid = [
+    'https://169.254.169.254/latest/meta-data',
+    'http://127.0.0.1/internal',
+    'https://private.local',
+    'https://localhost',
+    'https://something.internal',
+    'https://example.test',
+    'file://intranet.acme.com',
+    'javascript:acme.com',
+    'https://user:password@acme.com',
+    'https://acme.com:8443',
+    'check our website: acme.com',
+    'https://acme.com an old one'
+  ];
+  for(const website of invalid) {
+    const normalized = normalizeCalendlyBooking({
+      consultant_id: consultantId,
+      require_company_website_answer: true,
+      event: {
+        uri: 'https://api.calendly.com/scheduled_events/security-001',
+        start_time: '2026-10-10T16:00:00Z'
+      },
+      invitee: {
+        uri: 'https://api.calendly.com/scheduled_events/security-001/invitees/security-001',
+        name: 'Robin Security',
+        email: 'robin@acme.com',
+        questions_and_answers: [{ question: 'Company website', answer: website }]
+      }
+    });
+    assert.equal(normalized.ok, false, website);
+    assert.equal(normalized.booking.domain, null, website);
+    assert.equal(normalized.provenance.domain, null, website);
+    assert.ok(normalized.missing.includes('company_website_answer'), website);
+  }
+});
+
+test('strict Company website ignores personal website instead of claiming corporate identity', () => {
+  const normalized = normalizeCalendlyBooking({
+    consultant_id: consultantId,
+    require_company_website_answer: true,
+    event: {
+      uri: 'https://api.calendly.com/scheduled_events/security-002',
+      start_time: '2026-10-10T16:00:00Z'
+    },
+    invitee: {
+      uri: 'https://api.calendly.com/scheduled_events/security-002/invitees/security-002',
+      name: 'Robin Security', email: 'robin@acme.com',
+      questions_and_answers: [
+        { question: 'Your personal website', answer: 'https://portfolio.acme.com' }
+      ]
+    }
+  });
+  assert.equal(normalized.ok, false);
+  assert.ok(normalized.missing.includes('company_website_answer'));
+  assert.equal(normalized.booking.domain, null);
+});
+
+test('strict website derives registrable company label for subdomains', () => {
+  for(const [website,expected] of [
+    ['https://docs.supabase.com','Supabase'],
+    ['https://app.instructure.com','Instructure'],
+    ['https://docs.acme.co.uk','Acme']
+  ]) {
+    const normalized = normalizeCalendlyBooking({
+      consultant_id: consultantId,
+      require_company_website_answer: true,
+      event: {
+        uri: 'https://api.calendly.com/scheduled_events/security-003',
+        start_time: '2026-10-10T16:00:00Z'
+      },
+      invitee: {
+        uri: 'https://api.calendly.com/scheduled_events/security-003/invitees/security-003',
+        name: 'Robin Security', email: 'robin@gmail.com',
+        questions_and_answers: [
+          { question: 'Company website', answer: website }
+        ]
+      }
+    });
+    assert.equal(normalized.ok, true, website);
+    assert.equal(normalized.booking.company, expected, website);
+    assert.equal(normalized.provenance.domain, 'QUESTION_DOMAIN');
+  }
+});

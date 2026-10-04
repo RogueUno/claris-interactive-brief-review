@@ -34,6 +34,7 @@ export default {
 
     const result = normalizeCalendlyBooking({
       consultant_id: parsed.value?.consultant_id,
+      require_company_website_answer: parsed.value?.require_company_website_answer === true,
       event: parsed.value?.event,
       invitee: parsed.value?.invitee
     });
