@@ -8,7 +8,7 @@ import { buildConsultantFinalDelivery } from '../../../calibration-v3/server/pil
 // Provider-free contract composition only, NOT a replacement for live Gemini
 // certification. Here "zero-question" means no prospect clarification needed;
 // the consultant's discovery plan may still contain questions.
-function booking({ website = 'https://acme.example.org' } = {}) {
+function booking({ website = 'https://acme-security.org' } = {}) {
   const answers = [{ question: 'What should we know?', answer: 'Please review security risks.' }];
   if (website) answers.unshift({ question: 'Company website', answer: website });
   return normalizeCalendlyBooking({
@@ -20,7 +20,7 @@ function booking({ website = 'https://acme.example.org' } = {}) {
     },
     invitee: {
       uri: 'https://api.calendly.com/scheduled_events/meeting123/invitees/alex123',
-      name: 'Alex Engineer', email: 'alex@acme.example.org',
+      name: 'Alex Engineer', email: 'alex@acme-security.org',
       questions_and_answers: answers
     }
   });
@@ -96,7 +96,7 @@ test('strict Calendly → locked Runtime → certified bundle → email package 
   assert.equal(compiled.body.certification.discovery_deterministic_pass, true);
   assert.equal(compiled.body.opportunity_id, normalized.booking.opportunity_id);
   assert.equal(compiled.body.consultant_id, runtime.consultant_id);
-  assert.equal(compiled.body.delivery.to, 'consultant@example.net');
+  assert.equal(compiled.body.consultant_delivery_email, 'consultant@example.net');
   assert.equal(compiled.body.brief_payload.discovery.primary_questions.length, 1);
   assert.equal(JSON.stringify(compiled.body).includes('7500'), false);
 
