@@ -264,7 +264,7 @@ test('website subdomains derive the company label rather than app or docs', () =
     ['https://docs.supabase.com','Supabase'],
     ['https://app.instructure.com','Instructure'],
     ['https://docs.acme.co.uk','Acme'],
-    ['https://team-product.github.io','TeamProduct']
+    ['https://team-product.github.io','Team Product']
   ]){
     const result=normalizeCalendlyBooking({
       consultant_id:consultantId, require_company_website_answer:true,
