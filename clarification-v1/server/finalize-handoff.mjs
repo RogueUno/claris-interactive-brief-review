@@ -15,7 +15,7 @@ function requiredJsonText(value, field) {
 function deliveryOwner(value) {
   const raw = String(value ?? '').trim().toLowerCase();
   if (!raw) return null; // Old clarification envelopes remain readable and fail closed at delivery.
-  if (!/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(raw)) {
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(raw)) {
     throw new Error('FINALIZE_DELIVERY_EMAIL_INVALID');
   }
   return raw;
