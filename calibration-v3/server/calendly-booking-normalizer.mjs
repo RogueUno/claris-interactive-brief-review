@@ -176,11 +176,13 @@ export function normalizeCalendlyBooking({ event, invitee, consultant_id = null,
             : null,
       domain: domainFromExplicitAnswer
         ? 'QUESTION_DOMAIN'
-        : domainFromCombined
-          ? 'BOOKING_TEXT_DOMAIN'
-          : domainFromEmail
-            ? 'INVITEE_EMAIL_DOMAIN'
-            : null,
+        : require_company_website_answer === true
+          ? null
+          : domainFromCombined
+            ? 'BOOKING_TEXT_DOMAIN'
+            : domainFromEmail
+              ? 'INVITEE_EMAIL_DOMAIN'
+              : null,
       role: explicitRoleAnswer
         ? 'QUESTION_ROLE'
         : explicitRoleFromText(combinedAnswers)
