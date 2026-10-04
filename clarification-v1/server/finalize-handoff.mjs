@@ -51,12 +51,15 @@ function assertFinalizeContext(value) {
   if (!value || value.schema_version !== FINALIZE_CONTEXT_VERSION) {
     throw new Error('FINALIZE_CONTEXT_MISSING');
   }
+  const ownerId = consultantId(value.consultant_id);
+  const ownerEmail = deliveryOwner(value.consultant_delivery_email);
+  if (ownerEmail && !ownerId) throw new Error('FINALIZE_CONSULTANT_ID_REQUIRED');
   return {
     schema_version: FINALIZE_CONTEXT_VERSION,
     case_state_json: requiredJsonText(value.case_state_json, 'FINALIZE_CASE_STATE'),
     consultant_sot_json: requiredJsonText(value.consultant_sot_json, 'FINALIZE_CONSULTANT_SOT'),
-    consultant_id: consultantId(value.consultant_id),
-    consultant_delivery_email: deliveryOwner(value.consultant_delivery_email),
+    consultant_id: ownerId,
+    consultant_delivery_email: ownerEmail,
     captured_at: value.captured_at || null
   };
 }
