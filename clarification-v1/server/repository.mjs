@@ -27,8 +27,11 @@ async function getJsonWithMeta(storage, pathname) {
   return { value: await storage.getJson(pathname), etag: null };
 }
 
-export function createClarificationRepository(storage) {
+export function createClarificationRepository(storage, { requireAtomicCreate = false } = {}) {
   if (!storage?.getJson || !storage?.putJson) throw new Error('JSON_STORAGE_ADAPTER_REQUIRED');
+  if (requireAtomicCreate && typeof storage.putJsonIfAbsent !== 'function') {
+    throw new Error('CLARIFICATION_ATOMIC_STORAGE_REQUIRED');
+  }
 
   return {
     async createPackage(pkg, { now = Date.now(), finalizeContext = null } = {}) {
@@ -36,22 +39,10 @@ export function createClarificationRepository(storage) {
       const existing = await storage.getJson(envelopePath(opportunityId));
       if (existing) throw new Error('OPPORTUNITY_ALREADY_EXISTS');
 
-      let token = null;
-      let tokenHash = null;
-      if (pkg.status === 'OPEN') {
-        token = createClarificationToken(32);
-        tokenHash = hashClarificationToken(token);
-        await storage.putJson(invitePath(tokenHash), {
-          schema_version: INVITE_VERSION,
-          token_hash: tokenHash,
-          opportunity_id: opportunityId,
-          status: 'ACTIVE',
-          created_at: new Date(now).toISOString(),
-          expires_at: pkg.expires_at,
-          last_resolved_at: null
-        });
-      }
-
+      // The immutable envelope, not the invite pointer, must win the
+      // opportunity ID. Losers cannot overwrite another consultant's package.
+      const token = pkg.status === 'OPEN' ? createClarificationToken(32) : null;
+      const tokenHash = token ? hashClarificationToken(token) : null;
       const envelope = {
         schema_version: ENVELOPE_VERSION,
         opportunity_id: opportunityId,
@@ -64,7 +55,36 @@ export function createClarificationRepository(storage) {
         finalize_context: finalizeContext || null,
         updated_at: new Date(now).toISOString()
       };
-      const saved = await storage.putJson(envelopePath(opportunityId), envelope);
+      const pathname = envelopePath(opportunityId);
+      let saved;
+      try {
+        // The preview and production server explicitly require this atomic
+        // adapter. Test-only legacy memory adapters retain the old fallback.
+        saved = typeof storage.putJsonIfAbsent === 'function'
+          ? await storage.putJsonIfAbsent(pathname, envelope)
+          : await storage.putJson(pathname, envelope);
+      } catch (error) {
+        // Unknown result is fail-closed; never overwrite even if response was
+        // lost after Blob accepted the first write.
+        let present = false;
+        try { present = Boolean(await storage.getJson(pathname)); } catch {}
+        if (present) throw new Error('OPPORTUNITY_ALREADY_EXISTS');
+        throw error;
+      }
+      if (tokenHash) {
+        // Failure here leaves a saved OPEN case but cannot issue a broken link;
+        // an admin can reissue the invite after reconciliation. It is safer
+        // than publishing an invite before obtaining the unique case ID.
+        await storage.putJson(invitePath(tokenHash), {
+          schema_version: INVITE_VERSION,
+          token_hash: tokenHash,
+          opportunity_id: opportunityId,
+          status: 'ACTIVE',
+          created_at: new Date(now).toISOString(),
+          expires_at: pkg.expires_at,
+          last_resolved_at: null
+        });
+      }
       return { envelope, etag: saved?.etag || null, token };
     },
 
