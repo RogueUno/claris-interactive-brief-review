@@ -63,6 +63,7 @@ export async function claimFinalDelivery(input, {
   try { loaded = await repository.loadEnvelopeWithMeta(opportunityId); }
   catch { return outcome('BLOCKED', { error: 'FINAL_DELIVERY_READ_FAILED' }); }
   if (!loaded?.envelope) return outcome('BLOCKED', { error: 'CLARIFICATION_NOT_FOUND' });
+  if (!loaded.etag) return outcome('BLOCKED', { error: 'FINAL_DELIVERY_ATOMIC_WRITE_UNAVAILABLE' });
 
   const existing = inspectFinalDeliveryReceipt(loaded.envelope);
   if (existing) {
@@ -137,6 +138,7 @@ export async function acknowledgeFinalDelivery(input, {
   }
   const loaded = await repository.loadEnvelopeWithMeta(opportunityId);
   const record = loaded?.envelope?.final_delivery_receipt;
+  if (!loaded?.etag) return outcome('BLOCKED', { error: 'FINAL_DELIVERY_ATOMIC_WRITE_UNAVAILABLE' });
   if (!record || record.schema_version !== RECEIPT_SCHEMA ||
       !constantEquals(record.token_hash, hash(token))) {
     return outcome('BLOCKED', { error: 'FINAL_DELIVERY_CLAIM_MISSING' });
@@ -166,6 +168,41 @@ export async function acknowledgeFinalDelivery(input, {
     throw error;
   }
   return outcome('ACKNOWLEDGED', { reused: false });
+}
+
+export async function checkFinalDeliveryEligibility(input, {
+  repository, consultantRepository
+} = {}) {
+  requiredRepository(repository);
+  const opportunityId = text(input?.opportunity_id);
+  if (!/^[A-Za-z0-9_-]{3,100}$/.test(opportunityId)) {
+    return outcome('BLOCKED', { error: 'OPPORTUNITY_ID_INVALID' });
+  }
+  let loaded;
+  try { loaded = await repository.loadEnvelopeWithMeta(opportunityId); }
+  catch { return outcome('BLOCKED', { error: 'FINAL_DELIVERY_READ_FAILED' }); }
+  if (!loaded?.envelope) return outcome('BLOCKED', { error: 'CLARIFICATION_NOT_FOUND' });
+  if (!loaded.etag) return outcome('BLOCKED', { error: 'FINAL_DELIVERY_ATOMIC_WRITE_UNAVAILABLE' });
+  const receipt = inspectFinalDeliveryReceipt(loaded.envelope);
+  if (receipt) {
+    return outcome(receipt.status === 'SENT' ? 'SKIPPED_ALREADY_SENT' : 'RECONCILIATION_REQUIRED', {
+      error: receipt.status === 'SENT' ? null : 'FINAL_DELIVERY_OUTCOME_UNKNOWN'
+    });
+  }
+  if (loaded.envelope.final_delivery_receipt) {
+    return outcome('BLOCKED', { error: 'FINAL_DELIVERY_RECEIPT_INVALID' });
+  }
+  const bundle = buildFinalizeBundle(loaded.envelope, loaded.etag);
+  if (!bundle.ok || bundle.status !== 'SUBMITTED' ||
+      !bundle.consultant_id || !bundle.consultant_delivery_email) {
+    return outcome('BLOCKED', { error: 'FINAL_DELIVERY_OWNER_OR_SUBMISSION_INVALID' });
+  }
+  try {
+    await verifyLockedDeliveryOwner(bundle, { repository: consultantRepository });
+  } catch {
+    return outcome('BLOCKED', { error: 'FINAL_DELIVERY_OWNER_REVALIDATION_FAILED' });
+  }
+  return outcome('ELIGIBLE', { opportunity_id: opportunityId });
 }
 
 export const finalDeliveryReceiptSchema = RECEIPT_SCHEMA;
