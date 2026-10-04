@@ -87,7 +87,7 @@ function idFromUri(uri) {
   return parts.at(-1) || null;
 }
 
-export function normalizeCalendlyBooking({ event, invitee, consultant_id = null } = {}) {
+export function normalizeCalendlyBooking({ event, invitee, consultant_id = null, require_company_website_answer = false } = {}) {
   const entries = answerEntries(invitee);
   const combinedAnswers = entries.map(({ answer }) => answer).join('\n').trim();
 
@@ -111,7 +111,9 @@ export function normalizeCalendlyBooking({ event, invitee, consultant_id = null 
   const domainFromCombined = domainCandidates(combinedAnswers)[0] || null;
   const emailDomain = normalizeDomain(text(invitee?.email).split('@')[1] || '');
   const domainFromEmail = emailDomain && !FREE_EMAIL_DOMAINS.has(emailDomain) ? emailDomain : null;
-  const domain = domainFromExplicitAnswer || domainFromCombined || domainFromEmail || null;
+  const domain = require_company_website_answer === true
+    ? domainFromExplicitAnswer
+    : domainFromExplicitAnswer || domainFromCombined || domainFromEmail || null;
 
   const company =
     text(explicitCompanyAnswer) ||
@@ -155,6 +157,9 @@ export function normalizeCalendlyBooking({ event, invitee, consultant_id = null 
     ['domain', normalized.domain],
     ['meeting_time', normalized.meeting_time]
   ].filter(([, value]) => !value).map(([key]) => key);
+  if (require_company_website_answer === true && !domainFromExplicitAnswer) {
+    missing.push('company_website_answer');
+  }
 
   return {
     ok: missing.length === 0,
