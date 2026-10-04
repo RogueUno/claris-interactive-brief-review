@@ -56,6 +56,12 @@ function normalizeBooking(x) {
       !EMAIL.test(b.consultant_delivery_email) ||
       !EMAIL.test(b.prospect_email) || !b.company ||
       !b.prospect_first_name || !b.meeting_time || !b.domain ||
+      b.consultant_delivery_email.length > 254 ||
+      b.prospect_email.length > 254 ||
+      b.company.length > 160 ||
+      b.prospect_first_name.length > 120 ||
+      b.meeting_time.length > 80 || b.domain.length > 350 ||
+      /[\r\n\u0000-\u001f]/.test(b.company + b.prospect_first_name) ||
       !Number.isFinite(Date.parse(b.meeting_time))) {
     return null;
   }
