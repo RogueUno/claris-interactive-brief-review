@@ -50,3 +50,24 @@ Read `V23_HISTORICAL_LIFECYCLE_CASES_20261004.md` and `V23_OCT2026_READINESS_CHE
 - Verify no PII leaks to prospect page and zero-question path uses current Runtime owner.
 - Resolve known Gemini 429/free-tier and Tavily 432 limits without flooding retries. One bounded provider-backed run per current path is still required for production freeze; **not executed in this pass**.
 - Maintain inactive Calendly ingress until both paths and no-send/duplicate tests are certified. Do not run Antigravity migration Prompt 2 yet.
+
+
+## Historical Gemini and Make budget baseline (no calls made today)
+
+From one historical successful **zero-question** execution on 2026-09-23 (execution IDs remain in Make, not raw payloads in this repository):
+
+| Exact historical component | Gemini node invocations | Make credits |
+| --- | ---: | ---: |
+| Frozen PREPARE `9262ebe0f0e747af84a15ad4d5edaf2c` | 6 (1 Flash, 5 Flash-Lite) | 21.61 |
+| V2.3 clarification decision `1ffc5c380e78422e8e36be1112f44e0e` | 2 (1 Flash, 1 Flash-Lite) | 9 |
+| Frozen FINALIZE `4fbb46b4af3545938d11e7ea4fecf91b` | 5 (1 Flash, 4 Flash-Lite) | 30 |
+| Booking adapter `b2115a0c93d74b87aa460eb2ccacafe0` | 0 direct | 2 |
+| **Sum (historical nested execution only)** | **13 total** | **62.61** |
+
+These are observed, not a guaranteed per-lead price: actual branching and repairs change the number of calls, and individual Make credit accounting includes fractional usage.
+
+**Official provider constraint (2026-09-02 rate-limit docs):** Google evaluates RPM/TPM/RPD limits per Google Cloud project, not per API key; RPD resets at midnight Pacific time, and preview models may have stricter limits. API key rotation within a project does not create independent headroom. Source: https://ai.google.dev/gemini-api/docs/rate-limits .
+
+**Model availability:** Google's published June 1, 2026 changelog says Gemini 2.0 Flash/Flash-Lite are shut down; 3.1 Flash-Lite is the stable low-latency model. Historical attempted 2.5 Flash returned 404 for new users; do **not** blindly downgrade certified modules or buy a subscription until the remaining integration checks pass. Sources: https://ai.google.dev/gemini-api/docs/changelog and https://ai.google.dev/gemini-api/docs/models/gemini-3.1-flash-lite .
+
+**Proposed no-speculative-traffic policy:** Treat Gemini 429 as quota/admission failure, not an instruction to retry whole frozen research loops immediately; Tavily 432 plan limit as no-auto-retry; Gemini 404 model unavailable as configuration failure; Gemini 503 demand as transient but eligible only for a strictly bounded, credited retry after determining whether request state was persisted. This is *policy only*, not yet deployed to Make or the frozen logic.
