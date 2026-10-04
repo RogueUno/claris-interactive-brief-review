@@ -184,7 +184,7 @@ test('FINALIZE delivery owner is bound server-side and never exposed to prospect
   const safe = publicClarificationPackage(loaded.envelope.package);
   assert.doesNotMatch(JSON.stringify(safe), /sarah@example.com|finalize_context|consultant_delivery_email/);
   const created = await service.reissueInvite('opp_finalize_001', { now: 1001, ttlMs: 60_000 });
-  const resolved = await service.resolveInvite(created.token, { now: 1002 });
+  const resolved = await service.resolveInvite(created.invite_token, { now: 1002 });
   assert.equal(resolved.ok, true);
   const submitted = await service.submit(
     resolved.session_token,
