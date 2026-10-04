@@ -177,7 +177,11 @@ test('FINALIZE delivery owner is bound server-side and never exposed to prospect
     consultant_id: 'consultant_1',
     consultant_delivery_email: 'SARAH@EXAMPLE.COM'
   }, { now: 1000 });
-  await service.createPackage(pkg(), { now: 1000, ttlMs: 60000, finalizeContext });
+  // Older fixture uses a two-character option ID ("no"), invalid under the
+  // current contract; repair only this test's local package, not the baseline fixture.
+  const ownedPackage = pkg();
+  ownedPackage.questions[0].options[1].option_id = 'nope';
+  await service.createPackage(ownedPackage, { now: 1000, ttlMs: 60000, finalizeContext });
   const loaded = await repository.loadEnvelopeWithMeta('opp_finalize_001');
   assert.equal(loaded.envelope.finalize_context.consultant_id, 'consultant_1');
   assert.equal(loaded.envelope.finalize_context.consultant_delivery_email, 'sarah@example.com');
