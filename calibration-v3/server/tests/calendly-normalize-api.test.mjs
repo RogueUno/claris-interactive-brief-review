@@ -47,7 +47,8 @@ test('authenticated Calendly API enforces Make supplied website-required boolean
   const blocked=await noWebsite.json();
   assert.equal(blocked.ok,false);
   assert.ok(blocked.missing.includes('company_website_answer'));
-  assert.equal(blocked.provenance.domain,'INVITEE_EMAIL_DOMAIN');
+  assert.equal(blocked.provenance.domain,null);
+  assert.equal(blocked.booking.domain,null);
 
   const withWebsite = await handler.fetch(request([
     {question:'Company website',answer:'https://www.acme-security.com'},
