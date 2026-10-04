@@ -7,12 +7,23 @@ function text(value) {
   return typeof value === 'string' ? value.trim() : '';
 }
 
+const NONPUBLIC_SUFFIXES = new Set([
+  'local', 'localhost', 'internal', 'invalid', 'test', 'example',
+  'lan', 'home', 'corp', 'onion'
+]);
+
 function normalizeDomain(value) {
   const raw = text(value).toLowerCase();
-  if (!raw) return null;
+  if (!raw || /^(?:ftp|file|javascript|data):/i.test(raw)) return null;
   const withoutScheme = raw.replace(/^https?:\/\//, '').replace(/^www\./, '');
-  const host = withoutScheme.split(/[\/?#\s]/)[0].replace(/[^a-z0-9.-]/g, '');
-  if (!host || !host.includes('.') || host.startsWith('.') || host.endsWith('.')) return null;
+  const host = withoutScheme.split(/[\/?#\s]/)[0].replace(/\.$/, '');
+  const labels = host.split('.');
+  if (host.length > 253 || labels.length < 2 ||
+      labels.some((part) => !part || part.length > 63 ||
+        !/^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/.test(part))) return null;
+  const suffix = labels.at(-1);
+  if (!/^(?:[a-z]{2,24}|xn--[a-z0-9-]{2,59})$/.test(suffix) ||
+      NONPUBLIC_SUFFIXES.has(suffix)) return null;
   return host;
 }
 
@@ -64,10 +75,14 @@ function explicitRoleFromText(value) {
 }
 
 function companyFromDomain(domain) {
-  const label = text(domain).split('.')[0];
+  const labels = text(domain).split('.');
+  const twoPartSuffixes = new Set(['co.uk','com.au','co.nz','co.jp','com.br','co.in','com.mx','github.io','vercel.app','notion.site']);
+  const suffix = labels.slice(-2).join('.');
+  const effectiveRootIndex = labels.length - (twoPartSuffixes.has(suffix) ? 3 : 2);
+  const label = labels[effectiveRootIndex];
   if (!label) return null;
   return label
-    .split(/[-_]/)
+    .split('-')
     .filter(Boolean)
     .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
     .join(' ');
