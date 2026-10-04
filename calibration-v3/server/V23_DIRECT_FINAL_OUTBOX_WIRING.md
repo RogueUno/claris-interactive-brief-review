@@ -38,11 +38,11 @@ Server verifies the real locked consultant owner, exact SOT, verified email, can
   "requires_clarification": "{{3.requires_clarification}}",
   "final_audit_json": "{{3.final_audit_json}}",
   "final_brief_markdown": "{{3.final_brief_markdown}}",
-  "consultant_first_name": "{{3.consultant_first_name}}"
+  "consultant_first_name": "{{first(split(2.data.runtime_v3.consultant_sot_json.consultant.consultant_name; \" \"))}}"
 }
 ```
 
-Merge this object with the original booking+locked Runtime fields. The server rechecks the exact original registered booking, fresh locked consultant owner/SOT, status `FINALIZED`, stage `FINALIZE`, boolean `requires_clarification=false`, PASS audit with zero violations and no repair, and nonempty brief. It reserves delivery using ETag compare-and-swap. Only HTTP 200 + `data.status=CLAIMED` + `data.ok=true` authorizes Gmail #7. No raw Make brief may be interpolated as HTML. Use **only** the returned `data.consultant_delivery_email`, `data.subject`, and `data.html_body` (already escaped).
+V2.3 does **not** return `consultant_first_name`; always derive the greeting from module #2's locked Runtime consultant name. Merge this object with the original booking+locked Runtime fields. The server rechecks the exact original registered booking, fresh locked consultant owner/SOT, status `FINALIZED`, stage `FINALIZE`, boolean `requires_clarification=false`, PASS audit with zero violations and no repair, and nonempty brief. It reserves delivery using ETag compare-and-swap. Only HTTP 200 + `data.status=CLAIMED` + `data.ok=true` authorizes Gmail #7. No raw Make brief may be interpolated as HTML. Use **only** the returned `data.consultant_delivery_email`, `data.subject`, and `data.html_body` (already escaped).
 
 **3. `direct_final_ack` AFTER Gmail positively reports its message ID**:
 
