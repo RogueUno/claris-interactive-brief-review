@@ -1,11 +1,22 @@
 import { createHash, randomBytes, timingSafeEqual } from 'node:crypto';
 import { buildFinalizeBundle } from './finalize-handoff.mjs';
+import { buildConsultantFinalDelivery } from '../../calibration-v3/server/pilot-delivery.mjs';
 import { verifyLockedDeliveryOwner } from './verify-locked-delivery-owner.mjs';
 
 const RECEIPT_SCHEMA = 'claris_final_delivery_receipt_v1';
 
 function text(value) { return typeof value === 'string' ? value.trim() : ''; }
 function hash(value) { return createHash('sha256').update(value, 'utf8').digest('hex'); }
+function safeEmailHtml(textBody) {
+  // Gmail's rawHtml composer accepts HTML. Never interpolate model text as markup.
+  const encoded = text(textBody)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+  return '<div style="white-space:pre-wrap;font-family:Arial,sans-serif">' + encoded + '</div>';
+}
 function constantEquals(left, right) {
   const a = Buffer.from(text(left));
   const b = Buffer.from(text(right));
@@ -93,6 +104,14 @@ export async function claimFinalDelivery(input, {
     email: owner.consultant_delivery_email,
     brief: markdown
   }));
+  const deliveryPackage = buildConsultantFinalDelivery({
+    consultant_delivery_email: owner.consultant_delivery_email,
+    consultant_first_name: loaded.envelope.package?.consultant?.first_name,
+    company: loaded.envelope.package?.prospect?.company,
+    prospect_first_name: loaded.envelope.package?.prospect?.first_name,
+    final_brief_markdown: markdown,
+    opportunity_id: opportunityId
+  });
   const claimToken = randomBytes(32).toString('hex');
   const record = {
     schema_version: RECEIPT_SCHEMA,
@@ -120,7 +139,9 @@ export async function claimFinalDelivery(input, {
     consultant_id: owner.consultant_id,
     consultant_delivery_email: owner.consultant_delivery_email,
     claim_token: claimToken,
-    digest
+    digest,
+    email_subject: deliveryPackage.subject,
+    email_html: safeEmailHtml(deliveryPackage.text_body)
   });
 }
 
