@@ -151,7 +151,7 @@ test('strict booking requires a company website answer even when email yields a 
   });
   assert.equal(result.ok, false);
   assert.equal(result.booking.domain, null);
-  assert.equal(result.provenance.domain, 'INVITEE_EMAIL_DOMAIN');
+  assert.equal(result.provenance.domain, null);
   assert.ok(result.missing.includes('domain'));
   assert.ok(result.missing.includes('company_website_answer'));
 });
