@@ -133,3 +133,68 @@ test('supports explicit structured Calendly questions when present', () => {
   assert.equal(result.provenance.domain, 'QUESTION_DOMAIN');
   assert.equal(result.provenance.role, 'QUESTION_ROLE');
 });
+
+
+test('strict booking requires a company website answer even when email yields a usable domain', () => {
+  const result = normalizeCalendlyBooking({
+    consultant_id: consultantId,
+    require_company_website_answer: true,
+    event: { uri: 'https://api.calendly.com/scheduled_events/strict1', start_time: '2026-10-06T15:00:00Z' },
+    invitee: {
+      uri: 'https://api.calendly.com/scheduled_events/strict1/invitees/strict-invitee',
+      name: 'Alex Example',
+      email: 'alex@somecompany.com',
+      questions_and_answers: [
+        { question: 'What would help us prepare?', answer: 'We are planning a security review. Our website somecompany.com has more details.', position: 0 }
+      ]
+    }
+  });
+  assert.equal(result.ok, false);
+  assert.equal(result.booking.domain, null);
+  assert.equal(result.provenance.domain, 'INVITEE_EMAIL_DOMAIN');
+  assert.ok(result.missing.includes('domain'));
+  assert.ok(result.missing.includes('company_website_answer'));
+});
+
+test('strict booking accepts validated Company website answer and preserves role', () => {
+  const result = normalizeCalendlyBooking({
+    consultant_id: consultantId,
+    require_company_website_answer: true,
+    event: { uri: 'https://api.calendly.com/scheduled_events/strict2', start_time: '2026-10-06T15:00:00Z' },
+    invitee: {
+      uri: 'https://api.calendly.com/scheduled_events/strict2/invitees/strict-invitee2',
+      name: 'Alex Example',
+      email: 'alex@gmail.com',
+      questions_and_answers: [
+        { question: 'Company', answer: 'Acme', position: 0 },
+        { question: 'Company website', answer: 'https://acme.com', position: 1 },
+        { question: 'Role', answer: 'VP Engineering', position: 2 }
+      ]
+    }
+  });
+  assert.equal(result.ok, true);
+  assert.equal(result.booking.domain, 'https://acme.com');
+  assert.equal(result.booking.company, 'Acme');
+  assert.equal(result.booking.prospect_role, 'VP Engineering');
+  assert.equal(result.provenance.domain, 'QUESTION_DOMAIN');
+});
+
+test('strict booking rejects invalid Company website even if other answers mention a domain', () => {
+  const result = normalizeCalendlyBooking({
+    consultant_id: consultantId,
+    require_company_website_answer: true,
+    event: { uri: 'https://api.calendly.com/scheduled_events/strict3', start_time: '2026-10-06T15:00:00Z' },
+    invitee: {
+      uri: 'https://api.calendly.com/scheduled_events/strict3/invitees/strict-invitee3',
+      name: 'Alex Example',
+      email: 'alex@example.com',
+      questions_and_answers: [
+        { question: 'Company website', answer: 'Not yet decided', position: 0 },
+        { question: 'Notes', answer: 'My previous company was other-company.com', position: 1 }
+      ]
+    }
+  });
+  assert.equal(result.ok, false);
+  assert.ok(result.missing.includes('company_website_answer'));
+  assert.equal(result.booking.domain, null);
+});
