@@ -133,3 +133,56 @@ test('supports explicit structured Calendly questions when present', () => {
   assert.equal(result.provenance.domain, 'QUESTION_DOMAIN');
   assert.equal(result.provenance.role, 'QUESTION_ROLE');
 });
+
+
+test('real two-question Calendly setup derives company from website, not URL as name', () => {
+  const normalized = normalizeCalendlyBooking({
+    consultant_id: consultantId,
+    require_company_website_answer: true,
+    event: {
+      uri: 'https://api.calendly.com/scheduled_events/meeting-a12',
+      start_time: '2026-10-09T16:00:00Z'
+    },
+    invitee: {
+      uri: 'https://api.calendly.com/scheduled_events/meeting-a12/invitees/a12b34c5',
+      email: 'robin@gmail.com',
+      name: 'Robin Security',
+      questions_and_answers: [
+        { question: 'Company website', answer: 'https://www.acme-security.com/', position: 0 },
+        { question: 'Please share anything that will help prepare for our meeting.',
+          answer: 'We would like a security posture assessment.', position: 1 }
+      ]
+    }
+  });
+  assert.equal(normalized.ok, true);
+  assert.equal(normalized.booking.company, 'Acme');
+  assert.equal(normalized.booking.domain, 'https://acme-security.com');
+  assert.equal(normalized.booking.opportunity_id, 'calendly_a12b34c5');
+  assert.equal(normalized.provenance.company, 'DOMAIN_LABEL');
+  assert.equal(normalized.provenance.domain, 'QUESTION_DOMAIN');
+});
+
+test('strict company website rejects email-domain and free-text domain fallback', () => {
+  for(const answer of [
+    [{ question: 'Please share anything that will help prepare for our meeting.',
+      answer: 'Interested in your vCISO offering at acme-security.com.' }],
+    [{ question: 'Company website', answer: 'not supplied' }]
+  ]) {
+    const value = normalizeCalendlyBooking({
+      consultant_id: consultantId,
+      require_company_website_answer: true,
+      event: {
+        uri: 'https://api.calendly.com/scheduled_events/meeting-b34',
+        start_time: '2026-10-09T16:00:00Z'
+      },
+      invitee: {
+        uri: 'https://api.calendly.com/scheduled_events/meeting-b34/invitees/b34c56d7',
+        email: 'robin@acme-security.com',
+        name: 'Robin Security', questions_and_answers: answer
+      }
+    });
+    assert.equal(value.ok, false);
+    assert.ok(value.missing.includes('company_website_answer'));
+    assert.notEqual(value.provenance.domain, 'QUESTION_DOMAIN');
+  }
+});
