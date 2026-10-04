@@ -213,6 +213,7 @@ test('publish-ready creates private brief and email package in one authenticated
   assert.equal(publish.status, 201);
   const result = await body(publish);
   assert.equal(result.ok, true);
+  assert.equal(result.consultant_id, 'consultant_test_1');
   assert.equal(result.delivery.kind, 'CONSULTANT_BRIEF_READY');
   assert.equal(result.delivery.to, 'sarah@example.com');
   assert.match(result.delivery.text_body, /Which API surface is in scope/);
