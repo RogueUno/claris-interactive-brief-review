@@ -1,4 +1,5 @@
 import { buildDeliveryPackage } from '../../calibration-v3/server/pilot-delivery.mjs';
+import { createDirectFinalOutbox } from '../../calibration-v3/server/direct-final-outbox.mjs';
 import { json, methodNotAllowed, parseJson } from '../../calibration-v3/server/http.mjs';
 
 function authorized(request) {
@@ -24,10 +25,22 @@ function authorized(request) {
   return accepted.some((key) => candidates.has(key));
 }
 
-export default {
+// Preserve all existing package operations. Direct-final outbox actions share
+// this authenticated endpoint instead of consuming another Vercel function.
+export function createDeliveryGateway({
+  authorize = authorized,
+  directFinalOutboxProvider = async () => {
+    const runtime = (await import('../../calibration-v3/server/api-shared.mjs')).serverContext();
+    return createDirectFinalOutbox({
+      storage: runtime.storage,
+      consultantRepository: runtime.repository
+    });
+  }
+} = {}) {
+  return {
   async fetch(request) {
     if (request.method !== 'POST') return methodNotAllowed('POST');
-    if (!authorized(request)) return json({ ok: false, error: 'MAKE_UNAUTHORIZED' }, 401);
+    if (!authorize(request)) return json({ ok: false, error: 'MAKE_UNAUTHORIZED' }, 401);
 
     const parsed = await parseJson(request);
     if (!parsed.ok) return parsed.response;
@@ -39,6 +52,18 @@ export default {
     ).trim();
 
     try {
+      if (['direct_final_begin', 'direct_final_claim', 'direct_final_ack'].includes(operation)) {
+        const outbox = await directFinalOutboxProvider(request);
+        const result = operation === 'direct_final_begin'
+          ? await outbox.begin(parsed.value)
+          : operation === 'direct_final_claim'
+            ? await outbox.claim(parsed.value)
+            : await outbox.acknowledge(parsed.value);
+        const code = ['REGISTERED', 'CLAIMED', 'ACKNOWLEDGED', 'SKIPPED_ALREADY_SENT'].includes(result.status)
+          ? 200
+          : result.status === 'RECONCILIATION_REQUIRED' ? 409 : 422;
+        return json(result, code);
+      }
       const packageResult = buildDeliveryPackage(operation, parsed.value);
       return json({ ok: true, delivery: packageResult }, 200);
     } catch (error) {
@@ -47,4 +72,7 @@ export default {
       return json({ ok: false, error: code }, clientError ? 422 : 500);
     }
   }
-};
+  };
+}
+
+export default createDeliveryGateway();
