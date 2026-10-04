@@ -610,3 +610,43 @@ test('publisher outbox reconciliation never reaches a success status', async () 
   const badAck = await gateway.fetch(request('brief_notification_ack', {}, { auth: true }));
   assert.equal(badAck.status, 422);
 });
+
+
+test('direct-final API is Make-authenticated and cannot mistake reconciliation for a send', async () => {
+  const requests=[];
+  const directFinalOutboxProvider=async()=>({
+    async begin(data) {
+      requests.push({type:'begin',data});
+      return {ok:true,status:'REGISTERED',registration_token:'a'.repeat(64)};
+    },
+    async claim(data) {
+      requests.push({type:'claim',data});
+      return {ok:false,status:'RECONCILIATION_REQUIRED',
+        error:'DIRECT_FINAL_SEND_OUTCOME_UNKNOWN'};
+    },
+    async acknowledge(data) {
+      requests.push({type:'ack',data});
+      return {ok:true,status:'ACKNOWLEDGED',reused:false};
+    }
+  });
+  const {gateway}=setup({directFinalOutboxProvider});
+  const withoutKey=await gateway.fetch(request('direct_final_begin',{opportunity_id:'opp_123'}));
+  assert.equal(withoutKey.status,401);
+  assert.equal(requests.length,0);
+  const begin=await gateway.fetch(request('direct_final_begin',{
+    opportunity_id:'opp_123'
+  },{auth:true}));
+  assert.equal(begin.status,200);
+  assert.equal((await body(begin)).status,'REGISTERED');
+  const blocked=await gateway.fetch(request('direct_final_claim',{
+    opportunity_id:'opp_123'
+  },{auth:true}));
+  assert.equal(blocked.status,409);
+  assert.equal((await body(blocked)).ok,false);
+  const ack=await gateway.fetch(request('direct_final_ack',{
+    opportunity_id:'opp_123'
+  },{auth:true}));
+  assert.equal(ack.status,200);
+  assert.equal((await body(ack)).status,'ACKNOWLEDGED');
+  assert.deepEqual(requests.map(x=>x.type),['begin','claim','ack']);
+});
