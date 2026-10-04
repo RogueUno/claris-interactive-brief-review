@@ -193,6 +193,7 @@ export function createDeliveryGateway({
       return json({
         ok: true,
         publication_id: created.publication_id,
+        consultant_id: created.brief.consultant_id,
         reused: created.reused === true,
         notification_dedupe_key: notificationDedupeKey,
         brief: {
