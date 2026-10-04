@@ -76,7 +76,7 @@ test('16 racing clarification requests create one envelope and one resolvable in
   assert.equal(allPaths.filter(x => x.startsWith('claris/clarification-invites/')).length, 1);
   const loaded = await repository.loadEnvelopeWithMeta(opportunityId);
   assert.equal(loaded.envelope.package.consultant.consultant_id, 'consultant_alpha');
-  assert.equal(loaded.envelope.package.invite_hash?.length, 64);
+  assert.match(loaded.envelope.package.invite_hash, /^[A-Za-z0-9_-]{43}$/);
   assert.equal(loaded.etag, wins[0].value.etag);
   const invite = await repository.resolveInvite(wins[0].value.token, {now: 2000});
   assert.equal(invite.ok, true);
