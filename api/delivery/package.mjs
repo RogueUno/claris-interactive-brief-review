@@ -3,6 +3,7 @@ import { json, methodNotAllowed, parseJson, cookieValue } from '../../calibratio
 import { briefSessionCookie } from '../../brief-v1/server/http.mjs';
 import { compileCertifiedBriefPublication } from '../../brief-v1/server/certified-publication-adapter.mjs';
 import { createBriefNotificationOutbox } from '../../brief-v1/server/notification-outbox.mjs';
+import { createDirectFinalOutbox } from '../../calibration-v3/server/direct-final-outbox.mjs';
 
 function normalizeAcceptedKeys(values = []) {
   return values.map((value) => String(value || '').trim()).filter(Boolean);
@@ -96,6 +97,14 @@ export function createDeliveryGateway({
       briefRepository: brief.repository,
       consultantRepository: consultants.repository,
       baseUrl: briefBaseUrlProvider(request)
+    });
+  },
+  directFinalOutboxProvider = async () => {
+    const brief = (await import('../../brief-v1/server/api-shared.mjs')).briefServerContext();
+    const consultants = (await import('../../calibration-v3/server/api-shared.mjs')).serverContext();
+    return createDirectFinalOutbox({
+      storage: brief.storage,
+      consultantRepository: consultants.repository
     });
   }
 } = {}) {
@@ -250,6 +259,19 @@ export function createDeliveryGateway({
             operation: compiled.operation,
             publish_ready_body_json: JSON.stringify(compiled.body)
           }, 200);
+        }
+
+        if (operation === 'direct_final_begin' ||
+            operation === 'direct_final_claim' || operation === 'direct_final_ack') {
+          const outbox = await directFinalOutboxProvider();
+          const result = operation === 'direct_final_begin'
+            ? await outbox.begin(parsed.value)
+            : operation === 'direct_final_claim'
+              ? await outbox.claim(parsed.value)
+              : await outbox.acknowledge(parsed.value);
+          const code = ['REGISTERED','CLAIMED','ACKNOWLEDGED','SKIPPED_ALREADY_SENT'].includes(result.status)
+            ? 200 : result.status === 'RECONCILIATION_REQUIRED' ? 409 : 422;
+          return json(result, code);
         }
 
         if (operation === 'brief_notification_claim' || operation === 'brief_notification_ack') {
