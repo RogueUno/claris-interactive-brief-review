@@ -103,7 +103,7 @@ test('strict Calendly → locked Runtime → certified bundle → email package 
   // Stand-in certified FINALIZE artifact: no inference or email service invoked.
   const mail = buildConsultantFinalDelivery({
     opportunity_id: normalized.booking.opportunity_id,
-    consultant_delivery_email: compiled.body.delivery.to,
+    consultant_delivery_email: compiled.body.consultant_delivery_email,
     consultant_first_name: 'Chris',
     company: normalized.booking.company,
     prospect_first_name: normalized.booking.prospect_first_name,
