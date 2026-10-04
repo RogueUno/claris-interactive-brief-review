@@ -171,7 +171,8 @@ export function createDirectFinalOutbox({ storage, consultantRepository }) {
       if (!b || !TOKEN.test(registrationToken)) {
         return status('BLOCKED', { error: 'DIRECT_FINAL_CLAIM_INPUT_INVALID' });
       }
-      if (input?.status !== 'FINALIZED' || input?.requires_clarification !== false ||
+      if (input?.status !== 'FINALIZED' || input?.final_stage !== 'FINALIZE' ||
+          input?.requires_clarification !== false ||
           !auditPass(input?.final_audit_json) ||
           !text(input?.final_brief_markdown) ||
           text(input.final_brief_markdown).length > 250000) {
