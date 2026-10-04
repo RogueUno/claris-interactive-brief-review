@@ -1,3 +1,5 @@
+import { serverContext as calibrationServerContext } from '../../../calibration-v3/server/api-shared.mjs';
+import { verifyLockedDeliveryOwner } from '../../../clarification-v1/server/verify-locked-delivery-owner.mjs';
 import { clarificationServerContext } from '../../../clarification-v1/server/api-shared.mjs';
 import { json, methodNotAllowed, parseJson } from '../../../clarification-v1/server/http.mjs';
 import { runClarificationProtocolStep } from '../../../clarification-v1/server/protocol.mjs';
@@ -83,7 +85,14 @@ async function handleIntelligenceProtocol(request) {
 
     if (result.ok && result.status === 'READY' && result.clarification_package) {
       const ttlDays = Math.max(1, Math.min(30, Number(parsed.value?.ttl_days || 7)));
-      const finalizeContext = buildFinalizeContext(parsed.value);
+      // Persistence is only allowed once the intended recipient is proven to
+      // belong to the currently locked consultant Runtime. No prospect-supplied
+      // email or Make-provided fallback is trusted as the final destination.
+      const proposedContext = buildFinalizeContext(parsed.value);
+      const verifiedOwner = await verifyLockedDeliveryOwner(proposedContext, {
+        repository: calibrationServerContext().repository
+      });
+      const finalizeContext = { ...proposedContext, ...verifiedOwner };
       const persisted = await clarificationServerContext().service.createPackage(
         result.clarification_package,
         {
@@ -131,7 +140,8 @@ async function handleIntelligenceProtocol(request) {
           code === 'CLARIFICATION_PROTOCOL_VERSION_UNSUPPORTED' ||
           code === 'CLARIFICATION_TTL_INVALID'
         ? 400
-        : code.startsWith('PREPARE_') || code.startsWith('CONSULTANT_SOT_')
+        : code.startsWith('PREPARE_') || code.startsWith('CONSULTANT_SOT_') ||
+          code.startsWith('CONSULTANT_DELIVERY_') || code.startsWith('FINALIZE_')
           ? 422
           : 500;
     return json({ ok: false, error: code }, status);
