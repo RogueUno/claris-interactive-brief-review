@@ -33,6 +33,7 @@ jobs:
         run: |
           node --test candidate/clarification-v1/server/tests/verify-locked-delivery-owner.test.mjs
           node --test candidate/clarification-v1/server/tests/offline-delivery-lifecycle.test.mjs
+          node --test candidate/clarification-v1/server/tests/final-delivery-receipt.test.mjs
       - name: Compare FINALIZE baseline tests (fail closed)
         shell: bash
         run: |
