@@ -11,11 +11,38 @@ function requiredJsonText(value, field) {
   return text;
 }
 
+// Admin-only identity binding; never part of publicClarificationPackage or prospect answers.
+function deliveryOwner(value) {
+  const raw = String(value ?? '').trim().toLowerCase();
+  if (!raw) return null; // Old clarification envelopes remain readable and fail closed at delivery.
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(raw)) {
+    throw new Error('FINALIZE_DELIVERY_EMAIL_INVALID');
+  }
+  return raw;
+}
+function consultantId(value) {
+  const raw = String(value ?? '').trim();
+  if (raw && !/^[A-Za-z0-9_-]{3,80}$/.test(raw)) {
+    throw new Error('FINALIZE_CONSULTANT_ID_INVALID');
+  }
+  return raw || null;
+}
+
 export function buildFinalizeContext(input, { now = Date.now() } = {}) {
+  const ownerId = consultantId(input?.consultant?.consultant_id || input?.consultant_id);
+  const nestedId = consultantId(input?.consultant?.consultant_id);
+  const declaredId = consultantId(input?.consultant_id);
+  if (nestedId && declaredId && nestedId !== declaredId) {
+    throw new Error('FINALIZE_CONSULTANT_ID_MISMATCH');
+  }
+  const ownerEmail = deliveryOwner(input?.consultant_delivery_email);
+  if (ownerEmail && !ownerId) throw new Error('FINALIZE_CONSULTANT_ID_REQUIRED');
   return {
     schema_version: FINALIZE_CONTEXT_VERSION,
     case_state_json: requiredJsonText(input?.case_state_json, 'FINALIZE_CASE_STATE'),
     consultant_sot_json: requiredJsonText(input?.consultant_sot_json, 'FINALIZE_CONSULTANT_SOT'),
+    consultant_id: ownerId,
+    consultant_delivery_email: ownerEmail,
     captured_at: new Date(now).toISOString()
   };
 }
@@ -24,10 +51,15 @@ function assertFinalizeContext(value) {
   if (!value || value.schema_version !== FINALIZE_CONTEXT_VERSION) {
     throw new Error('FINALIZE_CONTEXT_MISSING');
   }
+  const ownerId = consultantId(value.consultant_id);
+  const ownerEmail = deliveryOwner(value.consultant_delivery_email);
+  if (ownerEmail && !ownerId) throw new Error('FINALIZE_CONSULTANT_ID_REQUIRED');
   return {
     schema_version: FINALIZE_CONTEXT_VERSION,
     case_state_json: requiredJsonText(value.case_state_json, 'FINALIZE_CASE_STATE'),
     consultant_sot_json: requiredJsonText(value.consultant_sot_json, 'FINALIZE_CONSULTANT_SOT'),
+    consultant_id: ownerId,
+    consultant_delivery_email: ownerEmail,
     captured_at: value.captured_at || null
   };
 }
@@ -70,6 +102,10 @@ export function buildFinalizeBundle(envelope, opportunityVersion = null) {
   let context;
   try {
     context = assertFinalizeContext(envelope?.finalize_context);
+    const persistedOwnerId = consultantId(envelope?.package?.consultant?.consultant_id);
+    if (context.consultant_id && persistedOwnerId !== context.consultant_id) {
+      throw new Error('FINALIZE_CONSULTANT_ID_MISMATCH');
+    }
   } catch (error) {
     return {
       ok: false,
@@ -89,6 +125,12 @@ export function buildFinalizeBundle(envelope, opportunityVersion = null) {
     opportunity_version: clarification.opportunity_version || null,
     case_state_json: context.case_state_json,
     consultant_sot_json: context.consultant_sot_json,
+    consultant_id: context.consultant_id,
+    consultant_delivery_email: context.consultant_delivery_email,
+    // Admin-only observability. This is webhook dispatch status, not proof that
+    // FINALIZE or a consultant email has succeeded.
+    finalize_dispatch_status: envelope?.finalize_dispatch?.status || 'LEGACY_UNTRACKED',
+    finalize_dispatch_error: envelope?.finalize_dispatch?.failure_code || null,
     prospect_answers_json: JSON.stringify(prospectAnswers),
     prospect_answers: prospectAnswers
   };

@@ -1,0 +1,293 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import { compileCertifiedBriefPublication } from '../certified-publication-adapter.mjs';
+
+const prepare={
+  schema_version:'CLARIS_PREMIUM_PREPARE_V3_6',
+  executive_readout:'Dense readout.',
+  open_dimensions:[{dimension_id:'D1',max_questions:1}]
+};
+const discovery={
+  schema_version:'CLARIS_DISCOVERY_INTELLIGENCE_V1_2',
+  authorized_dimensions:[{dimension_id:'D1',authority:'PREPARE',policy_key:null}],
+  commercial_target:[],
+  primary_questions:[{
+    question_id:'Q1',
+    dimension_id:'D1',
+    ask:'Which surface is in scope?',
+    linked_service_paths:[{service_id:'SVC_ADVISORY',condition:'Guidance requested.'}],
+    conditional_probes:[]
+  }],
+  end_of_call_decision:{
+    ready_for_next_step_if:['Scope clear.'],
+    remain_in_discovery_if:['D1 unresolved.'],
+    disqualify_or_deprioritize_if:['Outside capabilities.']
+  }
+};
+const sot={
+  services:[{service_id:'SVC_ADVISORY',name:'Advisory vCISO'}],
+  commercial_rules:{budget_required_before_first_call:false,minimum_viable_engagement_usd:7500}
+};
+const base={
+  opportunity_id:'opp_123',
+  consultant_id:'consultant_123',
+  consultant_delivery_email:'consultant@example.com',
+  consultant_first_name:'Chase',
+  company:'Acme',
+  prospect_name:'Alex',
+  prospect_role:'VP Engineering',
+  meeting_time:'2026-09-30T14:00:00Z',
+  prepare,
+  discovery,
+  consultant_sot:sot,
+  premium_audit:{audit_status:'PASS'},
+  discovery_audit:{audit_status:'PASS'},
+  premium_validation:{ok:true,errors:[]},
+  discovery_validation:{ok:true,errors:[]}
+};
+
+test('certified adapter emits one brief_publish_ready request',()=>{
+  const result=compileCertifiedBriefPublication(base);
+  assert.equal(result.operation,'brief_publish_ready');
+  assert.equal(result.body.opportunity_id,'opp_123');
+  assert.notEqual(result.body.brief_payload.prepare,prepare);
+  assert.notEqual(result.body.brief_payload.discovery,discovery);
+  assert.equal('conditional_service_paths' in result.body.brief_payload.prepare,false);
+  assert.equal(result.body.brief_payload.prepare.service_authority.mode,'HYPOTHESIS_ONLY');
+  assert.equal('linked_service_paths' in result.body.brief_payload.discovery.primary_questions[0],false);
+  assert.equal(result.body.brief_payload.discovery.primary_questions[0].possible_service_paths[0].authority,'HYPOTHESIS_ONLY');
+  assert.equal(result.body.brief_payload.discovery.primary_questions[0].possible_service_paths[0].display_label,'Possible path if confirmed');
+  assert.equal(result.body.validation_context.commercial_rules.budget_required_before_first_call,false);
+  assert.equal(JSON.stringify(result.body).includes('7500'),false);
+  assert.deepEqual(result.body.certification,{
+    schema_version:'CLARIS_PRECALL_CERTIFICATION_V1',
+    premium_semantic_pass:true,
+    discovery_semantic_pass:true,
+    premium_deterministic_pass:true,
+    discovery_deterministic_pass:true
+  });
+});
+
+for(const [field,bad,code] of [
+  ['premium_audit',{audit_status:'FAIL'},'PREMIUM_AUDIT_PASS_REQUIRED'],
+  ['discovery_audit',{audit_status:'FAIL'},'DISCOVERY_AUDIT_PASS_REQUIRED'],
+  ['premium_validation',{ok:false},'PREMIUM_VALIDATION_PASS_REQUIRED'],
+  ['discovery_validation',{ok:false},'DISCOVERY_VALIDATION_PASS_REQUIRED']
+]){
+  test(`fails closed when ${field} is not certified`,()=>{
+    assert.throws(()=>compileCertifiedBriefPublication({...base,[field]:bad}),new RegExp(code));
+  });
+}
+
+test('accepts JSON strings from Make outputs without changing authority',()=>{
+  const result=compileCertifiedBriefPublication({
+    ...base,
+    prepare:JSON.stringify(prepare),
+    discovery:JSON.stringify(discovery),
+    premium_audit:JSON.stringify({audit_status:'PASS'}),
+    discovery_audit:JSON.stringify({audit_status:'PASS'}),
+    premium_validation:JSON.stringify({ok:true}),
+    discovery_validation:JSON.stringify({ok:true})
+  });
+  assert.equal(result.operation,'brief_publish_ready');
+});
+
+
+test('compiles traceable scorecard while keeping raw scoring basis out of publication body',()=>{
+  const basis={
+    gate_status:'PASS',
+    canonical_match_classifications:{
+      service_need_alignment:{status:'MATCH',basis_ids:['BOOK-001','SOT:services'],reason:'Direct requested service fit.'},
+      icp_company_fit:{status:'UNKNOWN',basis_ids:[],reason:'No explicit ICP policy is present.'},
+      business_trigger:{status:'PARTIAL_MATCH',basis_ids:['BOOK-001'],reason:'Trigger present but depth remains open.'},
+      buyer_stakeholder_fit:{status:'UNKNOWN',basis_ids:[],reason:'Buyer fit is not established.'},
+      engagement_economics:{status:'UNKNOWN',basis_ids:[],reason:'No authorized economics evidence yet.'},
+      timing_urgency:{status:'UNKNOWN',basis_ids:[],reason:'No resolved delivery date yet.'},
+      expansion_potential:{status:'UNKNOWN',basis_ids:[],reason:'No distinct second need is established.'}
+    },
+    canonical_completeness_classifications:{
+      critical_question_coverage:{status:'COMPLETE',basis_ids:['E1'],reason:'Critical unknown is mapped.'},
+      source_authority:{status:'COMPLETE',basis_ids:['PE-001'],reason:'First-party evidence dominates.'},
+      corroboration_depth:{status:'PARTIAL',basis_ids:['PE-002'],reason:'Some claims have one authoritative source.'},
+      freshness:{status:'MISSING',basis_ids:[],reason:'No explicit freshness metadata is attached.'},
+      conflict_ambiguity_control:{status:'MISSING',basis_ids:[],reason:'No reasoning/unknown provenance is attached in this minimal fixture.'}
+    },
+    basis_resolution:{all_scored_basis_resolvable:true,unresolved_basis_ids:[]}
+  };
+  const research={findings:[
+    {evidence_id:'PE-001'},{evidence_id:'PE-002'},{evidence_id:'PE-003'}
+  ]};
+  const result=compileCertifiedBriefPublication({
+    ...base,
+    booking_text:'We need an API security review.',
+    precall_score_basis:basis,
+    precall_research_evidence:research
+  });
+  assert.equal(result.body.booking_text,'We need an API security review.');
+  assert.equal(result.body.brief_payload.scorecard.schema_version,'CLARIS_PRECALL_SCORECARD_V1');
+  assert.equal(result.body.brief_payload.scorecard.lead_fit.grade,'A');
+  assert.equal(result.body.brief_payload.scorecard.call_readiness.status,'READY');
+  const serialized=JSON.stringify(result.body);
+  assert.doesNotMatch(serialized,/canonical_match_classifications/);
+  assert.doesNotMatch(serialized,/basis_resolution/);
+});
+
+
+test('score publication fails closed without the research evidence packet used to resolve basis ids',()=>{
+  const basis={
+    gate_status:'PASS',
+    canonical_match_classifications:{
+      service_need_alignment:{status:'MATCH',basis_ids:['BOOK-001','SOT:services'],reason:'Direct fit.'},
+      icp_company_fit:{status:'UNKNOWN',basis_ids:[],reason:'No ICP policy.'},
+      business_trigger:{status:'UNKNOWN',basis_ids:[],reason:'No trigger.'},
+      buyer_stakeholder_fit:{status:'UNKNOWN',basis_ids:[],reason:'No buyer evidence.'},
+      engagement_economics:{status:'UNKNOWN',basis_ids:[],reason:'No economics.'},
+      timing_urgency:{status:'UNKNOWN',basis_ids:[],reason:'No timing.'},
+      expansion_potential:{status:'UNKNOWN',basis_ids:[],reason:'No expansion.'}
+    },
+    canonical_completeness_classifications:{
+      critical_question_coverage:{status:'COMPLETE',basis_ids:['E1'],reason:'Covered.'},
+      source_authority:{status:'MISSING',basis_ids:[],reason:'No packet.'},
+      corroboration_depth:{status:'MISSING',basis_ids:[],reason:'No packet.'},
+      freshness:{status:'MISSING',basis_ids:[],reason:'No packet.'},
+      conflict_ambiguity_control:{status:'MISSING',basis_ids:[],reason:'No packet.'}
+    },
+    basis_resolution:{all_scored_basis_resolvable:true,unresolved_basis_ids:[]}
+  };
+  assert.throws(
+    ()=>compileCertifiedBriefPublication({...base,booking_text:'Need help.',precall_score_basis:basis}),
+    /PRECALL_RESEARCH_EVIDENCE_REQUIRED/
+  );
+});
+
+
+test('validated company snapshot is presentation-only and additive to certified publication',()=>{
+  const snapshot={
+    schema_version:'CLARIS_COMPANY_SNAPSHOT_V1',
+    authority:'PRESENTATION_ONLY',
+    company_name:'Acme',
+    domain_host:'acme.com',
+    intro:null,
+    fields:{
+      founded_year:{
+        value:2016,display:'2016',label:'Founded',
+        source_url:'https://acme.com/about',source_label:'acme.com',
+        source_type:'FIRST_PARTY',supported:true,confidence:'HIGH',
+        evidence_quote:'Acme was founded in 2016.'
+      },
+      headquarters:{
+        value:'Paris, France',display:'Paris, France',label:'Headquarters',
+        source_url:'https://www.linkedin.com/company/acme/',source_label:'linkedin.com',
+        source_type:'PUBLIC_INDEX',supported:true,confidence:'MEDIUM',
+        evidence_quote:'Acme — Headquarters: Paris, France.'
+      },
+      employee_size:null,
+      company_type:{
+        value:'security advisory firm',display:'security advisory firm',label:'Company type',
+        source_url:'https://acme.com/about',source_label:'acme.com',
+        source_type:'FIRST_PARTY',supported:true,confidence:'MEDIUM',
+        evidence_quote:'Acme is a security advisory firm.'
+      },
+      scale_metric:null
+    },
+    prospect:{name:'Alex Morgan',role:'VP Engineering',linkedin_url:null},
+    sources:[
+      {url:'https://acme.com/about',source_type:'FIRST_PARTY',source_label:'acme.com'},
+      {url:'https://www.linkedin.com/company/acme/',source_type:'PUBLIC_INDEX',source_label:'linkedin.com'}
+    ],
+    validation:{ok:true,errors:[]}
+  };
+  const result=compileCertifiedBriefPublication({
+    ...base,
+    prospect_name:'Alex Morgan',
+    domain_host:'acme.com',
+    company_snapshot_v1:snapshot
+  });
+  assert.equal(result.body.brief_payload.company_snapshot.authority,'PRESENTATION_ONLY');
+  assert.equal(result.body.brief_payload.company_snapshot.fields.founded_year.display,'2016');
+  assert.equal(result.body.brief_payload.prepare.service_authority.mode,'HYPOTHESIS_ONLY');
+});
+
+test('invalid optional snapshot is omitted rather than poisoning a certified legacy brief',()=>{
+  const result=compileCertifiedBriefPublication({
+    ...base,
+    domain_host:'acme.com',
+    company_snapshot_v1:{
+      schema_version:'CLARIS_COMPANY_SNAPSHOT_V1',
+      authority:'PRESENTATION_ONLY',
+      company_name:'Acme',
+      domain_host:'acme.com',
+      fields:{
+        founded_year:{
+          value:2016,display:'2016',label:'Founded',
+          source_url:'https://example.com/about',source_label:'example.com',
+          source_type:'FIRST_PARTY',supported:true,confidence:'HIGH',
+          evidence_quote:'Acme was founded in 2016.'
+        },
+        headquarters:null,employee_size:null,company_type:null,scale_metric:null
+      },
+      prospect:{name:'Alex',linkedin_url:null},
+      sources:[]
+    }
+  });
+  assert.equal('company_snapshot' in result.body.brief_payload,false);
+  assert.equal(result.operation,'brief_publish_ready');
+});
+
+
+test('canonical identity evidence can derive a presentation-only snapshot at publication',()=>{
+  const canonical={
+    canonical_evidence_registry:[
+      {
+        channel:'IDENTITY_PRODUCT',admission_status:'ADMITTED',authority:'THIRD_PARTY_REPORTED',strength:'MEDIUM',
+        source_url:'https://www.cbinsights.com/company/acme',
+        source_title:'Acme profile',
+        source_excerpt:'Acme is based in Paris, France.'
+      },
+      {
+        channel:'IDENTITY_PRODUCT',admission_status:'ADMITTED',authority:'THIRD_PARTY_REPORTED',strength:'MEDIUM',
+        source_url:'https://example.com/acme-origin',
+        source_title:'Acme origin',
+        source_excerpt:'Acme was founded in 2019.'
+      },
+      {
+        channel:'IDENTITY_PRODUCT',admission_status:'ADMITTED',authority:'THIRD_PARTY_REPORTED',strength:'MEDIUM',
+        source_url:'https://example.com/acme-scale',
+        source_title:'Acme scale',
+        source_excerpt:'Acme has 125 employees and serves over 8,000 customers.'
+      }
+    ]
+  };
+  const result=compileCertifiedBriefPublication({
+    ...base,
+    domain:'https://acme.com',
+    prospect_name:'Alex Morgan',
+    canonical_truth_json:canonical
+  });
+  const snapshot=result.body.brief_payload.company_snapshot;
+  assert.equal(snapshot.schema_version,'CLARIS_COMPANY_SNAPSHOT_V1');
+  assert.equal(snapshot.authority,'PRESENTATION_ONLY');
+  assert.equal(snapshot.fields.founded_year.display,'2019');
+  assert.equal(snapshot.fields.headquarters.display,'Paris, France');
+  assert.equal(snapshot.fields.employee_size.display,'51–200');
+  assert.equal(snapshot.coverage.renderable,true);
+  assert.equal(snapshot.validation.ok,true);
+});
+
+test('canonical evidence that is too sparse leaves legacy publication unchanged',()=>{
+  const result=compileCertifiedBriefPublication({
+    ...base,
+    domain:'https://acme.com',
+    canonical_truth_json:{
+      canonical_evidence_registry:[
+        {
+          channel:'IDENTITY_PRODUCT',admission_status:'ADMITTED',authority:'THIRD_PARTY_REPORTED',strength:'MEDIUM',
+          source_url:'https://example.com/acme',
+          source_title:'Acme',
+          source_excerpt:'Acme was founded in 2019.'
+        }
+      ]
+    }
+  });
+  assert.equal('company_snapshot' in result.body.brief_payload,false);
+});

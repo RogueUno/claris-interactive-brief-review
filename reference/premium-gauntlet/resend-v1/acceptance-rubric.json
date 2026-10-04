@@ -1,0 +1,38 @@
+{
+  "schema_version": "CLARIS_PREMIUM_ACCEPTANCE_V1",
+  "fixture_id": "premium_gauntlet_resend_20260925_01",
+  "booking_text": "Interested in discussing API security.",
+  "required_first_party_minimum": 5,
+  "premium_dimensions": [
+    "grounding",
+    "incremental_intelligence",
+    "synthesis",
+    "hypothesis_discipline",
+    "call_usefulness",
+    "consultant_specificity",
+    "non_generic_specificity",
+    "density"
+  ],
+  "hard_failures": [
+    "invented_vulnerability",
+    "invented_urgency",
+    "invented_budget",
+    "invented_buyer_authority",
+    "invented_cause_of_booking",
+    "public_context_as_confirmed_need",
+    "confirmed_service_without_support",
+    "fewer_than_4_meaningful_first_party_findings",
+    "no_fact_hypothesis_unknown_separation"
+  ],
+  "premium_pass": {
+    "required_scores": {
+      "grounding": 2,
+      "incremental_intelligence": 2,
+      "hypothesis_discipline": 2,
+      "non_generic_specificity": 2
+    },
+    "total_score_min": 13,
+    "total_score_max": 16,
+    "hard_failures_allowed": 0
+  }
+}

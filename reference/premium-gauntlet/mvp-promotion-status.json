@@ -1,0 +1,146 @@
+{
+  "schema_version": "CLARIS_MVP_PROMOTION_GATE_V1",
+  "candidate_branch": "premium-gauntlet-v3-1",
+  "candidate_head": "18c2f07815399d9a9e98791ae9c88364c1d1b51f",
+  "gates": {
+    "consultant_intelligence": {
+      "status": "PASS"
+    },
+    "premium_research": {
+      "status": "PARTIAL",
+      "reason": "Golden evidence packets certified; real pilot research path remains later."
+    },
+    "premium_prepare_v3_6": {
+      "status": "PASS_LIVE_SANDBOX",
+      "deterministic_validator_scenario_id": 7644561,
+      "golden_fixtures": {
+        "Supabase": "SEMANTIC_PASS_DETERMINISTIC_PASS",
+        "Resend": "SEMANTIC_PASS_DETERMINISTIC_PASS",
+        "Linear": "SEMANTIC_PASS_DETERMINISTIC_PASS"
+      },
+      "structural_hardening": [
+        "structured_output_schema",
+        "planner_json_parse_gate",
+        "provenance_normalizer",
+        "bounded_markdown_only_repair",
+        "repair_mutation_guard",
+        "audit_json_parse_gate"
+      ]
+    },
+    "discovery_intelligence_v1_2": {
+      "status": "PASS_LIVE_SANDBOX",
+      "golden_fixtures": {
+        "Supabase": "SEMANTIC_20_20_DETERMINISTIC_PASS",
+        "Resend": "SEMANTIC_20_20_DETERMINISTIC_PASS",
+        "Linear": "SEMANTIC_20_20_DETERMINISTIC_PASS"
+      },
+      "deterministic_validator_scenario_id": 7629432,
+      "linear_final_revalidation_execution_id": "19d4ae1b0dfe4805bc1d5ebf4bd5781e"
+    },
+    "secure_private_brief": {
+      "status": "PASS",
+      "github_ci": "PASS",
+      "explicit_test_brief": "40/40 PASS",
+      "vercel_preview": "PASS",
+      "vercel_function_count": 12,
+      "preview_protection": "ENABLED",
+      "make_automation_bypass": "CERTIFIED",
+      "browser_app_smoke": "PARTIAL_ROUTE_200_JS_SESSION_PENDING_ENV_BLOCK",
+      "route_shell_200": "PASS"
+    },
+    "retry_idempotency": {
+      "status": "PASS"
+    },
+    "make_publisher": {
+      "status": "PASS",
+      "scenario_id": 7643611,
+      "receipt_store_id": 199489,
+      "revoke_certifier_scenario_id": 7644247,
+      "inactive_after_certification": true,
+      "golden_deliveries": [
+        "Supabase",
+        "Resend",
+        "Linear"
+      ],
+      "identical_retry": "PASS_SKIPPED_DUPLICATE",
+      "presentation_only_reuse": "PASS_SKIPPED_DUPLICATE",
+      "missing_certification": "PASS_REJECTED_422",
+      "economics_leak": "PASS_REJECTED_422",
+      "revoked_retry": "PASS_REJECTED_410"
+    },
+    "real_end_to_end_pilot": {
+      "status": "PENDING"
+    },
+    "commercial_readiness": {
+      "status": "PENDING"
+    },
+    "precall_score_reliability_v1": {
+      "status": "PASS_GOLDEN_REPEATABILITY",
+      "grade_scale": "D_0_25_C_25_50_B_50_75_A_75_100",
+      "minimum_scorable_coverage_for_letter": 40,
+      "fit_percentage_published": false,
+      "scorer_scenario_id": 7648115,
+      "resolver_scenario_id": 7649118,
+      "controlled_repair_scenario_id": 7648203,
+      "repeatability": {
+        "Supabase": "3_OF_3_IDENTICAL_CANONICAL_A_COVERAGE_65",
+        "Resend": "3_OF_3_IDENTICAL_CANONICAL_NO_GRADE_COVERAGE_30",
+        "Linear": "3_OF_3_IDENTICAL_CANONICAL_A_COVERAGE_45"
+      },
+      "server_reresolution_before_publication": true,
+      "direct_evidence_guards": [
+        "economics",
+        "timing",
+        "buyer_stakeholder",
+        "freshness"
+      ],
+      "github_ci": "PASS",
+      "vercel_preview": "READY",
+      "scope_note": "Gold-fixture repeatability certified; universal semantic repeatability remains a real-pilot validation question."
+    },
+    "certified_brief_package_compiler_v1": {
+      "status": "PASS_LIVE_SANDBOX",
+      "scenario_id": 7649501,
+      "server_operation": "brief_compile_publish_ready",
+      "side_effect_free_compile": true,
+      "live_supabase_compile_execution_id": "4c0567018c0247788632b66947aa60b1",
+      "live_publisher_execution_id": "06f4c330e17149c1bc4675518ad115e1",
+      "live_publication_id": "pub_vhMKXVpf1f2LCkpWKUJalYzFDqYnBQ1Hrr8g",
+      "minimized_body": {
+        "raw_score_basis_leaked": false,
+        "raw_research_marker_leaked": false,
+        "commercial_floor_leaked": false,
+        "published_fit_percentage": false
+      },
+      "publisher_handoff": "PASS_DELIVERED",
+      "inactive_after_certification": true
+    },
+    "certified_brief_package_compiler": {
+      "status": "PASS_LIVE_SANDBOX",
+      "server_operation": "brief_compile_publish_ready",
+      "scenario_id": 7649501,
+      "publisher_scenario_id": 7643611,
+      "compiler_execution_id": "4c0567018c0247788632b66947aa60b1",
+      "publisher_execution_id": "06f4c330e17149c1bc4675518ad115e1",
+      "publication_id": "pub_vhMKXVpf1f2LCkpWKUJalYzFDqYnBQ1Hrr8g",
+      "scorecard": {
+        "lead_fit_grade": "A",
+        "scorable_coverage": 65,
+        "evidence_coverage": 85,
+        "call_readiness": "READY",
+        "fit_percentage_published": false
+      },
+      "minimization": {
+        "raw_score_basis": false,
+        "raw_research_only_marker": false,
+        "consultant_commercial_floor": false
+      },
+      "publisher_inactive_after_run": true
+    }
+  },
+  "blockers": [
+    "Interactive fragment-token/session browser smoke (local browser outbound access blocked by environment)",
+    "Real end-to-end pilot"
+  ],
+  "production_ingress_policy": "KEEP_INACTIVE_UNTIL_GATES_C_THROUGH_H_GREEN"
+}

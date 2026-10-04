@@ -36,6 +36,20 @@ export function createVercelBlobJsonStorage({ token = process.env.BLOB_READ_WRIT
       };
     },
 
+    // Single-winner creation; read-then-put cannot protect concurrent bookings.
+    async putJsonIfAbsent(pathname, value) {
+      const saved = await put(pathname, JSON.stringify(value), {
+        access: 'private',
+        token,
+        addRandomSuffix: false,
+        allowOverwrite: false,
+        contentType: 'application/json'
+      });
+      return saved?.etag
+        ? { ...saved, etag: normalizeEtag(saved.etag) }
+        : saved;
+    },
+
     async putJson(pathname, value, { ifMatch = null } = {}) {
       try {
         const saved = await put(pathname, JSON.stringify(value), {

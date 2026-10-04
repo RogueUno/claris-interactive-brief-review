@@ -1,0 +1,119 @@
+{
+  "gate_status": "CORRECTED",
+  "canonical_match_classifications": {
+    "service_need_alignment": {
+      "status": "MATCH",
+      "basis_ids": [
+        "BOOK-001",
+        "SOT:services"
+      ],
+      "reason": "The booking directly requests an independent security review of the OAuth/RLS boundary, which maps directly to consulting services."
+    },
+    "icp_company_fit": {
+      "status": "UNKNOWN",
+      "basis_ids": [],
+      "reason": "The consultant SOT contains no explicit ICP or company-type policy rules."
+    },
+    "business_trigger": {
+      "status": "MATCH",
+      "basis_ids": [
+        "BOOK-001"
+      ],
+      "reason": "The booking states an upcoming enterprise OAuth 2.1 rollout this quarter requiring pre-launch review."
+    },
+    "buyer_stakeholder_fit": {
+      "status": "MATCH",
+      "basis_ids": [
+        "BOOK-001"
+      ],
+      "reason": "The booking establishes that the prospect is VP Engineering and owns the evaluation."
+    },
+    "engagement_economics": {
+      "status": "UNKNOWN",
+      "basis_ids": [],
+      "reason": "The booking contains no direct budget or pricing disclosures, and direct evidence is required by commercial rules."
+    },
+    "timing_urgency": {
+      "status": "MATCH",
+      "basis_ids": [
+        "BOOK-001"
+      ],
+      "reason": "The booking directly states an enterprise rollout planned for this quarter, creating a clear delivery timeframe."
+    },
+    "expansion_potential": {
+      "status": "UNKNOWN",
+      "basis_ids": [],
+      "reason": "The booking does not mention any additional distinct needs mapping to other SOT services."
+    }
+  },
+  "canonical_completeness_classifications": {
+    "critical_question_coverage": {
+      "status": "COMPLETE",
+      "basis_ids": [
+        "DIM:D1",
+        "DIM:D2",
+        "DIM:D3",
+        "Q:Q1",
+        "Q:Q2",
+        "Q:Q3"
+      ],
+      "reason": "All open dimensions from the certified PREPARE plan have dedicated diagnostic questions."
+    },
+    "source_authority": {
+      "status": "COMPLETE",
+      "basis_ids": [
+        "PE-001",
+        "PE-002",
+        "PE-003",
+        "PE-004"
+      ],
+      "reason": "All evidence items rely on first-party documentation directly from Supabase."
+    },
+    "corroboration_depth": {
+      "status": "PARTIAL",
+      "basis_ids": [
+        "PE-001",
+        "PE-002",
+        "PE-003",
+        "PE-004"
+      ],
+      "reason": "First-party evidence breadth is present across multiple documentation pages, but lacks independent external corroboration."
+    },
+    "freshness": {
+      "status": "MISSING",
+      "basis_ids": [],
+      "reason": "The curated research evidence packet contains no explicit publication, update, or fetched date metadata."
+    },
+    "conflict_ambiguity_control": {
+      "status": "COMPLETE",
+      "basis_ids": [
+        "R1",
+        "R2",
+        "R3",
+        "U1",
+        "U2",
+        "U3"
+      ],
+      "reason": "Unresolved variables like exact scope and review deadline are explicitly identified as open dimensions."
+    }
+  },
+  "corrected_strategy": {
+    "recommended_action": "Conduct the diagnostic call to lock the technical review boundary, required independent review artifact, and latest useful findings completion date.",
+    "primary_service_id": "",
+    "qualification_status": "PROMISING",
+    "rationale": "The buyer role, business trigger, and service need are clear and explicitly aligned with technical review services. Scoping depth and timing remain the primary variables to resolve on the call.",
+    "key_talking_points": [
+      "Confirm whether the independent review requires architecture-level design evaluation or hands-on technical validation.",
+      "Define the exact review output required to clear rollout.",
+      "Establish the latest useful findings completion date for the current quarter."
+    ],
+    "risk_factors": [
+      "The exact test scope and review deadline are currently unfixed in the booking.",
+      "Unclear delivery timing could compress remediation and retest windows prior to launch."
+    ]
+  },
+  "basis_resolution": {
+    "all_scored_basis_resolvable": true,
+    "unresolved_basis_ids": []
+  }
+}

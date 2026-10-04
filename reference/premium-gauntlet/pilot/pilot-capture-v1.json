@@ -1,0 +1,48 @@
+{
+  "schema_version": "CLARIS_PILOT_CAPTURE_V1",
+  "purpose": "Capture real consultant evidence for CLARIS four-figure MVP readiness.",
+  "before_call": [
+    "opportunity_id",
+    "company",
+    "consultant_id",
+    "baseline_manual_prep_minutes",
+    "claris_review_minutes",
+    "material_facts_not_in_booking"
+  ],
+  "after_call": [
+    "redundant_questions_avoided",
+    "primary_questions_total",
+    "primary_questions_helpful",
+    "conditional_probes_triggered",
+    "conditional_probes_helpful",
+    "material_wrong_fact_count",
+    "unsupported_inference_changed_call",
+    "missed_critical_question_changed_call",
+    "private_data_exposure",
+    "consultant_policy_violation",
+    "trust_rating",
+    "live_usability_rating",
+    "diagnostic_confidence_rating",
+    "would_use_next_serious_call",
+    "manual_prep_replacement",
+    "strongest_value",
+    "missing_or_weak",
+    "consultant_quote",
+    "call_outcome"
+  ],
+  "rating_scale": "1=poor, 5=excellent",
+  "manual_prep_replacement_values": [
+    "NONE",
+    "PARTIAL",
+    "MOSTLY",
+    "FULL"
+  ],
+  "hard_failures": [
+    "MATERIAL_WRONG_FACT",
+    "UNSUPPORTED_INFERENCE_CHANGED_CALL",
+    "MISSED_CRITICAL_DIAGNOSIS",
+    "PRIVATE_DATA_EXPOSURE",
+    "CONSULTANT_POLICY_VIOLATION"
+  ],
+  "note": "Thresholds are internal pilot gates, not claims of market willingness to pay. Pricing evidence still requires real buyer behavior."
+}

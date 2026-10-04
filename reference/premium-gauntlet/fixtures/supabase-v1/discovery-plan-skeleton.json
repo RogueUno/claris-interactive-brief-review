@@ -1,0 +1,167 @@
+{
+  "ok": true,
+  "schema_version": "CLARIS_DISCOVERY_PLAN_SKELETON_V1",
+  "authorized_dimensions": [
+    {
+      "dimension_id": "D1",
+      "ontology_intent": "D02 technical_or_service_scope",
+      "authority": "PREPARE",
+      "policy_key": null,
+      "source_authority": "BOOKING",
+      "authority_quote": "exact test scope",
+      "reason": "The booking explicitly says the exact test scope is not fixed.",
+      "max_questions": 1
+    },
+    {
+      "dimension_id": "D2",
+      "ontology_intent": "D06 desired_outcome",
+      "authority": "PREPARE",
+      "policy_key": null,
+      "source_authority": "BOOKING",
+      "authority_quote": "independent security review",
+      "reason": "Independent review is explicit, but the artifact and validation depth needed to clear rollout are not.",
+      "max_questions": 1
+    },
+    {
+      "dimension_id": "D3",
+      "ontology_intent": "D11 timing_trigger",
+      "authority": "PREPARE",
+      "policy_key": null,
+      "source_authority": "BOOKING",
+      "authority_quote": "haven't fixed the review deadline",
+      "reason": "The rollout is this quarter but the review deadline is explicitly unresolved.",
+      "max_questions": 1
+    }
+  ],
+  "question_slots": [
+    {
+      "question_id": "Q1",
+      "dimension_id": "D1",
+      "ontology_intent": "D02 technical_or_service_scope",
+      "authority": "PREPARE",
+      "policy_key": null,
+      "slot_index": 1,
+      "slot_budget": 1,
+      "fill_required": true,
+      "fill_only_if_materially_distinct": false
+    },
+    {
+      "question_id": "Q2",
+      "dimension_id": "D2",
+      "ontology_intent": "D06 desired_outcome",
+      "authority": "PREPARE",
+      "policy_key": null,
+      "slot_index": 1,
+      "slot_budget": 1,
+      "fill_required": true,
+      "fill_only_if_materially_distinct": false
+    },
+    {
+      "question_id": "Q3",
+      "dimension_id": "D3",
+      "ontology_intent": "D11 timing_trigger",
+      "authority": "PREPARE",
+      "policy_key": null,
+      "slot_index": 1,
+      "slot_budget": 1,
+      "fill_required": true,
+      "fill_only_if_materially_distinct": false
+    }
+  ],
+  "relevant_intent_definitions": [
+    {
+      "intent_id": "D02",
+      "name": "technical_or_service_scope",
+      "objective": "Bound the exact system, environment, control surface, framework or workload relevant to the engagement.",
+      "primary_authorities": [
+        "BOOKING",
+        "PROSPECT"
+      ],
+      "suppress_if": [
+        "scope is already explicit enough to select the correct review boundary"
+      ],
+      "listen_for_examples": [
+        "OAuth and RLS end-to-end",
+        "questionnaire workflow only",
+        "production AWS account",
+        "SOC 2 scope expansion"
+      ],
+      "may_unlock": [
+        "D03",
+        "D04",
+        "D07",
+        "D08",
+        "D14"
+      ]
+    },
+    {
+      "intent_id": "D06",
+      "name": "desired_outcome",
+      "objective": "Define the result, decision, artifact or operating change the prospect wants.",
+      "primary_authorities": [
+        "BOOKING",
+        "PROSPECT"
+      ],
+      "suppress_if": [
+        "the required deliverable and acceptance condition are already explicit"
+      ],
+      "listen_for_examples": [
+        "architecture opinion",
+        "independent test report",
+        "reusable assurance package",
+        "fewer engineering escalations"
+      ],
+      "may_unlock": [
+        "D13",
+        "D14",
+        "D15"
+      ]
+    },
+    {
+      "intent_id": "D11",
+      "name": "timing_trigger",
+      "objective": "Resolve a prospect-introduced deadline, milestone or timing dependency.",
+      "primary_authorities": [
+        "BOOKING",
+        "PROSPECT",
+        "CONSULTANT_POLICY"
+      ],
+      "suppress_if": [
+        "timing is already sufficiently explicit",
+        "asking 'why now' would be generic"
+      ],
+      "listen_for_examples": [
+        "findings before code freeze",
+        "enterprise launch this quarter",
+        "audit starts November 1"
+      ],
+      "may_unlock": [
+        "D05",
+        "D08",
+        "D15"
+      ]
+    }
+  ],
+  "forbidden_primary_intents": [
+    "D01 conversation_reason",
+    "D03 current_state",
+    "D04 problem_or_gap",
+    "D05 implication",
+    "D07 prior_attempts",
+    "D08 constraints_dependencies",
+    "D09 ownership_stakeholders",
+    "D10 economics",
+    "D12 decision_process",
+    "D13 assurance_requirements",
+    "D14 delivery_fit",
+    "D15 next_move"
+  ],
+  "allowed_service_ids": [
+    "SVC_VCISO_ADVISORY",
+    "SVC_PENTEST",
+    "SVC_ENTERPRISE_SECURITY"
+  ],
+  "commercial_target_authorized": false,
+  "economics_policy_required": false,
+  "errors": []
+}

@@ -1,0 +1,114 @@
+{
+  "gate_status": "CORRECTED",
+  "canonical_match_classifications": {
+    "service_need_alignment": {
+      "status": "MATCH",
+      "basis_ids": [
+        "BOOK-001",
+        "SOT:services"
+      ],
+      "reason": "The booking explicitly requests help making enterprise customer security reviews smoother, which directly aligns with Enterprise Sales Security Enablement."
+    },
+    "icp_company_fit": {
+      "status": "UNKNOWN",
+      "basis_ids": [],
+      "reason": "The SOT contains no explicit ICP or company-type policy rules."
+    },
+    "business_trigger": {
+      "status": "MATCH",
+      "basis_ids": [
+        "BOOK-001"
+      ],
+      "reason": "The booking explicitly identifies an increasing volume of enterprise customer security reviews as the operational event driving the request."
+    },
+    "buyer_stakeholder_fit": {
+      "status": "UNKNOWN",
+      "basis_ids": [],
+      "reason": "The booking and SOT do not establish specific buyer roles or ownership requirements."
+    },
+    "engagement_economics": {
+      "status": "UNKNOWN",
+      "basis_ids": [],
+      "reason": "The booking contains no direct budget or economic evidence to compare against SOT commercial rules."
+    },
+    "timing_urgency": {
+      "status": "UNKNOWN",
+      "basis_ids": [],
+      "reason": "The booking states a continuous need regarding reviews but provides no concrete timeline, deadline, or launch window."
+    },
+    "expansion_potential": {
+      "status": "UNKNOWN",
+      "basis_ids": [],
+      "reason": "The booking does not mention additional distinct service needs beyond streamlining security reviews."
+    }
+  },
+  "canonical_completeness_classifications": {
+    "critical_question_coverage": {
+      "status": "COMPLETE",
+      "basis_ids": [
+        "DIM:D1",
+        "DIM:D2",
+        "Q:Q1",
+        "Q:Q2"
+      ],
+      "reason": "All certified PREPARE open dimensions and variables are fully mapped to targeted discovery questions."
+    },
+    "source_authority": {
+      "status": "COMPLETE",
+      "basis_ids": [
+        "PE-001",
+        "PE-002",
+        "PE-003",
+        "PE-004",
+        "PE-005"
+      ],
+      "reason": "All evidence items rely entirely on official first-party documentation and trust center resources."
+    },
+    "corroboration_depth": {
+      "status": "PARTIAL",
+      "basis_ids": [
+        "PE-001",
+        "PE-002",
+        "PE-003",
+        "PE-004",
+        "PE-005"
+      ],
+      "reason": "First-party evidence breadth is solid across multiple company documentation pages, but lacks third-party corroboration."
+    },
+    "freshness": {
+      "status": "MISSING",
+      "basis_ids": [],
+      "reason": "The curated evidence packet contains no explicit publication, update, or fetched date metadata."
+    },
+    "conflict_ambiguity_control": {
+      "status": "COMPLETE",
+      "basis_ids": [
+        "R1",
+        "R2",
+        "U1",
+        "U2"
+      ],
+      "reason": "Uncertainties, residual friction points, and unsupported assumptions are explicitly bounded and controlled by PREPARE reasoning and unknowns."
+    }
+  },
+  "corrected_strategy": {
+    "recommended_action": "Proceed with the planned diagnostic discovery call to locate the exact manual review friction layer and define the desired smoother operating state before proposing a service path.",
+    "primary_service_id": "SVC_ENTERPRISE_SECURITY",
+    "qualification_status": "PROMISING",
+    "rationale": "The booking clearly identifies an operational bottleneck with enterprise security reviews that aligns with enterprise sales security enablement. Public documentation already establishes a robust assurance baseline, allowing the conversation to focus strictly on residual operational friction without wasting time on baseline compliance discovery.",
+    "key_talking_points": [
+      "Acknowledge existing public assurance artifacts (SOC 2, ISO 27001, HIPAA) and Trust Center resources to suppress redundant discovery.",
+      "Locate the exact manual review-friction layer: recurring questionnaires, evidence access, bespoke technical questions, or customer calls.",
+      "Define what a materially smoother review process operationally means forprs the team."
+    ],
+    "risk_factors": [
+      "Treating enterprise security reviews as an undifferentiated problem instead of isolating the specific workflow bottleneck.",
+      "Re-discovering public controls and baseline certifications that are already documented.",
+      "Assuming a service shape before the prospect confirms the desired operating outcome."
+    ]
+  },
+  "basis_resolution": {
+    "all_scored_basis_resolvable": true,
+    "unresolved_basis_ids": []
+  }
+}
