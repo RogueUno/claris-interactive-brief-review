@@ -1,0 +1,34 @@
+name: V2.3 Direct Final Safety
+
+on:
+  push:
+    branches: [v23-direct-final-outbox-20261004]
+  pull_request:
+    branches: [v23-delivery-owner-gate-20261004, main]
+    paths:
+      - 'api/delivery/package.mjs'
+      - 'calibration-v3/server/direct-final-outbox.mjs'
+      - 'calibration-v3/server/blob-storage.mjs'
+      - 'clarification-v1/server/tests/direct-final-*.test.mjs'
+      - '.github/workflows/v23-direct-final-ci.yml'
+  workflow_dispatch:
+
+jobs:
+  direct-final:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout isolated candidate
+        uses: actions/checkout@v4
+      - name: Verify ES modules
+        run: |
+          node --check api/delivery/package.mjs
+          node --check calibration-v3/server/direct-final-outbox.mjs
+          node --check calibration-v3/server/blob-storage.mjs
+      - name: Offline no-provider delivery certification
+        run: |
+          node --test clarification-v1/server/tests/direct-final-outbox.test.mjs
+          node --test clarification-v1/server/tests/direct-final-gateway.test.mjs
+      - name: Original owner tests must remain safe
+        run: |
+          node --test clarification-v1/server/tests/verify-locked-delivery-owner.test.mjs
+          node --test clarification-v1/server/tests/final-delivery-receipt.test.mjs
