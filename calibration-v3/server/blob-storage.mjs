@@ -36,6 +36,17 @@ export function createVercelBlobJsonStorage({ token = process.env.BLOB_READ_WRIT
       };
     },
 
+    async putJsonIfAbsent(pathname, value) {
+      // This must be a server-side create-only write, not a read-then-write.
+      return put(pathname, JSON.stringify(value), {
+        access: 'private',
+        token,
+        addRandomSuffix: false,
+        allowOverwrite: false,
+        contentType: 'application/json'
+      });
+    },
+
     async putJson(pathname, value, { ifMatch = null } = {}) {
       try {
         const saved = await put(pathname, JSON.stringify(value), {
