@@ -87,11 +87,17 @@ function idFromUri(uri) {
   return parts.at(-1) || null;
 }
 
-export function normalizeCalendlyBooking({ event, invitee, consultant_id = null } = {}) {
+export function normalizeCalendlyBooking({ event, invitee, consultant_id = null,
+  require_company_website_answer = false } = {}) {
   const entries = answerEntries(invitee);
   const combinedAnswers = entries.map(({ answer }) => answer).join('\n').trim();
 
-  const explicitCompanyAnswer = findAnswer(entries, [
+  // "Company website" is a URL question, not a company-name answer.
+  // Without this exclusion a real two-question Calendly event incorrectly
+  // sets company to "https://example.com" rather than its domain label.
+  const companyNameEntries = entries.filter(({ question }) =>
+    !/\b(?:website|web[\s-]*site|domain|url)\b/i.test(question));
+  const explicitCompanyAnswer = findAnswer(companyNameEntries, [
     /\bcompany\b/i,
     /\borganization\b/i,
     /\borganisation\b/i
@@ -155,6 +161,12 @@ export function normalizeCalendlyBooking({ event, invitee, consultant_id = null 
     ['domain', normalized.domain],
     ['meeting_time', normalized.meeting_time]
   ].filter(([, value]) => !value).map(([key]) => key);
+  // Calendly may supply a perfectly good corporate email domain, but the
+  // production ingress requires an explicit company-site answer. Fail closed
+  // here as well rather than relying exclusively on Make's branch filter.
+  if (require_company_website_answer === true && !domainFromExplicitAnswer) {
+    missing.push('company_website_answer');
+  }
 
   return {
     ok: missing.length === 0,
