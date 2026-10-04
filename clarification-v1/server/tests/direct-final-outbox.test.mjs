@@ -223,3 +223,19 @@ test('lost registration response, lost Gmail acknowledgment and write races stay
   assert.equal(ack.status,'RECONCILIATION_REQUIRED');
   assert.equal((await g.outbox.claim({...finalized,registration_token:b.registration_token})).status,'RECONCILIATION_REQUIRED');
 });
+
+
+test('private and malformed company sites cannot register expensive PREPARE work',async()=>{
+  for(const site of [
+    'http://acme.com/','https://127.0.0.1/',
+    'https://169.254.169.254/','https://localhost/',
+    'https://backend.local/','https://internal.test/',
+    'https://acme.com:8443/','https://acme.com/private',
+    'https://user:password@acme.com/'
+  ]){
+    const f=fixture();
+    const result=await f.outbox.begin({...booking,domain:site});
+    assert.equal(result.status,'BLOCKED',site);
+    assert.equal(f.blobs.size,0,site);
+  }
+});
