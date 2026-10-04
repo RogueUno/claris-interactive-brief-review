@@ -24,6 +24,7 @@ const finalAudit = {
 const finalized = {
   ...booking,
   status:'FINALIZED',
+  final_stage:'FINALIZE',
   requires_clarification:false,
   final_audit_json:JSON.stringify(finalAudit),
   final_brief_markdown:'# CLARIS final brief\nSensitive details should be cited.',
@@ -163,6 +164,8 @@ test('claim requires verified certification, no clarification, unchanged booking
   const base={...finalized,registration_token:begin.registration_token};
   for(const altered of [
     {status:'READY'},
+    {final_stage:'PREPARE'},
+    {final_stage:null},
     {requires_clarification:true},
     {requires_clarification:undefined},
     {final_brief_markdown:' '},
@@ -219,4 +222,20 @@ test('lost registration response, lost Gmail acknowledgment and write races stay
   });
   assert.equal(ack.status,'RECONCILIATION_REQUIRED');
   assert.equal((await g.outbox.claim({...finalized,registration_token:b.registration_token})).status,'RECONCILIATION_REQUIRED');
+});
+
+
+test('private and malformed company sites cannot register expensive PREPARE work',async()=>{
+  for(const site of [
+    'http://acme.com/','https://127.0.0.1/',
+    'https://169.254.169.254/','https://localhost/',
+    'https://backend.local/','https://internal.test/',
+    'https://acme.com:8443/','https://acme.com/private',
+    'https://user:password@acme.com/'
+  ]){
+    const f=fixture();
+    const result=await f.outbox.begin({...booking,domain:site});
+    assert.equal(result.status,'BLOCKED',site);
+    assert.equal(f.blobs.size,0,site);
+  }
 });
