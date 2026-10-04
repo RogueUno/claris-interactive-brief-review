@@ -117,6 +117,9 @@ test('preflight → claim → provider acknowledgment → duplicate is a no-send
   assert.equal(claim.consultant_delivery_email, ownerEmail);
   assert.match(claim.claim_token, /^[a-f0-9]{64}$/);
   assert.match(claim.digest, /^[a-f0-9]{64}$/);
+  assert.match(claim.email_subject, /CLARIS/);
+  assert.match(claim.email_html, /Certified CLARIS Brief/);
+  assert.doesNotMatch(claim.email_html, /<script|<img/i);
 
   const persisted = await f.repository.loadEnvelopeWithMeta(validFinal.opportunity_id);
   assert.equal(persisted.envelope.final_delivery_receipt.status, 'RESERVED');
@@ -236,4 +239,16 @@ test('unversioned storage and a corrupt receipt always fail closed', async () =>
   assert.equal((await claimFinalDelivery(validFinal, {
     repository: f.repository, consultantRepository: f.consultantRepository
   })).error, 'FINAL_DELIVERY_RECEIPT_INVALID');
+});
+
+test('email HTML escapes model-provided markup instead of executing it', async () => {
+  const f = await prepared();
+  const malicious = '<script>alert("hello")</script> <img src=x onerror="evil()">';
+  const claim = await claimFinalDelivery({
+    ...validFinal, final_brief_markdown: '# Brief\\n' + malicious
+  }, { repository: f.repository, consultantRepository: f.consultantRepository });
+  assert.equal(claim.status, 'CLAIMED');
+  assert.ok(claim.email_html.includes('&lt;script&gt;'));
+  assert.ok(claim.email_html.includes('&lt;img'));
+  assert.doesNotMatch(claim.email_html, /<script|<img/i);
 });
