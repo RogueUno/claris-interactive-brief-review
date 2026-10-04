@@ -36,6 +36,19 @@ export function createVercelBlobJsonStorage({ token = process.env.BLOB_READ_WRIT
       };
     },
 
+    // Atomic create-only reservation for an outbox receipt. Unlike read-then-
+    // write, allowOverwrite:false prevents concurrent claimants from both
+    // authorizing a send under the same deterministic pathname.
+    async putJsonIfAbsent(pathname, value) {
+      return put(pathname, JSON.stringify(value), {
+        access: 'private',
+        token,
+        addRandomSuffix: false,
+        allowOverwrite: false,
+        contentType: 'application/json'
+      });
+    },
+
     async putJson(pathname, value, { ifMatch = null } = {}) {
       try {
         const saved = await put(pathname, JSON.stringify(value), {
