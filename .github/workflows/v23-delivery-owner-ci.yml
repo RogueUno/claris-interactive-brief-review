@@ -1,0 +1,60 @@
+name: V2.3 Delivery Ownership Safety
+on:
+  push:
+    branches: [main, v23-delivery-owner-gate-20261004]
+    paths:
+      - 'api/clarification/admin/package.mjs'
+      - 'clarification-v1/server/**'
+      - 'calibration-v3/server/runtime-export.mjs'
+      - 'calibration-v3/server/blob-storage.mjs'
+      - 'clarification-v1/server/api-shared.mjs'
+      - '.github/workflows/v23-delivery-owner-ci.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'api/clarification/admin/package.mjs'
+      - 'clarification-v1/server/**'
+      - 'calibration-v3/server/runtime-export.mjs'
+      - 'calibration-v3/server/blob-storage.mjs'
+      - 'clarification-v1/server/api-shared.mjs'
+  workflow_dispatch:
+
+jobs:
+  owner-safety:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout candidate
+        uses: actions/checkout@v4
+        with:
+          path: candidate
+          fetch-depth: 0
+      - name: Check syntax
+        run: |
+          node --check candidate/api/clarification/admin/package.mjs
+          node --check candidate/clarification-v1/server/finalize-handoff.mjs
+          node --check candidate/clarification-v1/server/verify-locked-delivery-owner.mjs
+      - name: Verify locked owner isolation
+        run: |
+          node --test candidate/clarification-v1/server/tests/verify-locked-delivery-owner.test.mjs
+          node --test candidate/clarification-v1/server/tests/offline-delivery-lifecycle.test.mjs
+          node --test candidate/clarification-v1/server/tests/final-delivery-receipt.test.mjs
+          node --test candidate/clarification-v1/server/tests/atomic-clarification-create.test.mjs
+      - name: Compare FINALIZE baseline tests (fail closed)
+        shell: bash
+        run: |
+          set -euo pipefail
+          git clone --depth=1 --branch main "https://github.com/${{ github.repository }}.git" baseline
+          node --test baseline/clarification-v1/server/tests/finalize-handoff.test.mjs >baseline.log 2>&1 || true
+          node --test candidate/clarification-v1/server/tests/finalize-handoff.test.mjs >candidate.log 2>&1 || true
+          grep '^not ok ' baseline.log | sed -E 's/^not ok [0-9]+ - //' | sort -u >baseline.fail || true
+          grep '^not ok ' candidate.log | sed -E 's/^not ok [0-9]+ - //' | sort -u >candidate.fail || true
+          comm -13 baseline.fail candidate.fail >new.fail
+          if [ -s new.fail ]; then
+            echo 'New FINALIZE test regressions:'
+            cat new.fail
+            while IFS= read -r failure; do
+              grep -F -A 24 -- " - ${failure}" candidate.log | head -n 30 || true
+            done <new.fail
+            exit 1
+          fi
+          echo 'No new FINALIZE regressions.'

@@ -7,7 +7,7 @@ let cached;
 export function clarificationServerContext() {
   if (cached) return cached;
   const storage = createVercelBlobJsonStorage();
-  const repository = createClarificationRepository(storage);
+  const repository = createClarificationRepository(storage, { requireAtomicCreate: true });
   const sessionSecret = process.env.CLARIS_SESSION_SECRET;
   if (!sessionSecret) throw new Error('CLARIS_SESSION_SECRET_REQUIRED');
   const service = createClarificationService({ repository, sessionSecret });
