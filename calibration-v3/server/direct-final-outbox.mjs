@@ -61,8 +61,17 @@ function normalizeBooking(x) {
   }
   try {
     const url = new URL(b.domain);
+    const host = url.hostname.replace(/\.$/, '').toLowerCase();
+    const labels = host.split('.');
+    const last = labels.at(-1);
+    const reserved = new Set(['local','localhost','internal','invalid','test','example','lan','home','corp','onion']);
     if (url.protocol !== 'https:' || url.username || url.password ||
-        url.search || url.hash || url.pathname !== '/') return null;
+        url.port || url.search || url.hash || url.pathname !== '/' ||
+        host.length > 253 || labels.length < 2 || host.includes(':') ||
+        labels.some(l => !l || l.length > 63 ||
+          !/^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?$/.test(l)) ||
+        !/^(?:[a-z]{2,24}|xn--[a-z0-9-]{2,59})$/.test(last) ||
+        reserved.has(last) || /^\d+$/.test(last)) return null;
   } catch { return null; }
   return b;
 }
@@ -171,7 +180,8 @@ export function createDirectFinalOutbox({ storage, consultantRepository }) {
       if (!b || !TOKEN.test(registrationToken)) {
         return status('BLOCKED', { error: 'DIRECT_FINAL_CLAIM_INPUT_INVALID' });
       }
-      if (input?.status !== 'FINALIZED' || input?.requires_clarification !== false ||
+      if (input?.status !== 'FINALIZED' || input?.final_stage !== 'FINALIZE' ||
+          input?.requires_clarification !== false ||
           !auditPass(input?.final_audit_json) ||
           !text(input?.final_brief_markdown) ||
           text(input.final_brief_markdown).length > 250000) {
