@@ -88,7 +88,9 @@ jobs:
             echo "New server regressions introduced by premium branch:"
             cat new-failures.txt
             echo "=== Failing test diagnostics (branch) ==="
-            grep -A 25 '^not ok ' branch-server.log | head -n 150 || true
+            while IFS= read -r failure; do
+              grep -F -A 40 -- " - ${failure}" branch-server.log | head -n 50 || true
+            done < new-failures.txt
             exit 1
           fi
 
