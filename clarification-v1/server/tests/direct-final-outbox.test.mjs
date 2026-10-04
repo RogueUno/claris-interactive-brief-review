@@ -24,6 +24,7 @@ const finalAudit = {
 const finalized = {
   ...booking,
   status:'FINALIZED',
+  final_stage:'FINALIZE',
   requires_clarification:false,
   final_audit_json:JSON.stringify(finalAudit),
   final_brief_markdown:'# CLARIS final brief\nSensitive details should be cited.',
@@ -163,6 +164,8 @@ test('claim requires verified certification, no clarification, unchanged booking
   const base={...finalized,registration_token:begin.registration_token};
   for(const altered of [
     {status:'READY'},
+    {final_stage:'PREPARE'},
+    {final_stage:null},
     {requires_clarification:true},
     {requires_clarification:undefined},
     {final_brief_markdown:' '},
