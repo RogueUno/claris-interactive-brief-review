@@ -1,5 +1,6 @@
 import { clarificationServerContext } from '../../clarification-v1/server/api-shared.mjs';
 import { triggerFinalizeContinuation } from '../../clarification-v1/server/finalize-continuation.mjs';
+import { recordFinalizeDispatch } from '../../clarification-v1/server/finalize-dispatch.mjs';
 import { CLARIFICATION_SESSION_COOKIE, cookieValue, json, methodNotAllowed, parseJson } from '../../clarification-v1/server/http.mjs';
 
 export default {
@@ -19,6 +20,27 @@ export default {
 
     if (result.ok) {
       const continuation = await triggerFinalizeContinuation(result.opportunity_id);
+      // The submission itself is already committed. Persist only a dispatch
+      // outcome, not proof of FINALIZE or Gmail delivery, and do not retry a
+      // webhook whose response may have been lost after Make accepted it.
+      try {
+        const recorded = await recordFinalizeDispatch(
+          clarificationServerContext().repository,
+          result.opportunity_id,
+          continuation
+        );
+        if (!recorded.ok) {
+          console.error('CLARIS_FINALIZE_DISPATCH_RECEIPT_FAILED', {
+            opportunity_id: result.opportunity_id,
+            error: recorded.error
+          });
+        }
+      } catch {
+        console.error('CLARIS_FINALIZE_DISPATCH_RECEIPT_FAILED', {
+          opportunity_id: result.opportunity_id,
+          error: 'FINALIZE_DISPATCH_STORAGE_UNAVAILABLE'
+        });
+      }
       if (!continuation.ok) {
         console.error('CLARIS_FINALIZE_CONTINUATION_FAILED', {
           opportunity_id: result.opportunity_id,
