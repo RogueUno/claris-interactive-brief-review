@@ -166,3 +166,60 @@ test('FINALIZE continuation reports unavailable configuration without throwing',
   assert.equal(result.ok, false);
   assert.equal(result.error, 'FINALIZE_WEBHOOK_NOT_CONFIGURED');
 });
+
+
+test('FINALIZE delivery owner is bound server-side and never exposed to prospect views', async () => {
+  const { repository, service } = fixture();
+  const finalizeContext = buildFinalizeContext({
+    case_state_json: caseState,
+    consultant_sot_json: sot,
+    consultant: { consultant_id: 'consultant_1' },
+    consultant_id: 'consultant_1',
+    consultant_delivery_email: 'SARAH@EXAMPLE.COM'
+  }, { now: 1000 });
+  await service.createPackage(pkg(), { now: 1000, ttlMs: 60000, finalizeContext });
+  const loaded = await repository.loadEnvelopeWithMeta('opp_finalize_001');
+  assert.equal(loaded.envelope.finalize_context.consultant_id, 'consultant_1');
+  assert.equal(loaded.envelope.finalize_context.consultant_delivery_email, 'sarah@example.com');
+  const safe = publicClarificationPackage(loaded.envelope.package);
+  assert.doesNotMatch(JSON.stringify(safe), /sarah@example.com|finalize_context|consultant_delivery_email/);
+  const created = await service.reissueInvite('opp_finalize_001', { now: 1001, ttlMs: 60_000 });
+  const resolved = await service.resolveInvite(created.token, { now: 1002 });
+  assert.equal(resolved.ok, true);
+  const submitted = await service.submit(
+    resolved.session_token,
+    [{ question_id: 'q_budget', value: 'yes' }],
+    { now: 1003, expectedVersion: resolved.opportunity_version }
+  );
+  assert.equal(submitted.ok, true);
+  const updated = await repository.loadEnvelopeWithMeta('opp_finalize_001');
+  const bundle = buildFinalizeBundle(updated.envelope, updated.etag);
+  assert.equal(bundle.ok, true);
+  assert.equal(bundle.consultant_id, 'consultant_1');
+  assert.equal(bundle.consultant_delivery_email, 'sarah@example.com');
+  assert.doesNotMatch(bundle.prospect_answers_json, /sarah@example.com/);
+});
+
+test('FINALIZE owner mismatch or invalid email fails closed', () => {
+  assert.throws(() => buildFinalizeContext({
+    case_state_json: caseState, consultant_sot_json: sot,
+    consultant: { consultant_id: 'consultant_1' },
+    consultant_id: 'consultant_2',
+    consultant_delivery_email: 'sarah@example.com'
+  }), /FINALIZE_CONSULTANT_ID_MISMATCH/);
+  assert.throws(() => buildFinalizeContext({
+    case_state_json: caseState, consultant_sot_json: sot,
+    consultant_id: 'consultant_1',
+    consultant_delivery_email: 'not-an-email'
+  }), /FINALIZE_DELIVERY_EMAIL_INVALID/);
+  assert.throws(() => buildFinalizeContext({
+    case_state_json: caseState, consultant_sot_json: sot,
+    consultant_delivery_email: 'sarah@example.com'
+  }), /FINALIZE_CONSULTANT_ID_REQUIRED/);
+});
+
+test('legacy clarification envelopes do not infer an email address', () => {
+  const context = buildFinalizeContext({ case_state_json: caseState, consultant_sot_json: sot });
+  assert.equal(context.consultant_delivery_email, null);
+  assert.equal(context.consultant_id, null);
+});
