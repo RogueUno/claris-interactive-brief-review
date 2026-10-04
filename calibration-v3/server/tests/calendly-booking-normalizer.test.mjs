@@ -198,3 +198,45 @@ test('strict booking rejects invalid Company website even if other answers menti
   assert.ok(result.missing.includes('company_website_answer'));
   assert.equal(result.booking.domain, null);
 });
+
+
+test('strict website-only booking derives company label without treating URL as company name', () => {
+  const result = normalizeCalendlyBooking({
+    consultant_id: consultantId,
+    require_company_website_answer: true,
+    event: {uri:'https://api.calendly.com/scheduled_events/name-check',start_time:'2026-10-06T15:00:00Z'},
+    invitee: {
+      uri:'https://api.calendly.com/scheduled_events/name-check/invitees/name-check-invitee',
+      email:'alice@gmail.com',
+      name:'Alice Example',
+      questions_and_answers:[
+        {question:'Company website',answer:'https://instructure.com',position:0},
+        {question:'Notes',answer:'Would like an independent security review.',position:1}
+      ]
+    }
+  });
+  assert.equal(result.ok,true);
+  assert.equal(result.booking.company,'Instructure');
+  assert.equal(result.booking.domain,'https://instructure.com');
+  assert.equal(result.provenance.company,'DOMAIN_LABEL');
+});
+
+test('strict mode does not accept a personal website question as Company website', () => {
+  const result = normalizeCalendlyBooking({
+    consultant_id:consultantId,
+    require_company_website_answer:true,
+    event:{uri:'https://api.calendly.com/scheduled_events/notcompany',start_time:'2026-10-06T15:00:00Z'},
+    invitee:{
+      uri:'https://api.calendly.com/scheduled_events/notcompany/invitees/one',
+      email:'alice@othercompany.com',
+      name:'Alice Example',
+      questions_and_answers:[
+        {question:'Your personal website',answer:'https://my-blog.example',position:0},
+        {question:'Company',answer:'Other Company',position:1}
+      ]
+    }
+  });
+  assert.equal(result.ok,false);
+  assert.equal(result.booking.domain,null);
+  assert.ok(result.missing.includes('company_website_answer'));
+});
