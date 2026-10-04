@@ -240,3 +240,43 @@ test('strict mode does not accept a personal website question as Company website
   assert.equal(result.booking.domain,null);
   assert.ok(result.missing.includes('company_website_answer'));
 });
+
+
+test('strict booking rejects local IP and private hostname', () => {
+  for (const candidate of ['http://127.0.0.1/admin','http://169.254.169.254/latest','http://backend.local/path','http://internal.test']) {
+    const result=normalizeCalendlyBooking({
+      consultant_id: consultantId, require_company_website_answer:true,
+      event:{ uri:'https://api.calendly.com/scheduled_events/unsafe',start_time:'2026-10-06T15:00:00Z' },
+      invitee:{
+        uri:'https://api.calendly.com/scheduled_events/unsafe/invitees/unsafe1',
+        name:'Alex Example', email:'alex@gmail.com',
+        questions_and_answers:[{ question:'Company website',answer:candidate,position:0 }]
+      }
+    });
+    assert.equal(result.ok,false,candidate);
+    assert.equal(result.booking.domain,null,candidate);
+    assert.ok(result.missing.includes('company_website_answer'),candidate);
+  }
+});
+
+test('website subdomains derive the company label rather than app or docs', () => {
+  for(const [url,expected] of [
+    ['https://docs.supabase.com','Supabase'],
+    ['https://app.instructure.com','Instructure'],
+    ['https://docs.acme.co.uk','Acme'],
+    ['https://team-product.github.io','TeamProduct']
+  ]){
+    const result=normalizeCalendlyBooking({
+      consultant_id:consultantId, require_company_website_answer:true,
+      event:{uri:'https://api.calendly.com/scheduled_events/subdomain',start_time:'2026-10-06T15:00:00Z'},
+      invitee:{
+        uri:'https://api.calendly.com/scheduled_events/subdomain/invitees/xyz',
+        email:'alex@gmail.com',name:'Alex Example',
+        questions_and_answers:[{question:'Company website',answer:url,position:0}]
+      }
+    });
+    assert.equal(result.ok,true,url);
+    assert.equal(result.booking.company,expected,url);
+    assert.equal(result.provenance.company,'DOMAIN_LABEL');
+  }
+});
