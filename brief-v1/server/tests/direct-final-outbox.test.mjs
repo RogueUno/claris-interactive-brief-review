@@ -239,3 +239,20 @@ test('private and malformed company sites cannot register expensive PREPARE work
     assert.equal(f.blobs.size,0,site);
   }
 });
+
+
+test('unbounded or multiline booking labels cannot reach Gmail',async()=>{
+  for(const input of [
+    {company:'A'.repeat(161)},
+    {company:'Acme\nBcc:target@example.org'},
+    {prospect_first_name:'R'.repeat(121)},
+    {prospect_first_name:'Alex\rOther'},
+    {meeting_time:'T'.repeat(81)},
+    {prospect_email:'p'.repeat(250)+'@example.org'}
+  ]){
+    const f=fixture();
+    const response=await f.outbox.begin({...booking,...input});
+    assert.equal(response.status,'BLOCKED',Object.keys(input)[0]);
+    assert.equal(f.blobs.size,0);
+  }
+});
