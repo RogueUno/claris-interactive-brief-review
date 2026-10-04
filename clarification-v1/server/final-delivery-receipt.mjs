@@ -31,7 +31,7 @@ function safeReceipt(value) {
   };
 }
 function outcome(status, extras = {}) {
-  return { ok: status === 'CLAIMED' || status === 'ACKNOWLEDGED', status, ...extras };
+  return { ok: ['ELIGIBLE', 'CLAIMED', 'ACKNOWLEDGED', 'SKIPPED_ALREADY_SENT'].includes(status), status, ...extras };
 }
 function requiredRepository(repository) {
   if (!repository?.loadEnvelopeWithMeta || !repository?.saveEnvelopeWithMeta) {
