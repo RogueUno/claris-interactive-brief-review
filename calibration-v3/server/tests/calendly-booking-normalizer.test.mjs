@@ -155,7 +155,7 @@ test('real two-question Calendly setup derives company from website, not URL as 
     }
   });
   assert.equal(normalized.ok, true);
-  assert.equal(normalized.booking.company, 'Acme');
+  assert.equal(normalized.booking.company, 'Acme Security');
   assert.equal(normalized.booking.domain, 'https://acme-security.com');
   assert.equal(normalized.booking.opportunity_id, 'calendly_a12b34c5');
   assert.equal(normalized.provenance.company, 'DOMAIN_LABEL');
