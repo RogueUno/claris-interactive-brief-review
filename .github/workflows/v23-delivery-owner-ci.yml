@@ -6,6 +6,8 @@ on:
       - 'api/clarification/admin/package.mjs'
       - 'clarification-v1/server/**'
       - 'calibration-v3/server/runtime-export.mjs'
+      - 'calibration-v3/server/blob-storage.mjs'
+      - 'clarification-v1/server/api-shared.mjs'
       - '.github/workflows/v23-delivery-owner-ci.yml'
   pull_request:
     branches: [main]
@@ -13,6 +15,8 @@ on:
       - 'api/clarification/admin/package.mjs'
       - 'clarification-v1/server/**'
       - 'calibration-v3/server/runtime-export.mjs'
+      - 'calibration-v3/server/blob-storage.mjs'
+      - 'clarification-v1/server/api-shared.mjs'
   workflow_dispatch:
 
 jobs:
@@ -34,6 +38,7 @@ jobs:
           node --test candidate/clarification-v1/server/tests/verify-locked-delivery-owner.test.mjs
           node --test candidate/clarification-v1/server/tests/offline-delivery-lifecycle.test.mjs
           node --test candidate/clarification-v1/server/tests/final-delivery-receipt.test.mjs
+          node --test candidate/clarification-v1/server/tests/atomic-clarification-create.test.mjs
       - name: Compare FINALIZE baseline tests (fail closed)
         shell: bash
         run: |
