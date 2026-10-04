@@ -102,6 +102,10 @@ export function buildFinalizeBundle(envelope, opportunityVersion = null) {
   let context;
   try {
     context = assertFinalizeContext(envelope?.finalize_context);
+    const persistedOwnerId = consultantId(envelope?.package?.consultant?.consultant_id);
+    if (context.consultant_id && persistedOwnerId !== context.consultant_id) {
+      throw new Error('FINALIZE_CONSULTANT_ID_MISMATCH');
+    }
   } catch (error) {
     return {
       ok: false,
