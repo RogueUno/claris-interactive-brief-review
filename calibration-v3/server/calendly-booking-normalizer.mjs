@@ -91,16 +91,19 @@ export function normalizeCalendlyBooking({ event, invitee, consultant_id = null,
   const entries = answerEntries(invitee);
   const combinedAnswers = entries.map(({ answer }) => answer).join('\n').trim();
 
-  const explicitCompanyAnswer = findAnswer(entries, [
-    /\bcompany\b/i,
-    /\borganization\b/i,
-    /\borganisation\b/i
-  ]);
-  const explicitDomainAnswer = findAnswer(entries, [
-    /\bwebsite\b/i,
-    /\bdomain\b/i,
-    /\bcompany\s+(?:url|website)\b/i
-  ]);
+  const explicitCompanyAnswer = findAnswer(
+    entries.filter(({ question }) => !/\b(?:website|web\s*site|url|domain|link)\b/i.test(question)),
+    [
+      /\bcompany\b/i,
+      /\borganization\b/i,
+      /\borganisation\b/i
+    ]
+  );
+  const explicitDomainAnswer = findAnswer(entries,
+    require_company_website_answer === true
+      ? [/\b(?:company|business|organization|organisation|firm)\s+(?:website|web\s*site|url|domain)\b/i]
+      : [/\bwebsite\b/i, /\bdomain\b/i, /\bcompany\s+(?:url|website)\b/i]
+  );
   const explicitRoleAnswer = findAnswer(entries, [
     /\brole\b/i,
     /\btitle\b/i,
