@@ -2,6 +2,7 @@ import { buildDeliveryPackage } from '../../calibration-v3/server/pilot-delivery
 import { json, methodNotAllowed, parseJson, cookieValue } from '../../calibration-v3/server/http.mjs';
 import { briefSessionCookie } from '../../brief-v1/server/http.mjs';
 import { compileCertifiedBriefPublication } from '../../brief-v1/server/certified-publication-adapter.mjs';
+import { createBriefNotificationOutbox } from '../../brief-v1/server/notification-outbox.mjs';
 
 function normalizeAcceptedKeys(values = []) {
   return values.map((value) => String(value || '').trim()).filter(Boolean);
@@ -86,7 +87,17 @@ export function createDeliveryGateway({
   deliveryBuilder = buildDeliveryPackage,
   acceptedKeysProvider = defaultAcceptedKeys,
   adminKeysProvider = defaultAdminKeys,
-  briefBaseUrlProvider = defaultBriefBaseUrl
+  briefBaseUrlProvider = defaultBriefBaseUrl,
+  notificationOutboxProvider = async (request) => {
+    const brief = (await import('../../brief-v1/server/api-shared.mjs')).briefServerContext();
+    const consultants = (await import('../../calibration-v3/server/api-shared.mjs')).serverContext();
+    return createBriefNotificationOutbox({
+      storage: brief.storage,
+      briefRepository: brief.repository,
+      consultantRepository: consultants.repository,
+      baseUrl: briefBaseUrlProvider(request)
+    });
+  }
 } = {}) {
   async function handleBriefOperation(request, operation, body) {
     const service = await briefServiceProvider();
@@ -238,6 +249,17 @@ export function createDeliveryGateway({
             operation: compiled.operation,
             publish_ready_body_json: JSON.stringify(compiled.body)
           }, 200);
+        }
+
+        if (operation === 'brief_notification_claim' || operation === 'brief_notification_ack') {
+          const outbox = await notificationOutboxProvider(request);
+          const result = operation === 'brief_notification_claim'
+            ? await outbox.claim(parsed.value)
+            : await outbox.acknowledge(parsed.value);
+          const status = ['CLAIMED', 'ACKNOWLEDGED', 'SKIPPED_ALREADY_SENT'].includes(result.status)
+            ? 200
+            : result.status === 'RECONCILIATION_REQUIRED' ? 409 : 422;
+          return json(result, status);
         }
 
         if (operation === 'brief_create' || operation === 'brief_publish_ready' || operation === 'brief_revoke') {
