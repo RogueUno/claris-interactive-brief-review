@@ -3,6 +3,7 @@ import { verifyLockedDeliveryOwner } from '../../../clarification-v1/server/veri
 import { claimFinalDelivery, acknowledgeFinalDelivery, checkFinalDeliveryEligibility } from '../../../clarification-v1/server/final-delivery-receipt.mjs';
 import { clarificationServerContext } from '../../../clarification-v1/server/api-shared.mjs';
 import { json, methodNotAllowed, parseJson } from '../../../clarification-v1/server/http.mjs';
+import { parseMakeDeliveryInput, SUBMITTED_FINAL_FORM_FIELDS } from '../../../calibration-v3/server/make-delivery-transport.mjs';
 import { runClarificationProtocolStep } from '../../../clarification-v1/server/protocol.mjs';
 import { buildFinalizeBundle, buildFinalizeContext } from '../../../clarification-v1/server/finalize-handoff.mjs';
 import { renderFinalBrief } from '../../../clarification-v1/server/final-brief-renderer.mjs';
@@ -156,7 +157,9 @@ async function handleIntelligenceProtocol(request) {
 // A reserved claim cannot automatically expire because the provider may have
 // sent an email before an ACK was lost. Such cases require reconciliation.
 async function handleFinalDeliveryOperation(request, operation) {
-  const parsed = await parseJson(request);
+  const parsed = await parseMakeDeliveryInput(
+    request, parseJson, SUBMITTED_FINAL_FORM_FIELDS[operation]
+  );
   if (!parsed.ok) return parsed.response;
   try {
     const context = clarificationServerContext();
