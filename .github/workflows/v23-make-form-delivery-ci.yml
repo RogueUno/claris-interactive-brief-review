@@ -1,0 +1,31 @@
+name: CLARIS Make Delivery Form Safety
+
+on:
+  push:
+    branches: [v23-make-form-delivery-20261005]
+  pull_request:
+    branches: [main]
+    paths:
+      - "calibration-v3/server/make-delivery-transport.mjs"
+      - "calibration-v3/server/tests/make-delivery-transport.test.mjs"
+      - "api/delivery/package.mjs"
+      - "api/clarification/admin/package.mjs"
+      - ".github/workflows/v23-make-form-delivery-ci.yml"
+  workflow_dispatch:
+
+jobs:
+  safe-transport:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check static routes
+        run: |
+          node --check calibration-v3/server/make-delivery-transport.mjs
+          node --check api/delivery/package.mjs
+          node --check api/clarification/admin/package.mjs
+      - name: Test form encoding and backward compatibility
+        run: |
+          node --test calibration-v3/server/tests/make-delivery-transport.test.mjs
+          node --test clarification-v1/server/tests/direct-final-gateway.test.mjs
+          node --test clarification-v1/server/tests/final-delivery-receipt.test.mjs
+          node --test clarification-v1/server/tests/offline-delivery-lifecycle.test.mjs

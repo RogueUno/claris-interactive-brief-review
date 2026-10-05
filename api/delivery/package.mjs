@@ -1,6 +1,7 @@
 import { buildDeliveryPackage } from '../../calibration-v3/server/pilot-delivery.mjs';
 import { createDirectFinalOutbox } from '../../calibration-v3/server/direct-final-outbox.mjs';
 import { json, methodNotAllowed, parseJson } from '../../calibration-v3/server/http.mjs';
+import { parseMakeDeliveryInput, DIRECT_FINAL_FORM_FIELDS } from '../../calibration-v3/server/make-delivery-transport.mjs';
 
 function authorized(request) {
   const accepted = [process.env.CLARIS_MAKE_KEY, process.env.CLARIS_ADMIN_KEY]
@@ -42,14 +43,14 @@ export function createDeliveryGateway({
     if (request.method !== 'POST') return methodNotAllowed('POST');
     if (!authorize(request)) return json({ ok: false, error: 'MAKE_UNAUTHORIZED' }, 401);
 
-    const parsed = await parseJson(request);
-    if (!parsed.ok) return parsed.response;
-
-    const operation = String(
-      request.headers.get('x-claris-delivery') ||
-      parsed.value?.operation ||
-      ''
+    const declaredOperation = String(
+      request.headers.get('x-claris-delivery') || ''
     ).trim();
+    const parsed = await parseMakeDeliveryInput(
+      request, parseJson, DIRECT_FINAL_FORM_FIELDS[declaredOperation]
+    );
+    if (!parsed.ok) return parsed.response;
+    const operation = declaredOperation || String(parsed.value?.operation || '').trim();
 
     try {
       if (['direct_final_begin', 'direct_final_claim', 'direct_final_ack'].includes(operation)) {
