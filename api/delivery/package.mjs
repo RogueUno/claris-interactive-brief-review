@@ -1,6 +1,5 @@
 import { buildDeliveryPackage } from '../../calibration-v3/server/pilot-delivery.mjs';
 import { createDirectFinalOutbox } from '../../calibration-v3/server/direct-final-outbox.mjs';
-import { clarificationServerContext } from '../../clarification-v1/server/api-shared.mjs';
 import { json, methodNotAllowed, parseJson } from '../../calibration-v3/server/http.mjs';
 import { parseMakeDeliveryInput, DIRECT_FINAL_FORM_FIELDS } from '../../calibration-v3/server/make-delivery-transport.mjs';
 
@@ -33,6 +32,7 @@ export function createDeliveryGateway({
   authorize = authorized,
   directFinalOutboxProvider = async (request) => {
     const runtime = (await import('../../calibration-v3/server/api-shared.mjs')).serverContext();
+    const { clarificationServerContext } = await import('../../clarification-v1/server/api-shared.mjs');
     return createDirectFinalOutbox({
       storage: runtime.storage,
       consultantRepository: runtime.repository,
