@@ -1,0 +1,30 @@
+name: CLARIS Prospect Invite Safety
+
+on:
+  push:
+    branches: [v23-invite-delivery-20261005]
+  pull_request:
+    branches: [v23-make-form-delivery-20261005, main]
+    paths:
+      - 'calibration-v3/server/direct-final-outbox.mjs'
+      - 'calibration-v3/server/make-delivery-transport.mjs'
+      - 'api/delivery/package.mjs'
+      - 'clarification-v1/server/tests/direct-invite-outbox.test.mjs'
+      - '.github/workflows/v23-invite-delivery-ci.yml'
+  workflow_dispatch:
+
+jobs:
+  invite-safety:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Static syntax
+        run: |
+          node --check calibration-v3/server/direct-final-outbox.mjs
+          node --check api/delivery/package.mjs
+      - name: Offline tests, no paid providers
+        run: |
+          node --test clarification-v1/server/tests/direct-invite-outbox.test.mjs
+          node --test clarification-v1/server/tests/direct-final-outbox.test.mjs
+          node --test clarification-v1/server/tests/direct-final-gateway.test.mjs
+          node --test calibration-v3/server/tests/make-delivery-transport.test.mjs
