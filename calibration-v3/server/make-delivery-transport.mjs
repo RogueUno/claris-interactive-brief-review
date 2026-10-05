@@ -21,6 +21,15 @@ export const DIRECT_FINAL_FORM_FIELDS = Object.freeze({
   ],
   direct_final_ack: [
     'opportunity_id', 'claim_token', 'provider_message_id'
+  ],
+  direct_clarification_claim: [
+    'opportunity_id', 'consultant_id', 'consultant_delivery_email',
+    'consultant_sot_json', 'company', 'prospect_first_name',
+    'prospect_email', 'meeting_time', 'domain', 'registration_token',
+    'status', 'requires_clarification', 'invite_url'
+  ],
+  direct_clarification_ack: [
+    'opportunity_id', 'claim_token', 'provider_message_id'
   ]
 });
 export const SUBMITTED_FINAL_FORM_FIELDS = Object.freeze({

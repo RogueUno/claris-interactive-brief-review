@@ -30,11 +30,14 @@ function authorized(request) {
 // this authenticated endpoint instead of consuming another Vercel function.
 export function createDeliveryGateway({
   authorize = authorized,
-  directFinalOutboxProvider = async () => {
+  directFinalOutboxProvider = async (request) => {
     const runtime = (await import('../../calibration-v3/server/api-shared.mjs')).serverContext();
+    const { clarificationServerContext } = await import('../../clarification-v1/server/api-shared.mjs');
     return createDirectFinalOutbox({
       storage: runtime.storage,
-      consultantRepository: runtime.repository
+      consultantRepository: runtime.repository,
+      clarificationRepository: clarificationServerContext().repository,
+      inviteBaseUrl: new URL('/clarification-v1/',request.url).toString()
     });
   }
 } = {}) {
@@ -53,13 +56,18 @@ export function createDeliveryGateway({
     const operation = declaredOperation || String(parsed.value?.operation || '').trim();
 
     try {
-      if (['direct_final_begin', 'direct_final_claim', 'direct_final_ack'].includes(operation)) {
+      if (['direct_final_begin','direct_final_claim','direct_final_ack',
+        'direct_clarification_claim','direct_clarification_ack'].includes(operation)) {
         const outbox = await directFinalOutboxProvider(request);
         const result = operation === 'direct_final_begin'
           ? await outbox.begin(parsed.value)
           : operation === 'direct_final_claim'
             ? await outbox.claim(parsed.value)
-            : await outbox.acknowledge(parsed.value);
+            : operation === 'direct_final_ack'
+              ? await outbox.acknowledge(parsed.value)
+              : operation === 'direct_clarification_claim'
+                ? await outbox.claimInvite(parsed.value)
+                : await outbox.acknowledgeInvite(parsed.value);
         const code = ['REGISTERED', 'CLAIMED', 'ACKNOWLEDGED', 'SKIPPED_ALREADY_SENT'].includes(result.status)
           ? 200
           : result.status === 'RECONCILIATION_REQUIRED' ? 409 : 422;
