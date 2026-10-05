@@ -340,10 +340,17 @@ export function createDirectFinalOutbox({ storage, consultantRepository,
       } catch {
         return status('RECONCILIATION_REQUIRED',{error:'INVITE_CLAIM_UNCERTAIN'});
       }
+      // Invite target is already verified against the private package above.
+      // Escape HTML attributes independently of email prose to prevent markup
+      // injection without sacrificing a clickable link to the narrative form.
+      const href=inviteUrl.replace(/&/g,'&amp;').replace(/"/g,'&quot;')
+        .replace(/'/g,'&#39;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
       return status('CLAIMED',{
         prospect_email:b.prospect_email,
         subject:email.subject,
-        html_body:escapedEmail(email.text_body),
+        html_body:escapedEmail(email.text_body)
+          + '<p><a href="' + href
+          + '" rel="noopener noreferrer">Answer the quick questions</a></p>',
         claim_token:claimToken
       });
     },
