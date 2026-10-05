@@ -84,6 +84,9 @@ test('clarification invite: single claimant, owner email, provider ACK and safe 
  assert.equal(claim.prospect_email,booking.prospect_email);
  assert.match(claim.html_body,/1 quick detail/);
  assert.match(claim.subject,/Casey/);
+ assert.match(claim.html_body,/<a href="https:\/\/claris-calibration\.vercel\.app\/clarification-v1\/#invite=/);
+ assert.match(claim.html_body,/Answer the quick questions<\/a>/);
+ assert.doesNotMatch(claim.html_body,/<script|onerror=/i);
  const persisted=[...data.values()][0].value;
  assert.equal(persisted.status,'INVITE_RESERVED');
  assert.ok(!JSON.stringify(persisted).includes(url));
