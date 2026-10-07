@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createDirectFinalOutbox } from '../../../calibration-v3/server/direct-final-outbox.mjs';
+import { renderFinalBrief } from '../final-brief-renderer.mjs';
 
 const sot = {
   consultant: { consultant_name:'Casey Adviser', firm:'GRC Advisory' },
@@ -31,10 +32,61 @@ const finalized = {
   consultant_first_name:'Casey'
 };
 
+function certifiedPrepareState(overrides={}) {
+  return {
+    prepare_advisory:{stage:'AWAITING_PROSPECT_INPUT'},
+    p3_repair_applied:false,
+    p3_semantic_status:'DUAL_CERTIFIED_PASS',
+    p2_contract_gate_passed:true,
+    artifact_contract_version:'V3_TRUTH_BOUNDARY_3',
+    compiler_contract_version:'V3_CANONICAL_TRUTH_1',
+    canonical_evidence_authority:'MODULE_85_DETERMINISTIC_CANONICAL_TRUTH_COMPILER',
+    canonical_truth_json:JSON.stringify({
+      company:'Acme Security',
+      domain:'https://acme.com/',
+      compiler_contract_version:'V3_CANONICAL_TRUTH_1',
+      booking_evidence:[{
+        evidence_id:'BOOK-001',authority:'BOOKING_TEXT',
+        statement:'SOC 2 readiness is the stated booking need.',
+        exact_basis:'SOC 2 readiness is the stated booking need.',
+        resolvable:true
+      }],
+      canonical_evidence_registry:[{
+        evidence_id:'FAC-001',admission_status:'ADMITTED',sensitivity:'STANDARD',
+        channel:'IDENTITY_PRODUCT',authority:'VERIFIED_PUBLIC_FACT',
+        strength:'HIGH',freshness:'CURRENT',source_date:'2026-10-01',
+        source_url:'https://acme.com/security',
+        source_excerpt:'Acme publishes a security and compliance page.'
+      }]
+    }),
+    ...overrides
+  };
+}
+const strictArtifact = {
+  match_score:82,
+  evidence_completeness_score:88,
+  preliminary_brief_markdown:'Prepare around the stated SOC 2 readiness need.',
+  intelligence_lineage:[
+    {evidence_id:'BOOK-001',authority:'BOOKING_TEXT',usage:'Stated booking need'},
+    {evidence_id:'FAC-001',authority:'VERIFIED_PUBLIC_FACT',usage:'Public security posture'}
+  ]
+};
+function strictFinalized(overrides={}) {
+  const rendered=renderFinalBrief(strictArtifact);
+  return {
+    ...finalized,
+    prepare_case_state_json:JSON.stringify(certifiedPrepareState()),
+    final_stage_output_json:JSON.stringify(strictArtifact),
+    final_case_state_json:JSON.stringify(strictArtifact),
+    final_brief_markdown:rendered.brief_markdown,
+    ...overrides
+  };
+}
+
 function fixture({ identity='consultant_alpha',
   delivery='consultant@example.com',
   locked=true, runtimeStatus='READY', officialSot=sot,
-  storageOverride={} } = {}) {
+  storageOverride={}, requireFinalProvenance=false } = {}) {
   const blobs = new Map();
   let rev = 0;
   const storage = {
@@ -80,7 +132,7 @@ function fixture({ identity='consultant_alpha',
   };
   return {
     storage,blobs,consultantRepository,
-    outbox:createDirectFinalOutbox({storage,consultantRepository})
+    outbox:createDirectFinalOutbox({storage,consultantRepository,requireFinalProvenance})
   };
 }
 
