@@ -251,6 +251,7 @@ test('renders nested claris_final_brief contract emitted by V2.3 FINALIZE', () =
   assert.match(rendered.brief_markdown, /Primary service: SVC_API_AUDIT/);
   assert.match(rendered.brief_markdown, /Supported Match: 50\/100/);
   assert.match(rendered.brief_markdown, /Evidence Completeness: 68.75\/100/);
+  assert.match(rendered.brief_markdown, /basis: SVC_API_AUDIT, BOOK-001/);
   assert.match(rendered.brief_markdown, /Engagement Scope/);
   assert.match(rendered.brief_markdown, /Which API surfaces are highest priority/);
   assert.match(rendered.brief_markdown, /May 2026 Data Breach/);
@@ -407,6 +408,42 @@ test('renders canonical_alignment FINALIZE schema with overall match', () => {
   assert.match(rendered.brief_markdown, /Evidence Completeness: 62.5\/100/);
   assert.match(rendered.brief_markdown, /BOOK-001/);
   assert.match(rendered.brief_markdown, /PROS-001/);
+});
+
+test('fails closed when current FINAL contract drops all source lineage', () => {
+  assert.throws(
+    () => renderFinalBrief({
+      claris_final_brief: {
+        brief_metadata: {
+          report_status: 'QUALIFIED_FOR_DISCOVERY',
+          lead_consultant: 'Jordan Vale',
+          firm: 'Priority Stack Advisory'
+        },
+        deterministic_metrics: {
+          supported_match: 50,
+          scorable_coverage: 50,
+          evaluated_fit_rate: 100,
+          evidence_completeness: 68.75
+        },
+        match_score_explanation: {
+          overall_assessment: 'The prospect requirements align directly with the consultancy services.',
+          match_breakdown: {
+            service_need_alignment: {
+              status: 'MATCH',
+              rationale: 'Explicit booking need maps to API auditing.',
+              basis_ids: ['SVC_API_AUDIT', 'BOOK-001']
+            }
+          }
+        },
+        preliminary_brief_markdown: 'The prospect is seeking an API/OAuth audit.',
+        discovery_question_plan: [{
+          question: 'Which API surfaces are highest priority?',
+          intent: 'Define technical boundary.'
+        }]
+      }
+    }),
+    /FINAL_ARTIFACT_PROVENANCE_MISSING/
+  );
 });
 
 test('fails closed when nested current FINAL contract is missing required metrics/content', () => {
