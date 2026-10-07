@@ -2,6 +2,7 @@ import { createHash, randomBytes, timingSafeEqual } from 'node:crypto';
 import { buildFinalizeBundle } from './finalize-handoff.mjs';
 import { buildConsultantFinalDelivery } from '../../calibration-v3/server/pilot-delivery.mjs';
 import { verifyLockedDeliveryOwner } from './verify-locked-delivery-owner.mjs';
+import { renderFinalBrief } from './final-brief-renderer.mjs';
 
 const RECEIPT_SCHEMA = 'claris_final_delivery_receipt_v1';
 
@@ -27,6 +28,66 @@ function verifiedAudit(raw) {
   try { audit = typeof raw === 'string' ? JSON.parse(raw) : raw; } catch { return false; }
   return audit?.audit_status === 'PASS' && audit.repair_required === false &&
     Array.isArray(audit.violations) && audit.violations.length === 0;
+}
+function parsedObject(raw) {
+  if (raw && typeof raw === 'object' && !Array.isArray(raw)) return raw;
+  try {
+    const value = JSON.parse(String(raw || ''));
+    return value && typeof value === 'object' && !Array.isArray(value) ? value : null;
+  } catch { return null; }
+}
+function canonicalJson(value) {
+  function walk(item) {
+    if (Array.isArray(item)) return item.map(walk);
+    if (item && typeof item === 'object') {
+      return Object.fromEntries(Object.keys(item).sort().map((key) => [key, walk(item[key])]));
+    }
+    return item;
+  }
+  return JSON.stringify(walk(value));
+}
+function verifiedFinalProvenance(input, context, markdown) {
+  if (input?.final_stage !== 'FINALIZE') {
+    return { ok:false, error:'FINAL_DELIVERY_STAGE_INVALID' };
+  }
+  const version = text(input?.opportunity_version);
+  const provenanceDigest = text(input?.finalize_provenance_digest);
+  if (!version || version !== text(context?.opportunity_version) ||
+      !/^[a-f0-9]{64}$/i.test(provenanceDigest) ||
+      !constantEquals(provenanceDigest, context?.finalize_provenance_digest)) {
+    return { ok:false, error:'FINAL_DELIVERY_PROVENANCE_MISMATCH' };
+  }
+
+  const stageOutput = parsedObject(input?.final_stage_output_json);
+  const caseState = parsedObject(input?.final_case_state_json);
+  if (!stageOutput || !caseState) {
+    return { ok:false, error:'FINAL_DELIVERY_ARTIFACT_PROVENANCE_MISSING' };
+  }
+  if (canonicalJson(stageOutput) !== canonicalJson(caseState)) {
+    return { ok:false, error:'FINAL_DELIVERY_FINAL_STATE_MISMATCH' };
+  }
+
+  let rendered;
+  try { rendered = renderFinalBrief(stageOutput); }
+  catch { return { ok:false, error:'FINAL_DELIVERY_ARTIFACT_INVALID' }; }
+  if (text(rendered?.brief_markdown) !== markdown) {
+    return { ok:false, error:'FINAL_DELIVERY_RENDER_MISMATCH' };
+  }
+
+  const acceptedCount = Number(context?.finalize_provenance?.accepted_answer_count || 0);
+  if (acceptedCount > 0 && context?.finalize_provenance?.clarification_required === true) {
+    const serialized = canonicalJson(stageOutput);
+    if (!/\bPROS-[A-Za-z0-9_-]+\b/.test(serialized)) {
+      return { ok:false, error:'FINAL_DELIVERY_PROSPECT_LINEAGE_MISSING' };
+    }
+  }
+  return {
+    ok:true,
+    provenance_digest:provenanceDigest,
+    stage_output_sha256:hash(canonicalJson(stageOutput)),
+    audit_sha256:hash(typeof input?.final_audit_json === 'string'
+      ? input.final_audit_json : canonicalJson(input?.final_audit_json))
+  };
 }
 function isCollision(error) {
   return error?.code === 'BLOB_PRECONDITION_FAILED' ||
@@ -91,6 +152,10 @@ export async function claimFinalDelivery(input, {
       !context.consultant_id || !context.consultant_delivery_email) {
     return outcome('BLOCKED', { error: 'FINAL_DELIVERY_OWNER_OR_SUBMISSION_INVALID' });
   }
+  const provenance = verifiedFinalProvenance(input, context, markdown);
+  if (!provenance.ok) {
+    return outcome('BLOCKED', { error: provenance.error });
+  }
   let owner;
   try {
     owner = await verifyLockedDeliveryOwner(context, { repository: consultantRepository });
@@ -102,6 +167,9 @@ export async function claimFinalDelivery(input, {
     version: context.opportunity_version,
     consultant_id: owner.consultant_id,
     email: owner.consultant_delivery_email,
+    provenance_digest: provenance.provenance_digest,
+    stage_output_sha256: provenance.stage_output_sha256,
+    audit_sha256: provenance.audit_sha256,
     brief: markdown
   }));
   const deliveryPackage = buildConsultantFinalDelivery({
