@@ -37,12 +37,43 @@ test("persisted record is immutable and time stamped",async()=>{
  assert.equal(raw.immutable,true);assert.equal(raw.persisted_at,"2026-10-07T12:00:00.000Z");
  assert.equal(raw.repository_version,"claris_booking_fact_repository_v1");
 });
-test("duplicate create never overwrites first record",async()=>{
+test("exact duplicate webhook replay is idempotent",async()=>{
+ const s=memory(),r=createBookingFactRepository(s),first=envelope();await r.create(first);
+ const out=await r.create(envelope());
+ assert.equal(out.ok,true);assert.equal(out.status,"EXISTS_IDENTICAL");
+ assert.equal(out.etag,"etag_mock_001");assert.equal(s.writes,2);
+});
+test("changed duplicate facts never overwrite immutable first record",async()=>{
  const s=memory(),r=createBookingFactRepository(s),first=envelope();await r.create(first);
  const second=envelope();second.facts=[{fact_key:"tampered"}];
  const out=await r.create(second);
- assert.equal(out.ok,false);assert.equal(out.error,"BOOKING_FACT_CREATE_UNCERTAIN");
+ assert.equal(out.ok,false);assert.equal(out.error,"BOOKING_FACT_IMMUTABLE_CONFLICT");
  assert.equal([...s.map.values()][0].facts[0].fact_key,"company_website");assert.equal(s.writes,2);
+});
+test("uncertain create that actually persisted exact facts is confirmed safely",async()=>{
+ const s=memory(),r=createBookingFactRepository(s),e=envelope(),path=r.pathFor(e.opportunity_id);
+ s.putJsonIfAbsent=async(_path,value)=>{
+   s.map.set(path,JSON.parse(JSON.stringify(value)));s.etags.set(path,"etag_after_timeout");
+   throw Error("network timeout");
+ };
+ const out=await r.create(e);
+ assert.equal(out.ok,true);assert.equal(out.status,"EXISTS_IDENTICAL");
+ assert.equal(out.etag,"etag_after_timeout");
+});
+test("uncertain create with no readable record stays uncertain",async()=>{
+ const s=memory();s.putJsonIfAbsent=async()=>{throw Error("network timeout")};
+ const out=await createBookingFactRepository(s).create(envelope());
+ assert.equal(out.ok,false);assert.equal(out.error,"BOOKING_FACT_CREATE_UNCERTAIN");
+});
+test("successful write without returned ETag is independently confirmed",async()=>{
+ const s=memory(),r=createBookingFactRepository(s),e=envelope(),path=r.pathFor(e.opportunity_id);
+ s.putJsonIfAbsent=async(_path,value)=>{
+   s.map.set(path,JSON.parse(JSON.stringify(value)));s.etags.set(path,"etag_readback");
+   return {};
+ };
+ const out=await r.create(e);
+ assert.equal(out.ok,true);assert.equal(out.status,"EXISTS_IDENTICAL");
+ assert.equal(out.etag,"etag_readback");
 });
 test("load returns exact persisted envelope and ETag",async()=>{
  const s=memory(),r=createBookingFactRepository(s);await r.create(envelope());
