@@ -2,9 +2,9 @@
 // Pure dependency injection: does not call Blob, Make, Calendly or a model by itself.
 const EXPECTED_EVENT_TYPE=Object.freeze({custom_questions:[
  {name:"Company website",type:"string",position:0,enabled:true,required:true,answer_choices:[],include_other:false},
- {name:"Please share anything that will help prepare for our meeting.",type:"string",position:1,enabled:true,required:false,answer_choices:[],include_other:false},
- {name:"What would you like help with?",type:"single_select",position:2,enabled:true,required:true,
-  answer_choices:["API Security Auditing","SOC 2 Readiness","Both API Security Auditing and SOC 2 Readiness","I'm not sure yet / something else"],include_other:false}
+ {name:"What would you like help with?",type:"single_select",position:1,enabled:true,required:true,
+  answer_choices:["API Security Auditing","SOC 2 Readiness","Both API Security Auditing and SOC 2 Readiness","I'm not sure yet / something else"],include_other:false},
+ {name:"Please share anything that will help prepare for our meeting.",type:"string",position:2,enabled:true,required:false,answer_choices:[],include_other:false}
 ]});
 const txt=x=>typeof x==="string"?x.trim():"";
 const block=(error)=>({ok:false,error});
