@@ -33,6 +33,10 @@ export function trustedFirstCallFactGateEnabled(env = process.env) {
     envEnabled(env?.CLARIS_FIRST_CALL_FACT_GATE_V1);
 }
 
+export function finalProvenanceGateEnabled(env = process.env) {
+  return envEnabled(env?.CLARIS_FINAL_PROVENANCE_V1);
+}
+
 function getTrustedFirstCallGovernance() {
   if (trustedFirstCallGovernance) return trustedFirstCallGovernance;
   const calibration = calibrationServerContext();
@@ -202,7 +206,8 @@ async function handleFinalDeliveryOperation(request, operation) {
     const context = clarificationServerContext();
     const repositories = {
       repository: context.repository,
-      consultantRepository: calibrationServerContext().repository
+      consultantRepository: calibrationServerContext().repository,
+      requireFinalProvenance: finalProvenanceGateEnabled()
     };
     const result = operation === FINAL_DELIVERY_PREFLIGHT_OPERATION
       ? await checkFinalDeliveryEligibility(parsed.value, repositories)
