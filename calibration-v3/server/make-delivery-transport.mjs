@@ -17,12 +17,19 @@ export const DIRECT_FINAL_FORM_FIELDS = Object.freeze({
     'consultant_sot_json', 'company', 'prospect_first_name',
     'prospect_email', 'meeting_time', 'domain', 'recovery_reason'
   ],
+  direct_final_seal_prepare: [
+    'opportunity_id', 'consultant_id', 'consultant_delivery_email',
+    'consultant_sot_json', 'company', 'prospect_first_name',
+    'prospect_email', 'meeting_time', 'domain', 'registration_token',
+    'prepare_case_state_json'
+  ],
   direct_final_claim: [
     'opportunity_id', 'consultant_id', 'consultant_delivery_email',
     'consultant_sot_json', 'company', 'prospect_first_name',
     'prospect_email', 'meeting_time', 'domain', 'registration_token',
     'status', 'final_stage', 'requires_clarification', 'final_audit_json',
-    'final_brief_markdown', 'consultant_first_name'
+    'final_brief_markdown', 'consultant_first_name', 'prepare_case_state_json',
+    'final_stage_output_json', 'final_case_state_json'
   ],
   direct_final_ack: [
     'opportunity_id', 'claim_token', 'provider_message_id'
