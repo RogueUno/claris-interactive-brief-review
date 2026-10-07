@@ -218,7 +218,11 @@ function classificationLines(classifications) {
   return Object.entries(classifications).map(([key, item]) => {
     const status = firstText(item?.status) || 'UNKNOWN';
     const reason = firstText(item?.reason, item?.rationale, item?.reasoning);
-    return `- **${humanize(key)}:** ${status}${reason ? ` — ${reason}` : ''}`;
+    const basisIds = array(item?.basis_ids)
+      .map((value) => firstText(value))
+      .filter(Boolean);
+    const basis = basisIds.length ? ` [basis: ${basisIds.join(', ')}]` : '';
+    return `- **${humanize(key)}:** ${status}${reason ? ` — ${reason}` : ''}${basis}`;
   });
 }
 
@@ -262,8 +266,14 @@ function assertRenderable(normalized) {
       )
     );
 
+    const hasLineage = normalized.intelligence_lineage.length > 0 &&
+      normalized.intelligence_lineage.every((item) => Boolean(firstText(item?.source_id)));
+
     if (!allMetricsPresent || !hasCurrentContractContent) {
       throw new Error('FINAL_ARTIFACT_CONTRACT_MISMATCH');
+    }
+    if (!hasLineage) {
+      throw new Error('FINAL_ARTIFACT_PROVENANCE_MISSING');
     }
   }
 }
