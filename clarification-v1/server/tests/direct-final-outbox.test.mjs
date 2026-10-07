@@ -256,3 +256,106 @@ test('unbounded or multiline booking labels cannot reach Gmail',async()=>{
     assert.equal(f.blobs.size,0);
   }
 });
+
+
+test('registered transient-provider recovery rotates the token exactly once',async()=>{
+  const f=fixture();
+  const begin=await f.outbox.begin(booking,{now:1000});
+  const recovered=await f.outbox.recoverRegistered({
+    ...booking,recovery_reason:'PROVIDER_TRANSIENT_503'
+  },{now:2000});
+  assert.equal(recovered.status,'RECOVERY_AUTHORIZED');
+  assert.equal(recovered.ok,true);
+  assert.equal(recovered.recovery_count,1);
+  assert.match(recovered.registration_token,/^[a-f0-9]{64}$/);
+  assert.notEqual(recovered.registration_token,begin.registration_token);
+
+  const stale=await f.outbox.claim({
+    ...finalized,registration_token:begin.registration_token
+  });
+  assert.equal(stale.status,'BLOCKED');
+  assert.equal(stale.error,'DIRECT_FINAL_REGISTRATION_MISMATCH');
+
+  const fresh=await f.outbox.claim({
+    ...finalized,registration_token:recovered.registration_token
+  });
+  assert.equal(fresh.status,'CLAIMED');
+});
+
+test('a registered booking receives at most one recovery authorization',async()=>{
+  const f=fixture();
+  await f.outbox.begin(booking);
+  const first=await f.outbox.recoverRegistered({
+    ...booking,recovery_reason:'PROVIDER_TRANSIENT_503'
+  });
+  assert.equal(first.status,'RECOVERY_AUTHORIZED');
+  const second=await f.outbox.recoverRegistered({
+    ...booking,recovery_reason:'PROVIDER_TRANSIENT_503'
+  });
+  assert.equal(second.status,'BLOCKED');
+  assert.equal(second.error,'DIRECT_FINAL_RECOVERY_LIMIT_REACHED');
+});
+
+test('recovery requires exact registered booking, locked owner, SOT and explicit transient reason',async()=>{
+  const f=fixture();
+  await f.outbox.begin(booking);
+  for(const patch of [
+    {recovery_reason:'AUTOMATIC_RETRY'},
+    {company:'Different Company',recovery_reason:'PROVIDER_TRANSIENT_503'},
+    {consultant_sot_json:{consultant:{consultant_name:'Wrong'}},recovery_reason:'PROVIDER_TRANSIENT_503'}
+  ]){
+    const r=await f.outbox.recoverRegistered({...booking,...patch});
+    assert.equal(r.status,'BLOCKED',JSON.stringify(patch));
+  }
+
+  const wrongOwner=fixture({delivery:'other@example.com'});
+  await wrongOwner.outbox.begin({...booking,consultant_delivery_email:'other@example.com'});
+  const denied=await wrongOwner.outbox.recoverRegistered({
+    ...booking,recovery_reason:'PROVIDER_TRANSIENT_503'
+  });
+  assert.equal(denied.status,'BLOCKED');
+});
+
+test('concurrent recovery permits one token rotation only',async()=>{
+  const f=fixture();
+  await f.outbox.begin(booking);
+  const results=await Promise.all(Array.from({length:12},()=>f.outbox.recoverRegistered({
+    ...booking,recovery_reason:'PROVIDER_TRANSIENT_503'
+  })));
+  assert.equal(results.filter(x=>x.status==='RECOVERY_AUTHORIZED').length,1);
+  assert.equal(results.filter(x=>x.status==='RECONCILIATION_REQUIRED').length,11);
+});
+
+test('recovery cannot reopen a reserved or sent delivery',async()=>{
+  const f=fixture();
+  const begin=await f.outbox.begin(booking);
+  const claim=await f.outbox.claim({...finalized,registration_token:begin.registration_token});
+  assert.equal(claim.status,'CLAIMED');
+
+  const reserved=await f.outbox.recoverRegistered({
+    ...booking,recovery_reason:'PROVIDER_TRANSIENT_503'
+  });
+  assert.equal(reserved.status,'RECONCILIATION_REQUIRED');
+  assert.equal(reserved.error,'DIRECT_FINAL_SEND_OUTCOME_UNKNOWN');
+
+  await f.outbox.acknowledge({
+    opportunity_id:booking.opportunity_id,
+    claim_token:claim.claim_token,provider_message_id:'gmail-one'
+  });
+  const sent=await f.outbox.recoverRegistered({
+    ...booking,recovery_reason:'PROVIDER_TRANSIENT_503'
+  });
+  assert.equal(sent.status,'SKIPPED_ALREADY_SENT');
+});
+
+test('uncertain recovery CAS result never returns a new usable token',async()=>{
+  const f=fixture();
+  await f.outbox.begin(booking);
+  f.storage.putJson=async()=>{throw Error('NETWORK_TIMEOUT');};
+  const result=await f.outbox.recoverRegistered({
+    ...booking,recovery_reason:'PROVIDER_TRANSIENT_503'
+  });
+  assert.equal(result.status,'RECONCILIATION_REQUIRED');
+  assert.equal(result.error,'DIRECT_FINAL_RECOVERY_UNCERTAIN');
+  assert.equal('registration_token' in result,false);
+});
