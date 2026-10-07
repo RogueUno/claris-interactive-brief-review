@@ -8,6 +8,7 @@ const EXPECTED_EVENT_TYPE=Object.freeze({custom_questions:[
 ]});
 const txt=x=>typeof x==="string"?x.trim():"";
 const block=(error)=>({ok:false,error});
+const CLARIFY=new Set(["SERVICE_ALIGNMENT_UNESTABLISHED","UNKNOWN_POLICY_NOT_PERMISSIVE","KNOWN_BUDGET_CURRENCY_UNCOMPARABLE"]);
 export function createTrustedBookingFactService({
  loadProfileEnvelope,compileFacts,evaluateQualification
 }={}){
@@ -43,16 +44,23 @@ export function createTrustedBookingFactService({
      ideal_client_profile:sot.ideal_client_profile
    };
    const qualification=evaluateQualification({envelope:facts,policy});
-   if(!qualification?.ok)return {
-     ok:false,error:qualification?.error||"BOOKING_QUALIFICATION_EVALUATION_FAILED",
-     profile_status:"LOCKED",runtime_status:"READY"
-   };
+   if(!qualification?.ok&&!CLARIFY.has(qualification?.error))
+     return {
+       ok:false,error:qualification?.error||"BOOKING_QUALIFICATION_EVALUATION_FAILED",
+       profile_status:"LOCKED",runtime_status:"READY"
+     };
+   const qualificationStatus=!qualification?.ok
+     ?"REQUIRES_CLARIFICATION"
+     :qualification.established===true
+       ?"ESTABLISHED"
+       :"AFFIRMATIVE_DISQUALIFIER";
    return {
      ok:true,schema_version:"claris_trusted_booking_fact_service_v1",
      consultant_id:id,opportunity_id:facts.opportunity_id,
      profile_status:"LOCKED",runtime_status:"READY",
      booking_fact_envelope:facts,
      qualification_fact:qualification,
+     qualification_status:qualificationStatus,
      // Never export the entire private consultant SOT through this boundary.
      runtime_policy_version:txt(sot.sot_version)||null
    };
