@@ -52,9 +52,11 @@ test("full consultant SOT is not returned",async()=>{
  assert.equal("services" in r,false);
  assert.equal(r.runtime_policy_version,"runtime_v3_test");
 });
-test("unknown service answer requires clarification but does not invent alignment",async()=>{
+test("unknown service answer remains a valid booking but explicitly requires clarification",async()=>{
  const r=await call(service(),{invitee:invitee("I'm not sure yet / something else")});
- assert.equal(r.ok,false);assert.equal(r.error,"SERVICE_ALIGNMENT_UNESTABLISHED");
+ assert.equal(r.ok,true);assert.equal(r.qualification_status,"REQUIRES_CLARIFICATION");
+ assert.equal(r.qualification_fact.error,"SERVICE_ALIGNMENT_UNESTABLISHED");
+ assert.equal(r.booking_fact_envelope.clarification_required_by_booking_facts,true);
 });
 test("inactive selected service is rejected using locked Runtime",async()=>{
  const p=profile();p.lifecycle_record.runtime_v3.consultant_sot_json.services=[{service_id:"SVC_API_AUDIT",name:"API Security Auditing"}];
@@ -109,4 +111,18 @@ test("qualification evaluator errors fail closed",async()=>{
 });
 test("dependencies are mandatory",()=>{
  assert.throws(()=>createTrustedBookingFactService(),/DEPENDENCY_REQUIRED/);
+});
+
+test("established qualification is labeled without authorizing delivery",async()=>{
+ const r=await call();assert.equal(r.ok,true);assert.equal(r.qualification_status,"ESTABLISHED");
+ assert.equal("final_delivery_authorized" in r,false);
+});
+test("policy evaluator may mark an affirmative disqualifier without dropping the booking",async()=>{
+ const r=await call(service({evaluate:()=>({ok:true,established:false,fact_key:"not affirmatively disqualified",reason:"KNOWN_BUDGET_BELOW_FLOOR"})}));
+ assert.equal(r.ok,true);assert.equal(r.qualification_status,"AFFIRMATIVE_DISQUALIFIER");
+ assert.equal(r.qualification_fact.established,false);
+});
+test("non-permissive unknown policy routes to clarification rather than rejecting intake",async()=>{
+ const r=await call(service({evaluate:()=>({ok:false,error:"UNKNOWN_POLICY_NOT_PERMISSIVE"})}));
+ assert.equal(r.ok,true);assert.equal(r.qualification_status,"REQUIRES_CLARIFICATION");
 });
