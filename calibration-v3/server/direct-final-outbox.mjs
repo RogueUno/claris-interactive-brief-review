@@ -443,17 +443,35 @@ export function createDirectFinalOutbox({ storage, consultantRepository,
           !same(rec.booking_hash, hash(JSON.stringify(b)))) {
         return status('BLOCKED', { error:'DIRECT_FINAL_REGISTRATION_MISMATCH' });
       }
-      if (rec.status !== 'REGISTERED') return previously(rec);
+      if (requireFinalProvenance) {
+        if (rec.status !== 'PREPARE_SEALED') {
+          return status('BLOCKED', { error:'DIRECT_FINAL_PREPARE_NOT_SEALED' });
+        }
+      } else if (!['REGISTERED','PREPARE_SEALED'].includes(rec.status)) {
+        return previously(rec);
+      }
       const owner = await lockedOwner(input);
       if (!owner || owner.consultant_id !== rec.consultant_id ||
           !same(rec.consultant_email_hash, hash(owner.consultant_delivery_email))) {
         return status('BLOCKED', { error:'DIRECT_FINAL_OWNER_CHANGED' });
       }
-      let canonical;
-      try { canonical = canonicalJson(input.consultant_sot_json); }
-      catch { return status('BLOCKED', { error:'DIRECT_FINAL_SOT_INVALID' }); }
-      if (!same(rec.sot_hash, hash(canonical))) {
+      let canonical, sotObject;
+      try {
+        canonical = canonicalJson(input.consultant_sot_json);
+        sotObject = parsedObject(input.consultant_sot_json);
+      } catch {
+        return status('BLOCKED', { error:'DIRECT_FINAL_SOT_INVALID' });
+      }
+      if (!sotObject || !same(rec.sot_hash, hash(canonical))) {
         return status('BLOCKED', { error:'DIRECT_FINAL_SOT_CHANGED' });
+      }
+      const provenance = requireFinalProvenance
+        ? verifiedDirectFinalProvenance(
+            input, rec, b, sotObject, text(input.final_brief_markdown)
+          )
+        : { ok:true, prepare_hash:null, stage_output_hash:null, audit_hash:null };
+      if (!provenance.ok) {
+        return status('BLOCKED', { error:provenance.error });
       }
       let delivery;
       try {
@@ -474,6 +492,9 @@ export function createDirectFinalOutbox({ storage, consultantRepository,
         ...rec, status: 'RESERVED',
         claim_hash: hash(claimToken),
         final_hash: hash(text(input.final_brief_markdown)),
+        provenance_prepare_hash: provenance.prepare_hash,
+        provenance_stage_output_hash: provenance.stage_output_hash,
+        provenance_audit_hash: provenance.audit_hash,
         reserved_at: new Date(now).toISOString()
       };
       try { await storage.putJson(receiptPath(b.opportunity_id), next, { ifMatch:loaded.etag }); }
