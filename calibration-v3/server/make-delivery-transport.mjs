@@ -12,6 +12,11 @@ export const DIRECT_FINAL_FORM_FIELDS = Object.freeze({
     'consultant_sot_json', 'company', 'prospect_first_name',
     'prospect_email', 'meeting_time', 'domain'
   ],
+  direct_final_recover: [
+    'opportunity_id', 'consultant_id', 'consultant_delivery_email',
+    'consultant_sot_json', 'company', 'prospect_first_name',
+    'prospect_email', 'meeting_time', 'domain', 'recovery_reason'
+  ],
   direct_final_claim: [
     'opportunity_id', 'consultant_id', 'consultant_delivery_email',
     'consultant_sot_json', 'company', 'prospect_first_name',
