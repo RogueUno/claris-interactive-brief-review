@@ -10,9 +10,9 @@ import {
 
 const eventType=()=>({custom_questions:[
  {name:"Company website",type:"string",position:0,enabled:true,required:true,answer_choices:[],include_other:false},
- {name:"What would you like help with?",type:"single_select",position:1,enabled:true,required:true,
-  answer_choices:["API Security Auditing","SOC 2 Readiness","Both API Security Auditing and SOC 2 Readiness","I'm not sure yet / something else"],include_other:false},
- {name:"Please share anything that will help prepare for our meeting.",type:"string",position:2,enabled:true,required:false,answer_choices:[],include_other:false}
+ {name:"Please share anything that will help prepare for our meeting.",type:"string",position:1,enabled:true,required:false,answer_choices:[],include_other:false},
+ {name:"What would you like help with?",type:"single_select",position:2,enabled:true,required:true,
+  answer_choices:["API Security Auditing","SOC 2 Readiness","Both API Security Auditing and SOC 2 Readiness","I'm not sure yet / something else"],include_other:false}
 ]});
 const event=()=>({uri:"https://api.calendly.com/scheduled_events/event-qa-001",start_time:"2026-10-10T12:00:00Z"});
 const invitee=(alignment="SOC 2 Readiness",extra=[])=>({
@@ -36,21 +36,21 @@ test("strict event schema passes with company website, alignment and optional pr
  assert.equal(verifyTrustedCalendlyQuestionSchema(eventType()).ok,true);
 });
 test("current production-like two-question schema fails until alignment field exists",()=>{
- const t=eventType();t.custom_questions.splice(1,1);
+ const t=eventType();t.custom_questions=t.custom_questions.filter(q=>q.name!=="What would you like help with?");
  assert.equal(verifyTrustedCalendlyQuestionSchema(t).error,"ALIGNMENT_QUESTION_SCHEMA_INVALID");
 });
 test("alignment must be required single-select",()=>{
  for(const patch of [{required:false},{type:"string"}]){
-  const t=eventType();Object.assign(t.custom_questions[1],patch);
+  const t=eventType();Object.assign(t.custom_questions.find(q=>q.name==="What would you like help with?"),patch);
   assert.equal(verifyTrustedCalendlyQuestionSchema(t).error,"ALIGNMENT_QUESTION_SCHEMA_INVALID");
  }
 });
 test("alignment choices and order are a versioned contract",()=>{
- const t=eventType();t.custom_questions[1].answer_choices.reverse();
+ const t=eventType();t.custom_questions.find(q=>q.name==="What would you like help with?").answer_choices.reverse();
  assert.equal(verifyTrustedCalendlyQuestionSchema(t).error,"ALIGNMENT_CHOICES_SCHEMA_INVALID");
 });
 test("Calendly Other input is disabled to keep fact values typed",()=>{
- const t=eventType();t.custom_questions[1].include_other=true;
+ const t=eventType();t.custom_questions.find(q=>q.name==="What would you like help with?").include_other=true;
  assert.equal(verifyTrustedCalendlyQuestionSchema(t).error,"ALIGNMENT_CHOICES_SCHEMA_INVALID");
 });
 test("unknown enabled questions fail schema instead of silently entering trust boundary",()=>{
@@ -169,4 +169,11 @@ test("known below-floor USD budget is an affirmative disqualifier",()=>{
 test("known non-USD budget with positive USD floor fails closed rather than converts",()=>{
  const e=compile();e.facts.push({fact_key:"budget",established:true,amount:9000,currency:"EUR"});
  assert.equal(evaluateTrustedBookingQualification({envelope:e,policy:qualificationPolicy()}).error,"KNOWN_BUDGET_CURRENCY_UNCOMPARABLE");
+});
+
+test("live Calendly order is accepted: website, optional prep, required dropdown",()=>{
+ const r=verifyTrustedCalendlyQuestionSchema(eventType());
+ assert.equal(r.ok,true);
+ assert.equal(eventType().custom_questions[2].type,"single_select");
+ assert.equal(eventType().custom_questions[2].position,2);
 });
