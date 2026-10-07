@@ -201,7 +201,7 @@ function escapedEmail(value) {
 }
 function validRecord(record) {
   if (!record || record.schema_version !== VERSION ||
-      !['REGISTERED','RESERVED','SENT','INVITE_RESERVED','INVITE_SENT'].includes(record.status)) {
+      !['REGISTERED','PREPARE_SEALED','RESERVED','SENT','INVITE_RESERVED','INVITE_SENT'].includes(record.status)) {
     return false;
   }
   return TOKEN.test(record.registration_hash) &&
@@ -214,14 +214,15 @@ function previously(record) {
   return ['SENT','INVITE_SENT'].includes(record.status)
     ? status('SKIPPED_ALREADY_SENT')
     : status('RECONCILIATION_REQUIRED', {
-      error: record.status === 'REGISTERED'
+      error: ['REGISTERED','PREPARE_SEALED'].includes(record.status)
         ? 'DIRECT_FINAL_BOOKING_ALREADY_REGISTERED'
         : 'DIRECT_FINAL_SEND_OUTCOME_UNKNOWN'
     });
 }
 
 export function createDirectFinalOutbox({ storage, consultantRepository,
-  clarificationRepository = null, inviteBaseUrl = null }) {
+  clarificationRepository = null, inviteBaseUrl = null,
+  requireFinalProvenance = false }) {
   if (!storage?.getJsonWithMeta || !storage?.putJsonIfAbsent || !storage?.putJson ||
       !consultantRepository?.loadIdentity ||
       !consultantRepository?.loadProfileEnvelopeWithMeta) {
@@ -265,6 +266,10 @@ export function createDirectFinalOutbox({ storage, consultantRepository,
         sot_hash: hash(sot),
         registration_hash: hash(registrationToken),
         status: 'REGISTERED',
+        prepare_hash: null,
+        prepare_evidence_hash: null,
+        prepare_evidence_count: 0,
+        prepare_sealed_at: null,
         claim_hash: null,
         final_hash: null,
         provider_message_id: null,
