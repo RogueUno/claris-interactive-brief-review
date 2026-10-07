@@ -12,6 +12,7 @@ import { normalizeClarificationConsultantPolicy } from '../../../clarification-v
 import { evaluateTrustedBookingQualification } from '../../../calibration-v3/server/trusted-booking-facts.mjs';
 import { createBookingFactRepository } from '../../../calibration-v3/server/booking-fact-repository.mjs';
 import { createTrustedFirstCallGovernance } from '../../../clarification-v1/server/trusted-first-call-governance.mjs';
+import { runFinalProvenanceSelfTest } from '../../../clarification-v1/server/final-provenance-self-test.mjs';
 
 const PROTOCOL_OPERATION = 'INTELLIGENCE_PROTOCOL';
 const FINALIZE_BUNDLE_OPERATION = 'FINALIZE_BUNDLE';
@@ -20,6 +21,7 @@ const MAX_PROTOCOL_BODY_BYTES = 450_000;
 const FINAL_DELIVERY_PREFLIGHT_OPERATION = 'FINAL_DELIVERY_PREFLIGHT';
 const FINAL_DELIVERY_CLAIM_OPERATION = 'FINAL_DELIVERY_CLAIM';
 const FINAL_DELIVERY_ACK_OPERATION = 'FINAL_DELIVERY_ACK';
+const FINAL_PROVENANCE_QA_OPERATION = 'FINAL_PROVENANCE_SELF_TEST';
 
 let trustedFirstCallGovernance = null;
 
@@ -240,6 +242,10 @@ export default {
     const operation = String(request.headers.get('x-claris-operation') || '').trim().toUpperCase();
     if (operation === PROTOCOL_OPERATION) {
       return handleIntelligenceProtocol(request);
+    }
+    if (operation === FINAL_PROVENANCE_QA_OPERATION) {
+      const result = await runFinalProvenanceSelfTest();
+      return json(result, result.ok ? 200 : 500);
     }
     if (operation === FINALIZE_BUNDLE_OPERATION) {
       return handleFinalizeBundle(request);
