@@ -7,6 +7,11 @@ import { parseMakeDeliveryInput, SUBMITTED_FINAL_FORM_FIELDS } from '../../../ca
 import { runClarificationProtocolStep } from '../../../clarification-v1/server/protocol.mjs';
 import { buildFinalizeBundle, buildFinalizeContext } from '../../../clarification-v1/server/finalize-handoff.mjs';
 import { renderFinalBrief } from '../../../clarification-v1/server/final-brief-renderer.mjs';
+import { adaptCertifiedPrepareToClarificationEvidence } from '../../../clarification-v1/server/prepare-adapter.mjs';
+import { normalizeClarificationConsultantPolicy } from '../../../clarification-v1/server/consultant-policy.mjs';
+import { evaluateTrustedBookingQualification } from '../../../calibration-v3/server/trusted-booking-facts.mjs';
+import { createBookingFactRepository } from '../../../calibration-v3/server/booking-fact-repository.mjs';
+import { createTrustedFirstCallGovernance } from '../../../clarification-v1/server/trusted-first-call-governance.mjs';
 
 const PROTOCOL_OPERATION = 'INTELLIGENCE_PROTOCOL';
 const FINALIZE_BUNDLE_OPERATION = 'FINALIZE_BUNDLE';
@@ -15,6 +20,33 @@ const MAX_PROTOCOL_BODY_BYTES = 450_000;
 const FINAL_DELIVERY_PREFLIGHT_OPERATION = 'FINAL_DELIVERY_PREFLIGHT';
 const FINAL_DELIVERY_CLAIM_OPERATION = 'FINAL_DELIVERY_CLAIM';
 const FINAL_DELIVERY_ACK_OPERATION = 'FINAL_DELIVERY_ACK';
+
+let trustedFirstCallGovernance = null;
+
+function envEnabled(value) {
+  const normalized = String(value || '').trim().toLowerCase();
+  return normalized === '1' || normalized === 'true' || normalized === 'enabled';
+}
+
+export function trustedFirstCallFactGateEnabled(env = process.env) {
+  return envEnabled(env?.CLARIS_TRUSTED_BOOKING_FACTS_V1) &&
+    envEnabled(env?.CLARIS_FIRST_CALL_FACT_GATE_V1);
+}
+
+function getTrustedFirstCallGovernance() {
+  if (trustedFirstCallGovernance) return trustedFirstCallGovernance;
+  const calibration = calibrationServerContext();
+  const bookingFacts = createBookingFactRepository(calibration.storage);
+  trustedFirstCallGovernance = createTrustedFirstCallGovernance({
+    runProtocolStep: runClarificationProtocolStep,
+    adaptPrepare: adaptCertifiedPrepareToClarificationEvidence,
+    normalizePolicy: normalizeClarificationConsultantPolicy,
+    evaluateQualification: evaluateTrustedBookingQualification,
+    loadBookingFacts: (opportunityId) => bookingFacts.load(opportunityId),
+    loadProfileEnvelope: (consultantId) => calibration.repository.loadProfileEnvelope(consultantId)
+  });
+  return trustedFirstCallGovernance;
+}
 
 function adminAuthorized(request, acceptedKeys) {
   const keys = (Array.isArray(acceptedKeys) ? acceptedKeys : [acceptedKeys])
@@ -86,7 +118,10 @@ async function handleIntelligenceProtocol(request) {
   if (!parsed.ok) return parsed.response;
 
   try {
-    const result = runClarificationProtocolStep(parsed.value);
+    let result = runClarificationProtocolStep(parsed.value);
+    if (trustedFirstCallFactGateEnabled()) {
+      result = await getTrustedFirstCallGovernance().apply(parsed.value, result);
+    }
 
     if (result.ok && result.status === 'READY' && result.clarification_package) {
       const ttlDays = Math.max(1, Math.min(30, Number(parsed.value?.ttl_days || 7)));
@@ -134,7 +169,9 @@ async function handleIntelligenceProtocol(request) {
       }, 200);
     }
 
-    const status = result.ok === false && result.status === 'BLOCKED' ? 422 : 200;
+    const status = result.ok === false && result.status === 'BLOCKED'
+      ? result.error === 'TRUSTED_FIRST_CALL_PROOF_UNAVAILABLE' ? 503 : 422
+      : 200;
     return json(result, status);
   } catch (error) {
     const code = error?.code || error?.message || 'CLARIFICATION_PROTOCOL_FAILED';
