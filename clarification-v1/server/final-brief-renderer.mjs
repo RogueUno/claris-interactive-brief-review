@@ -32,7 +32,7 @@ function numeric(value) {
   return Number.isFinite(candidate) ? candidate : null;
 }
 
-function parseArtifact(input) {
+export function parseFinalArtifact(input) {
   if (
     typeof input !== 'string' &&
     (!input || typeof input !== 'object' || Array.isArray(input))
@@ -279,7 +279,7 @@ function assertRenderable(normalized) {
 }
 
 export function normalizeFinalArtifact(input) {
-  const parsed = parseArtifact(input);
+  const parsed = parseFinalArtifact(input);
   const { artifact, source_schema: sourceSchema } = unwrapArtifact(parsed);
   const clarisMetadata = object(artifact.claris_brief_metadata);
   const briefMetadata = object(artifact.brief_metadata);
