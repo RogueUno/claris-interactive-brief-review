@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { parseMakeDeliveryInput, DIRECT_FINAL_FORM_FIELDS,
   SUBMITTED_FINAL_FORM_FIELDS } from '../make-delivery-transport.mjs';
-import { createDeliveryGateway } from '../../../api/delivery/package.mjs';
+import { createDeliveryGateway, directFinalProvenanceEnabled } from '../../../api/delivery/package.mjs';
 
 const AUTH = 'Bearer synthetic-test-auth';
 const url = 'https://claris.example/api/delivery/package';
@@ -89,6 +89,7 @@ test('authenticated direct-final endpoint receives escaped form fields and rejec
     directFinalOutboxProvider:async()=>({
       async begin(data){calls.push(['begin',data]);return {ok:true,status:'REGISTERED'};},
       async recoverRegistered(data){calls.push(['recover',data]);return {ok:true,status:'RECOVERY_AUTHORIZED'};},
+      async sealPrepare(data){calls.push(['seal',data]);return {ok:true,status:'PREPARE_SEALED'};},
       async claim(data){calls.push(['claim',data]);return {ok:false,status:'RECONCILIATION_REQUIRED'};},
       async acknowledge(data){calls.push(['ack',data]);return {ok:true,status:'ACKNOWLEDGED'};}
     })
@@ -116,11 +117,23 @@ test('authenticated direct-final endpoint receives escaped form fields and rejec
   assert.equal(calls[1][0],'recover');
   assert.equal(calls[1][1].recovery_reason,'PROVIDER_TRANSIENT_503');
 
+  const seal=await gateway.fetch(request('direct_final_seal_prepare',{
+    opportunity_id:'calendly_012345',consultant_id:'consultant_alpha',
+    consultant_delivery_email:'consultant@example.com',
+    consultant_sot_json:'{"consultant":{"firm":"Test"}}',
+    company:'Acme',prospect_first_name:'Robin',prospect_email:'robin@acme.com',
+    meeting_time:'2026-10-09T15:00:00Z',domain:'https://acme.com/',
+    registration_token:'b'.repeat(64),prepare_case_state_json:'{"certified":true}'
+  }));
+  assert.equal(seal.status,200);
+  assert.equal(calls[2][0],'seal');
+  assert.equal(calls[2][1].prepare_case_state_json,'{"certified":true}');
+
   const ack=await gateway.fetch(request('direct_final_ack',{
     opportunity_id:'calendly_012345',claim_token:'a'.repeat(64),provider_message_id:'msg=1&2'
   }));
   assert.equal(ack.status,200);
-  assert.equal(calls[2][1].provider_message_id,'msg=1&2');
+  assert.equal(calls[3][1].provider_message_id,'msg=1&2');
 });
 
 
@@ -143,4 +156,51 @@ test('direct-final recovery form exposes only the exact registered-recovery fiel
   );
   assert.equal(parsed.ok,true);
   assert.equal(parsed.value.recovery_reason,'PROVIDER_TRANSIENT_503');
+});
+
+test('direct-final provenance flag is explicit and default-off',()=>{
+  assert.equal(directFinalProvenanceEnabled({}),false);
+  assert.equal(directFinalProvenanceEnabled({CLARIS_FINAL_PROVENANCE_V1:'false'}),false);
+  for(const value of ['1','true','TRUE','enabled',' enabled ']) {
+    assert.equal(directFinalProvenanceEnabled({CLARIS_FINAL_PROVENANCE_V1:value}),true,value);
+  }
+});
+
+test('PREPARE seal form exposes only booking binding, token and certified PREPARE state',async()=>{
+  const fields=DIRECT_FINAL_FORM_FIELDS.direct_final_seal_prepare;
+  assert.deepEqual(fields,[
+    'opportunity_id','consultant_id','consultant_delivery_email',
+    'consultant_sot_json','company','prospect_first_name',
+    'prospect_email','meeting_time','domain','registration_token',
+    'prepare_case_state_json'
+  ]);
+  const parsed=await parseMakeDeliveryInput(
+    request('direct_final_seal_prepare',{
+      opportunity_id:'calendly_012345',consultant_id:'consultant_alpha',
+      consultant_delivery_email:'consultant@example.com',consultant_sot_json:'{}',
+      company:'Acme',prospect_first_name:'Robin',prospect_email:'robin@acme.com',
+      meeting_time:'2026-10-09T15:00:00Z',domain:'https://acme.com/',
+      registration_token:'a'.repeat(64),prepare_case_state_json:'{"p2_contract_gate_passed":true}'
+    }),
+    fallback,fields
+  );
+  assert.equal(parsed.ok,true);
+  assert.match(parsed.value.prepare_case_state_json,/p2_contract_gate_passed/);
+});
+
+test('direct-final claim permits exact provenance fields but no extras',async()=>{
+  const fields=DIRECT_FINAL_FORM_FIELDS.direct_final_claim;
+  for(const name of ['prepare_case_state_json','final_stage_output_json','final_case_state_json']) {
+    assert.equal(fields.includes(name),true,name);
+  }
+  const parsed=await parseMakeDeliveryInput(
+    request('direct_final_claim',{
+      opportunity_id:'calendly_012345',requires_clarification:'false',
+      prepare_case_state_json:'{"a":1}',final_stage_output_json:'{"b":2}',
+      final_case_state_json:'{"b":2}'
+    }),
+    fallback,fields
+  );
+  assert.equal(parsed.ok,true);
+  assert.equal(parsed.value.requires_clarification,false);
 });
