@@ -526,3 +526,21 @@ test('zero-question FINALIZE lineage cannot introduce PROS or unsealed evidence 
     assert.equal(result.error,'DIRECT_FINAL_LINEAGE_INVALID');
   }
 });
+
+test('strict provenance accepts JSON-encoded fenced FINALIZE artifacts',async()=>{
+  const f=fixture({requireFinalProvenance:true});
+  const begin=await f.outbox.begin(booking);
+  await f.outbox.sealPrepare({
+    ...booking,registration_token:begin.registration_token,
+    prepare_case_state_json:JSON.stringify(certifiedPrepareState())
+  });
+  const ticks=String.fromCharCode(96).repeat(3);
+  const fenced=JSON.stringify(ticks+'json\n'+JSON.stringify(strictArtifact)+'\n'+ticks);
+  const result=await f.outbox.claim({
+    ...strictFinalized(),
+    final_stage_output_json:fenced,
+    final_case_state_json:fenced,
+    registration_token:begin.registration_token
+  });
+  assert.equal(result.status,'CLAIMED');
+});
