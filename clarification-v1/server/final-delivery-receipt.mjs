@@ -2,7 +2,7 @@ import { createHash, randomBytes, timingSafeEqual } from 'node:crypto';
 import { buildFinalizeBundle } from './finalize-handoff.mjs';
 import { buildConsultantFinalDelivery } from '../../calibration-v3/server/pilot-delivery.mjs';
 import { verifyLockedDeliveryOwner } from './verify-locked-delivery-owner.mjs';
-import { renderFinalBrief } from './final-brief-renderer.mjs';
+import { renderFinalBrief, parseFinalArtifact } from './final-brief-renderer.mjs';
 
 const RECEIPT_SCHEMA = 'claris_final_delivery_receipt_v1';
 
@@ -29,13 +29,6 @@ function verifiedAudit(raw) {
   return audit?.audit_status === 'PASS' && audit.repair_required === false &&
     Array.isArray(audit.violations) && audit.violations.length === 0;
 }
-function parsedObject(raw) {
-  if (raw && typeof raw === 'object' && !Array.isArray(raw)) return raw;
-  try {
-    const value = JSON.parse(String(raw || ''));
-    return value && typeof value === 'object' && !Array.isArray(value) ? value : null;
-  } catch { return null; }
-}
 function canonicalJson(value) {
   function walk(item) {
     if (Array.isArray(item)) return item.map(walk);
@@ -58,10 +51,15 @@ function verifiedFinalProvenance(input, context, markdown) {
     return { ok:false, error:'FINAL_DELIVERY_PROVENANCE_MISMATCH' };
   }
 
-  const stageOutput = parsedObject(input?.final_stage_output_json);
-  const caseState = parsedObject(input?.final_case_state_json);
-  if (!stageOutput || !caseState) {
+  if (!input?.final_stage_output_json || !input?.final_case_state_json) {
     return { ok:false, error:'FINAL_DELIVERY_ARTIFACT_PROVENANCE_MISSING' };
+  }
+  let stageOutput, caseState;
+  try {
+    stageOutput = parseFinalArtifact(input.final_stage_output_json);
+    caseState = parseFinalArtifact(input.final_case_state_json);
+  } catch {
+    return { ok:false, error:'FINAL_DELIVERY_ARTIFACT_INVALID' };
   }
   if (canonicalJson(stageOutput) !== canonicalJson(caseState)) {
     return { ok:false, error:'FINAL_DELIVERY_FINAL_STATE_MISMATCH' };
