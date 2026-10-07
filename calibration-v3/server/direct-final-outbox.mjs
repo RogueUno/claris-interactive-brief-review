@@ -347,6 +347,76 @@ export function createDirectFinalOutbox({ storage, consultantRepository,
       });
     },
 
+    async sealPrepare(input, { now=Date.now() } = {}) {
+      const b = normalizeBooking(input);
+      const registrationToken = text(input?.registration_token);
+      if (!b || !TOKEN.test(registrationToken)) {
+        return status('BLOCKED', { error:'DIRECT_FINAL_PREPARE_SEAL_INPUT_INVALID' });
+      }
+      let loaded;
+      try { loaded = await get(b.opportunity_id); }
+      catch { return status('BLOCKED', { error:'DIRECT_FINAL_PREPARE_SEAL_READ_FAILED' }); }
+      const rec = loaded?.value;
+      if (!validRecord(rec) || !loaded.etag) {
+        return status('BLOCKED', { error:'DIRECT_FINAL_REGISTRATION_MISSING' });
+      }
+      if (!same(rec.registration_hash, hash(registrationToken)) ||
+          rec.opportunity_id !== b.opportunity_id ||
+          rec.consultant_id !== b.consultant_id ||
+          !same(rec.booking_hash, hash(JSON.stringify(b)))) {
+        return status('BLOCKED', { error:'DIRECT_FINAL_REGISTRATION_MISMATCH' });
+      }
+      const owner = await lockedOwner(input);
+      if (!owner || owner.consultant_id !== rec.consultant_id ||
+          !same(rec.consultant_email_hash, hash(owner.consultant_delivery_email))) {
+        return status('BLOCKED', { error:'DIRECT_FINAL_OWNER_CHANGED' });
+      }
+      let canonical, sotObject;
+      try {
+        canonical = canonicalJson(input.consultant_sot_json);
+        sotObject = parsedObject(input.consultant_sot_json);
+      } catch {
+        return status('BLOCKED', { error:'DIRECT_FINAL_SOT_INVALID' });
+      }
+      if (!sotObject || !same(rec.sot_hash, hash(canonical))) {
+        return status('BLOCKED', { error:'DIRECT_FINAL_SOT_CHANGED' });
+      }
+      const proof = certifiedPrepareProof(input, b, sotObject);
+      if (!proof) {
+        return status('BLOCKED', { error:'DIRECT_FINAL_PREPARE_NOT_CERTIFIED' });
+      }
+      if (rec.status === 'PREPARE_SEALED') {
+        if (same(rec.prepare_hash, proof.prepare_hash) &&
+            same(rec.prepare_evidence_hash, proof.evidence_hash)) {
+          return status('PREPARE_SEALED', {
+            opportunity_id:b.opportunity_id,
+            evidence_count:proof.evidence_ids.length,
+            reused:true
+          });
+        }
+        return status('BLOCKED', { error:'DIRECT_FINAL_PREPARE_SEAL_MISMATCH' });
+      }
+      if (rec.status !== 'REGISTERED') return previously(rec);
+      const next = {
+        ...rec,
+        status:'PREPARE_SEALED',
+        prepare_hash:proof.prepare_hash,
+        prepare_evidence_hash:proof.evidence_hash,
+        prepare_evidence_count:proof.evidence_ids.length,
+        prepare_sealed_at:new Date(now).toISOString()
+      };
+      try {
+        await storage.putJson(receiptPath(b.opportunity_id), next, { ifMatch:loaded.etag });
+      } catch {
+        return status('RECONCILIATION_REQUIRED', { error:'DIRECT_FINAL_PREPARE_SEAL_UNCERTAIN' });
+      }
+      return status('PREPARE_SEALED', {
+        opportunity_id:b.opportunity_id,
+        evidence_count:proof.evidence_ids.length,
+        reused:false
+      });
+    },
+
     async claim(input, { now=Date.now() } = {}) {
       const b = normalizeBooking(input);
       const registrationToken = text(input?.registration_token);
