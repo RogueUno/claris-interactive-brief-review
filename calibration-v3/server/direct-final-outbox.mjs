@@ -18,7 +18,7 @@ function same(a, b) {
 }
 function status(name, extra = {}) {
   return {
-    ok: ['REGISTERED', 'CLAIMED', 'ACKNOWLEDGED', 'SKIPPED_ALREADY_SENT'].includes(name),
+    ok: ['REGISTERED', 'RECOVERY_AUTHORIZED', 'CLAIMED', 'ACKNOWLEDGED', 'SKIPPED_ALREADY_SENT'].includes(name),
     status: name, ...extra
   };
 }
@@ -167,7 +167,9 @@ export function createDirectFinalOutbox({ storage, consultantRepository,
         provider_message_id: null,
         registered_at: new Date(now).toISOString(),
         reserved_at: null,
-        sent_at: null
+        sent_at: null,
+        recovery_count: 0,
+        recovered_at: null
       };
       try { await storage.putJsonIfAbsent(receiptPath(b.opportunity_id), data); }
       catch {
@@ -178,6 +180,62 @@ export function createDirectFinalOutbox({ storage, consultantRepository,
       return status('REGISTERED', {
         opportunity_id: b.opportunity_id,
         registration_token: registrationToken
+      });
+    },
+
+    async recoverRegistered(input, { now=Date.now() } = {}) {
+      const b = normalizeBooking(input);
+      if (!b) return status('BLOCKED', { error:'DIRECT_FINAL_RECOVERY_BOOKING_INVALID' });
+      if (text(input?.recovery_reason) !== 'PROVIDER_TRANSIENT_503') {
+        return status('BLOCKED', { error:'DIRECT_FINAL_RECOVERY_REASON_INVALID' });
+      }
+
+      const owner = await lockedOwner(input);
+      if (!owner || owner.consultant_id !== b.consultant_id ||
+          owner.consultant_delivery_email !== b.consultant_delivery_email) {
+        return status('BLOCKED', { error:'DIRECT_FINAL_RECOVERY_OWNER_UNVERIFIED' });
+      }
+
+      let sot;
+      try { sot = canonicalJson(input.consultant_sot_json); }
+      catch { return status('BLOCKED', { error:'DIRECT_FINAL_RECOVERY_SOT_INVALID' }); }
+
+      let loaded;
+      try { loaded = await get(b.opportunity_id); }
+      catch { return status('BLOCKED', { error:'DIRECT_FINAL_RECOVERY_READ_FAILED' }); }
+      const rec = loaded?.value;
+      if (!validRecord(rec) || !loaded.etag) {
+        return status('BLOCKED', { error:'DIRECT_FINAL_RECOVERY_REGISTRATION_MISSING' });
+      }
+      if (rec.status !== 'REGISTERED') return previously(rec);
+      if (rec.opportunity_id !== b.opportunity_id ||
+          rec.consultant_id !== b.consultant_id ||
+          !same(rec.booking_hash, hash(JSON.stringify(b))) ||
+          !same(rec.sot_hash, hash(sot))) {
+        return status('BLOCKED', { error:'DIRECT_FINAL_RECOVERY_BINDING_MISMATCH' });
+      }
+
+      const recoveryCount = Number.isInteger(rec.recovery_count) ? rec.recovery_count : 0;
+      if (recoveryCount >= 1) {
+        return status('BLOCKED', { error:'DIRECT_FINAL_RECOVERY_LIMIT_REACHED' });
+      }
+
+      const registrationToken = randomBytes(32).toString('hex');
+      const next = {
+        ...rec,
+        registration_hash: hash(registrationToken),
+        recovery_count: recoveryCount + 1,
+        recovered_at: new Date(now).toISOString()
+      };
+      try {
+        await storage.putJson(receiptPath(b.opportunity_id), next, { ifMatch:loaded.etag });
+      } catch {
+        return status('RECONCILIATION_REQUIRED', { error:'DIRECT_FINAL_RECOVERY_UNCERTAIN' });
+      }
+      return status('RECOVERY_AUTHORIZED', {
+        opportunity_id: b.opportunity_id,
+        registration_token: registrationToken,
+        recovery_count: next.recovery_count
       });
     },
 
