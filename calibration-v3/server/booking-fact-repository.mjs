@@ -79,7 +79,12 @@ export function createBookingFactRepository(storage){
         return confirmExisting(storage,envelope);
       }
       const etag=typeof saved?.etag==="string"&&hashish.test(saved.etag)?saved.etag:null;
-      if(!etag)return confirmExisting(storage,envelope);
+      if(!etag){
+        const confirmed=await confirmExisting(storage,envelope);
+        return confirmed.ok
+          ? {...confirmed,status:"CREATED_CONFIRMED"}
+          : confirmed;
+      }
       return {ok:true,status:"CREATED",opportunity_id:envelope.opportunity_id,etag};
     },
     pathFor
