@@ -92,6 +92,107 @@ function auditPass(input) {
     parsed.repair_required === false &&
     Array.isArray(parsed.violations) && parsed.violations.length === 0;
 }
+
+function parsedObject(value) {
+  if (value && typeof value === 'object' && !Array.isArray(value)) return value;
+  let current = value;
+  for (let depth = 0; depth < 2 && typeof current === 'string'; depth += 1) {
+    try { current = JSON.parse(current); }
+    catch { return null; }
+  }
+  return current && typeof current === 'object' && !Array.isArray(current)
+    ? current : null;
+}
+function stableJson(value) {
+  function walk(item) {
+    if (Array.isArray(item)) return item.map(walk);
+    if (item && typeof item === 'object') {
+      return Object.fromEntries(Object.keys(item).sort().map(k => [k, walk(item[k])]));
+    }
+    return item;
+  }
+  return JSON.stringify(walk(value));
+}
+function certifiedPrepareProof(input, booking, sotObject) {
+  const state = parsedObject(input?.prepare_case_state_json);
+  const consultantName = text(sotObject?.consultant?.consultant_name);
+  const firm = text(sotObject?.consultant?.firm);
+  if (!state || !consultantName || !firm) return null;
+  let bundle;
+  try {
+    bundle = adaptCertifiedPrepareToClarificationEvidence({
+      opportunity_id: booking.opportunity_id,
+      case_state_json: state,
+      consultant: {
+        consultant_id: booking.consultant_id,
+        first_name: consultantName.split(/\s+/)[0],
+        firm
+      },
+      prospect: {
+        first_name: booking.prospect_first_name,
+        company: booking.company
+      }
+    });
+  } catch { return null; }
+  const ids = [...new Set((bundle?.evidence || [])
+    .map(item => text(item?.evidence_id))
+    .filter(Boolean))].sort();
+  const hasBooking = (bundle?.evidence || []).some(item =>
+    item?.source_type === 'BOOKING' && ids.includes(text(item?.evidence_id)));
+  if (!ids.length || !hasBooking ||
+      ids.some(id => !/^[A-Za-z0-9_-]{3,100}$/.test(id))) return null;
+  return {
+    prepare_hash: hash(stableJson(state)),
+    evidence_hash: hash(JSON.stringify(ids)),
+    evidence_ids: ids
+  };
+}
+function verifiedDirectFinalProvenance(input, record, booking, sotObject, markdown) {
+  if (!record?.prepare_hash || !record?.prepare_evidence_hash) {
+    return { ok:false, error:'DIRECT_FINAL_PREPARE_NOT_SEALED' };
+  }
+  const proof = certifiedPrepareProof(input, booking, sotObject);
+  if (!proof || !same(proof.prepare_hash, record.prepare_hash)) {
+    return { ok:false, error:'DIRECT_FINAL_PREPARE_PROVENANCE_MISMATCH' };
+  }
+  if (!same(proof.evidence_hash, record.prepare_evidence_hash)) {
+    return { ok:false, error:'DIRECT_FINAL_PREPARE_EVIDENCE_MISMATCH' };
+  }
+  if (!input?.final_stage_output_json || !input?.final_case_state_json) {
+    return { ok:false, error:'DIRECT_FINAL_ARTIFACT_PROVENANCE_MISSING' };
+  }
+  let stageOutput, finalCase;
+  try {
+    stageOutput = parseFinalArtifact(input.final_stage_output_json);
+    finalCase = parseFinalArtifact(input.final_case_state_json);
+  } catch {
+    return { ok:false, error:'DIRECT_FINAL_ARTIFACT_INVALID' };
+  }
+  if (stableJson(stageOutput) !== stableJson(finalCase)) {
+    return { ok:false, error:'DIRECT_FINAL_FINAL_STATE_MISMATCH' };
+  }
+  let rendered;
+  try { rendered = renderFinalBrief(stageOutput); }
+  catch { return { ok:false, error:'DIRECT_FINAL_ARTIFACT_INVALID' }; }
+  if (text(rendered?.brief_markdown) !== markdown) {
+    return { ok:false, error:'DIRECT_FINAL_RENDER_MISMATCH' };
+  }
+  const lineage = Array.isArray(rendered?.normalized?.intelligence_lineage)
+    ? rendered.normalized.intelligence_lineage : [];
+  const ids = lineage.map(item => text(item?.source_id)).filter(Boolean);
+  if (!ids.length || ids.length !== lineage.length ||
+      ids.some(id => id.startsWith('PROS-')) ||
+      ids.some(id => !proof.evidence_ids.includes(id))) {
+    return { ok:false, error:'DIRECT_FINAL_LINEAGE_INVALID' };
+  }
+  return {
+    ok:true,
+    prepare_hash:proof.prepare_hash,
+    stage_output_hash:hash(stableJson(stageOutput)),
+    audit_hash:hash(typeof input?.final_audit_json === 'string'
+      ? input.final_audit_json : stableJson(input?.final_audit_json))
+  };
+}
 function escapedEmail(value) {
   return '<div style="white-space:pre-wrap;font-family:Arial,sans-serif">' +
     text(value).replace(/&/g, '&amp;').replace(/</g, '&lt;')
