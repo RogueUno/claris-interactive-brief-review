@@ -125,6 +125,13 @@ test('submitted prospect response becomes deterministic FINALIZE input', async (
   assert.equal(answers.answers[0].answer_exact, 'Yes');
   assert.equal(answers.answers[0].selected_option_id, 'yes');
   assert.deepEqual(answers.answers[0].selected_option_postures, ['GENERIC_SAFE']);
+  assert.equal(bundle.finalize_provenance.schema_version, 'claris_finalize_provenance_v1');
+  assert.equal(bundle.finalize_provenance.opportunity_id, 'opp_finalize_001');
+  assert.equal(bundle.finalize_provenance.opportunity_version, loaded.etag);
+  assert.equal(bundle.finalize_provenance.accepted_answer_count, 1);
+  assert.equal(bundle.finalize_provenance.clarification_required, true);
+  assert.match(bundle.finalize_provenance.prospect_answers_sha256, /^[a-f0-9]{64}$/);
+  assert.match(bundle.finalize_provenance_digest, /^[a-f0-9]{64}$/);
 });
 
 test('zero-question FINALIZE adapter creates an empty answer set without fabrication', () => {
@@ -256,4 +263,46 @@ test('FINALIZE bundle refuses persisted owner mismatch against the package', asy
   assert.equal(result.ok, false);
   assert.equal(result.error, 'FINALIZE_CONSULTANT_ID_MISMATCH');
   assert.equal(result.http_status, 409);
+});
+
+
+test('FINALIZE provenance digest is deterministic for one exact accepted-answer version', async()=>{
+  const {repository,service}=fixture();
+  const ctx=buildFinalizeContext({
+    case_state_json:caseState,consultant_sot_json:sot,
+    consultant_id:'consultant_1',consultant_delivery_email:'sarah@example.com'
+  });
+  const p=pkg();p.questions[0].options[1].option_id='nope';
+  const created=await service.createPackage(p,{now:5000,ttlMs:60000,finalizeContext:ctx});
+  const opened=await service.resolveInvite(created.invite_token,{now:5100});
+  await service.submit(opened.session_token,[{question_id:'q_budget',value:'yes'}],{
+    now:5200,expectedVersion:opened.opportunity_version
+  });
+  const loaded=await repository.loadEnvelopeWithMeta('opp_finalize_001');
+  const a=buildFinalizeBundle(loaded.envelope,loaded.etag);
+  const b=buildFinalizeBundle(loaded.envelope,loaded.etag);
+  assert.equal(a.ok,true);assert.equal(b.ok,true);
+  assert.equal(a.finalize_provenance_digest,b.finalize_provenance_digest);
+});
+
+test('changing accepted answers or opportunity version changes FINALIZE provenance digest', async()=>{
+  const {repository,service}=fixture();
+  const ctx=buildFinalizeContext({
+    case_state_json:caseState,consultant_sot_json:sot,
+    consultant_id:'consultant_1',consultant_delivery_email:'sarah@example.com'
+  });
+  const p=pkg();p.questions[0].options[1].option_id='nope';
+  const created=await service.createPackage(p,{now:6000,ttlMs:60000,finalizeContext:ctx});
+  const opened=await service.resolveInvite(created.invite_token,{now:6100});
+  await service.submit(opened.session_token,[{question_id:'q_budget',value:'yes'}],{
+    now:6200,expectedVersion:opened.opportunity_version
+  });
+  const loaded=await repository.loadEnvelopeWithMeta('opp_finalize_001');
+  const original=buildFinalizeBundle(loaded.envelope,loaded.etag);
+  const changed=structuredClone(loaded.envelope);
+  changed.response.answers[0].value='No';
+  const changedAnswers=buildFinalizeBundle(changed,loaded.etag);
+  const changedVersion=buildFinalizeBundle(loaded.envelope,loaded.etag+'-other');
+  assert.notEqual(original.finalize_provenance_digest,changedAnswers.finalize_provenance_digest);
+  assert.notEqual(original.finalize_provenance_digest,changedVersion.finalize_provenance_digest);
 });
