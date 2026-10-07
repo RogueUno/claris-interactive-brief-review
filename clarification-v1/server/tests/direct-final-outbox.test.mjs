@@ -411,3 +411,118 @@ test('uncertain recovery CAS result never returns a new usable token',async()=>{
   assert.equal(result.error,'DIRECT_FINAL_RECOVERY_UNCERTAIN');
   assert.equal('registration_token' in result,false);
 });
+
+test('strict direct-final provenance requires PREPARE seal before claim',async()=>{
+  const f=fixture({requireFinalProvenance:true});
+  const begin=await f.outbox.begin(booking);
+  const denied=await f.outbox.claim({...strictFinalized(),registration_token:begin.registration_token});
+  assert.equal(denied.status,'BLOCKED');
+  assert.equal(denied.error,'DIRECT_FINAL_PREPARE_NOT_SEALED');
+
+  const sealed=await f.outbox.sealPrepare({
+    ...booking,
+    registration_token:begin.registration_token,
+    prepare_case_state_json:JSON.stringify(certifiedPrepareState())
+  },{now:1100});
+  assert.equal(sealed.status,'PREPARE_SEALED');
+  assert.equal(sealed.reused,false);
+  assert.equal(sealed.evidence_count,2);
+
+  const claim=await f.outbox.claim({
+    ...strictFinalized(),registration_token:begin.registration_token
+  },{now:1200});
+  assert.equal(claim.status,'CLAIMED');
+  const rec=[...f.blobs.values()][0].value;
+  assert.match(rec.provenance_prepare_hash,/^[a-f0-9]{64}$/);
+  assert.match(rec.provenance_stage_output_hash,/^[a-f0-9]{64}$/);
+  assert.match(rec.provenance_audit_hash,/^[a-f0-9]{64}$/);
+});
+
+test('PREPARE seal is idempotent only for the exact certified PREPARE state',async()=>{
+  const f=fixture({requireFinalProvenance:true});
+  const begin=await f.outbox.begin(booking);
+  const base={
+    ...booking,registration_token:begin.registration_token,
+    prepare_case_state_json:JSON.stringify(certifiedPrepareState())
+  };
+  const first=await f.outbox.sealPrepare(base);
+  assert.equal(first.status,'PREPARE_SEALED');
+  const second=await f.outbox.sealPrepare(base);
+  assert.equal(second.status,'PREPARE_SEALED');
+  assert.equal(second.reused,true);
+
+  const changed=certifiedPrepareState();
+  const truth=JSON.parse(changed.canonical_truth_json);
+  truth.booking_evidence[0].statement='Changed after seal';
+  changed.canonical_truth_json=JSON.stringify(truth);
+  const mismatch=await f.outbox.sealPrepare({
+    ...booking,registration_token:begin.registration_token,
+    prepare_case_state_json:JSON.stringify(changed)
+  });
+  assert.equal(mismatch.status,'BLOCKED');
+  assert.equal(mismatch.error,'DIRECT_FINAL_PREPARE_SEAL_MISMATCH');
+});
+
+test('uncertified PREPARE cannot be sealed for direct-final delivery',async()=>{
+  const f=fixture({requireFinalProvenance:true});
+  const begin=await f.outbox.begin(booking);
+  const bad=certifiedPrepareState({p3_semantic_status:'FAILED'});
+  const result=await f.outbox.sealPrepare({
+    ...booking,registration_token:begin.registration_token,
+    prepare_case_state_json:JSON.stringify(bad)
+  });
+  assert.equal(result.status,'BLOCKED');
+  assert.equal(result.error,'DIRECT_FINAL_PREPARE_NOT_CERTIFIED');
+});
+
+test('strict claim rejects changed PREPARE, final-state mismatch and arbitrary brief text',async()=>{
+  for(const mutation of ['prepare','state','brief']){
+    const f=fixture({requireFinalProvenance:true});
+    const begin=await f.outbox.begin(booking);
+    const prepare=certifiedPrepareState();
+    await f.outbox.sealPrepare({
+      ...booking,registration_token:begin.registration_token,
+      prepare_case_state_json:JSON.stringify(prepare)
+    });
+    const payload=strictFinalized();
+    if(mutation==='prepare'){
+      const changed=certifiedPrepareState();
+      const truth=JSON.parse(changed.canonical_truth_json);
+      truth.canonical_evidence_registry[0].source_excerpt='Changed public fact';
+      changed.canonical_truth_json=JSON.stringify(truth);
+      payload.prepare_case_state_json=JSON.stringify(changed);
+    }
+    if(mutation==='state') payload.final_case_state_json=JSON.stringify({...strictArtifact,match_score:81});
+    if(mutation==='brief') payload.final_brief_markdown='Arbitrary caller text';
+    const result=await f.outbox.claim({...payload,registration_token:begin.registration_token});
+    assert.equal(result.status,'BLOCKED',mutation);
+    assert.equal(result.error,
+      mutation==='prepare'?'DIRECT_FINAL_PREPARE_PROVENANCE_MISMATCH':
+      mutation==='state'?'DIRECT_FINAL_FINAL_STATE_MISMATCH':
+      'DIRECT_FINAL_RENDER_MISMATCH');
+  }
+});
+
+test('zero-question FINALIZE lineage cannot introduce PROS or unsealed evidence IDs',async()=>{
+  for(const badId of ['PROS-001','FAC-999']){
+    const f=fixture({requireFinalProvenance:true});
+    const begin=await f.outbox.begin(booking);
+    await f.outbox.sealPrepare({
+      ...booking,registration_token:begin.registration_token,
+      prepare_case_state_json:JSON.stringify(certifiedPrepareState())
+    });
+    const artifact={...strictArtifact,intelligence_lineage:[
+      ...strictArtifact.intelligence_lineage,{evidence_id:badId,usage:'Injected lineage'}
+    ]};
+    const rendered=renderFinalBrief(artifact);
+    const result=await f.outbox.claim({
+      ...strictFinalized(),
+      final_stage_output_json:JSON.stringify(artifact),
+      final_case_state_json:JSON.stringify(artifact),
+      final_brief_markdown:rendered.brief_markdown,
+      registration_token:begin.registration_token
+    });
+    assert.equal(result.status,'BLOCKED',badId);
+    assert.equal(result.error,'DIRECT_FINAL_LINEAGE_INVALID');
+  }
+});
