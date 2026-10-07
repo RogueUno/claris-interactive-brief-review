@@ -1,7 +1,9 @@
+import { createHash } from 'node:crypto';
 import { buildClarificationResult } from './result.mjs';
 
 const FINALIZE_CONTEXT_VERSION = 'claris_finalize_context_v1';
 const FINALIZE_ANSWERS_VERSION = 'claris_finalize_prospect_answers_v1';
+const FINALIZE_PROVENANCE_VERSION = 'claris_finalize_provenance_v1';
 
 function requiredJsonText(value, field) {
   const text = String(value || '').trim();
@@ -69,6 +71,40 @@ function exactAnswer(value) {
   return JSON.stringify(value);
 }
 
+function canonicalJson(value) {
+  function walk(item) {
+    if (Array.isArray(item)) return item.map(walk);
+    if (item && typeof item === 'object') {
+      return Object.fromEntries(Object.keys(item).sort().map((key) => [key, walk(item[key])]));
+    }
+    return item;
+  }
+  return JSON.stringify(walk(value));
+}
+function digest(value) {
+  return createHash('sha256').update(typeof value === 'string' ? value : canonicalJson(value), 'utf8').digest('hex');
+}
+function finalizeProvenance({ opportunityId, opportunityVersion, context, prospectAnswers }) {
+  const version = String(opportunityVersion || '').trim();
+  if (!version) throw new Error('FINALIZE_OPPORTUNITY_VERSION_REQUIRED');
+  const payload = {
+    schema_version: FINALIZE_PROVENANCE_VERSION,
+    opportunity_id: opportunityId,
+    opportunity_version: version,
+    consultant_id: context.consultant_id,
+    accepted_answer_count: prospectAnswers.answers.length,
+    clarification_required: prospectAnswers.clarification_required === true,
+    submitted_at: prospectAnswers.submitted_at || null,
+    case_state_sha256: digest(context.case_state_json),
+    consultant_sot_sha256: digest(context.consultant_sot_json),
+    prospect_answers_sha256: digest(prospectAnswers)
+  };
+  return {
+    ...payload,
+    digest: digest(payload)
+  };
+}
+
 export function buildFinalizeProspectAnswers(clarificationResult) {
   const result = clarificationResult?.clarification_result;
   if (!result) throw new Error('CLARIFICATION_RESULT_REQUIRED');
@@ -117,6 +153,23 @@ export function buildFinalizeBundle(envelope, opportunityVersion = null) {
   }
 
   const prospectAnswers = buildFinalizeProspectAnswers(clarification);
+  let provenance;
+  try {
+    provenance = finalizeProvenance({
+      opportunityId: clarification.opportunity_id,
+      opportunityVersion: clarification.opportunity_version,
+      context,
+      prospectAnswers
+    });
+  } catch (error) {
+    return {
+      ok: false,
+      error: error?.message || 'FINALIZE_PROVENANCE_INVALID',
+      http_status: 409,
+      opportunity_id: clarification.opportunity_id,
+      status: clarification.status
+    };
+  }
   return {
     ok: true,
     http_status: 200,
@@ -128,11 +181,14 @@ export function buildFinalizeBundle(envelope, opportunityVersion = null) {
     consultant_id: context.consultant_id,
     consultant_delivery_email: context.consultant_delivery_email,
     prospect_answers_json: JSON.stringify(prospectAnswers),
-    prospect_answers: prospectAnswers
+    prospect_answers: prospectAnswers,
+    finalize_provenance: provenance,
+    finalize_provenance_digest: provenance.digest
   };
 }
 
 export const finalizeHandoffContract = Object.freeze({
   context_version: FINALIZE_CONTEXT_VERSION,
-  prospect_answers_version: FINALIZE_ANSWERS_VERSION
+  prospect_answers_version: FINALIZE_ANSWERS_VERSION,
+  provenance_version: FINALIZE_PROVENANCE_VERSION
 });
