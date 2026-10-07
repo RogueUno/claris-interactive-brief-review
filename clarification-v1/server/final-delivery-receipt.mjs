@@ -119,7 +119,8 @@ export function inspectFinalDeliveryReceipt(envelope) {
 // lost acknowledgment, retrying could send twice. Unconfirmed reservations need
 // human reconciliation against the provider before any further send attempt.
 export async function claimFinalDelivery(input, {
-  repository, consultantRepository, now = Date.now()
+  repository, consultantRepository, now = Date.now(),
+  requireFinalProvenance = false
 } = {}) {
   requiredRepository(repository);
   const opportunityId = text(input?.opportunity_id);
@@ -152,7 +153,9 @@ export async function claimFinalDelivery(input, {
       !context.consultant_id || !context.consultant_delivery_email) {
     return outcome('BLOCKED', { error: 'FINAL_DELIVERY_OWNER_OR_SUBMISSION_INVALID' });
   }
-  const provenance = verifiedFinalProvenance(input, context, markdown);
+  const provenance = requireFinalProvenance
+    ? verifiedFinalProvenance(input, context, markdown)
+    : { ok:true, provenance_digest:null, stage_output_sha256:null, audit_sha256:null };
   if (!provenance.ok) {
     return outcome('BLOCKED', { error: provenance.error });
   }
@@ -162,7 +165,7 @@ export async function claimFinalDelivery(input, {
   } catch {
     return outcome('BLOCKED', { error: 'FINAL_DELIVERY_OWNER_REVALIDATION_FAILED' });
   }
-  const digest = hash(JSON.stringify({
+  const digest = hash(JSON.stringify(requireFinalProvenance ? {
     opportunity_id: opportunityId,
     version: context.opportunity_version,
     consultant_id: owner.consultant_id,
@@ -170,6 +173,12 @@ export async function claimFinalDelivery(input, {
     provenance_digest: provenance.provenance_digest,
     stage_output_sha256: provenance.stage_output_sha256,
     audit_sha256: provenance.audit_sha256,
+    brief: markdown
+  } : {
+    opportunity_id: opportunityId,
+    version: context.opportunity_version,
+    consultant_id: owner.consultant_id,
+    email: owner.consultant_delivery_email,
     brief: markdown
   }));
   const deliveryPackage = buildConsultantFinalDelivery({
