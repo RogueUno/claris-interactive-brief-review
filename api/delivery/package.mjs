@@ -26,6 +26,15 @@ function authorized(request) {
   return accepted.some((key) => candidates.has(key));
 }
 
+function envEnabled(value) {
+  const normalized = String(value || '').trim().toLowerCase();
+  return normalized === '1' || normalized === 'true' || normalized === 'enabled';
+}
+
+export function directFinalProvenanceEnabled(env = process.env) {
+  return envEnabled(env?.CLARIS_FINAL_PROVENANCE_V1);
+}
+
 // Preserve all existing package operations. Direct-final outbox actions share
 // this authenticated endpoint instead of consuming another Vercel function.
 export function createDeliveryGateway({
@@ -37,7 +46,8 @@ export function createDeliveryGateway({
       storage: runtime.storage,
       consultantRepository: runtime.repository,
       clarificationRepository: clarificationServerContext().repository,
-      inviteBaseUrl: new URL('/clarification-v1/',request.url).toString()
+      inviteBaseUrl: new URL('/clarification-v1/',request.url).toString(),
+      requireFinalProvenance: directFinalProvenanceEnabled()
     });
   }
 } = {}) {
@@ -56,13 +66,16 @@ export function createDeliveryGateway({
     const operation = declaredOperation || String(parsed.value?.operation || '').trim();
 
     try {
-      if (['direct_final_begin','direct_final_recover','direct_final_claim','direct_final_ack',
+      if (['direct_final_begin','direct_final_recover','direct_final_seal_prepare',
+        'direct_final_claim','direct_final_ack',
         'direct_clarification_claim','direct_clarification_ack'].includes(operation)) {
         const outbox = await directFinalOutboxProvider(request);
         const result = operation === 'direct_final_begin'
           ? await outbox.begin(parsed.value)
           : operation === 'direct_final_recover'
             ? await outbox.recoverRegistered(parsed.value)
+            : operation === 'direct_final_seal_prepare'
+              ? await outbox.sealPrepare(parsed.value)
             : operation === 'direct_final_claim'
               ? await outbox.claim(parsed.value)
             : operation === 'direct_final_ack'
@@ -70,7 +83,8 @@ export function createDeliveryGateway({
               : operation === 'direct_clarification_claim'
                 ? await outbox.claimInvite(parsed.value)
                 : await outbox.acknowledgeInvite(parsed.value);
-        const code = ['REGISTERED', 'RECOVERY_AUTHORIZED', 'CLAIMED', 'ACKNOWLEDGED', 'SKIPPED_ALREADY_SENT'].includes(result.status)
+        const code = ['REGISTERED', 'RECOVERY_AUTHORIZED', 'PREPARE_SEALED',
+          'CLAIMED', 'ACKNOWLEDGED', 'SKIPPED_ALREADY_SENT'].includes(result.status)
           ? 200
           : result.status === 'RECONCILIATION_REQUIRED' ? 409 : 422;
         return json(result, code);
