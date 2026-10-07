@@ -88,6 +88,7 @@ test('authenticated direct-final endpoint receives escaped form fields and rejec
     authorize:r=>r.headers.get('authorization')===AUTH,
     directFinalOutboxProvider:async()=>({
       async begin(data){calls.push(['begin',data]);return {ok:true,status:'REGISTERED'};},
+      async recoverRegistered(data){calls.push(['recover',data]);return {ok:true,status:'RECOVERY_AUTHORIZED'};},
       async claim(data){calls.push(['claim',data]);return {ok:false,status:'RECONCILIATION_REQUIRED'};},
       async acknowledge(data){calls.push(['ack',data]);return {ok:true,status:'ACKNOWLEDGED'};}
     })
@@ -102,9 +103,44 @@ test('authenticated direct-final endpoint receives escaped form fields and rejec
   assert.equal(calls.length,1);
   assert.equal(calls[0][1].company,form.company);
   assert.equal(calls[0][1].requires_clarification,false);
+
+  const recovery=await gateway.fetch(request('direct_final_recover',{
+    opportunity_id:'calendly_012345',consultant_id:'consultant_alpha',
+    consultant_delivery_email:'consultant@example.com',
+    consultant_sot_json:'{"consultant":{"firm":"Test"}}',
+    company:'Acme',prospect_first_name:'Robin',prospect_email:'robin@acme.com',
+    meeting_time:'2026-10-09T15:00:00Z',domain:'https://acme.com/',
+    recovery_reason:'PROVIDER_TRANSIENT_503'
+  }));
+  assert.equal(recovery.status,200);
+  assert.equal(calls[1][0],'recover');
+  assert.equal(calls[1][1].recovery_reason,'PROVIDER_TRANSIENT_503');
+
   const ack=await gateway.fetch(request('direct_final_ack',{
     opportunity_id:'calendly_012345',claim_token:'a'.repeat(64),provider_message_id:'msg=1&2'
   }));
   assert.equal(ack.status,200);
-  assert.equal(calls[1][1].provider_message_id,'msg=1&2');
+  assert.equal(calls[2][1].provider_message_id,'msg=1&2');
+});
+
+
+test('direct-final recovery form exposes only the exact registered-recovery fields', async()=>{
+  const fields=DIRECT_FINAL_FORM_FIELDS.direct_final_recover;
+  assert.deepEqual(fields,[
+    'opportunity_id','consultant_id','consultant_delivery_email',
+    'consultant_sot_json','company','prospect_first_name',
+    'prospect_email','meeting_time','domain','recovery_reason'
+  ]);
+  const parsed=await parseMakeDeliveryInput(
+    request('direct_final_recover',{
+      opportunity_id:'calendly_012345',consultant_id:'consultant_alpha',
+      consultant_delivery_email:'consultant@example.com',consultant_sot_json:'{}',
+      company:'Acme',prospect_first_name:'Robin',prospect_email:'robin@acme.com',
+      meeting_time:'2026-10-09T15:00:00Z',domain:'https://acme.com/',
+      recovery_reason:'PROVIDER_TRANSIENT_503'
+    }),
+    fallback,fields
+  );
+  assert.equal(parsed.ok,true);
+  assert.equal(parsed.value.recovery_reason,'PROVIDER_TRANSIENT_503');
 });
