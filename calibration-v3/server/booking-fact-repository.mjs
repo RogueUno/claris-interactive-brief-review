@@ -17,6 +17,35 @@ function validEnvelope(e){
     e.issuer==="SERVER_CALENDLY_FACT_COMPILER_V1"&&
     e.source?.kind==="CALENDLY"&&Array.isArray(e.facts);
 }
+function stable(value){
+  if(Array.isArray(value))return "["+value.map(stable).join(",")+"]";
+  if(value&&typeof value==="object"){
+    return "{"+Object.keys(value).sort().map(k=>JSON.stringify(k)+":"+stable(value[k])).join(",")+"}";
+  }
+  return JSON.stringify(value);
+}
+function logical(record){
+  if(!record||typeof record!=="object")return record;
+  const {persisted_at,immutable,repository_version,...rest}=record;
+  return rest;
+}
+function sameLogical(existing,envelope){
+  return stable(logical(existing))===stable(envelope);
+}
+async function confirmExisting(storage,envelope){
+  let loaded;
+  try{loaded=await storage.getJsonWithMeta(pathFor(envelope.opportunity_id))}
+  catch{return {ok:false,error:"BOOKING_FACT_CREATE_UNCERTAIN"}}
+  if(!loaded?.value)return {ok:false,error:"BOOKING_FACT_CREATE_UNCERTAIN"};
+  if(!validEnvelope(loaded.value)||loaded.value.opportunity_id!==envelope.opportunity_id)
+    return {ok:false,error:"BOOKING_FACT_RECORD_INVALID"};
+  if(!sameLogical(loaded.value,envelope))
+    return {ok:false,error:"BOOKING_FACT_IMMUTABLE_CONFLICT"};
+  if(typeof loaded.etag!=="string"||loaded.etag.length<3)
+    return {ok:false,error:"BOOKING_FACT_ETAG_MISSING"};
+  return {ok:true,status:"EXISTS_IDENTICAL",
+    opportunity_id:envelope.opportunity_id,etag:loaded.etag};
+}
 export function createBookingFactRepository(storage){
   if(typeof storage?.getJsonWithMeta!=="function"||
      typeof storage?.putJsonIfAbsent!=="function")
@@ -45,13 +74,13 @@ export function createBookingFactRepository(storage){
       let saved;
       try{saved=await storage.putJsonIfAbsent(pathFor(envelope.opportunity_id),record)}
       catch{
-        // An uncertain atomic-create result must never lead to a second write.
-        return {ok:false,error:"BOOKING_FACT_CREATE_UNCERTAIN"};
+        // Distinguish an identical Calendly redelivery from an uncertain or
+        // conflicting write by independently reading the immutable record.
+        return confirmExisting(storage,envelope);
       }
-      // Storage adapters may return an ETag; if they do, preserve it. The record
-      // itself carries no API keys, model output or provider tokens.
-      return {ok:true,status:"CREATED",opportunity_id:envelope.opportunity_id,
-        etag:typeof saved?.etag==="string"&&hashish.test(saved.etag)?saved.etag:null};
+      const etag=typeof saved?.etag==="string"&&hashish.test(saved.etag)?saved.etag:null;
+      if(!etag)return confirmExisting(storage,envelope);
+      return {ok:true,status:"CREATED",opportunity_id:envelope.opportunity_id,etag};
     },
     pathFor
   };
