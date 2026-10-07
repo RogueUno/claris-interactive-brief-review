@@ -2,7 +2,8 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { createClarificationRepository } from '../repository.mjs';
 import { createClarificationService } from '../service.mjs';
-import { buildFinalizeContext } from '../finalize-handoff.mjs';
+import { buildFinalizeContext, buildFinalizeBundle } from '../finalize-handoff.mjs';
+import { renderFinalBrief } from '../final-brief-renderer.mjs';
 import { claimFinalDelivery, acknowledgeFinalDelivery,
   checkFinalDeliveryEligibility, inspectFinalDeliveryReceipt } from '../final-delivery-receipt.mjs';
 
@@ -103,6 +104,71 @@ async function prepared({ legacy = false } = {}) {
   );
   assert.equal(answer.ok, true);
   return f;
+}
+
+function strictArtifact({ prospectLineage = true } = {}) {
+  const lineage = [
+    { evidence_id:'BOOK-001', authority:'BOOKING_TEXT', statement:'Company website: https://example.com' },
+    ...(prospectLineage
+      ? [{ evidence_id:'PROS-001', authority:'PROSPECT_REPORTED', statement:'Prospect confirmed budget readiness.' }]
+      : [])
+  ];
+  return {
+    brief_metadata: {
+      consultant_name:'Chris Person',
+      firm_name:'Claim Advisory',
+      prospect_company:'Example'
+    },
+    match_score_summary: {
+      overall_match_score:15,
+      scorable_coverage:30,
+      evaluated_fit_rate:50,
+      evidence_completeness:62.5
+    },
+    canonical_alignment: {
+      service_need_alignment: {
+        status:'PARTIAL_MATCH',
+        basis_ids: prospectLineage ? ['PROS-001'] : ['BOOK-001'],
+        reason: prospectLineage
+          ? 'Prospect-reported evidence supports discovery.'
+          : 'Booking evidence supports discovery.'
+      },
+      business_trigger: { status:'UNKNOWN', basis_ids:[], reason:'No trigger established.' }
+    },
+    client_intel: { company_profile:{ name:'Example', domain:'https://example.com' } },
+    strategic_intelligence: {
+      stated_need: {
+        primary_requirement:'Security advisory',
+        evidence_id: prospectLineage ? 'PROS-001' : 'BOOK-001'
+      },
+      potential_service_relevance:[{service_id:'V_CISO',name:'vCISO'}],
+      strategic_recommendations:['Conduct discovery.'],
+      risk_factors:['Unknown urgency']
+    },
+    intelligence_lineage:{admissible_evidence:lineage}
+  };
+}
+
+async function strictFinalInput(f, overrides = {}) {
+  const loaded = await f.repository.loadEnvelopeWithMeta(validFinal.opportunity_id);
+  const bundle = buildFinalizeBundle(loaded.envelope, loaded.etag);
+  assert.equal(bundle.ok, true);
+  const stageOutput = overrides.stageOutput || strictArtifact({
+    prospectLineage: overrides.prospectLineage !== false
+  });
+  const rendered = renderFinalBrief(stageOutput);
+  const base = {
+    opportunity_id:validFinal.opportunity_id,
+    status:'FINALIZED',
+    final_stage:'FINALIZE',
+    opportunity_version:bundle.opportunity_version,
+    finalize_provenance_digest:bundle.finalize_provenance_digest,
+    final_stage_output_json:JSON.stringify(stageOutput),
+    final_case_state_json:JSON.stringify(stageOutput),
+    final_audit_json:JSON.stringify(audit),
+    final_brief_markdown:rendered.brief_markdown
+  };
+  return { ...base, ...overrides.input };
 }
 
 test('preflight → claim → provider acknowledgment → duplicate is a no-send', async () => {
@@ -251,4 +317,86 @@ test('email HTML escapes model-provided markup instead of executing it', async (
   assert.ok(claim.email_html.includes('&lt;script&gt;'));
   assert.ok(claim.email_html.includes('&lt;img'));
   assert.doesNotMatch(claim.email_html, /<script|<img/i);
+});
+
+
+test('strict provenance claim binds accepted answers, version, final artifact and server render', async()=>{
+  const f=await prepared();
+  const input=await strictFinalInput(f);
+  const claim=await claimFinalDelivery(input,{
+    repository:f.repository,consultantRepository:f.consultantRepository,
+    requireFinalProvenance:true
+  });
+  assert.equal(claim.status,'CLAIMED');
+  assert.equal(claim.ok,true);
+  assert.match(claim.digest,/^[a-f0-9]{64}$/);
+});
+
+test('strict provenance rejects stale version, wrong digest and wrong stage', async()=>{
+  for(const patch of [
+    {opportunity_version:'stale-etag'},
+    {finalize_provenance_digest:'0'.repeat(64)},
+    {final_stage:'PREPARE'}
+  ]){
+    const f=await prepared();
+    const input=await strictFinalInput(f,{input:patch});
+    const result=await claimFinalDelivery(input,{
+      repository:f.repository,consultantRepository:f.consultantRepository,
+      requireFinalProvenance:true
+    });
+    assert.equal(result.status,'BLOCKED',JSON.stringify(patch));
+    assert.ok([
+      'FINAL_DELIVERY_PROVENANCE_MISMATCH','FINAL_DELIVERY_STAGE_INVALID'
+    ].includes(result.error),result.error);
+  }
+});
+
+test('strict provenance rejects final case state that differs from audited stage output', async()=>{
+  const f=await prepared();
+  const input=await strictFinalInput(f);
+  input.final_case_state_json=JSON.stringify({...JSON.parse(input.final_case_state_json),tampered:true});
+  const result=await claimFinalDelivery(input,{
+    repository:f.repository,consultantRepository:f.consultantRepository,
+    requireFinalProvenance:true
+  });
+  assert.equal(result.status,'BLOCKED');
+  assert.equal(result.error,'FINAL_DELIVERY_FINAL_STATE_MISMATCH');
+});
+
+test('strict provenance rejects arbitrary brief text not rendered from final artifact', async()=>{
+  const f=await prepared();
+  const input=await strictFinalInput(f);
+  input.final_brief_markdown='# Different brief';
+  const result=await claimFinalDelivery(input,{
+    repository:f.repository,consultantRepository:f.consultantRepository,
+    requireFinalProvenance:true
+  });
+  assert.equal(result.status,'BLOCKED');
+  assert.equal(result.error,'FINAL_DELIVERY_RENDER_MISMATCH');
+});
+
+test('submitted clarification requires prospect-reported PROS lineage in final artifact', async()=>{
+  const f=await prepared();
+  const input=await strictFinalInput(f,{prospectLineage:false});
+  const result=await claimFinalDelivery(input,{
+    repository:f.repository,consultantRepository:f.consultantRepository,
+    requireFinalProvenance:true
+  });
+  assert.equal(result.status,'BLOCKED');
+  assert.equal(result.error,'FINAL_DELIVERY_PROSPECT_LINEAGE_MISSING');
+});
+
+test('accepted-answer envelope mutation invalidates previously issued provenance', async()=>{
+  const f=await prepared();
+  const input=await strictFinalInput(f);
+  const loaded=await f.repository.loadEnvelopeWithMeta(validFinal.opportunity_id);
+  const changed=structuredClone(loaded.envelope);
+  changed.response.answers[0].value='No';
+  await f.repository.saveEnvelopeWithMeta(validFinal.opportunity_id,changed,{ifMatch:loaded.etag});
+  const result=await claimFinalDelivery(input,{
+    repository:f.repository,consultantRepository:f.consultantRepository,
+    requireFinalProvenance:true
+  });
+  assert.equal(result.status,'BLOCKED');
+  assert.equal(result.error,'FINAL_DELIVERY_PROVENANCE_MISMATCH');
 });
