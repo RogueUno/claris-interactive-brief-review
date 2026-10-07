@@ -65,14 +65,14 @@ test("uncertain create with no readable record stays uncertain",async()=>{
  const out=await createBookingFactRepository(s).create(envelope());
  assert.equal(out.ok,false);assert.equal(out.error,"BOOKING_FACT_CREATE_UNCERTAIN");
 });
-test("successful write without returned ETag is independently confirmed",async()=>{
+test("successful write without returned ETag is independently confirmed as fresh create",async()=>{
  const s=memory(),r=createBookingFactRepository(s),e=envelope(),path=r.pathFor(e.opportunity_id);
  s.putJsonIfAbsent=async(_path,value)=>{
    s.map.set(path,JSON.parse(JSON.stringify(value)));s.etags.set(path,"etag_readback");
    return {};
  };
  const out=await r.create(e);
- assert.equal(out.ok,true);assert.equal(out.status,"EXISTS_IDENTICAL");
+ assert.equal(out.ok,true);assert.equal(out.status,"CREATED_CONFIRMED");
  assert.equal(out.etag,"etag_readback");
 });
 test("load returns exact persisted envelope and ETag",async()=>{
