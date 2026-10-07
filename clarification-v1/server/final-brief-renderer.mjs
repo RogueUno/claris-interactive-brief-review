@@ -42,10 +42,12 @@ export function parseFinalArtifact(input) {
 
   let current = input;
   for (let depth = 0; depth < 2 && typeof current === 'string'; depth += 1) {
-    const source = current.trim();
+    let source = current.trim();
     if (!source) {
       throw new Error(depth === 0 ? 'FINAL_ARTIFACT_REQUIRED' : 'FINAL_ARTIFACT_INVALID');
     }
+    const fenced = source.match(/^\`\`\`(?:json)?\s*([\s\S]*?)\s*\`\`\`$/i);
+    if (fenced) source = fenced[1].trim();
     try {
       current = JSON.parse(source);
     } catch {
