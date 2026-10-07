@@ -1,6 +1,8 @@
 import { createHash, randomBytes, timingSafeEqual } from 'node:crypto';
 import { verifyLockedDeliveryOwner } from '../../clarification-v1/server/verify-locked-delivery-owner.mjs';
 import { buildConsultantFinalDelivery, buildProspectClarificationDelivery } from './pilot-delivery.mjs';
+import { adaptCertifiedPrepareToClarificationEvidence } from '../../clarification-v1/server/prepare-adapter.mjs';
+import { renderFinalBrief, parseFinalArtifact } from '../../clarification-v1/server/final-brief-renderer.mjs';
 
 // This outbox is only for V2.3's no-clarification branch. Submitted prospect
 // answers and published V5 briefs use different, independently gated outboxes.
@@ -18,7 +20,7 @@ function same(a, b) {
 }
 function status(name, extra = {}) {
   return {
-    ok: ['REGISTERED', 'RECOVERY_AUTHORIZED', 'CLAIMED', 'ACKNOWLEDGED', 'SKIPPED_ALREADY_SENT'].includes(name),
+    ok: ['REGISTERED', 'RECOVERY_AUTHORIZED', 'PREPARE_SEALED', 'CLAIMED', 'ACKNOWLEDGED', 'SKIPPED_ALREADY_SENT'].includes(name),
     status: name, ...extra
   };
 }
