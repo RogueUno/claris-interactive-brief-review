@@ -10,9 +10,9 @@ import {
 
 const eventType=()=>({custom_questions:[
  {name:"Company website",type:"string",position:0,enabled:true,required:true,answer_choices:[],include_other:false},
- {name:"Please share anything that will help prepare for our meeting.",type:"string",position:1,enabled:true,required:false,answer_choices:[],include_other:false},
- {name:"What would you like help with?",type:"single_select",position:2,enabled:true,required:true,
-  answer_choices:["API Security Auditing","SOC 2 Readiness","Both API Security Auditing and SOC 2 Readiness","I'm not sure yet / something else"],include_other:false}
+ {name:"What would you like help with?",type:"single_select",position:1,enabled:true,required:true,
+  answer_choices:["API Security Auditing","SOC 2 Readiness","Both API Security Auditing and SOC 2 Readiness","I'm not sure yet / something else"],include_other:false},
+ {name:"Please share anything that will help prepare for our meeting.",type:"string",position:2,enabled:true,required:false,answer_choices:[],include_other:false}
 ]});
 const event=()=>({uri:"https://api.calendly.com/scheduled_events/event-qa-001",start_time:"2026-10-10T12:00:00Z"});
 const invitee=(alignment="SOC 2 Readiness",extra=[])=>({
@@ -171,9 +171,9 @@ test("known non-USD budget with positive USD floor fails closed rather than conv
  assert.equal(evaluateTrustedBookingQualification({envelope:e,policy:qualificationPolicy()}).error,"KNOWN_BUDGET_CURRENCY_UNCOMPARABLE");
 });
 
-test("live Calendly order is accepted: website, optional prep, required dropdown",()=>{
+test("live Calendly order is accepted: required website, required dropdown, optional prep",()=>{
  const r=verifyTrustedCalendlyQuestionSchema(eventType());
  assert.equal(r.ok,true);
- assert.equal(eventType().custom_questions[2].type,"single_select");
- assert.equal(eventType().custom_questions[2].position,2);
+ assert.equal(eventType().custom_questions[1].type,"single_select");
+ assert.equal(eventType().custom_questions[1].position,1);
 });
