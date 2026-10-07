@@ -1,10 +1,11 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import handler from '../../../api/calendly/normalize.mjs';
+import handler, { trustedBookingFactsEnabled, trustedBookingFactHttpStatus } from '../../../api/calendly/normalize.mjs';
 
 // Pure HTTP contract test. This never contacts Calendly, Make, Gemini or Gmail.
 const originalMakeKey = process.env.CLARIS_MAKE_KEY;
 const originalAdminKey = process.env.CLARIS_ADMIN_KEY;
+const originalTrustedFactsFlag = process.env.CLARIS_TRUSTED_BOOKING_FACTS_V1;
 
 function request(answers, websiteRequired=true) {
   return new Request('https://claris.test/api/calendly/normalize', {
@@ -32,11 +33,14 @@ function request(answers, websiteRequired=true) {
 test('authenticated Calendly API enforces Make supplied website-required boolean', async t=>{
   process.env.CLARIS_MAKE_KEY='synthetic-ci-only-key';
   delete process.env.CLARIS_ADMIN_KEY;
+  delete process.env.CLARIS_TRUSTED_BOOKING_FACTS_V1;
   t.after(()=>{
     if(originalMakeKey === undefined) delete process.env.CLARIS_MAKE_KEY;
     else process.env.CLARIS_MAKE_KEY=originalMakeKey;
     if(originalAdminKey === undefined) delete process.env.CLARIS_ADMIN_KEY;
     else process.env.CLARIS_ADMIN_KEY=originalAdminKey;
+    if(originalTrustedFactsFlag === undefined) delete process.env.CLARIS_TRUSTED_BOOKING_FACTS_V1;
+    else process.env.CLARIS_TRUSTED_BOOKING_FACTS_V1=originalTrustedFactsFlag;
   });
 
   const noWebsite = await handler.fetch(request([
@@ -62,4 +66,25 @@ test('authenticated Calendly API enforces Make supplied website-required boolean
   assert.equal(accepted.booking.company,'Acme Security');
   assert.equal(accepted.provenance.domain,'QUESTION_DOMAIN');
   assert.equal(accepted.provenance.company,'DOMAIN_LABEL');
+});
+
+test('trusted booking facts feature flag is default-off and explicit-only', ()=>{
+  assert.equal(trustedBookingFactsEnabled({}), false);
+  assert.equal(trustedBookingFactsEnabled({CLARIS_TRUSTED_BOOKING_FACTS_V1:'false'}), false);
+  for(const value of ['1','true','TRUE','enabled',' enabled ']) {
+    assert.equal(trustedBookingFactsEnabled({CLARIS_TRUSTED_BOOKING_FACTS_V1:value}), true, value);
+  }
+});
+
+test('trusted booking fact API status mapping fails closed', ()=>{
+  assert.equal(trustedBookingFactHttpStatus({ok:true}), 200);
+  assert.equal(trustedBookingFactHttpStatus({ok:false,error:'BOOKING_FACT_IMMUTABLE_CONFLICT'}), 409);
+  assert.equal(trustedBookingFactHttpStatus({ok:false,error:'PROFILE_NOT_LOCKED'}), 409);
+  assert.equal(trustedBookingFactHttpStatus({ok:false,error:'RUNTIME_V3_NOT_READY'}), 409);
+  for(const error of [
+    'PROFILE_READ_FAILED','BOOKING_FACT_CREATE_UNCERTAIN',
+    'TRUSTED_BOOKING_FACT_PERSIST_FAILED','TRUSTED_BOOKING_FACT_COMPILE_FAILED',
+    'TRUSTED_BOOKING_FACT_SERVER_UNAVAILABLE'
+  ]) assert.equal(trustedBookingFactHttpStatus({ok:false,error}), 503, error);
+  assert.equal(trustedBookingFactHttpStatus({ok:false,error:'COMPANY_WEBSITE_INVALID'}), 422);
 });
