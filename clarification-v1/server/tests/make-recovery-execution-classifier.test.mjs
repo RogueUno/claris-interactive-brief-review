@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {classifyMakeRecoveryExecution} from '../../../calibration-v3/server/make-recovery-execution-classifier.mjs';
 const id='a7d72485a71246d6b599c6bec301b241';
-const summary={execution:{id,status:'error'},error:{message:'[503] This model is currently experiencing high demand.'}};
+const summary={execution:{id,status:'error',startedAt:'2026-10-06T11:55:28.774Z',duration:338270},error:{message:'[503] This model is currently experiencing high demand.'}};
 const inspection={execution:{id,status:'error',startedAt:'2026-10-06T11:55:28.774Z',duration:338270},
 error:{message:'[503] This model is currently experiencing high demand.',moduleId:19},
 modules:[{id:2,invocations:1,errors:0},{id:19,invocations:1,errors:1}]};
@@ -29,4 +29,19 @@ test('ambiguous or FINALIZE-linked errors are denied',()=>{
     inspection:{...inspection,...mutation}});
   assert.equal(x,null);
  }
+});
+
+test('truncated and contradictory Make execution histories fail closed',()=>{
+ for(const change of [
+  {eventsTruncated:true},
+  {modules:[{id:2,invocations:1,errors:2}]},
+  {modules:[{id:2,invocations:1,errors:1},{id:2,invocations:1,errors:1}]}
+ ]){
+  assert.equal(classifyMakeRecoveryExecution({scenarioId:7786842,executionId:id,summary,
+   inspection:{...inspection,error:{message:'[503] transient',moduleId:2},
+    modules:[{id:2,invocations:1,errors:1}],...change}}),null);
+ }
+ const mismatch={...summary,execution:{...summary.execution,duration:123}};
+ assert.equal(classifyMakeRecoveryExecution({scenarioId:7786842,executionId:id,summary:mismatch,
+  inspection:{...inspection,error:{message:'[503] transient',moduleId:2},modules:[{id:2,invocations:1,errors:1}]}}),null);
 });
