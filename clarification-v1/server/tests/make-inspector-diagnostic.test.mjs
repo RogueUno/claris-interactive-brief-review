@@ -17,7 +17,7 @@ test('read-only sanitized successful diagnostic',async()=>{
   return {ok:true,json:async()=>url.endsWith('/scenarios/7786842')?
    {scenario:{id:7786842,isActive:false}}:{dlqs:[],pg:{offset:0,limit:10}}};
  }});
- assert.equal(result.status,'SCENARIO_READ_VERIFIED');
+ assert.equal(result.status,'API_CONNECTIVITY_OBSERVED_NOT_RECOVERY_CERTIFIED');
  assert.equal(result.ok,true);
  assert.deepEqual(requests.map(x=>x.method),['GET','GET']);
  assert.equal(JSON.stringify(result).includes(env.CLARIS_MAKE_INSPECTOR_TOKEN),false);
