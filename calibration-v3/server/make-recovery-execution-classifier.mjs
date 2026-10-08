@@ -9,8 +9,14 @@ export function classifyMakeRecoveryExecution({scenarioId,executionId,summary,in
     summary?.execution?.status!=='error' ||
     e?.id!==undefined && e.id!==executionId ||
     e?.status!=='error' ||
+    summary.execution.startedAt!==e.startedAt ||
+    summary.execution.duration!==e.duration ||
     !inspection?.error?.moduleId ||
     !Array.isArray(inspection.modules)) return null;
+  if(inspection.eventsTruncated===true ||
+    inspection.modules.some(m=>!Number.isSafeInteger(m.id)||
+      !Number.isSafeInteger(m.invocations)||m.invocations<0||
+      !Number.isSafeInteger(m.errors)||m.errors<0||m.errors>m.invocations))return null;
   const failure=inspection.modules.filter(m=>m.errors>0);
   // Make V2.3 shadow's PREPARE is child module #2. Other failures (C1-C4,
   // HTTP protocol, FINALIZE) must NOT result in a PREPARE recovery token.
