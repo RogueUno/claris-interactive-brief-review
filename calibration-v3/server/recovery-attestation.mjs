@@ -3,6 +3,7 @@
 // module. Absence, malformed proof or storage ambiguity always denies recovery.
 const ID=/^[A-Za-z0-9_-]{8,100}$/;
 const RUN=/^[A-Za-z0-9_-]{12,150}$/;
+const SCENARIO=/^[1-9][0-9]{5,11}$/;
 const HASH=/^[a-f0-9]{64}$/;
 const ts=x=>typeof x==='string'&&Number.isFinite(Date.parse(x))?Date.parse(x):NaN;
 export function recoveryEvidencePath(id) {
@@ -22,7 +23,7 @@ export function createRecoveryAttestor({storage,now=()=>Date.now()}={}) {
        e.authority!=='SERVER_VERIFIED_MAKE_EXECUTION'||
        e.opportunity_id!==opportunity_id||e.consultant_id!==consultant_id||
        e.receipt_etag!==receipt_etag||
-       !RUN.test(e.make_execution_id)||!RUN.test(e.make_scenario_id)||
+       !RUN.test(e.make_execution_id)||!SCENARIO.test(e.make_scenario_id)||
        e.make_stage!=='PREPARE'||e.execution_status!=='TERMINAL_FAILED'||
        e.provider_http_status!==503||e.provider_failure_class!=='TRANSIENT'||
        e.no_pending_execution!==true||e.no_claim_or_send!==true||
