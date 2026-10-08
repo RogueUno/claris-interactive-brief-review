@@ -36,7 +36,7 @@ function fixture({record=rec,run=execution,sc=scenario,approvalPatch={},failWrit
    ...approvalPatch
  });
  const writer=createRecoveryAttestationWriter({storage,inspectExecution,inspectScenario,
-   readOperatorApproval,now:()=>clock});
+   readOperatorApproval,consumeOperatorApproval:async()=>true,now:()=>clock});
  return {writer,writes,storage};
 }
 test('independently inspected terminal-503 plus approval creates immutable bound proof',async()=>{
