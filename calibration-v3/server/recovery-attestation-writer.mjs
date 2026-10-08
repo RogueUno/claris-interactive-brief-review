@@ -1,5 +1,6 @@
 import { createHash } from 'node:crypto';
 import { recoveryEvidencePath } from './recovery-attestation.mjs';
+import { createStoredRecoveryApprovalReader } from './recovery-operator-approval.mjs';
 
 // Privileged orchestration-only service. Never expose this as a general Make
 // webhook. The inspector and approval reader MUST fetch their data independently.
@@ -9,11 +10,13 @@ const SCENARIO=/^[1-9][0-9]{5,11}$/;
 const sha=x=>createHash('sha256').update(JSON.stringify(x)).digest('hex');
 const validDate=x=>typeof x==='string'&&Number.isFinite(Date.parse(x));
 export function createRecoveryAttestationWriter({
-  storage,inspectExecution,inspectScenario,readOperatorApproval,now=()=>Date.now()
+  storage,inspectExecution,inspectScenario,readOperatorApproval=null,now=()=>Date.now()
 }={}) {
   if(!storage?.getJsonWithMeta||!storage?.putJsonIfAbsent||
     typeof inspectExecution!=='function'||typeof inspectScenario!=='function'||
-    typeof readOperatorApproval!=='function')throw Error('RECOVERY_WRITER_TRUSTED_DEPENDENCIES_REQUIRED');
+    (readOperatorApproval!==null&&typeof readOperatorApproval!=='function'))
+    throw Error('RECOVERY_WRITER_TRUSTED_DEPENDENCIES_REQUIRED');
+  const approvalReader=readOperatorApproval||createStoredRecoveryApprovalReader({storage,now});
 
   return async ({opportunity_id,consultant_id,receipt_etag,make_execution_id,
     make_scenario_id}={})=>{
@@ -56,7 +59,7 @@ export function createRecoveryAttestationWriter({
     const evidence_sha256=sha(proof);
     let approval;
     try {
-      approval=await readOperatorApproval({opportunity_id,consultant_id,
+      approval=await approvalReader({opportunity_id,consultant_id,
         evidence_sha256,make_execution_id,receipt_etag});
     }catch{return {ok:false,error:'RECOVERY_WRITER_APPROVAL_UNAVAILABLE'};}
     if(!approval||approval.status!=='APPROVED'||
