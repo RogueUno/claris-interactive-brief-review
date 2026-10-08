@@ -45,8 +45,8 @@ export function createRecoveryAttestationWriter({
       execution.send_attempted!==false||execution.claim_attempted!==false||
       !validDate(execution.finished_at)||Date.parse(execution.finished_at)>now()||
       !scenario||Number(scenario.id)!==Number(make_scenario_id)||
-      scenario.status!=='inactive'||scenario.isWaitingOnIncompleteExecutions===true||
-      Number(scenario.incompleteExecutions||0)!==0)
+      scenario.status!=='inactive'||scenario.isWaitingOnIncompleteExecutions!==false||
+      scenario.incompleteExecutions!==0)
       return {ok:false,error:'RECOVERY_WRITER_NOT_PROVEN'};
     const observed_at=new Date(execution.finished_at).toISOString();
     const proof={
