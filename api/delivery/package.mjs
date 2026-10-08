@@ -1,6 +1,7 @@
 import { buildDeliveryPackage } from '../../calibration-v3/server/pilot-delivery.mjs';
 import { createDirectFinalOutbox } from '../../calibration-v3/server/direct-final-outbox.mjs';
 import { createRecoveryAttestor } from '../../calibration-v3/server/recovery-attestation.mjs';
+import { runMakeInspectorDiagnostic } from '../../calibration-v3/server/make-inspector-diagnostic.mjs';
 import { json, methodNotAllowed, parseJson } from '../../calibration-v3/server/http.mjs';
 import { parseMakeDeliveryInput, DIRECT_FINAL_FORM_FIELDS } from '../../calibration-v3/server/make-delivery-transport.mjs';
 
@@ -67,6 +68,10 @@ export function createDeliveryGateway({
     const declaredOperation = String(
       request.headers.get('x-claris-delivery') || ''
     ).trim();
+    if (declaredOperation === 'make_inspector_diagnostic') {
+      const result = await runMakeInspectorDiagnostic();
+      return json(result, result.ok ? 200 : 422);
+    }
     const parsed = await parseMakeDeliveryInput(
       request, parseJson, DIRECT_FINAL_FORM_FIELDS[declaredOperation]
     );
