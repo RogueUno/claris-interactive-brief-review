@@ -222,7 +222,9 @@ function previously(record) {
 
 export function createDirectFinalOutbox({ storage, consultantRepository,
   clarificationRepository = null, inviteBaseUrl = null,
-  requireFinalProvenance = false }) {
+  requireFinalProvenance = false,
+  requireRecoveryAttestation = false,
+  recoveryAttestor = null }) {
   if (!storage?.getJsonWithMeta || !storage?.putJsonIfAbsent || !storage?.putJson ||
       !consultantRepository?.loadIdentity ||
       !consultantRepository?.loadProfileEnvelopeWithMeta) {
@@ -326,6 +328,37 @@ export function createDirectFinalOutbox({ storage, consultantRepository,
       const recoveryCount = Number.isInteger(rec.recovery_count) ? rec.recovery_count : 0;
       if (recoveryCount >= 1) {
         return status('BLOCKED', { error:'DIRECT_FINAL_RECOVERY_LIMIT_REACHED' });
+      }
+
+      // A claimed provider 503 is not proof of a terminal, no-send execution.
+      // When strict recovery is enabled, authority MUST come from an injected
+      // server-side attestor. Never accept a caller-supplied approval object.
+      if (requireRecoveryAttestation) {
+        if (typeof recoveryAttestor !== 'function') {
+          return status('BLOCKED', { error:'DIRECT_FINAL_RECOVERY_ATTESTOR_UNAVAILABLE' });
+        }
+        let attestation;
+        try {
+          attestation = await recoveryAttestor({
+            opportunity_id:b.opportunity_id,
+            consultant_id:b.consultant_id,
+            receipt:structuredClone(rec),
+            receipt_etag:loaded.etag
+          });
+        } catch {
+          return status('BLOCKED', { error:'DIRECT_FINAL_RECOVERY_ATTESTATION_UNAVAILABLE' });
+        }
+        if (attestation?.authorized !== true ||
+            attestation?.opportunity_id !== b.opportunity_id ||
+            attestation?.consultant_id !== b.consultant_id ||
+            attestation?.receipt_etag !== loaded.etag ||
+            attestation?.terminal_provider_503 !== true ||
+            attestation?.no_claim_or_send === true && attestation?.no_pending_execution !== true ||
+            attestation?.no_claim_or_send !== true ||
+            attestation?.operator_approved !== true ||
+            attestation?.one_use_approval !== true) {
+          return status('BLOCKED', { error:'DIRECT_FINAL_RECOVERY_NOT_ATTESTED' });
+        }
       }
 
       const registrationToken = randomBytes(32).toString('hex');
