@@ -35,6 +35,7 @@ jobs:
           node --test clarification-v1/server/tests/recovery-attestation-candidate.test.mjs
           node --test clarification-v1/server/tests/recovery-attestation-evidence.test.mjs
           node --test clarification-v1/server/tests/recovery-attestation-writer.test.mjs
+          node --test clarification-v1/server/tests/make-recovery-execution-classifier.test.mjs
           node --test clarification-v1/server/tests/direct-final-gateway.test.mjs
           node --test clarification-v1/server/tests/direct-final-calendly-bridge.test.mjs
           node --test calibration-v3/server/tests/calendly-booking-normalizer.test.mjs
