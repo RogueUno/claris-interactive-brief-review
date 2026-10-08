@@ -40,12 +40,12 @@ export function createRecoveryAttestationWriter({
       execution.provider_http_status!==503||execution.provider_failure_class!=='TRANSIENT'||
       execution.finished!==true||execution.pending_operations!==0||
       execution.send_attempted!==false||execution.claim_attempted!==false||
-      !validDate(execution.finished_at)||
+      !validDate(execution.finished_at)||Date.parse(execution.finished_at)>now()||
       !scenario||Number(scenario.id)!==Number(make_scenario_id)||
       scenario.status!=='inactive'||scenario.isWaitingOnIncompleteExecutions===true||
       Number(scenario.incompleteExecutions||0)!==0)
       return {ok:false,error:'RECOVERY_WRITER_NOT_PROVEN'};
-    const observed_at=new Date(now()).toISOString();
+    const observed_at=new Date(execution.finished_at).toISOString();
     const proof={
       opportunity_id,consultant_id,receipt_etag,
       make_execution_id,make_scenario_id:String(make_scenario_id),
@@ -67,6 +67,7 @@ export function createRecoveryAttestationWriter({
       approval.make_execution_id!==make_execution_id||
       approval.one_use!==true||approval.used===true||
       !validDate(approval.approved_at)||!validDate(approval.expires_at)||
+      Date.parse(approval.approved_at)<Date.parse(observed_at)||
       Date.parse(approval.approved_at)>now()||
       Date.parse(approval.expires_at)<=now()||
       Date.parse(approval.expires_at)-now()>15*60*1000)
