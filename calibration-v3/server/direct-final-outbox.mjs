@@ -353,7 +353,7 @@ export function createDirectFinalOutbox({ storage, consultantRepository,
             attestation?.consultant_id !== b.consultant_id ||
             attestation?.receipt_etag !== loaded.etag ||
             attestation?.terminal_provider_503 !== true ||
-            attestation?.no_claim_or_send === true && attestation?.no_pending_execution !== true ||
+            attestation?.no_pending_execution !== true ||
             attestation?.no_claim_or_send !== true ||
             attestation?.operator_approved !== true ||
             attestation?.one_use_approval !== true) {
