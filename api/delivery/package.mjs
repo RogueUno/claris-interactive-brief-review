@@ -1,5 +1,6 @@
 import { buildDeliveryPackage } from '../../calibration-v3/server/pilot-delivery.mjs';
 import { createDirectFinalOutbox } from '../../calibration-v3/server/direct-final-outbox.mjs';
+import { createRecoveryAttestor } from '../../calibration-v3/server/recovery-attestation.mjs';
 import { json, methodNotAllowed, parseJson } from '../../calibration-v3/server/http.mjs';
 import { parseMakeDeliveryInput, DIRECT_FINAL_FORM_FIELDS } from '../../calibration-v3/server/make-delivery-transport.mjs';
 
@@ -52,7 +53,9 @@ export function createDeliveryGateway({
       clarificationRepository: clarificationServerContext().repository,
       inviteBaseUrl: new URL('/clarification-v1/',request.url).toString(),
       requireFinalProvenance: directFinalProvenanceEnabled(),
-      requireRecoveryAttestation: recoveryAttestationEnabled()
+      requireRecoveryAttestation: recoveryAttestationEnabled(),
+      recoveryAttestor: recoveryAttestationEnabled()
+        ? createRecoveryAttestor({storage:runtime.storage}) : null
     });
   }
 } = {}) {
