@@ -34,6 +34,8 @@ export function createMakeReadOnlyInspector({
         throw Error('MAKE_INSPECTOR_SCENARIO_INCOMPLETE');
       // No unresolved or ambiguous incomplete executions allowed.
       if(dlq.dlqs.length>0)throw Error('MAKE_INSPECTOR_INCOMPLETE_EXECUTIONS');
+      if(!dlq.pg || dlq.pg.offset!==0 || !Number.isSafeInteger(dlq.pg.limit) || dlq.pg.limit<1 || dlq.pg.limit<dlq.dlqs.length)
+        throw Error('MAKE_INSPECTOR_DLQ_PAGINATION_UNVERIFIED');
       return {
         id:n,
         status:s.isActive===false?'inactive':s.isActive===true?'active':'unknown',
