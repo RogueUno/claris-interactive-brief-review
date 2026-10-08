@@ -31,6 +31,10 @@ function envEnabled(value) {
   return normalized === '1' || normalized === 'true' || normalized === 'enabled';
 }
 
+export function recoveryAttestationEnabled(env = process.env) {
+  return envEnabled(env?.CLARIS_RECOVERY_ATTESTATION_V1);
+}
+
 export function directFinalProvenanceEnabled(env = process.env) {
   return envEnabled(env?.CLARIS_FINAL_PROVENANCE_V1);
 }
@@ -47,7 +51,8 @@ export function createDeliveryGateway({
       consultantRepository: runtime.repository,
       clarificationRepository: clarificationServerContext().repository,
       inviteBaseUrl: new URL('/clarification-v1/',request.url).toString(),
-      requireFinalProvenance: directFinalProvenanceEnabled()
+      requireFinalProvenance: directFinalProvenanceEnabled(),
+      requireRecoveryAttestation: recoveryAttestationEnabled()
     });
   }
 } = {}) {
