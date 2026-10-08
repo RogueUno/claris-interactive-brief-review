@@ -39,8 +39,8 @@ export function createMakeReadOnlyInspector({
       return {
         id:n,
         status:s.isActive===false?'inactive':s.isActive===true?'active':'unknown',
-        incompleteExecutions:0,
-        isWaitingOnIncompleteExecutions:false
+        incompleteExecutions:null,
+        isWaitingOnIncompleteExecutions:null
       };
     },
     async inspectExecution({scenarioId:id,executionId}) {
