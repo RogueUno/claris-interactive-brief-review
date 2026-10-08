@@ -14,7 +14,7 @@ export async function runMakeInspectorDiagnostic({
     const inspector=createMakeReadOnlyInspector({token,fetchImpl});
     const status=await inspector.inspectScenario({scenarioId});
     if(status?.status!=='inactive')return {ok:false,status:'SCENARIO_NOT_INACTIVE'};
-    return {ok:true,status:'SCENARIO_READ_VERIFIED'};
+    return {ok:true,status:'API_CONNECTIVITY_OBSERVED_NOT_RECOVERY_CERTIFIED'};
   }catch(error){
     const allowed=new Set([
       'MAKE_INSPECTOR_READ_FAILED','MAKE_INSPECTOR_RESPONSE_INVALID',
