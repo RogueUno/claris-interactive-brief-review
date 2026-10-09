@@ -40,6 +40,7 @@ jobs:
           node --test clarification-v1/server/tests/recovery-approval-consumption.test.mjs
           node --test clarification-v1/server/tests/first-mvp-cutover-preflight.test.mjs
           node --test clarification-v1/server/tests/first-mvp-nosend-rehearsal.test.mjs
+          node --test clarification-v1/server/tests/multi-choice-exclusivity.test.mjs
           node --test clarification-v1/server/tests/make-read-only-inspector.test.mjs
           node --test clarification-v1/server/tests/make-inspector-diagnostic.test.mjs
           node --test clarification-v1/server/tests/direct-final-gateway.test.mjs
