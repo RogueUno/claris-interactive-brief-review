@@ -38,6 +38,7 @@ jobs:
           node --test clarification-v1/server/tests/make-recovery-execution-classifier.test.mjs
           node --test clarification-v1/server/tests/recovery-operator-approval.test.mjs
           node --test clarification-v1/server/tests/recovery-approval-consumption.test.mjs
+          node --test clarification-v1/server/tests/first-mvp-cutover-preflight.test.mjs
           node --test clarification-v1/server/tests/make-read-only-inspector.test.mjs
           node --test clarification-v1/server/tests/make-inspector-diagnostic.test.mjs
           node --test clarification-v1/server/tests/direct-final-gateway.test.mjs
