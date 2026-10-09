@@ -250,6 +250,8 @@ function normalizeAnswer(question, raw) {
     const normalized = raw.map((item) => normalizeSingleChoice(question, item));
     const identities = normalized.map((item) => `${item.answer_kind}:${item.selected_option_id || item.value}`);
     if (new Set(identities).size !== identities.length) throw new Error(`ANSWER_DUPLICATE:${question.question_id}`);
+    if (normalized.some((item) => item.answer_kind === 'UNSURE') && normalized.length > 1)
+      throw new Error(`ANSWER_UNSURE_EXCLUSIVE:${question.question_id}`);
     return {
       question_id: question.question_id,
       mode: question.mode,
