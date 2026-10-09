@@ -11,5 +11,7 @@ export function assessBookingCutover({ingress,booking,lifecycle,submitted}={}){
  if(ingress?.target!==7780705)reasons.push('INGRESS_TARGET_NOT_PROTECTED');
  if(booking?.target!==7786842)reasons.push('BOOKING_TARGET_NOT_PROTECTED');
  if(submitted?.target!==7786842)reasons.push('SUBMITTED_TARGET_NOT_PROTECTED');
+ if(ingress?.websiteProvenanceGated!==true)reasons.push('WEBSITE_GATE_NOT_VERIFIED');
+ if(lifecycle?.frozenPrepareTarget!==7360890)reasons.push('FROZEN_PREPARE_TARGET_NOT_VERIFIED');
  return {stage:'READ_ONLY_PREFLIGHT',safeToRun:false,reasons};
 }
