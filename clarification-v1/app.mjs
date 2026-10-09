@@ -218,7 +218,8 @@ function hasAnswer(question, value) {
   if (!question.required) return true;
   if (question.response_type === 'SINGLE_CHOICE') return isValidSingleChoice(value);
   if (question.response_type === 'MULTI_CHOICE') {
-    return Array.isArray(value) && value.length > 0 && value.every(isValidSingleChoice);
+    return Array.isArray(value) && value.length > 0 && value.every(isValidSingleChoice) &&
+      !(value.some((v) => v.kind === 'UNSURE') && value.length > 1);
   }
   return value != null && String(value).trim() !== '';
 }
@@ -374,7 +375,11 @@ function renderQuestion(notice = '') {
       (value.kind !== 'OPTION' || item.option_id === value.option_id)
     ));
     if (exists >= 0) state.draft.splice(exists, 1);
-    else state.draft.push(value);
+    else if (value.kind === 'UNSURE') state.draft = [value];
+    else {
+      state.draft = state.draft.filter((item) => item?.kind !== 'UNSURE');
+      state.draft.push(value);
+    }
   }
 
   function selectChoice(value) {
