@@ -252,3 +252,16 @@ test('email HTML escapes model-provided markup instead of executing it', async (
   assert.ok(claim.email_html.includes('&lt;img'));
   assert.doesNotMatch(claim.email_html, /<script|<img/i);
 });
+
+test('protected submitted delivery requires a matching rendered final artifact', async () => {
+ const f = await prepared();
+ const opts = {repository:f.repository, consultantRepository:f.consultantRepository};
+ const input = {...validFinal, require_rendered_artifact:true};
+ assert.equal((await claimFinalDelivery(input, opts)).error, 'FINAL_DELIVERY_ARTIFACT_REQUIRED');
+ const incomplete = {...input, final_stage_output_json: JSON.stringify({consultant_prep_strategy:{primary_service_id:'SVC_SOC2'}})};
+ assert.equal((await claimFinalDelivery(incomplete, opts)).status, 'BLOCKED');
+ const validArtifact={preliminary_brief:{summary_markdown:'Rehearsal-only briefing'}, match_analysis:{supported_match_score:15,scorable_coverage:30,classifications:{scope:{status:'PARTIAL_MATCH'}}}, consultant_prep_strategy:{recommended_action:'Perform rehearsal',key_talking_points:['Respect scope'],qualification_status:'UNQUALIFIED_SYNTHETIC'},prospect_question_plan:[{question:'What is in scope?'}]};
+ const mismatched={...input,final_stage_output_json:JSON.stringify(validArtifact)};
+ assert.equal((await claimFinalDelivery(mismatched,opts)).error,'FINAL_DELIVERY_RENDER_MISMATCH');
+ assert.equal((await checkFinalDeliveryEligibility(input,opts)).status,'ELIGIBLE');
+});

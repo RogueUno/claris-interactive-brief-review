@@ -1,7 +1,7 @@
 name: V2.3 Delivery Ownership Safety
 on:
   push:
-    branches: [main, v23-delivery-owner-gate-20261004]
+    branches: [main, v23-delivery-owner-gate-20261004, fix/submitted-final-delivery-content-gate-20261010]
     paths:
       - 'api/clarification/admin/package.mjs'
       - 'clarification-v1/server/**'

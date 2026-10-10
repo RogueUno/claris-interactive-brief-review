@@ -1,4 +1,5 @@
 import { createHash, randomBytes, timingSafeEqual } from 'node:crypto';
+import { renderFinalBrief } from './final-brief-renderer.mjs';
 import { buildFinalizeBundle } from './finalize-handoff.mjs';
 import { buildConsultantFinalDelivery } from '../../calibration-v3/server/pilot-delivery.mjs';
 import { verifyLockedDeliveryOwner } from './verify-locked-delivery-owner.mjs';
@@ -70,6 +71,13 @@ export async function claimFinalDelivery(input, {
     return outcome('BLOCKED', { error: 'FINAL_DELIVERY_NOT_CERTIFIED' });
   }
 
+  if (input?.require_rendered_artifact === true || input?.require_rendered_artifact === 'true') {
+    if (!text(input?.final_stage_output_json)) return outcome('BLOCKED', { error: 'FINAL_DELIVERY_ARTIFACT_REQUIRED' });
+    try {
+      if (renderFinalBrief(input.final_stage_output_json).brief_markdown.trim() !== markdown)
+        return outcome('BLOCKED', { error: 'FINAL_DELIVERY_RENDER_MISMATCH' });
+    } catch { return outcome('BLOCKED', { error: 'FINAL_DELIVERY_RENDER_INVALID' }); }
+  }
   let loaded;
   try { loaded = await repository.loadEnvelopeWithMeta(opportunityId); }
   catch { return outcome('BLOCKED', { error: 'FINAL_DELIVERY_READ_FAILED' }); }
