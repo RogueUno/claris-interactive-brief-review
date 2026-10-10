@@ -32,7 +32,7 @@ function numeric(value) {
   return Number.isFinite(candidate) ? candidate : null;
 }
 
-function parseArtifact(input) {
+export function parseFinalArtifact(input) {
   if (
     typeof input !== 'string' &&
     (!input || typeof input !== 'object' || Array.isArray(input))
@@ -42,10 +42,12 @@ function parseArtifact(input) {
 
   let current = input;
   for (let depth = 0; depth < 2 && typeof current === 'string'; depth += 1) {
-    const source = current.trim();
+    let source = current.trim();
     if (!source) {
       throw new Error(depth === 0 ? 'FINAL_ARTIFACT_REQUIRED' : 'FINAL_ARTIFACT_INVALID');
     }
+    const fenced = source.match(/^\`\`\`(?:json)?\s*([\s\S]*?)\s*\`\`\`$/i);
+    if (fenced) source = fenced[1].trim();
     try {
       current = JSON.parse(source);
     } catch {
@@ -158,20 +160,22 @@ function normalizeConsultantContext(artifact) {
 
 function normalizeDiscoveryQuestions(artifact) {
   const discoveryPlan = object(artifact.discovery_plan);
-  const source = array(artifact.discovery_question_plan).length
-    ? array(artifact.discovery_question_plan)
+  const source = array(artifact.prospect_question_plan).length
+    ? array(artifact.prospect_question_plan)
+    : array(artifact.discovery_question_plan).length
+      ? array(artifact.discovery_question_plan)
     : array(artifact.discovery_questions).length
       ? array(artifact.discovery_questions)
       : array(discoveryPlan.priority_questions).length
         ? array(discoveryPlan.priority_questions)
-        : array(discoveryPlan.high_priority_questions);
+        : array(discoveryPlan.high_priority_questions).length ? array(discoveryPlan.high_priority_questions) : array(artifact.preliminary_brief?.consultant_live_discovery_if_no_form);
 
   return source
     .map((item) => typeof item === 'string'
       ? { question: firstText(item), intent: null, alignment_id: null }
       : {
           question: firstText(item?.question),
-          intent: firstText(item?.intent, item?.objective, item?.target_dimension),
+          intent: firstText(item?.intent, item?.objective, item?.target_dimension, item?.evidence_gap_addressed),
           alignment_id: firstText(item?.alignment_id)
         })
     .filter((item) => item.question);
@@ -218,7 +222,11 @@ function classificationLines(classifications) {
   return Object.entries(classifications).map(([key, item]) => {
     const status = firstText(item?.status) || 'UNKNOWN';
     const reason = firstText(item?.reason, item?.rationale, item?.reasoning);
-    return `- **${humanize(key)}:** ${status}${reason ? ` — ${reason}` : ''}`;
+    const basisIds = array(item?.basis_ids)
+      .map((value) => firstText(value))
+      .filter(Boolean);
+    const basis = basisIds.length ? ` [basis: ${basisIds.join(', ')}]` : '';
+    return `- **${humanize(key)}:** ${status}${reason ? ` — ${reason}` : ''}${basis}`;
   });
 }
 
@@ -250,6 +258,14 @@ function assertRenderable(normalized) {
     throw new Error('FINAL_ARTIFACT_UNRECOGNIZED');
   }
 
+  if (normalized.source_schema === 'legacy_or_flat' && normalized.current_finalize_contract &&
+      (!normalized.preliminary_brief_markdown || !normalized.recommended_action ||
+       normalized.talking_points.length === 0 || normalized.discovery_questions.length === 0 ||
+       normalized.metrics.supported_match === null || normalized.metrics.scorable_coverage === null ||
+       Object.keys(normalized.match_classifications).length === 0)) {
+    throw new Error('FINAL_ARTIFACT_CONTENT_INCOMPLETE');
+  }
+
   if (normalized.source_schema === 'claris_final_brief') {
     const allMetricsPresent = metricValues.every((value) => value !== null);
     const hasCurrentContractContent = Boolean(
@@ -262,14 +278,20 @@ function assertRenderable(normalized) {
       )
     );
 
+    const hasLineage = normalized.intelligence_lineage.length > 0 &&
+      normalized.intelligence_lineage.every((item) => Boolean(firstText(item?.source_id)));
+
     if (!allMetricsPresent || !hasCurrentContractContent) {
       throw new Error('FINAL_ARTIFACT_CONTRACT_MISMATCH');
+    }
+    if (!hasLineage) {
+      throw new Error('FINAL_ARTIFACT_PROVENANCE_MISSING');
     }
   }
 }
 
 export function normalizeFinalArtifact(input) {
-  const parsed = parseArtifact(input);
+  const parsed = parseFinalArtifact(input);
   const { artifact, source_schema: sourceSchema } = unwrapArtifact(parsed);
   const clarisMetadata = object(artifact.claris_brief_metadata);
   const briefMetadata = object(artifact.brief_metadata);
@@ -302,7 +324,7 @@ export function normalizeFinalArtifact(input) {
   const discoveryGuidance = Object.keys(object(artifact.discovery_guidance)).length
     ? object(artifact.discovery_guidance)
     : object(strategicAssessment.discovery_guidance);
-  const strategicGuidance = object(artifact.strategic_guidance);
+  const strategicGuidance = Object.keys(object(artifact.strategic_guidance)).length ? object(artifact.strategic_guidance) : object(artifact.consultant_prep_strategy);
   const strategicRecommendations = object(artifact.strategic_recommendations);
   const scopeAnalysis = object(artifact.scope_analysis);
   const matchScoreExplanation = object(artifact.match_score_explanation);
@@ -330,8 +352,8 @@ export function normalizeFinalArtifact(input) {
           ? object(matchDiagnostics.match_classifications)
           : Object.keys(object(artifact.match_dimension_analysis)).length
             ? object(artifact.match_dimension_analysis)
-            : Object.keys(object(artifact.match_analysis)).length
-              ? object(artifact.match_analysis)
+            : Object.keys(object(artifact.match_analysis?.classifications)).length
+              ? object(artifact.match_analysis?.classifications)
               : Object.keys(object(artifact.canonical_alignment)).length
               ? object(artifact.canonical_alignment)
               : matchBreakdown;
@@ -339,7 +361,7 @@ export function normalizeFinalArtifact(input) {
     ? object(artifact.completeness_classifications)
     : Object.keys(object(artifact.canonical_completeness_classifications)).length
       ? object(artifact.canonical_completeness_classifications)
-      : object(artifact.evidence_completeness_analysis);
+      : Object.keys(object(artifact.completeness_analysis?.classifications)).length ? object(artifact.completeness_analysis.classifications) : object(artifact.evidence_completeness_analysis);
 
   const talkingPoints = array(
     strategicGuidance.key_talking_points ??
@@ -350,6 +372,7 @@ export function normalizeFinalArtifact(input) {
     discoveryPlan.key_talking_points ??
     strategicPosture.key_talking_points ??
     strategicIntelligence.strategic_recommendations ??
+    artifact.consultant_prep_strategy?.key_talking_points ??
     artifact.talking_points
   ).map((item) => typeof item === 'string' ? text(item) : firstText(item?.description, item?.summary)).filter(Boolean);
 
@@ -361,11 +384,12 @@ export function normalizeFinalArtifact(input) {
     strategySummary.risk_factors ??
     discoveryPlan.risk_factors ??
     strategicIntelligence.risk_factors ??
-    consultantOnlyContext.risk_factors
+    consultantOnlyContext.risk_factors ?? artifact.consultant_prep_strategy?.risk_factors
   ).map((item) => typeof item === 'string' ? text(item) : firstText(item?.description, item?.summary, item?.risk)).filter(Boolean);
 
   return {
     schema_version: 'claris_final_brief_render_v1',
+    current_finalize_contract: Object.keys(object(artifact.consultant_prep_strategy)).length > 0,
     source_schema: sourceSchema,
     company: firstText(
       prospectOverview.company_name,
@@ -416,6 +440,7 @@ export function normalizeFinalArtifact(input) {
       engagementSummary.qualification_status,
       strategySummary.qualification_status,
       executiveSummary.qualification_status,
+      artifact.consultant_prep_strategy?.qualification_status,
       artifact.qualification_status,
       briefMetadata.report_status
     ),
@@ -454,6 +479,7 @@ export function normalizeFinalArtifact(input) {
     ),
     metrics: {
       supported_match: numeric(
+        artifact.match_analysis?.supported_match_score ??
         deterministicMetrics.supported_match_score ??
         deterministicMetrics.supported_match
       ),
@@ -462,14 +488,17 @@ export function normalizeFinalArtifact(input) {
         deterministicMetrics.overall_match
       ),
       scorable_coverage: numeric(
+        artifact.match_analysis?.scorable_coverage ??
         deterministicMetrics.scorable_coverage_score ??
         deterministicMetrics.scorable_coverage
       ),
       evaluated_fit_rate: numeric(
+        artifact.match_analysis?.evaluated_fit_rate ??
         deterministicMetrics.evaluated_fit_rate ??
         deterministicMetrics.evaluated_fit_rate_percent
       ),
       evidence_completeness: numeric(
+        artifact.completeness_analysis?.evidence_completeness_score ??
         deterministicMetrics.evidence_completeness_score ??
         deterministicMetrics.evidence_completeness
       )
@@ -479,7 +508,7 @@ export function normalizeFinalArtifact(input) {
     talking_points: talkingPoints,
     risk_factors: riskFactors,
     remaining_unknowns: normalizeUnknowns(artifact, matchClassifications),
-    preliminary_brief_markdown: firstText(artifact.preliminary_brief_markdown),
+    preliminary_brief_markdown: firstText(artifact.preliminary_brief?.summary_markdown, artifact.preliminary_brief_markdown),
     discovery_questions: normalizeDiscoveryQuestions(artifact),
     intelligence_lineage: normalizeLineage(artifact),
     consultant_only_context: normalizeConsultantContext(artifact)
