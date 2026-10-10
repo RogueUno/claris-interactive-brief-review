@@ -463,3 +463,43 @@ test('fails closed on structurally valid but unrecognized artifact', () => {
     /FINAL_ARTIFACT_UNRECOGNIZED/
   );
 });
+
+
+test('October 9 FINALIZE contract renders real advisory and rejects empty placeholder', () => {
+  const actualShape = {
+    preliminary_brief: {
+      summary_markdown: 'The booking is a synthetic rehearsal; the SOC 2 answer must not change its stated scope.',
+      consultant_live_discovery_if_no_form: ['Confirm the rehearsal scope.']
+    },
+    match_analysis: {
+      supported_match_score: 15,
+      scorable_coverage: 30,
+      evaluated_fit_rate: 50,
+      classifications: { service_need_alignment: { status: 'PARTIAL_MATCH', reason: 'Synthetic scope conflicts with service interest.' } }
+    },
+    completeness_analysis: {
+      evidence_completeness_score: 74.75,
+      classifications: { corroboration_depth: { status: 'WEAK', reason: 'No admissible external corroboration.' } }
+    },
+    consultant_prep_strategy: {
+      qualification_status: 'UNQUALIFIED_SYNTHETIC',
+      primary_service_id: 'NONE_APPLICABLE',
+      recommended_action: 'Conduct only the authorized rehearsal.',
+      rationale: 'BOOK-001 limits the mandate.',
+      key_talking_points: ['Maintain scope separation.'],
+      risk_factors: ['Do not contact the prospect.']
+    }
+  };
+  const result = renderFinalBrief(actualShape);
+  assert.match(result.brief_markdown, /The booking is a synthetic rehearsal/);
+  assert.match(result.brief_markdown, /Supported Match: 15\/100/);
+  assert.match(result.brief_markdown, /Scorable Coverage: 30\/100/);
+  assert.match(result.brief_markdown, /Evidence Completeness: 74.75\/100/);
+  assert.match(result.brief_markdown, /UNQUALIFIED_SYNTHETIC/);
+  assert.match(result.brief_markdown, /Confirm the rehearsal scope/);
+  assert.match(result.brief_markdown, /Maintain scope separation/);
+  assert.match(result.brief_markdown, /Service Need Alignment: PARTIAL_MATCH/);
+  assert.throws(() => renderFinalBrief({
+    consultant_prep_strategy: { primary_service_id: 'SVC_SOC2' }
+  }), /FINAL_ARTIFACT_CONTENT_INCOMPLETE/);
+});
