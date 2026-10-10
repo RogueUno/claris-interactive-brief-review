@@ -166,7 +166,7 @@ function normalizeDiscoveryQuestions(artifact) {
       ? array(artifact.discovery_questions)
       : array(discoveryPlan.priority_questions).length
         ? array(discoveryPlan.priority_questions)
-        : array(discoveryPlan.high_priority_questions);
+        : array(discoveryPlan.high_priority_questions).length ? array(discoveryPlan.high_priority_questions) : array(artifact.preliminary_brief?.consultant_live_discovery_if_no_form);
 
   return source
     .map((item) => typeof item === 'string'
@@ -342,8 +342,8 @@ export function normalizeFinalArtifact(input) {
           ? object(matchDiagnostics.match_classifications)
           : Object.keys(object(artifact.match_dimension_analysis)).length
             ? object(artifact.match_dimension_analysis)
-            : Object.keys(object(artifact.match_analysis)).length
-              ? object(artifact.match_analysis)
+            : Object.keys(object(artifact.match_analysis?.classifications)).length
+              ? object(artifact.match_analysis?.classifications)
               : Object.keys(object(artifact.canonical_alignment)).length
               ? object(artifact.canonical_alignment)
               : matchBreakdown;
@@ -351,7 +351,7 @@ export function normalizeFinalArtifact(input) {
     ? object(artifact.completeness_classifications)
     : Object.keys(object(artifact.canonical_completeness_classifications)).length
       ? object(artifact.canonical_completeness_classifications)
-      : object(artifact.evidence_completeness_analysis);
+      : Object.keys(object(artifact.completeness_analysis?.classifications)).length ? object(artifact.completeness_analysis.classifications) : object(artifact.evidence_completeness_analysis);
 
   const talkingPoints = array(
     strategicGuidance.key_talking_points ??
@@ -362,6 +362,7 @@ export function normalizeFinalArtifact(input) {
     discoveryPlan.key_talking_points ??
     strategicPosture.key_talking_points ??
     strategicIntelligence.strategic_recommendations ??
+    artifact.consultant_prep_strategy?.key_talking_points ??
     artifact.talking_points
   ).map((item) => typeof item === 'string' ? text(item) : firstText(item?.description, item?.summary)).filter(Boolean);
 
@@ -373,7 +374,7 @@ export function normalizeFinalArtifact(input) {
     strategySummary.risk_factors ??
     discoveryPlan.risk_factors ??
     strategicIntelligence.risk_factors ??
-    consultantOnlyContext.risk_factors
+    consultantOnlyContext.risk_factors ?? artifact.consultant_prep_strategy?.risk_factors
   ).map((item) => typeof item === 'string' ? text(item) : firstText(item?.description, item?.summary, item?.risk)).filter(Boolean);
 
   return {
@@ -428,6 +429,7 @@ export function normalizeFinalArtifact(input) {
       engagementSummary.qualification_status,
       strategySummary.qualification_status,
       executiveSummary.qualification_status,
+      artifact.consultant_prep_strategy?.qualification_status,
       artifact.qualification_status,
       briefMetadata.report_status
     ),
