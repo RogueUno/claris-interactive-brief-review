@@ -2,7 +2,7 @@ name: V2.3 Direct Final Safety
 
 on:
   push:
-    branches: [v23-direct-final-clean-20261004]
+    branches: [v23-direct-final-clean-20261004, fix/final-brief-renderer-only-20261010]
   pull_request:
     branches: [v23-delivery-owner-gate-20261004, main]
     paths:
@@ -36,6 +36,10 @@ jobs:
           node --test clarification-v1/server/tests/direct-final-calendly-bridge.test.mjs
           node --test calibration-v3/server/tests/calendly-booking-normalizer.test.mjs
           node --test calibration-v3/server/tests/calendly-normalize-api.test.mjs
+      - name: Exact historical FINALIZE renderer replay
+        run: |
+          node --test clarification-v1/server/tests/oct09-finalize-exact-replay.test.mjs
+          node --test clarification-v1/server/tests/final-brief-renderer.test.mjs
       - name: Original owner tests must remain safe
         run: |
           node --test clarification-v1/server/tests/verify-locked-delivery-owner.test.mjs
