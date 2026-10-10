@@ -1,0 +1,102 @@
+{
+  "claris_final_brief": {
+    "brief_metadata": {
+      "report_status": "QUALIFIED_FOR_DISCOVERY",
+      "lead_consultant": "Morgan Lee",
+      "firm": "Northstar Risk Advisory",
+      "target_company": "Harborlane Cloud (fictional)",
+      "target_domain": "https://harborlane.example"
+    },
+    "deterministic_metrics": {
+      "supported_match": 78,
+      "overall_match": 78,
+      "scorable_coverage": 75,
+      "evaluated_fit_rate": 86,
+      "evidence_completeness": 72
+    },
+    "match_score_explanation": {
+      "overall_assessment": "Prospect-reported enterprise SOC 2 readiness requirement aligns with available advisory service; timing and budget still need confirmation.",
+      "match_breakdown": {
+        "service_need_alignment": {
+          "status": "MATCH",
+          "reason": "Buyer explicitly requested SOC 2 readiness",
+          "basis_ids": [
+            "BOOK-001",
+            "SVC_SOC2"
+          ]
+        },
+        "business_trigger": {
+          "status": "PARTIAL",
+          "reason": "Upcoming enterprise procurement assessment stated, deadline not established",
+          "basis_ids": [
+            "BOOK-001"
+          ]
+        },
+        "buyer_stakeholder_fit": {
+          "status": "UNKNOWN",
+          "reason": "Decision and implementation ownership have not been verified",
+          "basis_ids": []
+        },
+        "engagement_economics": {
+          "status": "UNKNOWN",
+          "reason": "Budget not stated; do not infer capacity",
+          "basis_ids": []
+        }
+      }
+    },
+    "preliminary_brief_markdown": "### Opportunity in one minute\n**Buyer-stated request (BOOK-001):** Assess Harborlane Cloud's SOC 2 readiness ahead of an enterprise customer security assessment. The buyer asks for scope, sequence, and evidence priorities. This is a fictional rehearsal, not a real prospect.\n\n### Suggested first-call diagnosis\nDistinguish an upcoming questionnaire from an audit deadline. Establish target SOC 2 report type, audit period, system boundary, responsible owners, evidence collection maturity, current policies and controls, and whether an auditor has been engaged. Do not equate customer pressure with a verified compliance gap.\n\n### First-call route\n1. Recap stated request verbatim and validate desired outcome.\n2. Map business drivers and decisions without projecting a deadline.\n3. Define in-scope systems and control owners.\n4. Evaluate evidence readiness and potential sequencing.\n5. Agree next steps only after budget and buyer authority are confirmed.",
+    "strategic_guidance": {
+      "qualification_status": "QUALIFIED_FOR_DISCOVERY",
+      "primary_service_id": "SVC_SOC2",
+      "recommended_action": "Conduct targeted readiness discovery; offer a scoped gap-assessment proposal only after validating ownership and requirements.",
+      "rationale": "Explicit buyer request aligns to SOC 2 readiness; no verified readiness findings or economic qualification yet.",
+      "key_talking_points": [
+        "Confirm the actual requested SOC 2 deliverable and procurement milestone",
+        "Ask which product, cloud accounts, vendors and teams fall within the system boundary",
+        "Map evidence owners and the status of risk assessments, access reviews and incident response exercises"
+      ],
+      "risk_factors": [
+        "An enterprise questionnaire may not require a full SOC 2 report",
+        "Budget and decision authority unverified",
+        "Never assert a failed control without admitted supporting evidence"
+      ]
+    },
+    "discovery_question_plan": [
+      {
+        "question": "What decision will the enterprise security assessment unlock, and what is the actual required date?",
+        "intent": "Separate verified procurement urgency from assumed audit pressure"
+      },
+      {
+        "question": "Which product, infrastructure, vendors and teams are in scope for the assurance request?",
+        "intent": "Define the system boundary"
+      },
+      {
+        "question": "What evidence already exists for access control, change management, vendor oversight and incident response?",
+        "intent": "Identify documentation and testing gaps without asserting failures"
+      },
+      {
+        "question": "Who owns this work internally, and has a CPA auditor already been chosen?",
+        "intent": "Map stakeholders and sequencing"
+      },
+      {
+        "question": "Has the organization set a budget and selected who will approve the engagement?",
+        "intent": "Establish commercial qualification"
+      }
+    ],
+    "intelligence_lineage": [
+      {
+        "source_id": "BOOK-001",
+        "authority": "BUYER_STATED_SYNTHETIC",
+        "usage": "Fictional security-assessment and SOC 2 readiness request"
+      },
+      {
+        "source_id": "SVC_SOC2",
+        "authority": "CONSULTANT_SERVICE_CATALOG_SYNTHETIC",
+        "usage": "Fictional consultant offers readiness advisory"
+      }
+    ],
+    "consultant_only_context": {
+      "boundary_caveat": "All case details are explicitly fictional. Treat any hypothesized control gaps as discovery questions, not findings."
+    }
+  }
+}

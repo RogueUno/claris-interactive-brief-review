@@ -41,6 +41,8 @@ jobs:
           node --test candidate/clarification-v1/server/tests/offline-delivery-lifecycle.test.mjs
           node --test candidate/clarification-v1/server/tests/final-delivery-receipt.test.mjs
           node --test candidate/clarification-v1/server/tests/atomic-clarification-create.test.mjs
+      - name: Verify realistic fictional SOC2 brief quality offline
+        run: node --test candidate/clarification-v1/server/tests/fictional-soc2-advisory.test.mjs
       - name: Verify exact protected submitted Make form transport
         run: node --test candidate/calibration-v3/server/tests/make-delivery-transport.test.mjs
       - name: Compare FINALIZE baseline tests (fail closed)
