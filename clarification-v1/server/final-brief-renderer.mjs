@@ -160,8 +160,10 @@ function normalizeConsultantContext(artifact) {
 
 function normalizeDiscoveryQuestions(artifact) {
   const discoveryPlan = object(artifact.discovery_plan);
-  const source = array(artifact.discovery_question_plan).length
-    ? array(artifact.discovery_question_plan)
+  const source = array(artifact.prospect_question_plan).length
+    ? array(artifact.prospect_question_plan)
+    : array(artifact.discovery_question_plan).length
+      ? array(artifact.discovery_question_plan)
     : array(artifact.discovery_questions).length
       ? array(artifact.discovery_questions)
       : array(discoveryPlan.priority_questions).length
@@ -173,7 +175,7 @@ function normalizeDiscoveryQuestions(artifact) {
       ? { question: firstText(item), intent: null, alignment_id: null }
       : {
           question: firstText(item?.question),
-          intent: firstText(item?.intent, item?.objective, item?.target_dimension),
+          intent: firstText(item?.intent, item?.objective, item?.target_dimension, item?.evidence_gap_addressed),
           alignment_id: firstText(item?.alignment_id)
         })
     .filter((item) => item.question);
