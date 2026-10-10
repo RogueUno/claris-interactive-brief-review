@@ -5,6 +5,8 @@ on:
     paths:
       - 'api/clarification/admin/package.mjs'
       - 'clarification-v1/server/**'
+      - 'calibration-v3/server/make-delivery-transport.mjs'
+      - 'calibration-v3/server/tests/make-delivery-transport.test.mjs'
       - 'calibration-v3/server/runtime-export.mjs'
       - 'calibration-v3/server/blob-storage.mjs'
       - 'clarification-v1/server/api-shared.mjs'
@@ -39,6 +41,8 @@ jobs:
           node --test candidate/clarification-v1/server/tests/offline-delivery-lifecycle.test.mjs
           node --test candidate/clarification-v1/server/tests/final-delivery-receipt.test.mjs
           node --test candidate/clarification-v1/server/tests/atomic-clarification-create.test.mjs
+      - name: Verify exact protected submitted Make form transport
+        run: node --test candidate/calibration-v3/server/tests/make-delivery-transport.test.mjs
       - name: Compare FINALIZE baseline tests (fail closed)
         shell: bash
         run: |

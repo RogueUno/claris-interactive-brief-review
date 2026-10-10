@@ -35,7 +35,9 @@ export const DIRECT_FINAL_FORM_FIELDS = Object.freeze({
 export const SUBMITTED_FINAL_FORM_FIELDS = Object.freeze({
   FINAL_DELIVERY_PREFLIGHT: ['opportunity_id'],
   FINAL_DELIVERY_CLAIM: [
-    'opportunity_id', 'status', 'final_brief_markdown', 'final_audit_json'
+    'opportunity_id', 'status', 'final_brief_markdown', 'final_audit_json',
+    'final_stage', 'opportunity_version', 'finalize_provenance_digest',
+    'final_stage_output_json', 'final_case_state_json', 'require_rendered_artifact'
   ],
   FINAL_DELIVERY_ACK: ['opportunity_id', 'claim_token', 'provider_message_id']
 });

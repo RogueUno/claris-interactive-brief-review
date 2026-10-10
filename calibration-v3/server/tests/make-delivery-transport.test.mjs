@@ -108,3 +108,23 @@ test('authenticated direct-final endpoint receives escaped form fields and rejec
   assert.equal(ack.status,200);
   assert.equal(calls[1][1].provider_message_id,'msg=1&2');
 });
+
+test('protected submitted Make claim form preserves every configured field without weakening allowlist', async () => {
+ const fields = {
+  opportunity_id:'opp_123', status:'FINALIZED', final_stage:'FINALIZE',
+  final_brief_markdown:'# Real brief\\nConsultant strategy',
+  final_audit_json:'{"audit_status":"PASS","violations":[],"repair_required":false}',
+  opportunity_version:'v3', finalize_provenance_digest:'digest',
+  final_stage_output_json:'{"preliminary_brief":{"summary_markdown":"Substantive summary"}}',
+  final_case_state_json:'{"case":"historical"}', require_rendered_artifact:'true'
+ };
+ const parsed=await parseMakeDeliveryInput(request('FINAL_DELIVERY_CLAIM', fields), fallback,
+   SUBMITTED_FINAL_FORM_FIELDS.FINAL_DELIVERY_CLAIM);
+ assert.equal(parsed.ok,true);
+ assert.deepEqual({...parsed.value},fields);
+ assert.equal(parsed.value.require_rendered_artifact,'true');
+ const rejected=await parseMakeDeliveryInput(request('FINAL_DELIVERY_CLAIM',{...fields,recipient_override:'attacker@example.org'}),fallback,
+   SUBMITTED_FINAL_FORM_FIELDS.FINAL_DELIVERY_CLAIM);
+ assert.equal(rejected.ok,false);
+ assert.equal((await rejected.response.json()).error,'DELIVERY_FORM_FIELD_INVALID');
+});
