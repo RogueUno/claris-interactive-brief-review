@@ -314,7 +314,7 @@ export function normalizeFinalArtifact(input) {
   const discoveryGuidance = Object.keys(object(artifact.discovery_guidance)).length
     ? object(artifact.discovery_guidance)
     : object(strategicAssessment.discovery_guidance);
-  const strategicGuidance = object(artifact.strategic_guidance);
+  const strategicGuidance = Object.keys(object(artifact.strategic_guidance)).length ? object(artifact.strategic_guidance) : object(artifact.consultant_prep_strategy);
   const strategicRecommendations = object(artifact.strategic_recommendations);
   const scopeAnalysis = object(artifact.scope_analysis);
   const matchScoreExplanation = object(artifact.match_score_explanation);
@@ -466,6 +466,7 @@ export function normalizeFinalArtifact(input) {
     ),
     metrics: {
       supported_match: numeric(
+        artifact.match_analysis?.supported_match_score ??
         deterministicMetrics.supported_match_score ??
         deterministicMetrics.supported_match
       ),
@@ -474,14 +475,17 @@ export function normalizeFinalArtifact(input) {
         deterministicMetrics.overall_match
       ),
       scorable_coverage: numeric(
+        artifact.match_analysis?.scorable_coverage ??
         deterministicMetrics.scorable_coverage_score ??
         deterministicMetrics.scorable_coverage
       ),
       evaluated_fit_rate: numeric(
+        artifact.match_analysis?.evaluated_fit_rate ??
         deterministicMetrics.evaluated_fit_rate ??
         deterministicMetrics.evaluated_fit_rate_percent
       ),
       evidence_completeness: numeric(
+        artifact.completeness_analysis?.evidence_completeness_score ??
         deterministicMetrics.evidence_completeness_score ??
         deterministicMetrics.evidence_completeness
       )
@@ -491,7 +495,7 @@ export function normalizeFinalArtifact(input) {
     talking_points: talkingPoints,
     risk_factors: riskFactors,
     remaining_unknowns: normalizeUnknowns(artifact, matchClassifications),
-    preliminary_brief_markdown: firstText(artifact.preliminary_brief_markdown),
+    preliminary_brief_markdown: firstText(artifact.preliminary_brief?.summary_markdown, artifact.preliminary_brief_markdown),
     discovery_questions: normalizeDiscoveryQuestions(artifact),
     intelligence_lineage: normalizeLineage(artifact),
     consultant_only_context: normalizeConsultantContext(artifact)
