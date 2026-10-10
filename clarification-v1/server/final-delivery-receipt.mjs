@@ -1,4 +1,5 @@
 import { createHash, randomBytes, timingSafeEqual } from 'node:crypto';
+import { renderFinalBrief } from './final-brief-renderer.mjs';
 import { buildFinalizeBundle } from './finalize-handoff.mjs';
 import { buildConsultantFinalDelivery } from '../../calibration-v3/server/pilot-delivery.mjs';
 import { verifyLockedDeliveryOwner } from './verify-locked-delivery-owner.mjs';
