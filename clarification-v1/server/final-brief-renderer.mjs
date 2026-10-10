@@ -256,6 +256,14 @@ function assertRenderable(normalized) {
     throw new Error('FINAL_ARTIFACT_UNRECOGNIZED');
   }
 
+  if (normalized.source_schema === 'legacy_or_flat' &&
+      (!normalized.preliminary_brief_markdown || !normalized.recommended_action ||
+       normalized.talking_points.length === 0 || normalized.discovery_questions.length === 0 ||
+       normalized.metrics.supported_match === null || normalized.metrics.scorable_coverage === null ||
+       Object.keys(normalized.match_classifications).length === 0)) {
+    throw new Error('FINAL_ARTIFACT_CONTENT_INCOMPLETE');
+  }
+
   if (normalized.source_schema === 'claris_final_brief') {
     const allMetricsPresent = metricValues.every((value) => value !== null);
     const hasCurrentContractContent = Boolean(
