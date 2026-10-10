@@ -1,0 +1,169 @@
+{
+  "preliminary_brief": {
+    "summary_markdown": "### **Executive Summary**\nThis engagement is strictly a **Synthetic CLARIS MVP rehearsal** involving the firm Tailead. Per the booking mandate (**BOOK-001**), the scope is limited to test research and call preparation. While the prospect indicated interest in **SOC 2 Readiness** (**PROS-001**), this is identified as a scope mismatch against the rehearsal mandate. No contact with the prospect is permitted.\n\n### **Engagement Scope**\n*   **Mandate:** Synthetic rehearsal and test research only.\n*   **Constraint:** Do not contact the prospect.\n*   **Conflict:** Prospect-reported interest in SOC 2 Readiness conflicts with the established rehearsal boundary.",
+    "highest_value_unknowns": [
+      {
+        "unknown_dimension": "Company Profile Admissibility",
+        "impact_of_unknown": "Tailead's status as a B2B SaaS or Software firm is not verified by admitted evidence, preventing ICP fit scoring."
+      },
+      {
+        "unknown_dimension": "Rehearsal Parameters",
+        "impact_of_unknown": "Specific parameters or constraints for the 'test research' phase beyond the booking text are unknown."
+      }
+    ],
+    "consultant_live_discovery_if_no_form": [
+      "Confirm the intended parameters for the CLARIS MVP rehearsal.",
+      "Acknowledge the SOC 2 interest record while maintaining the rehearsal boundary."
+    ]
+  },
+  "match_analysis": {
+    "supported_match_score": 15,
+    "scorable_coverage": 30,
+    "evaluated_fit_rate": 50,
+    "classifications": {
+      "service_need_alignment": {
+        "status": "PARTIAL_MATCH",
+        "basis_ids": [
+          "BOOK-001"
+        ],
+        "reason": "Engagement limited by BOOK-001 to 'Synthetic CLARIS MVP rehearsal'. PROS-001 indicates 'SOC 2 Readiness' interest which is a boundary scope mismatch."
+      },
+      "icp_company_fit": {
+        "status": "UNKNOWN",
+        "basis_ids": [],
+        "reason": "Company fit for Tailead B2B SaaS profile is not supported by admissible evidence."
+      },
+      "business_trigger": {
+        "status": "UNKNOWN",
+        "basis_ids": [],
+        "reason": "No admissible trigger evidence beyond the synthetic rehearsal mandate."
+      },
+      "buyer_stakeholder_fit": {
+        "status": "UNKNOWN",
+        "basis_ids": [],
+        "reason": "No admissible stakeholder data."
+      },
+      "engagement_economics": {
+        "status": "UNKNOWN",
+        "basis_ids": [],
+        "reason": "No admissible evidence regarding budget or pricing economics."
+      },
+      "timing_urgency": {
+        "status": "UNKNOWN",
+        "basis_ids": [],
+        "reason": "No admissible evidence regarding timing or urgency."
+      },
+      "expansion_potential": {
+        "status": "UNKNOWN",
+        "basis_ids": [],
+        "reason": "Expansion strictly disallowed per BOOK-001 boundary."
+      }
+    }
+  },
+  "completeness_analysis": {
+    "evidence_completeness_score": 74.75,
+    "classifications": {
+      "critical_question_coverage": {
+        "status": "PARTIAL",
+        "basis_ids": [
+          "BOOK-001"
+        ],
+        "reason": "Only synthetic rehearsal requirements are documented; commercial/qualifying questions remain unanswered."
+      },
+      "source_authority": {
+        "status": "COMPLETE",
+        "basis_ids": [
+          "BOOK-001"
+        ],
+        "reason": "All evidence derived from primary booking authority."
+      },
+      "corroboration_depth": {
+        "status": "WEAK",
+        "basis_ids": [
+          "BOOK-001"
+        ],
+        "reason": "No external corroboration exists for the synthetic rehearsal."
+      },
+      "freshness": {
+        "status": "COMPLETE",
+        "basis_ids": [
+          "BOOK-001"
+        ],
+        "reason": "Booking record is immediate."
+      },
+      "conflict_ambiguity_control": {
+        "status": "COMPLETE",
+        "basis_ids": [
+          "BOOK-001",
+          "PROS-001"
+        ],
+        "reason": "Conflict between PROS-001 and BOOK-001 correctly identified and mitigated via boundary rule."
+      }
+    }
+  },
+  "consultant_prep_strategy": {
+    "recommended_action": "Execute synthetic CLARIS MVP rehearsal protocol.",
+    "primary_service_id": "NONE_APPLICABLE",
+    "qualification_status": "UNQUALIFIED_SYNTHETIC",
+    "rationale": "Booking is explicitly for rehearsal purposes; prospect service interest is out-of-scope per the booking mandate.",
+    "key_talking_points": [
+      "Conduct rehearsal as scheduled",
+      "Acknowledge SOC 2 interest for documentation",
+      "Maintain rehearsal scope separation"
+    ],
+    "risk_factors": [
+      "Scope creep beyond rehearsal mandate",
+      "Misalignment with prospect interest"
+    ]
+  },
+  "prospect_question_plan": [
+    {
+      "question": "Regarding the CLARIS MVP rehearsal, what are the specific test research areas you wish to simulate?",
+      "objective": "Define parameters for the rehearsal mandate established in BOOK-001.",
+      "evidence_gap_addressed": "Rehearsal Parameters"
+    }
+  ],
+  "potential_service_relevance": [
+    {
+      "service_id": "SVC_SOC2",
+      "name": "SOC 2 Readiness",
+      "relevance_rationale": "Directly requested by prospect (PROS-001), though identified as a scope conflict with BOOK-001.",
+      "basis_ids": [
+        "PROS-001"
+      ]
+    }
+  ],
+  "intelligence_lineage": [
+    {
+      "claim": "Engagement is a synthetic CLARIS MVP rehearsal.",
+      "evidence_ids": [
+        "BOOK-001"
+      ]
+    },
+    {
+      "claim": "Prospect expressed interest in SOC 2 Readiness.",
+      "evidence_ids": [
+        "PROS-001"
+      ]
+    },
+    {
+      "claim": "Engagement scope excludes actual prospect contact.",
+      "evidence_ids": [
+        "BOOK-001"
+      ]
+    }
+  ],
+  "internal_hypothesis": [
+    {
+      "hypothesis": "The SOC 2 Readiness interest may be a secondary objective intended for exploration after the rehearsal phase.",
+      "probability": "LOW",
+      "impact": "May lead to scope expansion post-MVP rehearsal.",
+      "requires_verification": true
+    }
+  ],
+  "canonical_advisory_context": {
+    "sensitive_context_markdown": "#### **SENSITIVE_CONSULTANT_ONLY**\nThis rehearsal is for internal Tailead testing purposes. All FACT records (FAC-001 through FAC-009) were rejected during admission, meaning no external/public signals regarding Tailead's current infrastructure or security posture are admitted to this brief. The rehearsal should proceed using only the internal 'test research' constraints defined by the consultant firm."
+  },
+  "source_execution": "7527099/5f69a7eb9f754a3a80a95de42af622ef",
+  "fixture_kind": "historical_no_send"
+}
