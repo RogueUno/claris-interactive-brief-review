@@ -256,7 +256,7 @@ function assertRenderable(normalized) {
     throw new Error('FINAL_ARTIFACT_UNRECOGNIZED');
   }
 
-  if (normalized.source_schema === 'legacy_or_flat' &&
+  if (normalized.source_schema === 'legacy_or_flat' && normalized.current_finalize_contract &&
       (!normalized.preliminary_brief_markdown || !normalized.recommended_action ||
        normalized.talking_points.length === 0 || normalized.discovery_questions.length === 0 ||
        normalized.metrics.supported_match === null || normalized.metrics.scorable_coverage === null ||
@@ -387,6 +387,7 @@ export function normalizeFinalArtifact(input) {
 
   return {
     schema_version: 'claris_final_brief_render_v1',
+    current_finalize_contract: Object.keys(object(artifact.consultant_prep_strategy)).length > 0,
     source_schema: sourceSchema,
     company: firstText(
       prospectOverview.company_name,
