@@ -34,7 +34,7 @@ test('renders current strategic_guidance schema without blank metrics', () => {
   assert.equal(rendered.ok, true);
   assert.match(rendered.brief_markdown, /Supported Match: 65\/100/);
   assert.match(rendered.brief_markdown, /Primary service: SVC_API_AUDIT/);
-  assert.match(rendered.brief_markdown, /Timing Urgency: UNKNOWN/);
+  assert.match(rendered.brief_markdown, /Timing Urgency:\*\* UNKNOWN/);
 });
 
 test('normalizes legacy brief_metadata and strategic_recommendations schema', () => {
@@ -94,7 +94,7 @@ test('renders minimal client_profile plus metrics schema without inventing quali
   assert.match(rendered.brief_markdown, /Status: Not explicitly classified/);
   assert.match(rendered.brief_markdown, /Primary service: SVC_API_AUDIT/);
   assert.match(rendered.brief_markdown, /Supported Match: 50\/100/);
-  assert.match(rendered.brief_markdown, /Business Trigger: UNKNOWN/);
+  assert.match(rendered.brief_markdown, /Business Trigger:\*\* UNKNOWN/);
   assert.match(rendered.brief_markdown, /Review OAuth token flows/);
 });
 
@@ -193,6 +193,7 @@ test('renders nested claris_final_brief contract emitted by V2.3 FINALIZE', () =
       },
       deterministic_metrics: {
         supported_match: 50,
+        overall_match: 50,
         scorable_coverage: 50,
         evaluated_fit_rate: 100,
         evidence_completeness: 68.75
