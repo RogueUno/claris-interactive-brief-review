@@ -265,3 +265,25 @@ test('protected submitted delivery requires a matching rendered final artifact',
  assert.equal((await claimFinalDelivery(mismatched,opts)).error,'FINAL_DELIVERY_RENDER_MISMATCH');
  assert.equal((await checkFinalDeliveryEligibility(input,opts)).status,'ELIGIBLE');
 });
+
+test('exact October 9 historical artifact can be claimed only with matching full rendered brief', async () => {
+  const {readFileSync} = await import('node:fs');
+  const {renderFinalBrief} = await import('../final-brief-renderer.mjs');
+  const raw = readFileSync(new URL('./fixtures/oct09-finalize-actual.json', import.meta.url), 'utf8');
+  const rendered = renderFinalBrief(raw);
+  assert.ok(rendered.brief_markdown.length > 1500);
+  const f = await prepared();
+  const opts = {repository: f.repository, consultantRepository: f.consultantRepository};
+  const input = {...validFinal, require_rendered_artifact: 'true',
+    final_stage_output_json: raw, final_brief_markdown: rendered.brief_markdown};
+  const claim = await claimFinalDelivery(input, opts);
+  assert.equal(claim.status, 'CLAIMED');
+  assert.match(claim.email_html, /Maintain rehearsal scope separation/);
+  assert.equal((await claimFinalDelivery(input, opts)).status, 'RECONCILIATION_REQUIRED');
+  const ack = await acknowledgeFinalDelivery({
+    opportunity_id: validFinal.opportunity_id, claim_token: claim.claim_token,
+    provider_message_id: 'offline-no-send'
+  }, {repository: f.repository});
+  assert.equal(ack.status, 'ACKNOWLEDGED');
+  assert.equal((await claimFinalDelivery(input, opts)).status, 'SKIPPED_ALREADY_SENT');
+});
