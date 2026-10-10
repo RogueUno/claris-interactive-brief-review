@@ -532,3 +532,19 @@ test('submitted FINALIZE uses the prioritized prospect question plan instead of 
   assert.match(rendered.brief_markdown, /Confirm the permitted scope/);
   assert.doesNotMatch(rendered.brief_markdown, /Generic fallback question/);
 });
+
+test('replays complete October 9 live FINALIZE output without providers or Gmail', async () => {
+  const {readFileSync} = await import('node:fs');
+  const historical = JSON.parse(readFileSync(new URL('./fixtures/oct09-finalize-actual.json', import.meta.url), 'utf8'));
+  const result = renderFinalBrief(historical);
+  const brief = result.brief_markdown;
+  assert.equal(result.ok, true);
+  assert.ok(brief.length > 1500, 'brief must be substantive');
+  for (const phrase of ['Synthetic CLARIS MVP rehearsal', 'Supported Match: 15/100',
+    'Scorable Coverage: 30/100', 'Evidence Completeness: 74.75/100',
+    'UNQUALIFIED_SYNTHETIC', 'Maintain rehearsal scope separation',
+    'Regarding the CLARIS MVP rehearsal', 'PARTIAL_MATCH',
+    'No contact with the prospect is permitted']) {
+    assert.ok(brief.includes(phrase), 'missing: ' + phrase);
+  }
+});
