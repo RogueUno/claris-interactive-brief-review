@@ -503,3 +503,32 @@ test('October 9 FINALIZE contract renders real advisory and rejects empty placeh
     consultant_prep_strategy: { primary_service_id: 'SVC_SOC2' }
   }), /FINAL_ARTIFACT_CONTENT_INCOMPLETE/);
 });
+
+
+test('submitted FINALIZE uses the prioritized prospect question plan instead of generic fallback', () => {
+  const artifact = {
+    preliminary_brief: {
+      summary_markdown: 'Synthetic booking context must remain in scope.',
+      consultant_live_discovery_if_no_form: ['Generic fallback question']
+    },
+    consultant_prep_strategy: {
+      recommended_action: 'Keep the test within its permitted scope.',
+      qualification_status: 'UNQUALIFIED_SYNTHETIC',
+      key_talking_points: ['Preserve booking boundaries']
+    },
+    match_analysis: {
+      supported_match_score: 15,
+      scorable_coverage: 30,
+      classifications: { service_need_alignment: { status: 'PARTIAL_MATCH', reason: 'Scope mismatch' } }
+    },
+    prospect_question_plan: [{
+      question: 'Which research areas are authorized for this rehearsal?',
+      objective: 'Confirm the permitted scope',
+      evidence_gap_addressed: 'Rehearsal Parameters'
+    }]
+  };
+  const rendered = renderFinalBrief(artifact);
+  assert.match(rendered.brief_markdown, /Which research areas are authorized/);
+  assert.match(rendered.brief_markdown, /Confirm the permitted scope/);
+  assert.doesNotMatch(rendered.brief_markdown, /Generic fallback question/);
+});
