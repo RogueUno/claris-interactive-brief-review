@@ -169,6 +169,35 @@ function payloadValidation(input, envelope, bookingText) {
   return {ok:true,record};
 }
 
+// Dry-run contract review: no repository method, snapshot mutation or provider
+// call. All source data originates in the supplied already-loaded envelope.
+// PASS here is an admin-attested structural/audit contract, NOT independent
+// factual or semantic certification of the AI-generated consultant brief.
+export function inspectFinalSnapshotCandidatePayload(input, envelope) {
+  if(!input || typeof input.opportunity_id!=='string' || !ID.test(input.opportunity_id) ||
+      envelope?.schema_version!=='claris_clarification_envelope_v1' ||
+      envelope?.opportunity_id!==input.opportunity_id) {
+    return {ok:false,error:'CANDIDATE_OPPORTUNITY_BINDING_INVALID'};
+  }
+  if(envelope.package?.status!=='SUBMITTED'||!envelope.response) {
+    return {ok:false,error:'PROSPECT_SUBMISSION_REQUIRED'};
+  }
+  const booking=extractPersistedBookingContext(envelope);
+  if(!booking.ok) return {ok:false,error:'BOOKING_CONTEXT_UNVERIFIED'};
+  const verified=payloadValidation(input,envelope,booking.booking.verbatim_text);
+  if(!verified.ok) return {ok:false,error:verified.error};
+  return {
+    ok:true,
+    status:'CANDIDATE_CONTRACT_PASSED',
+    artifact_sha256:verified.record.artifact_sha256,
+    prospect_binding_sha256:verified.record.accepted_prospect_binding_sha256,
+    booking_binding:'INTERNAL_CANONICAL_AGREEMENT_ONLY',
+    audit_assurance:'ADMIN_SUPPLIED_PASS_NOT_INDEPENDENTLY_REEXECUTED',
+    semantic_assurance:'NOT_CERTIFIED',
+    write_performed:false
+  };
+}
+
 // Admin-attested final output only; does not independently re-run the frozen
 // intelligence/audit engine. This function never sends email or claims delivery.
 export async function persistGovernedFinalSnapshot(input, {repository}={}) {
