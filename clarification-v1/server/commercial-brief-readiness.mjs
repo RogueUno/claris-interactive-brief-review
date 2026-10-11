@@ -1,5 +1,6 @@
 import { normalizeFinalArtifact } from './final-brief-renderer.mjs';
 import { assessDiscoveryCoverage } from './discovery-coverage.mjs';
+import { prioritizeDiscoveryQuestions } from './discovery-prioritizer.mjs';
 
 export function isExplicitSyntheticRehearsal(_artifact, { trustedBookingText = '' } = {}) {
   // Never infer consent/contact restrictions from AI-generated lineage.
@@ -11,6 +12,7 @@ export function isExplicitSyntheticRehearsal(_artifact, { trustedBookingText = '
 export function assessCommercialBrief(input, { synthetic = false } = {}) {
   const n = normalizeFinalArtifact(input);
   const discovery_strategy = assessDiscoveryCoverage(input);
+  const prioritized_discovery = prioritizeDiscoveryQuestions(input);
   const checks = {
     narrative: Boolean(n.preliminary_brief_markdown),
     service: Boolean(n.primary_service_id) && !['NONE_APPLICABLE','NOT_APPLICABLE','NONE','UNKNOWN','N/A'].includes(String(n.primary_service_id).trim().toUpperCase()),
@@ -25,5 +27,5 @@ export function assessCommercialBrief(input, { synthetic = false } = {}) {
     evidence_lineage: n.intelligence_lineage.length > 0 && n.intelligence_lineage.every(item => Boolean(item.source_id))
   };
   const missing = Object.keys(checks).filter(key => !checks[key]);
-  return { status: synthetic ? 'NOT_COMMERCIAL_BENCHMARK' : missing.length ? 'REVIEW_REQUIRED' : 'DEPTH_CANDIDATE', missing, checks, discovery_strategy };
+  return { status: synthetic ? 'NOT_COMMERCIAL_BENCHMARK' : missing.length ? 'REVIEW_REQUIRED' : 'DEPTH_CANDIDATE', missing, checks, discovery_strategy, prioritized_discovery };
 }
