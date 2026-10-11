@@ -206,13 +206,29 @@ function normalizeLineage(artifact) {
             : array(consultantContext.intelligence_lineage);
 
   return source
-    .map((item) => typeof item === 'string'
-      ? { source_id: firstText(item), authority: null, usage: null }
-      : {
-          source_id: firstText(item?.source_id, item?.evidence_id),
-          authority: firstText(item?.authority, item?.source_authority, item?.source),
-          usage: firstText(item?.usage, item?.description, item?.statement)
-        })
+    .flatMap((item) => {
+      if (typeof item === 'string') {
+        return [{ source_id: firstText(item), authority: null, usage: null }];
+      }
+      const explicitId = firstText(item?.source_id, item?.evidence_id);
+      // Current FINALIZE may emit claim -> evidence_ids edges rather than
+      // one evidence record per row. Preserve each supplied reference without
+      // manufacturing source authority or new factual claims.
+      if (!explicitId && array(item?.evidence_ids).length) {
+        return array(item.evidence_ids)
+          .map((id) => ({
+            source_id: firstText(id),
+            authority: null,
+            usage: firstText(item?.claim)
+          }))
+          .filter((edge) => edge.source_id);
+      }
+      return [{
+        source_id: explicitId,
+        authority: firstText(item?.authority, item?.source_authority, item?.source),
+        usage: firstText(item?.usage, item?.description, item?.statement)
+      }];
+    })
     .filter((item) => item.source_id || item.usage);
 }
 
