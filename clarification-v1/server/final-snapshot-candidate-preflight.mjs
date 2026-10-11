@@ -1,6 +1,7 @@
 import { inspectPersistedFinalSources } from './final-snapshot-source-preflight.mjs';
 import { inspectFinalSnapshotCandidatePayload } from './final-snapshot-persistence.mjs';
 import { inspectProspectClaimConsistency } from './prospect-claim-consistency.mjs';
+import { inspectBookingScopeBoundary } from './booking-scope-boundary-review.mjs';
 
 const ID=/^[A-Za-z0-9_-]{3,100}$/;
 const out=(status,http_status,rest={})=>({
@@ -50,8 +51,10 @@ export async function inspectLiveFinalCandidate(input,{
   }
   const check=inspectFinalSnapshotCandidatePayload(input,envelope);
   if(!check.ok) return out('CANDIDATE_CONTRACT_BLOCKED',422,{error:check.error});
+  const boundary=inspectBookingScopeBoundary(input.final_stage_output_json,envelope);
   return out('CANDIDATE_CONTRACT_PASSED',200,{
     opportunity_id:input.opportunity_id,
+    booking_scope_review:boundary,
     artifact_sha256:check.artifact_sha256,
     prospect_claim_review:inspectProspectClaimConsistency(input.final_stage_output_json,envelope),
     booking_binding:check.booking_binding,
@@ -60,6 +63,7 @@ export async function inspectLiveFinalCandidate(input,{
     audit_assurance:check.audit_assurance,
     semantic_assurance:check.semantic_assurance,
     delivery_owner_status:source.owner_status,
-    write_eligibility:'NOT_DETERMINED_REQUIRES_SEPARATE_EXPLICIT_PILOT'
+    write_eligibility:boundary.booking_scope==='SYNTHETIC_NO_CONTACT' ?
+      'BLOCKED_SYNTHETIC_NO_CONTACT' : 'NOT_DETERMINED_REQUIRES_SEPARATE_EXPLICIT_PILOT'
   });
 }
