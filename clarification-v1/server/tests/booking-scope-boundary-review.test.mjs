@@ -55,6 +55,13 @@ test('unexpected contact directives buried in preliminary brief are visible',()=
  assert.ok(r.conflicts.some(x=>x.field==='preliminary_brief_markdown'&&
    x.reason==='PROSPECT_CONTACT_DIRECTIVE_IN_NO_CONTACT_SCOPE'));
 });
+test('an explicit prohibition does not hide a contradictory instruction in same sentence',()=>{
+ const altered=structuredClone(oct10);
+ altered.safety_note='Do not contact the prospect, but email the buyer regarding the opportunity.';
+ const r=inspectBookingScopeBoundary(altered,envelope());
+ assert.equal(r.status,'SYNTHETIC_SCOPE_CONFLICT_DETECTED');
+ assert.ok(r.conflicts.some(x=>x.reason==='PROSPECT_CONTACT_DIRECTIVE_IN_NO_CONTACT_SCOPE'));
+});
 test('explicit no-contact instruction is not a positive directive',()=>{
  const altered=structuredClone(oct10);
  altered.additional_safety_note='Do not contact the prospect or send a proposal.';
