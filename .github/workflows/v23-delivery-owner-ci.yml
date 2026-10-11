@@ -42,7 +42,7 @@ jobs:
           node --test candidate/clarification-v1/server/tests/final-delivery-receipt.test.mjs
           node --test candidate/clarification-v1/server/tests/atomic-clarification-create.test.mjs
       - name: Install production dependencies for API route regression
-        run: npm ci --omit=dev --no-audit --no-fund --prefix candidate
+        run: npm install --omit=dev --no-audit --no-fund --package-lock=false --prefix candidate
       - name: Verify read-only administrative discovery preview
         run: node --test candidate/clarification-v1/server/tests/admin-discovery-preview.test.mjs candidate/clarification-v1/server/tests/admin-discovery-preview-api.test.mjs
       - name: Verify persisted booking canonical agreement before discovery drafts
