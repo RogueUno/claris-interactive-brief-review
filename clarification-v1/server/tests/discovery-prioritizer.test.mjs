@@ -23,7 +23,7 @@ test('commercial SOC2 case prioritizes exactly five supplied questions with six-
     assert.equal(q.question,actual[q.original_index-1].question);
     assert.ok(q.topics.length>0);
   }
-  assert.deepEqual(r.unresolved_dimensions.map(x=>x.dimension).sort(), ['buyer_stakeholder_fit','business_trigger','engagement_economics']);
+  assert.deepEqual(r.unresolved_dimensions.map(x=>x.dimension).sort(), ['business_trigger','buyer_stakeholder_fit','engagement_economics']);
   assert.equal(assessCommercialBrief(fictional).prioritized_discovery.selected_count,5);
 });
 
