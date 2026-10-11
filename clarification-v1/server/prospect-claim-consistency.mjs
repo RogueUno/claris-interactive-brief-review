@@ -10,7 +10,8 @@ const SERVICES=Object.freeze({
   ISO27001:/\bISO[\s-]*27001\b/i,
   VCISO:/\b(?:vCISO|virtual\s+CISO)\b/i
 });
-const QUESTION_INTENT=/\b(interested|interest|need|needs|looking for|explor(?:e|ing)|want|wants|consider(?:ing)?|request(?:ing)?|which (?:advisory )?service)\b/i;
+const QUESTION_INTENT=/\b(interested|interest|need|needs|looking for|explor(?:e|ing)|want|wants|consider(?:ing)?|request(?:ing)?)\b/i;
+const NEGATIVE_PROMPT=/\b(already (?:own|owns|owned|purchased|pays for)|currently (?:use|uses|using|own)|not interested|no interest|not needed|do not need|don't need)\b/i;
 const NEGATIVE_ANSWER=/\b(?:not interested|no interest|don't want|do not want|not needed|no need|not looking for|decline|none of the above)\b/i;
 const SERVICE_CLAIM=/\b(?:interest|interested|need|requested|request|seeking|looking for|expressed|wants|considering)\b/i;
 
@@ -70,7 +71,7 @@ export function inspectProspectClaimConsistency(artifact,envelope) {
           reason='ACCEPTED_SERVICE_LABEL_MISMATCH';
         }else if(selected.length!==1){
           reason='ACCEPTED_SERVICE_LABEL_AMBIGUOUS';
-        }else if(!QUESTION_INTENT.test(entry.prompt)){
+        }else if(!QUESTION_INTENT.test(entry.prompt)||NEGATIVE_PROMPT.test(entry.prompt)){
           reason='FORM_PROMPT_DOES_NOT_ESTABLISH_INTEREST';
         }else{
           outcome='LABEL_ALIGNED_REVIEW_REQUIRED';
