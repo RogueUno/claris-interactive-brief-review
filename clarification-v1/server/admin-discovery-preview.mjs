@@ -66,6 +66,12 @@ export async function previewPersistedOpportunityDiscovery(opportunityId, { repo
     return response('NOT_FOUND',404,{error:'OPPORTUNITY_NOT_FOUND'});
   }
 
+  if (envelope.package?.status !== 'SUBMITTED' || !envelope.response) {
+    return response('SUBMISSION_NOT_ESTABLISHED',409,{
+      opportunity_id:opportunityId,error:'PROSPECT_SUBMISSION_REQUIRED'
+    });
+  }
+
   const context = extractPersistedBookingContext(envelope);
   if (!context.ok) {
     return response('BOOKING_CONTEXT_UNVERIFIED',409,{
