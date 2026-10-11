@@ -2,51 +2,14 @@ import { renderFinalBrief } from './final-brief-renderer.mjs';
 import { assessCommercialBrief, isExplicitSyntheticRehearsal } from './commercial-brief-readiness.mjs';
 import { prioritizeDiscoveryQuestions } from './discovery-prioritizer.mjs';
 import { draftFromPersistedBookingContext, extractPersistedBookingContext } from './persisted-booking-discovery-gate.mjs';
+import { verifyFinalSnapshot } from './final-snapshot-persistence.mjs';
 
-// READ-ONLY. This intentionally has no way to persist a FINALIZE artifact.
-// The snapshot format is a future, explicitly governed storage contract.
-// Existing submitted envelopes do not yet contain this record.
-const VERSION = 'claris_final_intelligence_snapshot_v1';
+// Read only; persistence is handled separately by the append-once service.
 const VALID_ID = /^[A-Za-z0-9_-]{3,100}$/;
-
-const response = (status, http_status, extra = {}) => ({
-  ok: status === 'PREVIEW_READY' || status === 'SCOPE_RESTRICTED',
-  status, http_status, ...extra
+const response = (status, http_status, extra={})=>({
+  ok:status==='PREVIEW_READY'||status==='SCOPE_RESTRICTED',
+  status,http_status,...extra
 });
-
-function auditPass(value) {
-  try {
-    const v = typeof value === 'string' ? JSON.parse(value) : value;
-    return v?.audit_status === 'PASS' && v.repair_required === false &&
-      Array.isArray(v.violations) && v.violations.length === 0;
-  } catch { return false; }
-}
-
-function validatedSnapshot(envelope, opportunityId) {
-  const snapshot = envelope?.final_intelligence;
-  if (snapshot == null) return { ok: false, missing: true };
-  if (snapshot.schema_version !== VERSION ||
-      snapshot.opportunity_id !== opportunityId ||
-      snapshot.status !== 'FINALIZED' || snapshot.final_stage !== 'FINALIZE' ||
-      snapshot.source !== 'GOVERNED_FINALIZE' ||
-      !auditPass(snapshot.final_audit_json) ||
-      typeof snapshot.final_stage_output_json !== 'string' ||
-      typeof snapshot.final_brief_markdown !== 'string') {
-    return { ok: false, missing: false };
-  }
-
-  try {
-    // These are strict content-integrity checks, not an independent audit of
-    // the AI's factual assertions or third-party evidence.
-    const rendered = renderFinalBrief(snapshot.final_stage_output_json);
-    if (rendered.brief_markdown !== snapshot.final_brief_markdown.trim()) {
-      return { ok: false, missing: false };
-    }
-    return { ok: true, artifact: snapshot.final_stage_output_json };
-  } catch {
-    return { ok: false, missing: false };
-  }
-}
 
 export async function previewPersistedOpportunityDiscovery(opportunityId, { repository } = {}) {
   if (typeof opportunityId !== 'string' || !VALID_ID.test(opportunityId)) {
@@ -79,7 +42,10 @@ export async function previewPersistedOpportunityDiscovery(opportunityId, { repo
     });
   }
 
-  const snapshot = validatedSnapshot(envelope,opportunityId);
+  const snapshot = envelope.final_intelligence == null ? {ok:false,missing:true} :
+    verifyFinalSnapshot(envelope.final_intelligence,opportunityId,{
+      bookingText:context.booking.verbatim_text
+    });
   if (!snapshot.ok) {
     return response(snapshot.missing ? 'FINAL_ARTIFACT_NOT_PERSISTED' :
       'FINAL_ARTIFACT_SNAPSHOT_INVALID',409,{
@@ -91,13 +57,13 @@ export async function previewPersistedOpportunityDiscovery(opportunityId, { repo
   }
 
   try {
-    const readiness = assessCommercialBrief(snapshot.artifact,{
-      synthetic:isExplicitSyntheticRehearsal(snapshot.artifact,{
+    const readiness = assessCommercialBrief(envelope.final_intelligence.final_stage_output_json,{
+      synthetic:isExplicitSyntheticRehearsal(envelope.final_intelligence.final_stage_output_json,{
         trustedBookingText:context.booking.verbatim_text
       })
     });
-    const selected = prioritizeDiscoveryQuestions(snapshot.artifact);
-    const draft = draftFromPersistedBookingContext(snapshot.artifact,envelope);
+    const selected = prioritizeDiscoveryQuestions(envelope.final_intelligence.final_stage_output_json);
+    const draft = draftFromPersistedBookingContext(envelope.final_intelligence.final_stage_output_json,envelope);
     const allowed = draft.status === 'DRAFTS_FOR_REVIEW' ||
       draft.status === 'NO_REMAINING_SLOTS' ||
       draft.status === 'INSUFFICIENT_GROUNDED_GAPS';
