@@ -176,6 +176,10 @@ async function handleDiscoveryPreview(request) {
       Object.keys(body).some(key => key !== 'opportunity_id')) {
     return json({ok:false,error:'PREVIEW_ONLY_OPPORTUNITY_ID_ALLOWED'},400);
   }
+  if (typeof body.opportunity_id !== 'string' ||
+      !/^[A-Za-z0-9_-]{3,100}$/.test(body.opportunity_id)) {
+    return json({ok:false,error:'OPPORTUNITY_ID_INVALID'},400);
+  }
   const result = await previewPersistedOpportunityDiscovery(body.opportunity_id,{
     repository:clarificationServerContext().repository
   });
