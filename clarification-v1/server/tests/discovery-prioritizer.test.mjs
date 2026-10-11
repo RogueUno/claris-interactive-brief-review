@@ -76,7 +76,7 @@ test('unverified references never enter selected evidence list',()=>{
   };
   const r=prioritizeDiscoveryQuestions(data);
   assert.equal(r.selected_count,1);
-  assert.deepEqual(r.selected[0].evidence_refs,[]);
-  assert.deepEqual(r.unresolved_dimensions[0].evidence_refs,[]);
+  assert.deepEqual(r.selected[0].declared_evidence_refs,[]);
+  assert.deepEqual(r.unresolved_dimensions[0].declared_evidence_refs,[]);
   assert.equal(r.selected[0].unresolved_dimensions[0].status,'UNKNOWN');
 });
