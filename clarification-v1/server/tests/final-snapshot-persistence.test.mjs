@@ -13,8 +13,9 @@ const markdown=renderFinalBrief(artifact).brief_markdown;
 function envelope() {
   return {
     schema_version:'claris_clarification_envelope_v1', opportunity_id:id,
-    package:{status:'SUBMITTED',consultant:{consultant_id:'test_consultant'}},
-    response:{submitted_at:'2026-10-10T00:00:00Z',answers:[]},
+    package:{status:'SUBMITTED',consultant:{consultant_id:'test_consultant'},questions:[]},
+    response:{schema_version:'claris_prospect_response_v1',opportunity_id:id,
+      source_class:'PROSPECT_REPORTED',submitted_at:'2026-10-10T00:00:00Z',answers:[]},
     finalize_context:{
       schema_version:'claris_finalize_context_v1',
       consultant_sot_json:JSON.stringify({services:[{service_id:'SVC_SOC2'}]}),
@@ -71,7 +72,7 @@ test('first accepted FINALIZE snapshot writes once with ETag, integrity digests 
   assert.equal(snap.source,'GOVERNED_FINALIZE');
   assert.equal(snap.integrity_version,'sha256-v1');
   assert.equal(typeof snap.artifact_sha256,'string');
-  assert.equal(verifyFinalSnapshot(snap,id,{bookingText:booking}).ok,true);
+  assert.equal(verifyFinalSnapshot(snap,id,{bookingText:booking,envelope:saved}).ok,true);
   const preview=await previewPersistedOpportunityDiscovery(id,{repository:db.repository});
   assert.equal(preview.status,'PREVIEW_READY');
   assert.equal(preview.review_drafts.length,0);
@@ -159,9 +160,9 @@ test('tampering with stored snapshot hashes or booking binding is detected',asyn
   const db=memory();
   await persistGovernedFinalSnapshot(payload(),{repository:db.repository});
   const snapshot=db.read().final_intelligence;
-  assert.equal(verifyFinalSnapshot({...snapshot,artifact_sha256:'0'.repeat(64)},id,{bookingText:booking}).ok,false);
-  assert.equal(verifyFinalSnapshot(snapshot,id,{bookingText:booking+' changed'}).error,'FINAL_SNAPSHOT_BOOKING_MISMATCH');
-  assert.equal(verifyFinalSnapshot({...snapshot,integrity_version:null},id,{bookingText:booking}).error,'FINAL_SNAPSHOT_INTEGRITY_REQUIRED');
+  assert.equal(verifyFinalSnapshot({...snapshot,artifact_sha256:'0'.repeat(64)},id,{bookingText:booking,envelope:db.read()}).ok,false);
+  assert.equal(verifyFinalSnapshot(snapshot,id,{bookingText:booking+' changed',envelope:db.read()}).error,'FINAL_SNAPSHOT_BOOKING_MISMATCH');
+  assert.equal(verifyFinalSnapshot({...snapshot,integrity_version:null},id,{bookingText:booking,envelope:db.read()}).error,'FINAL_SNAPSHOT_INTEGRITY_REQUIRED');
 });
 test('unknown persistence result reports uncertainty and never retries',async()=>{
   let calls=0;const db=memory();
