@@ -222,7 +222,7 @@ test('isolated commercial lifecycle: booking -> accepted answers -> FINALIZE con
  assert.equal(preview.no_auto_send,true);
  assert.equal(preview.commercial_readiness_status==='NOT_COMMERCIAL_BENCHMARK',false);
  const after=await db.repository.loadEnvelopeWithMeta(ID);
- assert.equal(after.envelope.final_delivery_receipt,null);
+ assert.equal(after.envelope.final_delivery_receipt == null,true);
  assert.equal(db.events.filter(x=>x.type==='memory_update'&&x.path.endsWith('/envelope.json')).length,2);
  assert.equal(JSON.stringify(preview).includes(EMAIL),false);
  assert.equal(JSON.stringify(preview).includes('Customer assessment planned; date not confirmed'),false);
