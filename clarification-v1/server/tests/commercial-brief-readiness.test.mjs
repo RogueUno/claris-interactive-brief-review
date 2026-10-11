@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { assessCommercialBrief, isExplicitSyntheticRehearsal } from '../commercial-brief-readiness.mjs';
+import { normalizeFinalArtifact, renderFinalBrief } from '../final-brief-renderer.mjs';
 
 const load = name => JSON.parse(readFileSync(new URL('./fixtures/' + name, import.meta.url), 'utf8'));
 test('fictional SOC 2 commercial brief meets all structural depth checks', () => {
@@ -34,4 +35,35 @@ test('marketing prose claiming synthetic cannot itself bypass review', () => {
  const artifact={preliminary_brief_markdown:'This says synthetic, but has no source.',deterministic_metrics:{supported_match:20}};
  assert.equal(isExplicitSyntheticRehearsal(artifact),false);
  assert.equal(assessCommercialBrief(artifact).status,'REVIEW_REQUIRED');
+});
+
+test('historical Oct9 real evidence claims retain their actual BOOK and PROS reference edges', () => {
+ const actual=load('oct09-finalize-actual.json');
+ const normalized=normalizeFinalArtifact(actual);
+ assert.equal(normalized.primary_service_id,'NONE_APPLICABLE');
+ assert.equal(normalized.intelligence_lineage.length,3);
+ assert.deepEqual(normalized.intelligence_lineage.map(edge=>edge.source_id),
+   ['BOOK-001','PROS-001','BOOK-001']);
+ assert.ok(normalized.intelligence_lineage.every(edge=>edge.authority===null));
+ const brief=renderFinalBrief(actual).brief_markdown;
+ assert.match(brief,/BOOK-001 — Engagement is a synthetic CLARIS MVP rehearsal/);
+ const review=assessCommercialBrief(actual);
+ assert.equal(review.status,'REVIEW_REQUIRED');
+ assert.equal(review.checks.service,false);
+ assert.equal(review.checks.evidence_lineage,true);
+});
+
+test('all UNKNOWN fit and claims without sources do not create an evidence-backed candidate', () => {
+ const unsafe={
+  preliminary_brief_markdown:'Customer claims a need.',
+  strategic_guidance:{primary_service_id:'NONE_APPLICABLE', recommended_action:'Discuss'},
+  match_classifications:{service_need_alignment:{status:'UNKNOWN',basis_ids:[],reason:'No proof'}},
+  intelligence_lineage:[{claim:'No admissible source attached'}],
+  deterministic_metrics:{supported_match:20,scorable_coverage:10}
+ };
+ const scored=assessCommercialBrief(unsafe);
+ assert.equal(scored.status,'REVIEW_REQUIRED');
+ assert.equal(scored.checks.service,false);
+ assert.equal(scored.checks.evidence_fit,false);
+ assert.equal(scored.checks.evidence_lineage,false);
 });
