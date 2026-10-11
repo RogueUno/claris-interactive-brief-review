@@ -41,6 +41,8 @@ jobs:
           node --test candidate/clarification-v1/server/tests/offline-delivery-lifecycle.test.mjs
           node --test candidate/clarification-v1/server/tests/final-delivery-receipt.test.mjs
           node --test candidate/clarification-v1/server/tests/atomic-clarification-create.test.mjs
+      - name: Verify evidence-constrained offline question drafting and no-contact boundary
+        run: node --test candidate/clarification-v1/server/tests/evidence-constrained-question-drafts.test.mjs
       - name: Verify grounded deterministic first-call question prioritization
         run: node --test candidate/clarification-v1/server/tests/discovery-prioritizer.test.mjs
       - name: Verify question relevance breadth on actual FINALIZE payloads
