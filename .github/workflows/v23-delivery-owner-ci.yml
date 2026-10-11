@@ -43,6 +43,8 @@ jobs:
           node --test candidate/clarification-v1/server/tests/atomic-clarification-create.test.mjs
       - name: Install production dependencies for API route regression
         run: npm install --omit=dev --no-audit --no-fund --package-lock=false --prefix candidate
+      - name: Verify read-only live FINALIZE candidate comparison and authorization
+        run: node --test candidate/clarification-v1/server/tests/final-snapshot-candidate-preflight.test.mjs candidate/clarification-v1/server/tests/final-snapshot-candidate-preflight-api.test.mjs
       - name: Verify authenticated read-only snapshot source preflight
         run: node --test candidate/clarification-v1/server/tests/final-snapshot-source-preflight.test.mjs candidate/clarification-v1/server/tests/final-snapshot-source-preflight-api.test.mjs
       - name: Verify accepted PROS evidence IDs and historical FINALIZE replay offline
