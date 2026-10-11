@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { createHash } from 'node:crypto';
 import { renderFinalBrief } from '../final-brief-renderer.mjs';
+import { deriveAcceptedProspectManifest } from '../accepted-prospect-evidence.mjs';
 import { previewPersistedOpportunityDiscovery } from '../admin-discovery-preview.mjs';
 
 const fixture=name=>JSON.parse(readFileSync(new URL('./fixtures/'+name,import.meta.url),'utf8'));
@@ -16,8 +17,9 @@ function envelope(booking=REQUEST, artifact=soc2) {
   const e = {
     schema_version:'claris_clarification_envelope_v1',
     opportunity_id:ID,
-    package:{status:'SUBMITTED'},
-    response:{submitted_at:'2026-10-10T00:00:00Z',answers:[]},
+    package:{status:'SUBMITTED',questions:[]},
+    response:{schema_version:'claris_prospect_response_v1',opportunity_id:ID,
+      source_class:'PROSPECT_REPORTED',submitted_at:'2026-10-10T00:00:00Z',answers:[]},
     finalize_context:{
       schema_version:'claris_finalize_context_v1',
       case_state_json:JSON.stringify({
@@ -53,6 +55,8 @@ function seal(e) {
   snapshot.markdown_sha256=hash(snapshot.final_brief_markdown);
   snapshot.audit_sha256=hash(snapshot.final_audit_json);
   snapshot.booking_sha256=hash(JSON.parse(e.finalize_context.case_state_json).booking_text_exact);
+  snapshot.prospect_binding_version='claris_accepted_prospect_manifest_v1';
+  snapshot.accepted_prospect_binding_sha256=deriveAcceptedProspectManifest(e).binding_sha256;
   return e;
 }
 
