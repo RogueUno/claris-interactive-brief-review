@@ -75,11 +75,16 @@ export function inspectBookingScopeBoundary(artifact,envelope) {
   scanStrings(raw,(path,text)=>{
     scanned_text_fields++;
     const leaf=String(path.split('.').at(-1)||'').replace(/\[\d+\]/g,'');
-    if(POSITIVE_CONTACT.test(text)&&!NEGATIVE_DIRECTIVE.test(text))
-      add(path,'PROSPECT_CONTACT_DIRECTIVE_IN_NO_CONTACT_SCOPE');
-    if(SALES_DIRECTIVE.test(text)&&!NEGATIVE_DIRECTIVE.test(text)&&
-       (DECISION_FIELDS.has(leaf)||/\b(?:recommend|should|next step|proceed to)\b/i.test(text)))
-      add(path,'UNAUTHORIZED_SALES_DIRECTIVE_IN_REHEARSAL');
+    // A negative instruction earlier in a long markdown field must not
+    // suppress a later positive outreach command in the same field.
+    const clauses=text.split(/(?:[.!?;]\s+|\r?\n+|,\s*but\s+|\bhowever,?\s+)/i);
+    for(const clause of clauses){
+      if(POSITIVE_CONTACT.test(clause)&&!NEGATIVE_DIRECTIVE.test(clause))
+        add(path,'PROSPECT_CONTACT_DIRECTIVE_IN_NO_CONTACT_SCOPE');
+      if(SALES_DIRECTIVE.test(clause)&&!NEGATIVE_DIRECTIVE.test(clause)&&
+         (DECISION_FIELDS.has(leaf)||/\b(?:recommend|should|next step|proceed to)\b/i.test(clause)))
+        add(path,'UNAUTHORIZED_SALES_DIRECTIVE_IN_REHEARSAL');
+    }
   });
   return {
     status:conflicts.length?'SYNTHETIC_SCOPE_CONFLICT_DETECTED':'SYNTHETIC_SCOPE_NOT_CONTRADICTED',
