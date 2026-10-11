@@ -29,23 +29,24 @@ function fingerprint(value) {
   return String(value || '').toLowerCase().replace(/[^\p{L}\p{N}]+/gu, ' ').trim().replace(/\s+/g, ' ');
 }
 
-function listedBasis(item, admissible) {
+function listedBasis(item, declaredSourceIds) {
   return Array.isArray(item?.basis_ids)
-    ? [...new Set(item.basis_ids.filter(id => typeof id === 'string' && admissible.has(id)))]
+    ? [...new Set(item.basis_ids.filter(id => typeof id === 'string' && declaredSourceIds.has(id)))]
     : [];
 }
 
 export function prioritizeDiscoveryQuestions(input) {
   const normalized = normalizeFinalArtifact(input);
   const coverage = assessDiscoveryCoverage(input);
-  const admissible = new Set(normalized.intelligence_lineage.map(item => item.source_id).filter(Boolean));
+  // FINALIZE lineage is a declared reference set, not independent source verification.
+  const declaredSourceIds = new Set(normalized.intelligence_lineage.map(item => item.source_id).filter(Boolean));
   const unresolved = Object.entries(normalized.match_classifications)
     .filter(([, item]) => item && typeof item === 'object' &&
       OPEN_STATUSES.has(String(item.status || '').toUpperCase()))
     .map(([dimension, item]) => ({
       dimension,
       status: String(item.status).toUpperCase(),
-      evidence_refs: listedBasis(item, admissible)
+      declared_evidence_refs: listedBasis(item, declaredSourceIds)
     }));
   const byDimension = new Map(unresolved.map(item => [item.dimension, item]));
   const missing_unknowns = normalized.remaining_unknowns.map(item => ({
@@ -76,14 +77,14 @@ export function prioritizeDiscoveryQuestions(input) {
     const gap_dimensions = [...new Set(topics.flatMap(topic =>
       TOPIC_DIMENSIONS[topic].filter(key => byDimension.has(key))))];
     const gap_items = gap_dimensions.map(key => byDimension.get(key));
-    const evidence_refs = [...new Set(gap_items.flatMap(gap => gap.evidence_refs))];
+    const declared_evidence_refs = [...new Set(gap_items.flatMap(gap => gap.declared_evidence_refs))];
     return [{
       original_index: index + 1,
       question: text,
       intent: item.intent || null,
       topics,
       unresolved_dimensions: gap_items.map(gap => ({dimension:gap.dimension,status:gap.status})),
-      evidence_refs,
+      declared_evidence_refs,
       origin: 'FINALIZE_QUESTION_PLAN'
     }];
   });
@@ -128,6 +129,6 @@ export function prioritizeDiscoveryQuestions(input) {
     explicit_unknowns: missing_unknowns,
     duplicates_skipped,
     uncategorized_skipped,
-    limitations: 'Question selection is advisory. No missing questions were generated; verify relevance and all source claims before a call.'
+    limitations: 'Question selection is advisory. No missing questions were generated; AI-declared source IDs are not independently verified; validate question relevance and all source claims before a call.'
   };
 }
