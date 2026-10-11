@@ -72,6 +72,8 @@ test('genuine FINALIZE-shaped candidate can be structurally reviewed with zero w
  assert.equal(result.delivery_authorized,false);
  assert.equal(result.audit_assurance,'ADMIN_SUPPLIED_PASS_NOT_INDEPENDENTLY_REEXECUTED');
  assert.equal(result.semantic_assurance,'NOT_CERTIFIED');
+ assert.equal(result.prospect_claim_review.semantic_assurance,'NOT_CERTIFIED');
+ assert.equal(result.prospect_claim_review.status,'NO_PROSPECT_CLAIMS');
  assert.equal(result.write_eligibility,'NOT_DETERMINED_REQUIRES_SEPARATE_EXPLICIT_PILOT');
  assert.match(result.artifact_sha256,/^[a-f0-9]{64}$/);
  assert.deepEqual(env.calls,['read','read']);
@@ -81,10 +83,14 @@ test('genuine FINALIZE-shaped candidate can be structurally reviewed with zero w
 });
 
 test('unrelated accepted answer is not called semantically verified',async()=>{
- const env=dependencies(fixture({answer:'Unrelated service'}));
- const result=await inspectLiveFinalCandidate(candidate(),env);
+ const mismatched=fixture({answer:'ISO 27001 preparation'});
+ mismatched.package.questions[0].options[0].label='ISO 27001 preparation';
+ const env=dependencies(mismatched);
+ const result=await inspectLiveFinalCandidate(candidate(historical),env);
  assert.equal(result.status,'CANDIDATE_CONTRACT_PASSED');
  assert.equal(result.semantic_assurance,'NOT_CERTIFIED');
+ assert.equal(result.prospect_claim_review.status,'PROSPECT_CLAIM_CONFLICT_DETECTED');
+ assert.equal(result.prospect_claim_review.checks[0].reason,'ACCEPTED_SERVICE_LABEL_MISMATCH');
  // This is intentionally structural only; a semantic certification gate is
  // required before any live release or delivery.
  assert.equal(result.delivery_authorized,false);

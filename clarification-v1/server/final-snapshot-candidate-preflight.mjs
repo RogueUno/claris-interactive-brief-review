@@ -1,5 +1,6 @@
 import { inspectPersistedFinalSources } from './final-snapshot-source-preflight.mjs';
 import { inspectFinalSnapshotCandidatePayload } from './final-snapshot-persistence.mjs';
+import { inspectProspectClaimConsistency } from './prospect-claim-consistency.mjs';
 
 const ID=/^[A-Za-z0-9_-]{3,100}$/;
 const out=(status,http_status,rest={})=>({
@@ -52,6 +53,7 @@ export async function inspectLiveFinalCandidate(input,{
   return out('CANDIDATE_CONTRACT_PASSED',200,{
     opportunity_id:input.opportunity_id,
     artifact_sha256:check.artifact_sha256,
+    prospect_claim_review:inspectProspectClaimConsistency(input.final_stage_output_json,envelope),
     booking_binding:check.booking_binding,
     prospect_binding:'ACCEPTED_RESPONSE_MANIFEST_MATCH',
     source_reference_check:'DECLARED_REFERENCE_ALLOWLIST_PASSED',
