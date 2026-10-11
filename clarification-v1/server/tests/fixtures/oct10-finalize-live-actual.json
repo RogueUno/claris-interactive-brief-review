@@ -1,0 +1,97 @@
+{
+  "preliminary_brief": {
+    "entity_summary": "The subject of this engagement is Tailead, identified within the context of a synthetic CLARIS MVP rehearsal.",
+    "engagement_context": "The engagement is strictly defined as a synthetic rehearsal for test research and call preparation. It is not a live prospect engagement and does not involve outbound contact.",
+    "primary_alignment_status": "QUALIFIED_SYNTHETIC_REHEARSAL",
+    "highest_value_unknowns": [
+      "The specific parameters and objectives defined for the 'test research' phase of the rehearsal.",
+      "The specific requirements for the 'call preparation' portion of the rehearsal."
+    ]
+  },
+  "match_score_explanation": {
+    "overall_score": 20,
+    "service_need_alignment": {
+      "status": "UNKNOWN",
+      "basis_ids": [],
+      "explanation": "The scope is explicitly defined by BOOK-001 as a synthetic rehearsal; prospect-reported service interests are excluded by canonical truth boundary constraints."
+    },
+    "icp_company_fit": {
+      "status": "MATCH",
+      "basis_ids": [
+        "BOOK-001"
+      ],
+      "explanation": "The entity is identified as Tailead, and the booking is confirmed as a synthetic rehearsal for CLARIS MVP testing, aligning with internal development/test parameters."
+    },
+    "business_trigger": {
+      "status": "UNKNOWN",
+      "basis_ids": [],
+      "explanation": "No admissible evidence links the rehearsal to an actual business trigger."
+    },
+    "buyer_stakeholder_fit": {
+      "status": "UNKNOWN",
+      "basis_ids": [],
+      "explanation": "No admissible evidence provided for stakeholder role or decision-making power."
+    },
+    "engagement_economics": {
+      "status": "UNKNOWN",
+      "basis_ids": [],
+      "explanation": "No admissible evidence provided regarding budget or engagement economics."
+    },
+    "timing_urgency": {
+      "status": "UNKNOWN",
+      "basis_ids": [],
+      "explanation": "No admissible evidence provided regarding timing or urgency requirements."
+    },
+    "expansion_potential": {
+      "status": "UNKNOWN",
+      "basis_ids": [],
+      "explanation": "No admissible evidence provided for expansion beyond the synthetic test rehearsal."
+    }
+  },
+  "engagement_readiness": {
+    "qualification_status": "SYNTHETIC_REHEARSAL_ONLY",
+    "recommended_action": "Execute synthetic rehearsal scope only.",
+    "key_talking_points": [
+      "Acknowledge synthetic CLARIS MVP rehearsal parameters.",
+      "Execute defined research and preparation tasks.",
+      "Maintain strictly technical focus aligned with BOOK-001 constraints."
+    ],
+    "risk_factors": [
+      "Prospect-reported SOC 2 Readiness interest constitutes scope expansion and must be bypassed.",
+      "Any attempt to treat the session as a live engagement would violate the V3_TRUTH_BOUNDARY_3."
+    ]
+  },
+  "potential_service_relevance": [],
+  "intelligence_lineage": [
+    {
+      "evidence_id": "BOOK-001",
+      "source": "BOOKING_TEXT",
+      "statement": "Synthetic CLARIS MVP rehearsal. The company is Tailead; test research and call preparation only. Do not contact the prospect."
+    },
+    {
+      "evidence_id": "PROS-001",
+      "source": "PROSPECT_REPORTED",
+      "statement": "The prospect expressed an interest in SOC 2 Readiness services (Note: This interest is excluded from engagement scope per Strategy Resolution)."
+    }
+  ],
+  "prospect_question_plan": [
+    {
+      "question": "What are the specific parameters or constraints for the 'test research' phase of this rehearsal?",
+      "objective": "To align the rehearsal execution with the intended test parameters of the CLARIS MVP."
+    }
+  ],
+  "consultant_only_hypotheses": [
+    {
+      "hypothesis_id": "HYP-001",
+      "description": "The rehearsal is likely an internal validation step to test the CLARIS system's ability to handle self-referential firm data.",
+      "required_verification": "Internal team confirmation of testing goals."
+    }
+  ],
+  "deterministic_metrics": {
+    "supported_match": "20/100",
+    "scorable_coverage": "20/100",
+    "evaluated_fit_rate": "100%",
+    "evidence_completeness": "62.5/100"
+  },
+  "preliminary_brief_markdown": "### Engagement Overview\n\n**Scope:** Synthetic CLARIS MVP Rehearsal  \n**Entity:** Tailead  \n**Constraint:** Test research and call preparation only. No prospect contact.  \n\n### Strategic Summary\nThis session is a controlled rehearsal. While the prospect questionnaire indicated an interest in **SOC 2 Readiness**, the canonical truth boundary locks the engagement to the **synthetic rehearsal** scope defined in the booking text. All preparation and research must adhere strictly to these testing parameters. No public evidence (FACs) has been admitted for this entity.\n\n### Critical Path\n- Execute research aligned with MVP testing objectives.\n- Bypass SOC 2 Readiness discussions as they fall outside the 'test research' mandate.\n- Treat all data as part of a synthetic rehearsal environment."
+}

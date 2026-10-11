@@ -96,12 +96,18 @@ function normalizeUnknowns(artifact, matchClassifications) {
 
   if (explicit.length) return explicit;
 
+  const reportedUnknowns = array(artifact?.preliminary_brief?.highest_value_unknowns)
+    .map((item) => ({ id: null, description: typeof item === 'string'
+      ? firstText(item) : firstText(item?.description, item?.question), reason: null }))
+    .filter((item) => item.description);
+  if (reportedUnknowns.length) return reportedUnknowns;
+
   return Object.entries(matchClassifications)
     .filter(([, item]) => String(item?.status || '').toUpperCase() === 'UNKNOWN')
     .map(([id, item]) => ({
       id,
       description: null,
-      reason: firstText(item?.reason, item?.rationale, item?.reasoning)
+      reason: firstText(item?.reason, item?.rationale, item?.reasoning, item?.explanation)
     }));
 }
 
@@ -136,12 +142,14 @@ function normalizeConsultantContext(artifact) {
 
   const hypothesisSource = array(context.internal_hypotheses).length
     ? array(context.internal_hypotheses)
-    : array(context.hypotheses);
+    : array(context.hypotheses).length
+      ? array(context.hypotheses)
+      : array(artifact.consultant_only_hypotheses);
   const hypotheses = hypothesisSource
     .map((item) => ({
       hypothesis_id: firstText(item?.hypothesis_id, item?.label),
       description: firstText(item?.description),
-      status: firstText(item?.status, item?.risk_of_inference)
+      status: firstText(item?.status, item?.risk_of_inference) || 'UNVERIFIED'
     }))
     .filter((item) => item.hypothesis_id || item.description);
 
@@ -221,7 +229,7 @@ function humanize(key) {
 function classificationLines(classifications) {
   return Object.entries(classifications).map(([key, item]) => {
     const status = firstText(item?.status) || 'UNKNOWN';
-    const reason = firstText(item?.reason, item?.rationale, item?.reasoning);
+    const reason = firstText(item?.reason, item?.rationale, item?.reasoning, item?.explanation);
     const basisIds = array(item?.basis_ids)
       .map((value) => firstText(value))
       .filter(Boolean);
@@ -324,11 +332,17 @@ export function normalizeFinalArtifact(input) {
   const discoveryGuidance = Object.keys(object(artifact.discovery_guidance)).length
     ? object(artifact.discovery_guidance)
     : object(strategicAssessment.discovery_guidance);
-  const strategicGuidance = Object.keys(object(artifact.strategic_guidance)).length ? object(artifact.strategic_guidance) : object(artifact.consultant_prep_strategy);
+  const strategicGuidance = Object.keys(object(artifact.strategic_guidance)).length ? object(artifact.strategic_guidance)
+    : Object.keys(object(artifact.consultant_prep_strategy)).length ? object(artifact.consultant_prep_strategy)
+    : object(artifact.engagement_readiness);
   const strategicRecommendations = object(artifact.strategic_recommendations);
   const scopeAnalysis = object(artifact.scope_analysis);
   const matchScoreExplanation = object(artifact.match_score_explanation);
-  const matchBreakdown = object(matchScoreExplanation.match_breakdown);
+  const matchBreakdown = Object.keys(object(matchScoreExplanation.match_breakdown)).length
+    ? object(matchScoreExplanation.match_breakdown)
+    : Object.fromEntries(Object.entries(matchScoreExplanation).filter(([, value]) =>
+        typeof value === 'object' && value !== null && !Array.isArray(value) &&
+        typeof value.status === 'string'));
   const deterministicMetrics = Object.keys(object(artifact.deterministic_metrics)).length
     ? object(artifact.deterministic_metrics)
     : Object.keys(object(matchSummary.deterministic_metrics)).length
