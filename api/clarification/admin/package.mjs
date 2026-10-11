@@ -8,10 +8,12 @@ import { runClarificationProtocolStep } from '../../../clarification-v1/server/p
 import { buildFinalizeBundle, buildFinalizeContext } from '../../../clarification-v1/server/finalize-handoff.mjs';
 import { renderFinalBrief } from '../../../clarification-v1/server/final-brief-renderer.mjs';
 import { assessCommercialBrief, isExplicitSyntheticRehearsal } from '../../../clarification-v1/server/commercial-brief-readiness.mjs';
+import { previewPersistedOpportunityDiscovery } from '../../../clarification-v1/server/admin-discovery-preview.mjs';
 
 const PROTOCOL_OPERATION = 'INTELLIGENCE_PROTOCOL';
 const FINALIZE_BUNDLE_OPERATION = 'FINALIZE_BUNDLE';
 const RENDER_FINAL_BRIEF_OPERATION = 'RENDER_FINAL_BRIEF';
+const DISCOVERY_PREVIEW_OPERATION = 'DISCOVERY_PREVIEW_READ_ONLY';
 const MAX_PROTOCOL_BODY_BYTES = 450_000;
 const FINAL_DELIVERY_PREFLIGHT_OPERATION = 'FINAL_DELIVERY_PREFLIGHT';
 const FINAL_DELIVERY_CLAIM_OPERATION = 'FINAL_DELIVERY_CLAIM';
@@ -159,6 +161,32 @@ async function handleIntelligenceProtocol(request) {
   }
 }
 
+
+// Isolated administrative read-only operation. Make's integration key must
+// never authorize it; it cannot accept a caller-provided artifact or booking.
+async function handleDiscoveryPreview(request) {
+  const declared = Number(request.headers.get('content-length') || 0);
+  if (Number.isFinite(declared) && declared > 4096) {
+    return json({ok:false,error:'PREVIEW_INPUT_TOO_LARGE'},413);
+  }
+  const parsed = await parseJson(request);
+  if (!parsed.ok) return parsed.response;
+  const body = parsed.value;
+  if (!body || typeof body !== 'object' || Array.isArray(body) ||
+      Object.keys(body).some(key => key !== 'opportunity_id')) {
+    return json({ok:false,error:'PREVIEW_ONLY_OPPORTUNITY_ID_ALLOWED'},400);
+  }
+  if (typeof body.opportunity_id !== 'string' ||
+      !/^[A-Za-z0-9_-]{3,100}$/.test(body.opportunity_id)) {
+    return json({ok:false,error:'OPPORTUNITY_ID_INVALID'},400);
+  }
+  const result = await previewPersistedOpportunityDiscovery(body.opportunity_id,{
+    repository:clarificationServerContext().repository
+  });
+  const {http_status,...payload}=result;
+  return json(payload,http_status);
+}
+
 // Admin-only outbox control. No email provider is called from this route.
 // A reserved claim cannot automatically expire because the provider may have
 // sent an email before an ACK was lost. Such cases require reconciliation.
@@ -202,6 +230,15 @@ export default {
     }
 
     const operation = String(request.headers.get('x-claris-operation') || '').trim().toUpperCase();
+    if (operation === DISCOVERY_PREVIEW_OPERATION) {
+      // Only the admin secret can see a persisted consultant's discovery
+      // intelligence. Reject ambiguous shared admin/Make configurations.
+      if (!adminKey || (makeKey && adminKey === makeKey) ||
+          !adminAuthorized(request, adminKey)) {
+        return json({ok:false,error:'DISCOVERY_PREVIEW_ADMIN_ONLY'},401);
+      }
+      return handleDiscoveryPreview(request);
+    }
     if (operation === PROTOCOL_OPERATION) {
       return handleIntelligenceProtocol(request);
     }
