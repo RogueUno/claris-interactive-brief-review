@@ -22,10 +22,12 @@ test('thin non-synthetic opportunity must be flagged for review', () => {
 
 test('synthetic exemption derives only from explicit booking evidence', () => {
  const historical=load('oct09-finalize-actual.json');
- assert.equal(isExplicitSyntheticRehearsal(historical),true);
+ assert.equal(isExplicitSyntheticRehearsal(historical),false);
+ const trustedBookingText='Synthetic CLARIS MVP rehearsal. The company is Tailead; test research and call preparation only. Do not contact the prospect.';
+ assert.equal(isExplicitSyntheticRehearsal(historical,{trustedBookingText}),true);
  const commercial=load('fictional-soc2-advisory-final.json');
  assert.equal(isExplicitSyntheticRehearsal(commercial),false);
- assert.equal(assessCommercialBrief(historical,{synthetic:isExplicitSyntheticRehearsal(historical)}).status,'NOT_COMMERCIAL_BENCHMARK');
+ assert.equal(assessCommercialBrief(historical,{synthetic:isExplicitSyntheticRehearsal(historical,{trustedBookingText})}).status,'NOT_COMMERCIAL_BENCHMARK');
  assert.equal(assessCommercialBrief(commercial,{synthetic:isExplicitSyntheticRehearsal(commercial)}).status,'DEPTH_CANDIDATE');
 });
 test('marketing prose claiming synthetic cannot itself bypass review', () => {
