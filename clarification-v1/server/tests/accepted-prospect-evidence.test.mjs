@@ -2,6 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {deriveAcceptedProspectManifest} from '../accepted-prospect-evidence.mjs';
+import {buildFinalizeProspectAnswers} from '../finalize-handoff.mjs';
 import {persistGovernedFinalSnapshot,verifyFinalSnapshot} from '../final-snapshot-persistence.mjs';
 import {renderFinalBrief} from '../final-brief-renderer.mjs';
 
@@ -136,4 +137,28 @@ test('unresolved fit basis references are blocked even if all lineage IDs are pr
   assert.equal(r.status,'BLOCKED');
   assert.equal(r.error,'FINALIZE_MATCH_BASIS_UNRESOLVED');
   assert.equal(db.writes(),0);
+});
+
+test('outbound FINALIZE handoff uses precisely the same accepted-answer ordinals',()=>{
+  const e=acceptedSoc2();
+  const manifest=deriveAcceptedProspectManifest(e);
+  const handoff=buildFinalizeProspectAnswers({
+    opportunity_id:id,
+    clarification_result:{
+      required:true,
+      source_class:'PROSPECT_REPORTED',
+      submitted_at:e.response.submitted_at,
+      answers:[{
+        question_id:e.response.answers[0].question_id,
+        answer_kind:'OPTION',
+        mode:'DISCOVER',
+        selected_option_id:'soc2',
+        value:soc2
+      }]
+    }
+  });
+  assert.equal(handoff.answers.length,1);
+  assert.equal(handoff.answers[0].source_evidence_id,manifest.entries[0].evidence_id);
+  assert.equal(handoff.answers[0].answer_exact,manifest.entries[0].value);
+  assert.equal(handoff.answers[0].question_id,manifest.entries[0].question_id);
 });
