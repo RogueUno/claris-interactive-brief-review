@@ -1,17 +1,10 @@
 import { normalizeFinalArtifact } from './final-brief-renderer.mjs';
 
-export function isExplicitSyntheticRehearsal(input) {
-  const artifact = typeof input === 'string' ? JSON.parse(input) : input;
-  const source = artifact?.claris_final_brief ?? artifact;
-  const lineage = Array.isArray(source?.intelligence_lineage) ? source.intelligence_lineage : [];
-  // Only trusted, explicitly labelled booking evidence can grant the rehearsal exemption.
-  return lineage.some(item => {
-    const authority = String(item?.authority ?? item?.source ?? '').toUpperCase();
-    const statement = String(item?.statement ?? item?.usage ?? '').toLowerCase();
-    return (authority === 'BOOKING_TEXT' || authority === 'BOOKING') &&
-      (statement.includes('synthetic') || statement.includes('rehearsal')) &&
-      statement.includes('do not contact');
-  });
+export function isExplicitSyntheticRehearsal(_artifact, { trustedBookingText = '' } = {}) {
+  // Never infer consent/contact restrictions from AI-generated lineage.
+  const booking = String(trustedBookingText || '').toLowerCase();
+  return (booking.includes('synthetic') || booking.includes('rehearsal')) &&
+    booking.includes('do not contact the prospect');
 }
 
 export function assessCommercialBrief(input, { synthetic = false } = {}) {
