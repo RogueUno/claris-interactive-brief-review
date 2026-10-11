@@ -7,6 +7,7 @@ import { parseMakeDeliveryInput, SUBMITTED_FINAL_FORM_FIELDS } from '../../../ca
 import { runClarificationProtocolStep } from '../../../clarification-v1/server/protocol.mjs';
 import { buildFinalizeBundle, buildFinalizeContext } from '../../../clarification-v1/server/finalize-handoff.mjs';
 import { renderFinalBrief } from '../../../clarification-v1/server/final-brief-renderer.mjs';
+import { assessCommercialBrief, isExplicitSyntheticRehearsal } from '../../../clarification-v1/server/commercial-brief-readiness.mjs';
 
 const PROTOCOL_OPERATION = 'INTELLIGENCE_PROTOCOL';
 const FINALIZE_BUNDLE_OPERATION = 'FINALIZE_BUNDLE';
@@ -66,7 +67,12 @@ async function handleRenderFinalBrief(request) {
 
   try {
     const artifact = parsed.value?.stage_output_json ?? parsed.value?.artifact ?? parsed.value;
-    return json(renderFinalBrief(artifact), 200);
+    const rendered = renderFinalBrief(artifact);
+    const commercial_readiness = assessCommercialBrief(artifact, {
+      synthetic: isExplicitSyntheticRehearsal(artifact)
+    });
+    // Advisory only. Existing renderer success and Make outputs remain unchanged.
+    return json({ ...rendered, commercial_readiness }, 200);
   } catch (error) {
     const code = error?.message || 'FINAL_BRIEF_RENDER_FAILED';
     const status = ['FINAL_ARTIFACT_REQUIRED', 'FINAL_ARTIFACT_INVALID', 'FINAL_ARTIFACT_INVALID_JSON'].includes(code)
