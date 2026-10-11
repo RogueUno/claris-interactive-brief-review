@@ -104,6 +104,18 @@ export function draftEvidenceConstrainedQuestions(artifact, {booking} = {}) {
   }
   const scope=supported[0].id;
   const normalized=normalizeFinalArtifact(artifact);
+  // A conflicting recognized service selection cannot be papered over with
+  // plausible buyer-facing questions, even when the booking mentions a scope.
+  const declaredService=String(normalized.primary_service_id || '').toUpperCase();
+  const knownServices={
+    SOC2_READINESS: /^SVC_SOC2(?:_|$)/,
+    ISO27001_PREPARATION: /^SVC_ISO27001(?:_|$)/,
+    VCISO_ADVISORY: /^SVC_VCISO(?:_|$)/
+  };
+  if (/^SVC_(SOC2|ISO27001|VCISO)(?:_|$)/.test(declaredService) &&
+      !knownServices[scope].test(declaredService)) {
+    return empty('SCOPE_CONFLICT_WITH_FINALIZE',{scope});
+  }
   if (!normalized.intelligence_lineage.some(x=>x.source_id === booking.source_id)) {
     return empty('BOOKING_REFERENCE_NOT_DECLARED');
   }
