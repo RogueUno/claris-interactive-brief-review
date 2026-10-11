@@ -43,6 +43,8 @@ jobs:
           node --test candidate/clarification-v1/server/tests/atomic-clarification-create.test.mjs
       - name: Install production dependencies for API route regression
         run: npm install --omit=dev --no-audit --no-fund --package-lock=false --prefix candidate
+      - name: Verify atomic append-once governed FINALIZE snapshot and disabled route
+        run: node --test candidate/clarification-v1/server/tests/final-snapshot-persistence.test.mjs candidate/clarification-v1/server/tests/final-snapshot-persistence-api.test.mjs
       - name: Verify read-only administrative discovery preview
         run: node --test candidate/clarification-v1/server/tests/admin-discovery-preview.test.mjs candidate/clarification-v1/server/tests/admin-discovery-preview-api.test.mjs
       - name: Verify persisted booking canonical agreement before discovery drafts

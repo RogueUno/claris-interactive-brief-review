@@ -9,11 +9,13 @@ import { buildFinalizeBundle, buildFinalizeContext } from '../../../clarificatio
 import { renderFinalBrief } from '../../../clarification-v1/server/final-brief-renderer.mjs';
 import { assessCommercialBrief, isExplicitSyntheticRehearsal } from '../../../clarification-v1/server/commercial-brief-readiness.mjs';
 import { previewPersistedOpportunityDiscovery } from '../../../clarification-v1/server/admin-discovery-preview.mjs';
+import { persistGovernedFinalSnapshot } from '../../../clarification-v1/server/final-snapshot-persistence.mjs';
 
 const PROTOCOL_OPERATION = 'INTELLIGENCE_PROTOCOL';
 const FINALIZE_BUNDLE_OPERATION = 'FINALIZE_BUNDLE';
 const RENDER_FINAL_BRIEF_OPERATION = 'RENDER_FINAL_BRIEF';
 const DISCOVERY_PREVIEW_OPERATION = 'DISCOVERY_PREVIEW_READ_ONLY';
+const FINAL_SNAPSHOT_STORE_OPERATION = 'FINAL_SNAPSHOT_STORE_GATED';
 const MAX_PROTOCOL_BODY_BYTES = 450_000;
 const FINAL_DELIVERY_PREFLIGHT_OPERATION = 'FINAL_DELIVERY_PREFLIGHT';
 const FINAL_DELIVERY_CLAIM_OPERATION = 'FINAL_DELIVERY_CLAIM';
@@ -162,6 +164,36 @@ async function handleIntelligenceProtocol(request) {
 }
 
 
+
+async function handleFinalSnapshotStore(request) {
+  const declared = Number(request.headers.get('content-length') || 0);
+  if (Number.isFinite(declared) && declared > 460000) {
+    return json({ok:false,error:'FINAL_SNAPSHOT_INPUT_TOO_LARGE'},413);
+  }
+  const parsed = await parseJson(request);
+  if (!parsed.ok) return parsed.response;
+  const input=parsed.value;
+  const allowed=new Set(['opportunity_id','expected_opportunity_version',
+    'status','final_stage','final_stage_output_json','final_brief_markdown','final_audit_json']);
+  if (!input || typeof input!=='object' || Array.isArray(input) ||
+      Object.keys(input).some(key=>!allowed.has(key))) {
+    return json({ok:false,error:'FINAL_SNAPSHOT_INPUT_INVALID'},400);
+  }
+  if (typeof input.opportunity_id!=='string' ||
+      !/^[A-Za-z0-9_-]{3,100}$/.test(input.opportunity_id)) {
+    return json({ok:false,error:'OPPORTUNITY_ID_INVALID'},400);
+  }
+  try {
+    const result=await persistGovernedFinalSnapshot(input,{
+      repository:clarificationServerContext().repository
+    });
+    const status=result.ok ? 200 : result.status==='CONFLICT' ? 409 : 422;
+    return json(result,status);
+  } catch {
+    return json({ok:false,status:'BLOCKED',error:'FINAL_SNAPSHOT_STORE_FAILED'},500);
+  }
+}
+
 // Isolated administrative read-only operation. Make's integration key must
 // never authorize it; it cannot accept a caller-provided artifact or booking.
 async function handleDiscoveryPreview(request) {
@@ -230,6 +262,18 @@ export default {
     }
 
     const operation = String(request.headers.get('x-claris-operation') || '').trim().toUpperCase();
+    if (operation === FINAL_SNAPSHOT_STORE_OPERATION) {
+      // This route is intentionally inert until separately activated with an
+      // explicit deployment env flag. The Make credential is never sufficient.
+      if (process.env.CLARIS_FINAL_SNAPSHOT_WRITE_ENABLED !== 'true') {
+        return json({ok:false,error:'FINAL_SNAPSHOT_WRITE_DISABLED'},403);
+      }
+      if (!adminKey || (makeKey && adminKey === makeKey) ||
+          !adminAuthorized(request,adminKey)) {
+        return json({ok:false,error:'FINAL_SNAPSHOT_ADMIN_ONLY'},401);
+      }
+      return handleFinalSnapshotStore(request);
+    }
     if (operation === DISCOVERY_PREVIEW_OPERATION) {
       // Only the admin secret can see a persisted consultant's discovery
       // intelligence. Reject ambiguous shared admin/Make configurations.

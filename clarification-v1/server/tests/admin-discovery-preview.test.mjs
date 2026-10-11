@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
+import { createHash } from 'node:crypto';
 import { renderFinalBrief } from '../final-brief-renderer.mjs';
 import { previewPersistedOpportunityDiscovery } from '../admin-discovery-preview.mjs';
 
@@ -12,7 +13,7 @@ const REQUEST='We need SOC 2 readiness ahead of an enterprise customer security 
 const NO_CONTACT='Synthetic CLARIS MVP rehearsal. The company is Tailead; test research and call preparation only. Do not contact the prospect.';
 
 function envelope(booking=REQUEST, artifact=soc2) {
-  return {
+  const e = {
     schema_version:'claris_clarification_envelope_v1',
     opportunity_id:ID,
     package:{status:'SUBMITTED'},
@@ -41,6 +42,18 @@ function envelope(booking=REQUEST, artifact=soc2) {
       })
     }
   };
+  return seal(e);
+}
+
+function seal(e) {
+  const hash=x=>createHash('sha256').update(x,'utf8').digest('hex');
+  const snapshot=e.final_intelligence;
+  snapshot.integrity_version='sha256-v1';
+  snapshot.artifact_sha256=hash(snapshot.final_stage_output_json);
+  snapshot.markdown_sha256=hash(snapshot.final_brief_markdown);
+  snapshot.audit_sha256=hash(snapshot.final_audit_json);
+  snapshot.booking_sha256=hash(JSON.parse(e.finalize_context.case_state_json).booking_text_exact);
+  return e;
 }
 
 function repository(value, journal=[]) {
@@ -66,6 +79,7 @@ test('persisted commercial case yields safe read-only consultant review previews
     }
   });
   e.final_intelligence.final_brief_markdown=renderFinalBrief(e.final_intelligence.final_stage_output_json).brief_markdown;
+  seal(e);
   const journal=[];
   const result=await previewPersistedOpportunityDiscovery(ID,{repository:repository(e,journal)});
   assert.equal(result.http_status,200);
