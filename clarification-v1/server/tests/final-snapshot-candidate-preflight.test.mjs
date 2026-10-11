@@ -72,6 +72,8 @@ test('genuine FINALIZE-shaped candidate can be structurally reviewed with zero w
  assert.equal(result.delivery_authorized,false);
  assert.equal(result.audit_assurance,'ADMIN_SUPPLIED_PASS_NOT_INDEPENDENTLY_REEXECUTED');
  assert.equal(result.semantic_assurance,'NOT_CERTIFIED');
+ assert.equal(result.prospect_claim_review.semantic_assurance,'NOT_CERTIFIED');
+ assert.equal(result.prospect_claim_review.status,'PROSPECT_CLAIM_CONFLICT_DETECTED');
  assert.equal(result.write_eligibility,'NOT_DETERMINED_REQUIRES_SEPARATE_EXPLICIT_PILOT');
  assert.match(result.artifact_sha256,/^[a-f0-9]{64}$/);
  assert.deepEqual(env.calls,['read','read']);
