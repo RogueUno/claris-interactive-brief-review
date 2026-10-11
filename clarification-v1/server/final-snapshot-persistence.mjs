@@ -1,6 +1,7 @@
 import { createHash } from 'node:crypto';
 import { parseFinalArtifact, normalizeFinalArtifact, renderFinalBrief } from './final-brief-renderer.mjs';
 import { extractPersistedBookingContext } from './persisted-booking-discovery-gate.mjs';
+import { deriveAcceptedProspectManifest } from './accepted-prospect-evidence.mjs';
 
 export const FINAL_SNAPSHOT_VERSION = 'claris_final_intelligence_snapshot_v1';
 const ID = /^[A-Za-z0-9_-]{3,100}$/;
@@ -28,7 +29,7 @@ function auditPass(raw) {
   } catch { return false; }
 }
 
-export function verifyFinalSnapshot(snapshot, opportunityId, { bookingText = null } = {}) {
+export function verifyFinalSnapshot(snapshot, opportunityId, { bookingText = null, envelope = null } = {}) {
   if (!snapshot || snapshot.schema_version !== FINAL_SNAPSHOT_VERSION ||
     snapshot.opportunity_id !== opportunityId ||
     snapshot.source !== 'GOVERNED_FINALIZE' ||
@@ -58,6 +59,13 @@ export function verifyFinalSnapshot(snapshot, opportunityId, { bookingText = nul
       // Do not silently certify older unbound records as governed persistence.
       return { ok:false, error:'FINAL_SNAPSHOT_INTEGRITY_REQUIRED' };
     }
+    // Re-check against the currently persisted accepted response at read time.
+    // An answer changed since the immutable FINALIZE must invalidate preview.
+    const accepted=deriveAcceptedProspectManifest(envelope);
+    if(!accepted.ok || snapshot.prospect_binding_version!=='claris_accepted_prospect_manifest_v1' ||
+      snapshot.accepted_prospect_binding_sha256!==accepted.binding_sha256) {
+      return {ok:false,error:'FINAL_SNAPSHOT_PROSPECT_BINDING_INVALID'};
+    }
     const normalized=normalizeFinalArtifact(snapshot.final_stage_output_json);
     if (!normalized.intelligence_lineage.some(item=>item.source_id==='BOOK-001') ||
         normalized.intelligence_lineage.some(item=>!item.source_id)) {
@@ -71,7 +79,7 @@ export function verifyFinalSnapshot(snapshot, opportunityId, { bookingText = nul
 
 // The persisted evidence catalog is an allowed-reference list, not proof that
 // any stated fact is correct. Unrecognized evidence is rejected, not repaired.
-function declaredSourceIds(envelope) {
+function declaredSourceIds(envelope, accepted) {
   let state, truth, sot;
   try {
     state=JSON.parse(envelope.finalize_context.case_state_json);
@@ -98,15 +106,9 @@ function declaredSourceIds(envelope) {
     Object.values(item).forEach(value=>serviceWalk(value,depth+1));
   }
   serviceWalk(sot);
-  // Prospect-reported refs are admissible only if explicitly bound to the
-  // persisted response; existence of generic answers alone is insufficient.
-  for (const answer of Array.isArray(envelope.response?.answers) ?
-      envelope.response.answers : []) {
-    if (typeof answer?.source_evidence_id==='string' &&
-      /^PROS-[0-9]{3,}$/.test(answer.source_evidence_id)) {
-      ids.add(answer.source_evidence_id);
-    }
-  }
+  // No source ID from model text can authorize itself. The accepted response
+  // manifest supplies the PROS ordinals; no answer means no PROS references.
+  for(const entry of accepted.entries) ids.add(entry.evidence_id);
   return ids;
 }
 
@@ -126,9 +128,20 @@ function payloadValidation(input, envelope, bookingText) {
     normalized.intelligence_lineage.some(item=>!item.source_id)) {
     return {ok:false,error:'FINALIZE_PROVENANCE_REQUIRED'};
   }
-  const allowable=declaredSourceIds(envelope);
+  const accepted=deriveAcceptedProspectManifest(envelope);
+  if (!accepted.ok) return {ok:false,error:accepted.error};
+  const allowable=declaredSourceIds(envelope,accepted);
   if (!allowable || normalized.intelligence_lineage.some(item=>!allowable.has(item.source_id))) {
     return {ok:false,error:'FINALIZE_PROVENANCE_UNRESOLVED'};
+  }
+  // Match-dimension basis IDs cannot bypass the same persisted evidence catalog.
+  for(const item of Object.values(normalized.match_classifications)) {
+    if(!item || typeof item!=='object') continue;
+    for(const ref of Array.isArray(item.basis_ids) ? item.basis_ids : []) {
+      if(typeof ref!=='string' || !allowable.has(ref)) {
+        return {ok:false,error:'FINALIZE_MATCH_BASIS_UNRESOLVED'};
+      }
+    }
   }
   // Require current renderer's exact output. No re-writing or accepting an old
   // markdown that differs after a renderer upgrade.
@@ -149,7 +162,9 @@ function payloadValidation(input, envelope, bookingText) {
     artifact_sha256:sha256(input.final_stage_output_json),
     markdown_sha256:sha256(input.final_brief_markdown),
     audit_sha256:sha256(input.final_audit_json),
-    booking_sha256:sha256(bookingText)
+    booking_sha256:sha256(bookingText),
+    prospect_binding_version:'claris_accepted_prospect_manifest_v1',
+    accepted_prospect_binding_sha256:accepted.binding_sha256
   };
   return {ok:true,record};
 }
@@ -181,9 +196,9 @@ export async function persistGovernedFinalSnapshot(input, {repository}={}) {
   if (!candidate.ok) return result('BLOCKED',{error:candidate.error});
   const existing=envelope.final_intelligence;
   if (existing != null) {
-    const old=verifyFinalSnapshot(existing,input.opportunity_id,{bookingText:booking.booking.verbatim_text});
+    const old=verifyFinalSnapshot(existing,input.opportunity_id,{bookingText:booking.booking.verbatim_text,envelope});
     if (!old.ok) return result('BLOCKED',{error:'EXISTING_FINAL_SNAPSHOT_INVALID'});
-    const equivalent=['artifact_sha256','markdown_sha256','audit_sha256','booking_sha256']
+    const equivalent=['artifact_sha256','markdown_sha256','audit_sha256','booking_sha256','accepted_prospect_binding_sha256']
       .every(key=>existing[key]===candidate.record[key]);
     return equivalent ? result('ALREADY_STORED',{opportunity_id:input.opportunity_id}) :
       result('CONFLICT',{error:'DIFFERENT_FINAL_SNAPSHOT_EXISTS'});
