@@ -83,7 +83,9 @@ test('genuine FINALIZE-shaped candidate can be structurally reviewed with zero w
 });
 
 test('unrelated accepted answer is not called semantically verified',async()=>{
- const env=dependencies(fixture({answer:'Unrelated service'}));
+ const mismatched=fixture({answer:'ISO 27001 preparation'});
+ mismatched.package.questions[0].options[0].label='ISO 27001 preparation';
+ const env=dependencies(mismatched);
  const result=await inspectLiveFinalCandidate(candidate(),env);
  assert.equal(result.status,'CANDIDATE_CONTRACT_PASSED');
  assert.equal(result.semantic_assurance,'NOT_CERTIFIED');
