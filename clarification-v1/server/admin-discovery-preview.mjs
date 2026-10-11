@@ -1,5 +1,5 @@
 import { renderFinalBrief } from './final-brief-renderer.mjs';
-import { assessCommercialBrief } from './commercial-brief-readiness.mjs';
+import { assessCommercialBrief, isExplicitSyntheticRehearsal } from './commercial-brief-readiness.mjs';
 import { prioritizeDiscoveryQuestions } from './discovery-prioritizer.mjs';
 import { draftFromPersistedBookingContext, extractPersistedBookingContext } from './persisted-booking-discovery-gate.mjs';
 
@@ -85,12 +85,21 @@ export async function previewPersistedOpportunityDiscovery(opportunityId, { repo
   }
 
   try {
-    const readiness = assessCommercialBrief(snapshot.artifact);
+    const readiness = assessCommercialBrief(snapshot.artifact,{
+      synthetic:isExplicitSyntheticRehearsal(snapshot.artifact,{
+        trustedBookingText:context.booking.verbatim_text
+      })
+    });
     const selected = prioritizeDiscoveryQuestions(snapshot.artifact);
     const draft = draftFromPersistedBookingContext(snapshot.artifact,envelope);
     const allowed = draft.status === 'DRAFTS_FOR_REVIEW' ||
       draft.status === 'NO_REMAINING_SLOTS' ||
       draft.status === 'INSUFFICIENT_GROUNDED_GAPS';
+    if (!allowed && draft.status !== 'SCOPE_RESTRICTED') {
+      return response('BLOCKED',409,{
+        opportunity_id:opportunityId,error:'DRAFT_GATE_NOT_ELIGIBLE'
+      });
+    }
     const safe = {
       opportunity_id:opportunityId,
       booking_assurance:context.assurance,
