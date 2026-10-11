@@ -147,6 +147,27 @@ test('historic synthetic FINALIZE may be analyzed without enabling any external 
  assert.equal(result.status,'CANDIDATE_CONTRACT_PASSED');
 });
 
+test('synthetic booking remains ineligible for a write pilot even with a passing candidate contract',async()=>{
+ const rehearsal='Synthetic CLARIS MVP rehearsal. The company is Tailead; test research and call preparation only. Do not contact the prospect.';
+ const e=fixture();
+ const state=JSON.parse(e.finalize_context.case_state_json);
+ state.booking_text_exact=rehearsal;
+ state.canonical_truth_json=JSON.stringify({booking_evidence:[
+  {evidence_id:'BOOK-001',authority:'BOOKING_TEXT',resolvable:true,
+   statement:rehearsal,exact_basis:rehearsal}
+ ],canonical_evidence_registry:[]});
+ e.finalize_context.case_state_json=JSON.stringify(state);
+ const env=dependencies(e);
+ const result=await inspectLiveFinalCandidate(candidate(historical),env);
+ assert.equal(result.status,'CANDIDATE_CONTRACT_PASSED');
+ assert.equal(result.booking_scope_review.booking_scope,'SYNTHETIC_NO_CONTACT');
+ assert.equal(result.booking_scope_review.conflict_count,0);
+ assert.equal(result.write_eligibility,'BLOCKED_SYNTHETIC_NO_CONTACT');
+ assert.equal(result.booking_scope_review.semantic_assurance,'NOT_CERTIFIED');
+ assert.equal(result.delivery_authorized,false);
+ assert.deepEqual(env.calls,['read','read']);
+});
+
 test('storage failures are redacted and cannot cause a write or secret disclosure',async()=>{
  const env=dependencies();
  env.repository.loadEnvelopeWithMeta=async()=>{throw Error('private-storage-secret');};

@@ -43,6 +43,8 @@ jobs:
           node --test candidate/clarification-v1/server/tests/atomic-clarification-create.test.mjs
       - name: Install production dependencies for API route regression
         run: npm install --omit=dev --no-audit --no-fund --package-lock=false --prefix candidate
+      - name: Verify synthetic booking no-contact boundary across FINALIZE intelligence
+        run: node --test candidate/clarification-v1/server/tests/booking-scope-boundary-review.test.mjs
       - name: Verify narrow prospect claim and accepted answer consistency without semantic promotion
         run: node --test candidate/clarification-v1/server/tests/prospect-claim-consistency.test.mjs
       - name: Verify read-only live FINALIZE candidate comparison and authorization
