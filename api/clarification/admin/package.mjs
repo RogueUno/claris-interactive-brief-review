@@ -10,6 +10,7 @@ import { renderFinalBrief } from '../../../clarification-v1/server/final-brief-r
 import { assessCommercialBrief, isExplicitSyntheticRehearsal } from '../../../clarification-v1/server/commercial-brief-readiness.mjs';
 import { previewPersistedOpportunityDiscovery } from '../../../clarification-v1/server/admin-discovery-preview.mjs';
 import { inspectPersistedFinalSources } from '../../../clarification-v1/server/final-snapshot-source-preflight.mjs';
+import { inspectLiveFinalCandidate } from '../../../clarification-v1/server/final-snapshot-candidate-preflight.mjs';
 import { persistGovernedFinalSnapshot } from '../../../clarification-v1/server/final-snapshot-persistence.mjs';
 
 const PROTOCOL_OPERATION = 'INTELLIGENCE_PROTOCOL';
@@ -17,6 +18,7 @@ const FINALIZE_BUNDLE_OPERATION = 'FINALIZE_BUNDLE';
 const RENDER_FINAL_BRIEF_OPERATION = 'RENDER_FINAL_BRIEF';
 const DISCOVERY_PREVIEW_OPERATION = 'DISCOVERY_PREVIEW_READ_ONLY';
 const SNAPSHOT_SOURCE_PREFLIGHT_OPERATION = 'FINAL_SNAPSHOT_SOURCE_PREFLIGHT_READ_ONLY';
+const FINAL_CANDIDATE_PREFLIGHT_OPERATION = 'FINAL_SNAPSHOT_CANDIDATE_PREFLIGHT_READ_ONLY';
 const FINAL_SNAPSHOT_STORE_OPERATION = 'FINAL_SNAPSHOT_STORE_GATED';
 const MAX_PROTOCOL_BODY_BYTES = 450_000;
 const FINAL_DELIVERY_PREFLIGHT_OPERATION = 'FINAL_DELIVERY_PREFLIGHT';
@@ -197,6 +199,38 @@ async function handleFinalSnapshotStore(request) {
 }
 
 
+async function handleSnapshotCandidatePreflight(request) {
+  // A genuine historical artifact can exceed the small ID-only preflight,
+  // but must never be copied into diagnostics or server error responses.
+  const declared=Number(request.headers.get('content-length')||0);
+  if(Number.isFinite(declared)&&declared>460000) {
+    return json({ok:false,error:'FINAL_CANDIDATE_INPUT_TOO_LARGE'},413);
+  }
+  const parsed=await parseJson(request);
+  if(!parsed.ok) return parsed.response;
+  const input=parsed.value;
+  const allowed=new Set(['opportunity_id','status','final_stage',
+    'final_stage_output_json','final_brief_markdown','final_audit_json']);
+  if(!input || typeof input!=='object' || Array.isArray(input) ||
+     Object.keys(input).some(key=>!allowed.has(key))) {
+    return json({ok:false,error:'FINAL_CANDIDATE_INPUT_INVALID'},400);
+  }
+  if(typeof input.opportunity_id!=='string' ||
+     !/^[A-Za-z0-9_-]{3,100}$/.test(input.opportunity_id)) {
+    return json({ok:false,error:'OPPORTUNITY_ID_INVALID'},400);
+  }
+  try {
+    const checked=await inspectLiveFinalCandidate(input,{
+      repository:clarificationServerContext().repository,
+      consultantRepository:calibrationServerContext().repository
+    });
+    const {http_status,...safe}=checked;
+    return json(safe,http_status);
+  } catch {
+    return json({ok:false,error:'FINAL_CANDIDATE_PREFLIGHT_FAILED'},500);
+  }
+}
+
 async function handleSnapshotSourcePreflight(request) {
   const declared=Number(request.headers.get('content-length')||0);
   if(Number.isFinite(declared)&&declared>4096) {
@@ -305,6 +339,13 @@ export default {
         return json({ok:false,error:'FINAL_SNAPSHOT_ADMIN_ONLY'},401);
       }
       return handleFinalSnapshotStore(request);
+    }
+    if(operation === FINAL_CANDIDATE_PREFLIGHT_OPERATION) {
+      if(!adminKey||(makeKey&&makeKey===adminKey)||
+          !adminAuthorized(request,adminKey)) {
+        return json({ok:false,error:'FINAL_CANDIDATE_ADMIN_ONLY'},401);
+      }
+      return handleSnapshotCandidatePreflight(request);
     }
     if (operation === SNAPSHOT_SOURCE_PREFLIGHT_OPERATION) {
       if(!adminKey||(makeKey&&makeKey===adminKey)||
