@@ -1,5 +1,12 @@
 import { normalizeFinalArtifact } from './final-brief-renderer.mjs';
 
+export function isExplicitSyntheticRehearsal(_artifact, { trustedBookingText = '' } = {}) {
+  // Never infer consent/contact restrictions from AI-generated lineage.
+  const booking = String(trustedBookingText || '').toLowerCase();
+  return (booking.includes('synthetic') || booking.includes('rehearsal')) &&
+    booking.includes('do not contact the prospect');
+}
+
 export function assessCommercialBrief(input, { synthetic = false } = {}) {
   const n = normalizeFinalArtifact(input);
   const checks = {
