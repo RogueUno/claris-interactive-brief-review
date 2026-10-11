@@ -79,7 +79,10 @@ export function buildFinalizeProspectAnswers(clarificationResult) {
     clarification_required: result.required === true,
     source_class: result.source_class || null,
     submitted_at: result.submitted_at || null,
-    answers: (result.answers || []).map((answer) => ({
+    answers: (result.answers || []).map((answer, index) => ({
+      // Deterministic reference to the accepted answer's position, not the
+      // displayed question's position. Recomputed from stored response at save.
+      source_evidence_id: 'PROS-' + String(index + 1).padStart(3, '0'),
       question_id: answer.question_id,
       prompt: answer.prompt || null,
       mode: answer.mode || null,
