@@ -44,7 +44,8 @@ export async function previewPersistedOpportunityDiscovery(opportunityId, { repo
 
   const snapshot = envelope.final_intelligence == null ? {ok:false,missing:true} :
     verifyFinalSnapshot(envelope.final_intelligence,opportunityId,{
-      bookingText:context.booking.verbatim_text
+      bookingText:context.booking.verbatim_text,
+      envelope
     });
   if (!snapshot.ok) {
     return response(snapshot.missing ? 'FINAL_ARTIFACT_NOT_PERSISTED' :
