@@ -169,6 +169,7 @@ async function createAndSubmit(){
  });
  assert.equal(submitted.ok,true);
  assert.equal(submitted.status,'SUBMITTED');
+ assert.equal(submitted.answer_count,3);
  const owner=profileRepository();
  const options={repository:db.repository,consultantRepository:owner};
  return {...db,created,opened,submitted,options};
@@ -178,6 +179,10 @@ test('isolated commercial lifecycle: booking -> accepted answers -> FINALIZE con
  const db=await createAndSubmit();
  const read=await db.repository.loadEnvelopeWithMeta(ID);
  const manifest=deriveAcceptedProspectManifest(read.envelope);
+ assert.equal(read.envelope.package.status,'SUBMITTED');
+ assert.equal(read.envelope.response.source_class,'PROSPECT_REPORTED');
+ assert.deepEqual(read.envelope.response.answers.map(x=>x.answer_kind),['OPTION','OPTION','UNSURE']);
+ assert.deepEqual(read.envelope.response.answers.map(x=>x.selected_option_id),['soc2','unspecified',null]);
  assert.equal(manifest.ok,true);
  assert.deepEqual(manifest.entries.map(x=>x.evidence_id),['PROS-001','PROS-002','PROS-003']);
  assert.deepEqual(manifest.entries.map(x=>x.value),[
@@ -202,6 +207,7 @@ test('isolated commercial lifecycle: booking -> accepted answers -> FINALIZE con
  assert.equal(check.prospect_claim_review.status,'NARROW_LABEL_ALIGNMENT_ONLY');
  assert.equal(check.audit_assurance,'ADMIN_SUPPLIED_PASS_NOT_INDEPENDENTLY_REEXECUTED');
  assert.equal(check.semantic_assurance,'NOT_CERTIFIED');
+ assert.equal(check.booking_scope_review.pilot_eligibility,'BLOCKED');
  assert.equal(check.delivery_authorized,false);
  assert.equal(check.write_performed,false);
  assert.equal(db.events.filter(x=>x.path.endsWith('/envelope.json')).length,2);
@@ -213,6 +219,7 @@ test('isolated commercial lifecycle: booking -> accepted answers -> FINALIZE con
   ...artifact,expected_opportunity_version:read.etag
  },{repository:db.repository});
  assert.equal(stored.status,'STORED');
+ assert.equal(db.events.filter(x=>x.type==='memory_update'&&x.path.endsWith('/envelope.json')).length,2);
  const preview=await previewPersistedOpportunityDiscovery(ID,{repository:db.repository});
  assert.equal(preview.status,'PREVIEW_READY');
  assert.equal(preview.ok,true);
@@ -230,9 +237,11 @@ test('isolated commercial lifecycle: booking -> accepted answers -> FINALIZE con
   ...artifact,expected_opportunity_version:read.etag
  },{repository:db.repository});
  assert.equal(replay.status,'ALREADY_STORED');
+ assert.equal(db.events.filter(x=>x.type==='memory_update'&&x.path.endsWith('/envelope.json')).length,2);
+ assert.equal([...db.data.keys()].every(path=>path.startsWith('claris/')),true);
 });
 
-test('real submission cannot mutate an accepted answer or expand into a false budget claim',async()=>{
+test('accepted submission cannot be mutated or misrepresented as another service',async()=>{
  const db=await createAndSubmit();
  const submittedAgain=await db.service.submit(db.opened.session_token,[
   {question_id:'q_service',value:'iso'}],{now:TIME+3000});
@@ -251,7 +260,10 @@ test('real submission cannot mutate an accepted answer or expand into a false bu
  assert.equal(verdict.prospect_claim_review.status,'PROSPECT_CLAIM_CONFLICT_DETECTED');
  assert.equal(verdict.semantic_assurance,'NOT_CERTIFIED');
  assert.equal(verdict.delivery_authorized,false);
+ assert.equal(verdict.write_performed,false);
  assert.equal((await db.repository.loadEnvelopeWithMeta(ID)).etag,before.etag);
+ assert.equal((await db.repository.loadEnvelopeWithMeta(ID)).envelope.final_intelligence,undefined);
+ assert.equal(db.events.filter(x=>x.type==='memory_update'&&x.path.endsWith('/envelope.json')).length,1);
 });
 
 test('missing accepted evidence, invalid audit and changed snapshot are fail-closed',async()=>{
@@ -262,6 +274,7 @@ test('missing accepted evidence, invalid audit and changed snapshot are fail-clo
   ...artifact,final_audit_json:'{"audit_status":"FAIL"}'
  },db.options);
  assert.equal(badAudit.status,'CANDIDATE_CONTRACT_BLOCKED');
+ assert.equal(badAudit.error,'FINALIZE_CERTIFICATION_REQUIRED');
  const tampered=JSON.parse(artifact.final_stage_output_json);
  tampered.claris_final_brief.intelligence_lineage.push({
   source_id:'PROS-099',authority:'PROSPECT_REPORTED',usage:'Unsupported prospect need'
@@ -271,6 +284,13 @@ test('missing accepted evidence, invalid audit and changed snapshot are fail-clo
   final_brief_markdown:renderFinalBrief(tampered).brief_markdown
  },db.options);
  assert.equal(unknown.status,'CANDIDATE_CONTRACT_BLOCKED');
+ assert.equal(unknown.error,'FINALIZE_PROVENANCE_UNRESOLVED');
+ assert.equal((await db.repository.loadEnvelopeWithMeta(ID)).envelope.final_intelligence,undefined);
+ const stale=await persistGovernedFinalSnapshot({
+  ...artifact,expected_opportunity_version:'stale-version'
+ },{repository:db.repository});
+ assert.equal(stale.status,'CONFLICT');
+ assert.equal(stale.error,'FINAL_SNAPSHOT_VERSION_MISMATCH');
  const stored=await persistGovernedFinalSnapshot({
   ...artifact,expected_opportunity_version:read.etag
  },{repository:db.repository});
