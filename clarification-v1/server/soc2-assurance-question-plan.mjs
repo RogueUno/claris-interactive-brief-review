@@ -31,7 +31,9 @@ function output(status,fields={}){
 }
 
 function acceptedSoc2Selection(manifest,envelope) {
-  const interested=manifest.entries.filter(e=>/\b(?:service|advisory|interested|explor(?:e|ing))\b/i.test(e.prompt||''));
+  const interested=manifest.entries.filter(e=>
+    /\b(?:service|interested|explor(?:e|ing)|looking for)\b/i.test(e.prompt||'') &&
+    !/\b(?:budget|funding|timing|deadline)\b/i.test(e.prompt||''));
   if(interested.length!==1) return null;
   const entry=interested[0];
   if(entry.answer_kind!=='OPTION'||!SOC2.test(entry.value)||
