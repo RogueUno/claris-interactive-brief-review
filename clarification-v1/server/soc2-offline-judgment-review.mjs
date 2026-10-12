@@ -8,7 +8,15 @@ import { inspectProspectClaimConsistency } from './prospect-claim-consistency.mj
 // provider audit, authorization to persist, or authorization to contact anyone.
 // Findings identify review work; silence never proves a statement is true.
 const SOC2=/\bSOC\s*2\b/i;
-const DELIVERABLE=/\b(questionnaire|Type\s*I\b|Type\s*II\b|audit\s*type|report\s*type|assurance\s*deliverable|assurance\s*report|which\s+(?:report|attestation)|what\s+(?:kind|type)\s+of\s+(?:assurance|report|audit))\b/i;
+// An isolated questionnaire keyword does not establish that the consultant
+// distinguished a customer questionnaire from a formal SOC 2 report.
+export function asksSoc2AssuranceDeliverable(question) {
+  const q=String(question||'');
+  const form=/\b(?:security\s+|vendor\s+|customer\s+)?questionnaire\b/i.test(q);
+  const report=/\b(?:SOC\s*2|audit|attestation|assurance|report|Type\s*I(?:I)?\b)\b/i.test(q);
+  const explicit=/\b(?:what|which|whether|does|did|request(?:ed)?|require(?:d)?|need|expect|versus|instead|deliverable)\b/i.test(q);
+  return form && report && explicit;
+}
 const REHEARSAL=/\b(fictional|rehearsal|synthetic|simulated|test.only)\b/i;
 const ASSERT_BUDGET=/\b(?:budget|funding)\s+(?:is|was|has\s+been)\s+(?:approved|secured|allocated|confirmed)\b|\b(?:approved|secured|allocated|confirmed)\s+(?:advisory\s+|project\s+)?budget\b/i;
 const ASSERT_DATE=/\b(?:deadline|date|timeline|timing)\s+(?:is|was|has\s+been)\s+(?:confirmed|fixed|agreed|set)\b|\bconfirmed\s+(?:deadline|date|timeline)\b/i;
@@ -111,7 +119,7 @@ export function reviewOfflineSoc2ConsultantJudgment(input,{envelope}={}) {
   // Check the actual questions rather than their self-described intents:
   // intent-only lexical coverage can manufacture apparent discovery depth.
   const questions=n.discovery_questions.map(q=>String(q.question||''));
-  if(!questions.some(q=>DELIVERABLE.test(q))) {
+  if(!questions.some(asksSoc2AssuranceDeliverable)) {
     add('SOC2_DELIVERABLE_DISAMBIGUATION_NOT_ASKED','first_call','important',
       'discovery_question_plan',
       'Ask what the enterprise actually requires: a questionnaire, a Type I/II report, or another form of assurance; distinguish this from an audit deadline.',
