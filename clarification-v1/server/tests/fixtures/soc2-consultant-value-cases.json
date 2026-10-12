@@ -1,0 +1,118 @@
+{
+  "benchmark_version": "soc2_consultant_value_fixture_v1",
+  "fictional": true,
+  "oracle_usage": "HELD_OUT_SIMULATED_ANSWERS_EVALUATION_ONLY_NOT_BOOKING_EVIDENCE",
+  "rubric_scope": "QUESTION_PLAN_DECISION_ELICITATION_ONLY_NOT_AUDIT_OPINION_OR_COMMERCIAL_OUTCOME",
+  "cases": [
+    {
+      "id": "procurement_questionnaire_only",
+      "buyer_context": "Vendor risk reviewer at a B2B SaaS company",
+      "booking": "We want SOC 2 readiness advice ahead of an enterprise customer security assessment. We need help identifying scope and existing control evidence. The deadline and budget are unconfirmed.",
+      "oracle": {
+        "deliverable": "QUESTIONNAIRE_ONLY",
+        "simulated_answer": "Customer vendor-risk analyst only needs a completed security questionnaire with evidence links; no SOC 2 report was explicitly requested.",
+        "decision_critical_branch": "QUESTIONNAIRE_TRIAGE",
+        "potential_next_step": "Confirm questionnaire sections and proof requirements before considering a scoped evidence-mapping engagement; do not sell an audit by default.",
+        "remaining_uncertainties": [
+          "scope",
+          "buyer authority",
+          "budget"
+        ]
+      }
+    },
+    {
+      "id": "point_in_time_type_i",
+      "buyer_context": "First-time SOC 2 prospect in renewal",
+      "booking": "We need SOC 2 readiness help for an upcoming enterprise customer review. We want to determine the scope of the work and what evidence exists. Approval and the actual due date are unclear.",
+      "oracle": {
+        "deliverable": "TYPE_I",
+        "simulated_answer": "The procurement contact asks for a SOC 2 Type I report as of a specified date; no CPA firm has been engaged.",
+        "decision_critical_branch": "TYPE_I_READINESS_AND_AUDITOR_SCOPING",
+        "potential_next_step": "Clarify the specified date and system description, then scope readiness with an independent CPA firm; do not promise report issuance.",
+        "remaining_uncertainties": [
+          "specified date",
+          "system boundary",
+          "budget",
+          "auditor availability"
+        ]
+      }
+    },
+    {
+      "id": "operating_period_type_ii",
+      "buyer_context": "SaaS provider preparing for repeat enterprise diligence",
+      "booking": "A customer review led us to ask for SOC 2 readiness assistance. We need clarity on the systems in scope and existing evidence. Timing and budget have not been settled.",
+      "oracle": {
+        "deliverable": "TYPE_II",
+        "simulated_answer": "The customer asks for a SOC 2 Type II report covering operating effectiveness over an appropriate period; evidence cadence is not yet mapped.",
+        "decision_critical_branch": "TYPE_II_OPERATING_EVIDENCE_FEASIBILITY",
+        "potential_next_step": "Scope control ownership and the operating evidence period with an independent CPA auditor before discussing any completion date.",
+        "remaining_uncertainties": [
+          "operating period",
+          "control evidence cadence",
+          "audit readiness",
+          "budget"
+        ]
+      }
+    },
+    {
+      "id": "request_not_yet_confirmed",
+      "buyer_context": "Founder preparing for an informal procurement call",
+      "booking": "We are exploring SOC 2 readiness because a prospective enterprise customer will review security materials. Please help us structure scope and preparation; no budget or deadline is agreed.",
+      "oracle": {
+        "deliverable": "NOT_CONFIRMED",
+        "simulated_answer": "The prospect has only heard SOC 2 mentioned verbally; there is no written requirement and the customer contact has not confirmed acceptable alternatives.",
+        "decision_critical_branch": "OBTAIN_ORIGINAL_REQUIREMENT_FIRST",
+        "potential_next_step": "Ask the buyer to obtain the exact customer ask or confirm acceptable alternatives before proposing an assurance program.",
+        "remaining_uncertainties": [
+          "customer requirement",
+          "procurement decision",
+          "timing",
+          "budget"
+        ]
+      }
+    },
+    {
+      "id": "existing_report_coverage",
+      "buyer_context": "Vendor with an existing report undergoing customer reassessment",
+      "booking": "We would like SOC 2 readiness advice for a customer security reassessment. Help us clarify whether our existing preparation, systems and evidence are appropriate; budget and date are unconfirmed.",
+      "oracle": {
+        "deliverable": "EXISTING_TYPE_II",
+        "simulated_answer": "The company already has a SOC 2 Type II report, but the customer may require updated scope, covered period, or additional information.",
+        "decision_critical_branch": "EXISTING_REPORT_GAP_TRIAGE",
+        "potential_next_step": "Confirm the existing report's period, scoped services and customer's precise objection; do not automatically recommend a new readiness assessment.",
+        "remaining_uncertainties": [
+          "report period",
+          "report boundary",
+          "specific customer objection",
+          "budget"
+        ]
+      }
+    },
+    {
+      "id": "mixed_service_request",
+      "buyer_context": "Mixed-framework inquiry (boundary control)",
+      "booking": "We want both SOC 2 readiness and ISO 27001 preparation for procurement. Help clarify scope and evidence.",
+      "oracle": {
+        "deliverable": "OUT_OF_SCOPE",
+        "simulated_answer": "Mixed SOC 2 / ISO 27001 request; this narrow SOC 2 planning tool must refuse an unambiguous scope.",
+        "decision_critical_branch": "BLOCKED",
+        "potential_next_step": "Use separate consultant review of mixed scopes, not this narrow deterministic adapter.",
+        "remaining_uncertainties": [
+          "which service is priority"
+        ]
+      }
+    },
+    {
+      "id": "no_contact_rehearsal",
+      "buyer_context": "Explicit simulation (contact hold)",
+      "booking": "Synthetic SOC 2 readiness rehearsal for an internal test. Do not contact the prospect.",
+      "oracle": {
+        "deliverable": "OUT_OF_SCOPE",
+        "simulated_answer": "No real prospect inquiry exists.",
+        "decision_critical_branch": "BLOCKED",
+        "potential_next_step": "No outreach, persistence or recommendation to real prospect.",
+        "remaining_uncertainties": []
+      }
+    }
+  ]
+}

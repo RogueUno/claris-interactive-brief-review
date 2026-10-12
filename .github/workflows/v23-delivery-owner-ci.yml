@@ -71,6 +71,8 @@ jobs:
         run: node --test candidate/clarification-v1/server/tests/commercial-brief-readiness.test.mjs
       - name: Verify exact Oct10 FINALIZE intelligence preservation and depth
         run: node --test candidate/clarification-v1/server/tests/oct10-finalize-schema-replay.test.mjs
+      - name: Benchmark SOC2 consultant decision elicitation against held-out fictional cases
+        run: node --test candidate/clarification-v1/server/tests/soc2-consultant-value-benchmark.test.mjs
       - name: Verify assurance-first SOC2 question-plan proposals with source and coverage guards
         run: node --test candidate/clarification-v1/server/tests/soc2-assurance-question-plan.test.mjs
       - name: Review SOC2 consultant judgment against accepted booking answers without provider calls
