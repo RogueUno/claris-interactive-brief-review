@@ -43,6 +43,8 @@ jobs:
           node --test candidate/clarification-v1/server/tests/atomic-clarification-create.test.mjs
       - name: Install production dependencies for API route regression
         run: npm install --omit=dev --no-audit --no-fund --package-lock=false --prefix candidate
+      - name: Verify isolated commercial SOC2 end-to-end lifecycle in memory
+        run: node --test candidate/clarification-v1/server/tests/isolated-commercial-soc2-e2e.test.mjs
       - name: Verify synthetic booking no-contact boundary across FINALIZE intelligence
         run: node --test candidate/clarification-v1/server/tests/booking-scope-boundary-review.test.mjs
       - name: Verify narrow prospect claim and accepted answer consistency without semantic promotion
