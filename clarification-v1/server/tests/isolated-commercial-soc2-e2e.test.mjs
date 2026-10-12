@@ -12,6 +12,7 @@ import {inspectLiveFinalCandidate} from '../final-snapshot-candidate-preflight.m
 import {persistGovernedFinalSnapshot} from '../final-snapshot-persistence.mjs';
 import {previewPersistedOpportunityDiscovery} from '../admin-discovery-preview.mjs';
 import {reviewOfflineSoc2ConsultantJudgment} from '../soc2-offline-judgment-review.mjs';
+import {proposeSoc2AssuranceFirstCallPlan} from '../soc2-assurance-question-plan.mjs';
 
 // Commercial content, fictional identities. No actual customer, domain,
 // email provider, Make execution, secret or network call. This test creates
@@ -212,6 +213,16 @@ test('isolated commercial lifecycle: booking -> accepted answers -> FINALIZE con
  assert.equal(quality.semantic_assurance,'NOT_CERTIFIED');
  assert.equal(quality.delivery_authorized,false);
  assert.equal(quality.write_authorized,false);
+ const plan=proposeSoc2AssuranceFirstCallPlan(
+  JSON.parse(artifact.final_stage_output_json),{envelope:read.envelope});
+ assert.equal(plan.status,'QUESTION_PLAN_PROPOSAL_FOR_CONSULTANT_REVIEW');
+ assert.equal(plan.proposed_count,5);
+ assert.equal(plan.replaced_question.original_index,1);
+ assert.deepEqual(plan.proposed_questions[0].basis_ids,['BOOK-001','PROS-001']);
+ assert.deepEqual(plan.dropped_topics,[]);
+ assert.equal(plan.auto_applied,false);
+ assert.equal(plan.delivery_authorized,false);
+ assert.equal(plan.write_authorized,false);
  const check=await inspectLiveFinalCandidate(artifact,db.options);
  assert.equal(check.status,'CANDIDATE_CONTRACT_PASSED');
  assert.equal(check.booking_scope_review.status,'SCOPE_NOT_SYNTHETIC_NO_CONTACT_CONFIRMED');
