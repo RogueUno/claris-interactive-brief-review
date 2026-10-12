@@ -13,7 +13,7 @@ const SOC2=/\bSOC\s*2\b/i;
 const CONFLICTING_SERVICE=/\b(?:ISO[\s-]*27001|vCISO|virtual\s+CISO)\b/i;
 const REHEARSAL=/\b(?:synthetic|fictional|rehearsal|simulat(?:ion|ed)|internal test|test research|do not contact|don't contact)\b/i;
 const SOC2_SERVICE=/^SVC_SOC2(?:_|$)/i;
-const QUESTION='What exactly did the enterprise customer request—a security questionnaire, a SOC 2 Type I or Type II report, or another assurance deliverable—and which business decision and required date does it affect?';
+const QUESTION='What exactly did the enterprise customer request—a security questionnaire, a SOC 2 Type I or Type II report, or another assurance deliverable—what business decision does it affect, and what is the actual required date (if any)?';
 const INTENT='Clarify the customer-required assurance deliverable and distinguish procurement timing from audit requirements without assuming either is confirmed.';
 const FIELDS=Object.freeze({
   review_only:true,
