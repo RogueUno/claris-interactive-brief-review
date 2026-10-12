@@ -11,6 +11,7 @@ import {inspectPersistedFinalSources} from '../final-snapshot-source-preflight.m
 import {inspectLiveFinalCandidate} from '../final-snapshot-candidate-preflight.mjs';
 import {persistGovernedFinalSnapshot} from '../final-snapshot-persistence.mjs';
 import {previewPersistedOpportunityDiscovery} from '../admin-discovery-preview.mjs';
+import {reviewOfflineSoc2ConsultantJudgment} from '../soc2-offline-judgment-review.mjs';
 
 // Commercial content, fictional identities. No actual customer, domain,
 // email provider, Make execution, secret or network call. This test creates
@@ -200,6 +201,17 @@ test('isolated commercial lifecycle: booking -> accepted answers -> FINALIZE con
  assert.equal(sources.accepted_answer_count,3);
  assert.equal(sources.snapshot_state,'NOT_PERSISTED');
  const artifact=finalizeCandidate();
+ const quality=reviewOfflineSoc2ConsultantJudgment(
+  JSON.parse(artifact.final_stage_output_json),{envelope:read.envelope});
+ assert.equal(quality.booking_assurance,'INTERNAL_CANONICAL_AGREEMENT_ONLY');
+ assert.deepEqual(quality.supported_evidence_ids,manifest.entries.map(x=>x.evidence_id));
+ assert.equal(quality.open_commercial_unknowns.budget,'UNCONFIRMED');
+ assert.equal(quality.open_commercial_unknowns.timing,'UNCONFIRMED');
+ assert.equal(quality.prospect_service_claim_check,'NARROW_LABEL_ALIGNMENT_ONLY');
+ assert.ok(quality.checks.some(x=>x.code==='SOC2_DELIVERABLE_DISAMBIGUATION_NOT_ASKED'));
+ assert.equal(quality.semantic_assurance,'NOT_CERTIFIED');
+ assert.equal(quality.delivery_authorized,false);
+ assert.equal(quality.write_authorized,false);
  const check=await inspectLiveFinalCandidate(artifact,db.options);
  assert.equal(check.status,'CANDIDATE_CONTRACT_PASSED');
  assert.equal(check.booking_scope_review.status,'SCOPE_NOT_SYNTHETIC_NO_CONTACT_CONFIRMED');
