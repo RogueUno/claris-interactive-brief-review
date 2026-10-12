@@ -2,6 +2,7 @@ import { buildDeliveryPackage } from '../../calibration-v3/server/pilot-delivery
 import { createDirectFinalOutbox } from '../../calibration-v3/server/direct-final-outbox.mjs';
 import { json, methodNotAllowed, parseJson } from '../../calibration-v3/server/http.mjs';
 import { parseMakeDeliveryInput, DIRECT_FINAL_FORM_FIELDS } from '../../calibration-v3/server/make-delivery-transport.mjs';
+import { handleV5Pilot } from '../../calibration-v3/server/pilot-v5-private.mjs';
 
 function authorized(request) {
   const accepted = [process.env.CLARIS_MAKE_KEY, process.env.CLARIS_ADMIN_KEY]
@@ -44,11 +45,13 @@ export function createDeliveryGateway({
   return {
   async fetch(request) {
     if (request.method !== 'POST') return methodNotAllowed('POST');
+    const declaredOperation = String(request.headers.get('x-claris-delivery') || '').trim();
+    // Browser calls: signed token exchange + HttpOnly session data only.
+    if (declaredOperation === 'brief_resolve' || declaredOperation === 'brief_data')
+      return handleV5Pilot(request, declaredOperation);
     if (!authorize(request)) return json({ ok: false, error: 'MAKE_UNAUTHORIZED' }, 401);
-
-    const declaredOperation = String(
-      request.headers.get('x-claris-delivery') || ''
-    ).trim();
+    if (declaredOperation === 'v5_replay_publish')
+      return handleV5Pilot(request, declaredOperation);
     const parsed = await parseMakeDeliveryInput(
       request, parseJson, DIRECT_FINAL_FORM_FIELDS[declaredOperation]
     );
