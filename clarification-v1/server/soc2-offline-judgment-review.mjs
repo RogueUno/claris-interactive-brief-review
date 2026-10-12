@@ -141,7 +141,7 @@ export function reviewOfflineSoc2ConsultantJudgment(input,{envelope}={}) {
       'score', 'review','deterministic_metrics',
       'Do not sell the numeric match/evidence scores as independently verified; inspect the deterministic calculation and evidence coverage.');
   }
-  if(budgetUnknown && /\bQUALIFIED\b/i.test(String(n.qualification_status||''))) {
+  if(budgetUnknown && String(n.qualification_status||'').toUpperCase().startsWith('QUALIFIED')) {
     add('QUALIFICATION_LABEL_REQUIRES_ECONOMIC_CAVEAT','positioning','review',
       'strategic_guidance.qualification_status',
       'Clearly distinguish suitable for exploratory discovery from commercially qualified or ready to purchase.',
