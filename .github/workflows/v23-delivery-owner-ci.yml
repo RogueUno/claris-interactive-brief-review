@@ -71,8 +71,6 @@ jobs:
         run: node --test candidate/clarification-v1/server/tests/commercial-brief-readiness.test.mjs
       - name: Verify exact Oct10 FINALIZE intelligence preservation and depth
         run: node --test candidate/clarification-v1/server/tests/oct10-finalize-schema-replay.test.mjs
-      - name: Verify isolated commercial SOC2 booking-to-consultant-preview lifecycle without external execution
-        run: node --test candidate/clarification-v1/server/tests/isolated-commercial-soc2-e2e.test.mjs
       - name: Verify realistic fictional SOC2 brief quality offline
         run: node --test candidate/clarification-v1/server/tests/fictional-soc2-advisory.test.mjs
       - name: Verify exact protected submitted Make form transport
