@@ -382,20 +382,23 @@ function runCallMarkup(discovery,prepare){
 }
 
 function nextMoveMarkup(scorecard,discovery){
-  const action=text(scorecard?.strategy?.recommended_action)||'No approved next move — consultant review required.';
+  const action=text(scorecard?.strategy?.recommended_action);
   const gate=discovery?.end_of_call_decision||{};
+  const sections=[
+    {title:'Advance if',items:arr(gate.ready_for_next_step_if)},
+    {title:'Keep diagnosing if',items:arr(gate.remain_in_discovery_if)},
+    {title:'Only deprioritize if',items:arr(gate.disqualify_or_deprioritize_if)}
+  ].filter(s=>s.items.length);
   return `<article class="next-move">
-    <div class="decision-icon">${icon('arrow')}</div>
-    <div><span class="truth-badge decision">Decision</span><span class="eyebrow">Conditional next move</span><strong>${esc(action)}</strong>
-      <details><summary>Decision conditions</summary><div class="decision-conditions">
-        <section><h4>Advance if</h4><ul>${arr(gate.ready_for_next_step_if).map(x=>`<li>${esc(x)}</li>`).join('')}</ul></section>
-        <section><h4>Keep diagnosing if</h4><ul>${arr(gate.remain_in_discovery_if).map(x=>`<li>${esc(x)}</li>`).join('')}</ul></section>
-        <section><h4>Only deprioritize if</h4><ul>${arr(gate.disqualify_or_deprioritize_if).map(x=>`<li>${esc(x)}</li>`).join('')}</ul></section>
-      </div></details>
+    <div class="decision-icon">${icon(action?'arrow':'alert')}</div>
+    <div>
+      <span class="truth-badge ${action?'decision':'unknown'}">${action?'Provider recommendation · review before action':'Review required'}</span>
+      <span class="eyebrow">Conditional next move</span>
+      <strong>${esc(action||'No provider-supported next action is established for this opportunity.')}</strong>
+      ${sections.length?`<details><summary>Decision conditions</summary><div class="decision-conditions">${sections.map(s=>`<section><h4>${esc(s.title)}</h4><ul>${s.items.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></section>`).join('')}</div></details>`:''}
     </div>
   </article>`;
 }
-
 function externalSignalMarkup(prepare){
   for(const evidence of arr(prepare?.expandable_blocks?.evidence)){
     const third=arr(evidence?.sources).find(source=>text(source?.source_type)==='THIRD_PARTY');
@@ -423,9 +426,9 @@ function sourceIndex(prepare){
   return [...groups.values()].map(g=>({...g,claims:uniq(g.claims),used:uniq(g.used),notUsed:uniq(g.notUsed),pages:[...new Map(g.pages.map(p=>[p.url,p])).values()]}));
 }
 function proofMarkup(prepare,groups){
-  const totalObs=groups.reduce((n,g)=>n+g.claims.length,0),totalPages=groups.reduce((n,g)=>n+g.pages.length,0);
+  const totalPages=groups.reduce((n,g)=>n+g.pages.length,0);
   return `<details class="proof-drawer">
-    <summary><div>${icon('file')}<span><span class="eyebrow">Audit layer</span><strong>Evidence & sources</strong></span></div><small>${totalObs} observations · ${totalPages} pages</small><span class="inspect">Inspect ${icon('arrow','mini-icon')}</span></summary>
+    <summary><div>${icon('file')}<span><span class="eyebrow">Audit layer</span><strong>Evidence & sources</strong></span></div><small>${totalPages} linked source pages · ${groups.length} domains</small><span class="inspect">Inspect ${icon('arrow','mini-icon')}</span></summary>
     <div class="proof-body">
       <div class="proof-tabs"><button class="is-active" data-proof-tab="evidence">Evidence</button><button data-proof-tab="reasoning">Reasoning</button><button data-proof-tab="unknowns">Unknowns</button></div>
       <div class="proof-panel is-active" data-proof-panel="evidence"><div class="source-pills">${groups.map((g,i)=>`<button class="source-pill${i===0?' is-active':''}" data-source="${esc(g.key)}">${icon('link','mini-icon')}<strong>${esc(g.key)}</strong><span>${g.claims.length} obs</span></button>`).join('')}</div><div class="source-tray" data-source-tray></div></div>
@@ -451,7 +454,17 @@ function render(brief){
   const companySnapshot=brief?.payload?.company_snapshot||null;
   const known=knownGoingIn(discovery),groups=sourceIndex(prepare);
   const snapshotMarkup=companySnapshotMarkup(companySnapshot);
-  const replayNotice=brief?.payload?.final_replay_v3?'<section class="panel" role="note" style="margin:18px 0;padding:18px 22px;border-left:4px solid #9f825d"><span class="eyebrow">Controlled simulation · actual Make FINALIZE output</span><p>Fictional prospect, public PostHog research. Provider audit PASS; independent commercial certification not established. Scores are provisional and only actual generated questions are shown.</p></section>':'';
+  const depth=brief?.payload?.commercial_depth||{};
+  const held=depth.status==='HOLD_FOR_COMMERCIAL_REVIEW'||depth.status==='BOOKING_AUTHORITY_REQUIRED';
+  const gaps=arr(depth.missing).map(x=>text(x).replaceAll('_',' '));
+  const replayNotice=brief?.payload?.final_replay_v3
+    ?`<section class="panel brief-quality-notice" role="status" aria-label="Commercial brief status">
+        <span class="eyebrow">Controlled Make.com simulation · original FINALIZE output</span>
+        <strong>${held?'Commercial review required':(text(depth.status)||'Commercial certification not established').replaceAll('_',' ')}</strong>
+        <p>Provider audit PASS only confirms its internal checks. Fit and evidence numbers remain provisional; this is not a certified buyer assessment.</p>
+        ${gaps.length?`<p class="quality-gaps"><b>Unresolved:</b> ${esc(gaps.join(' · '))}</p>`:''}
+      </section>`:'';
+
   root.innerHTML=`
     <header class="topbar"><a class="brand" href="#top">${icon('spark','brand-icon')}<span>CLARIS</span></a><nav class="segmented-nav"><a href="#matters">${icon('radar','mini-icon')} What matters</a><a href="#run">${icon('route','mini-icon')} Run the call</a><a href="#next">${icon('arrow','mini-icon')} Next move</a><a href="#evidence">${icon('file','mini-icon')} Evidence</a></nav><span class="private">${icon('lock','mini-icon')} Private · expires ${esc(new Date(brief.expires_at).toLocaleDateString())}</span></header>
     ${replayNotice}
@@ -461,7 +474,7 @@ function render(brief){
       <div class="section-head compact"><span class="eyebrow">At a glance</span><h2>Opportunity signal</h2></div>
       ${scoreMarkup(scorecard)}
       ${bookingSnapshotMarkup(context.booking_text,snapshotMarkup)}
-      <article class="call-focus panel"><div class="focus-icon">${icon('target')}</div><div><span class="eyebrow">Call focus</span><h2>${esc(discovery.call_objective||prepare?.call_strategy?.opening_move||'Run a focused diagnostic conversation.')}</h2>${callDirectionMarkup(prepare,discovery)}${prepare.executive_readout?`<details><summary>Working model</summary><p>${esc(prepare.executive_readout)}</p></details>`:''}</div></article>
+      <article class="call-focus panel"><div class="focus-icon">${icon('target')}</div><div><span class="eyebrow">Call focus</span><h2>${esc(excerpt(discovery.call_objective||prepare?.call_strategy?.opening_move||'Call objective not established — consultant review required.',220))}</h2>${callDirectionMarkup(prepare,discovery)}${prepare.executive_readout?`<details><summary>Working model</summary><p>${esc(prepare.executive_readout)}</p></details>`:''}</div></article>
       ${externalSignalMarkup(prepare)}
     </section>
 
