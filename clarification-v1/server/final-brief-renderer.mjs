@@ -182,8 +182,8 @@ function normalizeDiscoveryQuestions(artifact) {
     .map((item) => typeof item === 'string'
       ? { question: firstText(item), intent: null, alignment_id: null }
       : {
-          question: firstText(item?.question),
-          intent: firstText(item?.intent, item?.objective, item?.target_dimension, item?.evidence_gap_addressed),
+          question: firstText(item?.question, item?.text, item?.ask),
+          intent: firstText(item?.intent, item?.strategy_alignment, item?.objective, item?.target_dimension, item?.evidence_gap_addressed),
           alignment_id: firstText(item?.alignment_id)
         })
     .filter((item) => item.question);
