@@ -8,7 +8,7 @@ import { projectFinalReplay } from '../../brief-v5/replay-adapter.mjs';
 import { assessCommercialBrief } from '../../clarification-v1/server/commercial-brief-readiness.mjs';
 import { reviewDecisionQuality } from '../../clarification-v1/server/decision-quality-review.mjs';
 
-const OPPORTUNITY = 'claris_realistic_soc2_20261012_r1';
+const OPPORTUNITY = 'claris_realistic_soc2_20261013_r2';
 const CONSULTANT = 'pilot_mehdi_medjahed_20260922';
 const COOKIE = 'claris_private_v5_pilot';
 const SCHEMA = 'CLARIS_FINAL_REPLAY_V5_PILOT_V1';
@@ -51,8 +51,8 @@ function authMetadata(input,identity) {
   if(!b)throw new Error('BOOKING_REQUIRED');
   return {
     company:'PostHog',
-    prospect_name:'Robin (simulated prospect)',
-    prospect_role:'Operations lead (fictional)',
+    prospect_name:'Avery (simulated prospect)',
+    prospect_role:'Enterprise assurance coordinator (fictional)',
     meeting_time:null,
     booking_text:b,
     simulation_note:'Fictional buyer and test booking. Public PostHog website researched. No PostHog representative contacted or booked.',
