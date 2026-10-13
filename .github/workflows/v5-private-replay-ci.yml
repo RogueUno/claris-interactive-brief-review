@@ -1,10 +1,11 @@
 name: Make CLARIS V5 private replay safety
 on:
   push:
-    branches: [feat/v5-private-final-link-pilot-20261013]
+    branches: [feat/v5-private-final-link-pilot-20261013, feat/v5-private-realistic-depth-r2-20261013]
     paths:
       - 'brief-v5/**'
       - 'clarification-v1/server/model-prompts.mjs'
+      - 'clarification-v1/server/final-brief-renderer.mjs'
       - 'clarification-v1/server/final-brief-renderer.mjs'
       - 'clarification-v1/server/tests/real-v23-question-normalization.test.mjs'
       - 'clarification-v1/server/decision-quality-review.mjs'
