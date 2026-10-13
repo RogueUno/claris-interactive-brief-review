@@ -4,6 +4,9 @@ on:
     branches: [feat/v5-private-final-link-pilot-20261013]
     paths:
       - 'brief-v5/**'
+      - 'clarification-v1/server/model-prompts.mjs'
+      - 'clarification-v1/server/decision-quality-review.mjs'
+      - 'clarification-v1/server/tests/decision-quality-review.test.mjs'
       - 'calibration-v3/server/pilot-v5-private.mjs'
       - 'api/delivery/package.mjs'
       - '.github/workflows/v5-private-replay-ci.yml'
@@ -28,6 +31,8 @@ jobs:
         run: npm install --omit=dev --no-audit --no-fund --package-lock=false
       - name: Existing commercialization depth and provenance contracts
         run: |
+          node --test clarification-v1/server/tests/model-prompts.test.mjs
+          node --test clarification-v1/server/tests/decision-quality-review.test.mjs
           node --test clarification-v1/server/tests/commercial-brief-readiness.test.mjs
           node --test clarification-v1/server/tests/persisted-booking-discovery-gate.test.mjs
           node --test clarification-v1/server/tests/accepted-prospect-evidence.test.mjs
