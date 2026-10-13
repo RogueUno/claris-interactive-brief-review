@@ -57,7 +57,7 @@ function evidenceLevel(score){
 }
 function evidenceGrade(score){
   const n=Number(score);
-  if(!Number.isFinite(n))return null;
+  if(score==null||!Number.isFinite(n))return null;
   if(n>=75)return'A';
   if(n>=50)return'B';
   if(n>=25)return'C';
@@ -108,13 +108,13 @@ function readinessArc(ready,meaning='Prepared'){
 function scoreDetail(key,scorecard){
   const fit=scorecard?.lead_fit||{},ev=scorecard?.evidence_coverage||{},ready=scorecard?.call_readiness||{};
   if(key==='fit')return{
-    title:'Lead fit',answer:fit.grade||'—',descriptor:fit.grade?fit.descriptor:'Early evaluated signal',icon:'spark',
-    body:`<p>${fit.grade?`${esc(fit.scorable_coverage??0)} of 100 weighted fit criteria are currently scorable.`:`Only ${esc(fit.scorable_coverage??0)} of 100 weighted criteria are scorable, so CLARIS suppresses the letter grade.`}</p>
+    title:'Lead fit',answer:fit.grade||((fit.supported_match!=null&&Number.isFinite(Number(fit.supported_match)))?`${esc(fit.supported_match)}/100 (provisional)`:'—'),descriptor:fit.grade?fit.descriptor:'Numerical fit · no certified grade',icon:'spark',
+    body:`<p>${fit.grade?`${esc(fit.scorable_coverage??0)} of 100 weighted fit criteria are currently scorable.`:fit.supported_match!=null?`Make FINALIZE calculated ${esc(fit.supported_match)}/100 supported match, with ${esc(fit.scorable_coverage??'unknown')}/100 criteria scorable. This is a provisional numerical signal, not a certified letter grade.`:`The lead has no validated numerical fit score. No letter grade has been certified.`}</p>
     <ul class="metric-list">${arr(fit.dimensions).map(x=>`<li><div><strong>${esc(x.label)}</strong><p>${esc(x.reason)}</p></div><span class="status ${statusTone(x.status)}">${esc(text(x.status).replaceAll('_',' '))}</span></li>`).join('')}</ul>`
   };
   if(key==='evidence')return{
-    title:'Evidence coverage',answer:evidenceLevel(ev.score).label,descriptor:'Source support and diagnostic coverage',icon:'shield',
-    body:`<p>Audit score: ${esc(ev.score??'—')} / 100. This stays in the explanation layer because it measures evidence completeness, not prospect fit.</p>
+    title:'Evidence coverage',answer:ev.score!=null&&ev.score_origin==='FINALIZE_PROVIDER_METRIC'?`${esc(ev.score)}/100 (provider)` : evidenceLevel(ev.score).label,descriptor:ev.score_origin==='FINALIZE_PROVIDER_METRIC'?'Internal completeness metric · unverified':'Source support and diagnostic coverage',icon:'shield',
+    body:`<p>Internal FINALIZE completeness: ${esc(ev.score??'—')}/100. ${ev.score_origin==='FINALIZE_PROVIDER_METRIC'?'The provider assigned points across its completeness categories. This is not an independent source validation or proof that the buyer’s exact acceptance criteria are resolved.':'This score measures evidence completeness, not lead fit.'}</p>
     <ul class="metric-list">${arr(ev.dimensions).map(x=>`<li><div><strong>${esc(x.label)}</strong><p>${esc(x.reason)}</p></div><span class="status ${statusTone(x.status)}">${esc(text(x.status).replaceAll('_',' '))}</span></li>`).join('')}</ul>`
   };
   return{
@@ -125,6 +125,8 @@ function scoreDetail(key,scorecard){
 function scoreMarkup(scorecard){
   if(scorecard?.schema_version!=='CLARIS_PRECALL_SCORECARD_V1')return'';
   const fit=scorecard.lead_fit||{},ev=scorecard.evidence_coverage||{},ready=scorecard.call_readiness||{},eq=evidenceLevel(ev.score);
+  const hasProviderFit=fit.supported_match!=null&&Number.isFinite(Number(fit.supported_match));
+  const providerEvidence=ev.score_origin==='FINALIZE_PROVIDER_METRIC'&&ev.score!=null&&Number.isFinite(Number(ev.score));
   return `<section class="signal-block instrument-deck panel">
     <div class="instrument-header">
       <div><span class="eyebrow">Decision instruments</span><strong>Lead grade · evidence score · readiness state</strong></div>
@@ -133,14 +135,14 @@ function scoreMarkup(scorecard){
     <div class="signal-row">
       <button class="signal instrument-tile" data-score="fit" aria-expanded="false">
         <span class="signal-label">${icon('spark','small-icon')} Lead fit</span>
-        ${gradeArc(fit.grade,fit.grade?fit.descriptor:'Unscored')}
-        <span class="signal-desc">${esc(fit.grade?fit.descriptor:'Early evaluated signal')}</span>
+        ${fit.grade?gradeArc(fit.grade,fit.descriptor):hasProviderFit?arcInstrument({fill:Number(fit.supported_match),display:String(Math.round(Number(fit.supported_match))),caption:'Provider /100',tone:'deep',badge:`${esc(fit.scorable_coverage??'—')}/100 scorable`}):gradeArc(null,'Unscored')}
+        <span class="signal-desc">${esc(fit.grade?fit.descriptor:hasProviderFit?'Provisional fit · grade not certified':'No supported fit score')}</span>
         <span class="why">Why ${icon('arrow','mini-icon')}</span>
       </button>
       <button class="signal instrument-tile" data-score="evidence" aria-expanded="false">
         <span class="signal-label">${icon('shield','small-icon')} Evidence coverage</span>
-        ${evidenceArc(ev.score,eq.label==='Very strong'?'Very strong':eq.label==='Strong'?'Strong':eq.label==='Usable'?'Usable':eq.label==='Thin'?'Thin':'Low')}
-        <span class="signal-desc">Source support & diagnostic coverage</span>
+        ${providerEvidence?arcInstrument({fill:Number(ev.score),display:String(Math.round(Number(ev.score))),caption:'Provider /100',tone:'accent',badge:'Not independently verified'}):evidenceArc(ev.score,eq.label==='Very strong'?'Very strong':eq.label==='Strong'?'Strong':eq.label==='Usable'?'Usable':eq.label==='Thin'?'Thin':'Low')}
+        <span class="signal-desc">${providerEvidence?'Internal completeness · not certified':'Source support & diagnostic coverage'}</span>
         <span class="why">Why ${icon('arrow','mini-icon')}</span>
       </button>
       <button class="signal instrument-tile" data-score="ready" aria-expanded="false">
