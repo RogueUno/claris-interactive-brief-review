@@ -89,7 +89,7 @@ test('provider strategic narrative and qualified hypothesis survive without sens
     '### Critical Context',
     '- Third-party listing suggests an existing compliance posture (FAC-002).',
     '- An unrelated historical signal FAC-007 must not be taken as current weakness.'
-  ].join('\\n');
+  ].join('\n');
   input.payload.final_replay_v3.consultant_only_context={hypotheses:[
     {description:'OAuth/API dependencies may shape scoping, but this is unverified.',
      basis_ids:['FAC-004','FAC-007']}
