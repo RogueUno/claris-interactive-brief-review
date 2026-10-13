@@ -1,0 +1,33 @@
+name: Make CLARIS V5 private replay safety
+on:
+  push:
+    branches: [feat/v5-private-final-link-pilot-20261013]
+    paths:
+      - 'brief-v5/**'
+      - 'calibration-v3/server/pilot-v5-private.mjs'
+      - 'api/delivery/package.mjs'
+      - '.github/workflows/v5-private-replay-ci.yml'
+  workflow_dispatch:
+jobs:
+  replay:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Syntax checks
+        run: |
+          node --check brief-v5/app.mjs
+          node --check brief-v5/replay-adapter.mjs
+          node --check calibration-v3/server/pilot-v5-private.mjs
+          node --check api/delivery/package.mjs
+      - name: V5 evidence, question and safety contract
+        run: node --test brief-v5/replay-adapter.test.mjs
+      - name: Install runtime dependencies
+        run: npm install --omit=dev --no-audit --no-fund --package-lock=false
+      - name: Existing commercialization depth and provenance contracts
+        run: |
+          node --test clarification-v1/server/tests/commercial-brief-readiness.test.mjs
+          node --test clarification-v1/server/tests/persisted-booking-discovery-gate.test.mjs
+          node --test clarification-v1/server/tests/accepted-prospect-evidence.test.mjs
