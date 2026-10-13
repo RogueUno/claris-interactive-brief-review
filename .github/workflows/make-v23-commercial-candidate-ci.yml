@@ -1,7 +1,7 @@
 name: Make V2.3 commercial-intelligence candidate
 on:
   push:
-    branches: [candidate/make-v23-commercial-intelligence-20261013]
+    branches: [candidate/make-v23-commercial-intelligence-20261013, candidate/make-v23-finalize-schema-2-20261013]
     paths:
       - 'clarification-v1/server/**'
       - '.github/workflows/make-v23-commercial-candidate-ci.yml'
@@ -22,6 +22,7 @@ jobs:
       - name: Regression contract suite
         run: |
           node --test clarification-v1/server/tests/real-v23-question-normalization.test.mjs
+          node --test clarification-v1/server/tests/real-v23-question-plan-r2.test.mjs
           node --test clarification-v1/server/tests/decision-quality-review.test.mjs
           node --test clarification-v1/server/tests/model-prompts.test.mjs
           node --test clarification-v1/server/tests/commercial-brief-readiness.test.mjs

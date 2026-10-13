@@ -170,6 +170,8 @@ function normalizeDiscoveryQuestions(artifact) {
   const discoveryPlan = object(artifact.discovery_plan);
   const source = array(artifact.prospect_question_plan).length
     ? array(artifact.prospect_question_plan)
+    : array(artifact.question_plan).length
+      ? array(artifact.question_plan)
     : array(artifact.discovery_question_plan).length
       ? array(artifact.discovery_question_plan)
     : array(artifact.discovery_questions).length
@@ -183,7 +185,7 @@ function normalizeDiscoveryQuestions(artifact) {
       ? { question: firstText(item), intent: null, alignment_id: null }
       : {
           question: firstText(item?.question, item?.text, item?.ask),
-          intent: firstText(item?.intent, item?.strategy_alignment, item?.objective, item?.target_dimension, item?.evidence_gap_addressed),
+          intent: firstText(item?.intent, item?.strategy_alignment, item?.rationale, item?.objective, item?.target_dimension, item?.evidence_gap_addressed),
           alignment_id: firstText(item?.alignment_id)
         })
     .filter((item) => item.question);
@@ -219,7 +221,7 @@ function normalizeLineage(artifact) {
           .map((id) => ({
             source_id: firstText(id),
             authority: null,
-            usage: firstText(item?.claim)
+            usage: firstText(item?.claim, item?.insight)
           }))
           .filter((edge) => edge.source_id);
       }
@@ -361,6 +363,8 @@ export function normalizeFinalArtifact(input) {
         typeof value.status === 'string'));
   const deterministicMetrics = Object.keys(object(artifact.deterministic_metrics)).length
     ? object(artifact.deterministic_metrics)
+    : Object.keys(object(artifact.engagement_metadata?.deterministic_metrics)).length
+      ? object(artifact.engagement_metadata.deterministic_metrics)
     : Object.keys(object(matchSummary.deterministic_metrics)).length
       ? object(matchSummary.deterministic_metrics)
       : Object.keys(object(strategicAssessment.deterministic_metrics)).length
@@ -389,6 +393,8 @@ export function normalizeFinalArtifact(input) {
               : matchBreakdown;
   const completenessClassifications = Object.keys(object(artifact.completeness_classifications)).length
     ? object(artifact.completeness_classifications)
+    : Object.keys(object(artifact.completeness_score_explanation)).length
+      ? object(artifact.completeness_score_explanation)
     : Object.keys(object(artifact.canonical_completeness_classifications)).length
       ? object(artifact.canonical_completeness_classifications)
       : Object.keys(object(artifact.completeness_analysis?.classifications)).length ? object(artifact.completeness_analysis.classifications) : object(artifact.evidence_completeness_analysis);
