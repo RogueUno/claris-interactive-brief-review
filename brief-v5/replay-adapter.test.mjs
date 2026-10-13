@@ -142,6 +142,12 @@ test('second live FINALIZE schema keeps question_plan, nested scores and claim e
   assert.match(result.payload.prepare.executive_readout,/Buyer acceptance criteria are unresolved/);
   assert.equal(result.payload.replay_assessment.supported_match,80);
   assert.equal(result.payload.replay_assessment.evidence_completeness,100);
+  assert.equal(result.payload.scorecard.lead_fit.supported_match,80);
+  assert.equal(result.payload.scorecard.lead_fit.grade,null,'do not invent a governed letter grade');
+  assert.equal(result.payload.scorecard.lead_fit.scorable_coverage,85);
+  assert.equal(result.payload.scorecard.evidence_coverage.score,100);
+  assert.equal(result.payload.scorecard.evidence_coverage.score_origin,'FINALIZE_PROVIDER_METRIC');
+  assert.equal(result.payload.scorecard.evidence_coverage.validation_status,'NOT_INDEPENDENTLY_VERIFIED');
   assert.equal(result.payload.scorecard.call_readiness.status,'OPEN');
   assert.ok(result.payload.replay_evidence.some(x=>x.id==='PROS-001-A'));
   assert.ok(result.payload.replay_evidence.some(x=>x.id==='FAC-004'));
