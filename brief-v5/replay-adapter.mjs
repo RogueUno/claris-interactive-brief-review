@@ -35,7 +35,7 @@ function snapshot(records){
     if(!value||fields[key])return;
     const reported=entry.authority!=='VERIFIED_PUBLIC_FACT';
     fields[key]={label,display:value+(reported?' (reported)':''),supported:true,
-      source_url:entry.source_url,source_label:reported?'External listing · unverified':'Admitted public source'};
+      source_url:entry.source_url,source_label:reported?'External listing · not independently verified':'Admitted public source'};
   };
   for(const entry of sources){
     const excerpt=str(entry.source_excerpt);
