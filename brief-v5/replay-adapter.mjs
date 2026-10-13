@@ -36,8 +36,7 @@ export function projectFinalReplay(brief){
     open_dimensions:openDims,
     expandable_blocks:{
       evidence:[],
-      reasoning:Object.entries(matches).map(([k,v])=>({title:title(k)+' · '+title(v?.status),
-        observation:str(v?.reason),premises:list(v?.basis_ids),not_a_claim_of:['Independent verification of buyer intent']})),
+      reasoning:[...list(raw.intelligence_lineage).map(e=>({title:str(e.evidence_id)+' · '+str(e.source),observation:str(e.description),premises:[str(e.evidence_id)],not_a_claim_of:['Independently verified original source URL']})),...Object.entries(matches).map(([k,v])=>({title:title(k)+' · '+title(v?.status),observation:str(v?.reason),premises:list(v?.basis_ids),not_a_claim_of:['Independent verification of buyer intent']}))],
       unknowns:unknowns.map(([k,v])=>({title:title(k),why_unknown:str(v.reason),
         what_would_resolve_it:'Confirm directly with the prospect.'}))
     }
@@ -52,7 +51,9 @@ export function projectFinalReplay(brief){
   };
   const sourceLedger=list(raw.intelligence_lineage).map(e=>({id:str(e.evidence_id||e.source_id),
     authority:str(e.source),description:str(e.description||e.usage)})).filter(x=>x.id);
-  return {...brief,payload:{...brief.payload,prepare,discovery,scorecard:null,
+  const scores=obj(raw.deterministic_metrics);
+  const scorecard={schema_version:'CLARIS_PRECALL_SCORECARD_V1',lead_fit:{grade:null,scorable_coverage:metric(scores.scorable_coverage),dimensions:[]},evidence_coverage:{score:metric(scores.evidence_completeness),dimensions:[]},call_readiness:{status:'OPEN',open_variables:openDims.length},strategy:{recommended_action:'Confirm assurance requirements, project scope and decision authority before recommending an engagement.'},source_status:'PROVISIONAL_PROVIDER_REPLAY_NOT_CERTIFIED'};
+  return {...brief,payload:{...brief.payload,prepare,discovery,scorecard,
     replay_evidence:sourceLedger,replay_assessment:{
       supported_match:metric(raw.deterministic_metrics?.supported_match),
       evidence_completeness:metric(raw.deterministic_metrics?.evidence_completeness),
