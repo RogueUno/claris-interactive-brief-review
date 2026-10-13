@@ -446,8 +446,10 @@ function render(brief){
   const companySnapshot=brief?.payload?.company_snapshot||null;
   const known=knownGoingIn(discovery),groups=sourceIndex(prepare);
   const snapshotMarkup=companySnapshotMarkup(companySnapshot);
+  const replayNotice=brief?.payload?.final_replay_v3?'<section class="panel" role="note" style="margin:18px 0;padding:18px 22px;border-left:4px solid #9f825d"><span class="eyebrow">Controlled simulation · actual Make FINALIZE output</span><p>Fictional prospect, public PostHog research. Provider audit PASS; independent commercial certification not established. Scores are provisional and only actual generated questions are shown.</p></section>':'';
   root.innerHTML=`
     <header class="topbar"><a class="brand" href="#top">${icon('spark','brand-icon')}<span>CLARIS</span></a><nav class="segmented-nav"><a href="#matters">${icon('radar','mini-icon')} What matters</a><a href="#run">${icon('route','mini-icon')} Run the call</a><a href="#next">${icon('arrow','mini-icon')} Next move</a><a href="#evidence">${icon('file','mini-icon')} Evidence</a></nav><span class="private">${icon('lock','mini-icon')} Private · expires ${esc(new Date(brief.expires_at).toLocaleDateString())}</span></header>
+    ${replayNotice}
     <div id="top">${orientationMarkup(brief,context,companySnapshot)}</div>
 
     <section class="section overview">
