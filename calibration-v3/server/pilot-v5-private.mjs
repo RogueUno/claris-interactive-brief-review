@@ -5,6 +5,7 @@ import { extractPersistedBookingContext } from '../../clarification-v1/server/pe
 import { deriveAcceptedProspectManifest } from '../../clarification-v1/server/accepted-prospect-evidence.mjs';
 import { json, parseJson, cookieValue } from './http.mjs';
 import { projectFinalReplay } from '../../brief-v5/replay-adapter.mjs';
+import { assessCommercialBrief } from '../../clarification-v1/server/commercial-brief-readiness.mjs';
 
 const OPPORTUNITY = 'claris_realistic_soc2_20261012_r1';
 const CONSULTANT = 'pilot_mehdi_medjahed_20260922';
@@ -167,6 +168,27 @@ async function load(request) {
   const brief=await storage.getJson(briefPath());
   if(!brief||brief.schema_version!==SCHEMA||brief.expires_at!==access.expires_at)
     return fail('PRIVATE_BRIEF_NOT_AVAILABLE',410);
+  const loadedEnvelope=await clarificationServerContext().repository.loadEnvelopeWithMeta(OPPORTUNITY);
+  const envelope=loadedEnvelope.envelope;
+  const booking=extractPersistedBookingContext(envelope);
+  const accepted=deriveAcceptedProspectManifest(envelope);
+  if(!booking.ok || !accepted.ok || !accepted.entries.length ||
+    booking.booking.verbatim_text!==brief.context?.booking_text)
+    return fail('PERSISTED_EVIDENCE_CONTEXT_INVALID',409);
+  let canonical;
+  try {
+    const prepareState=JSON.parse(envelope.finalize_context.case_state_json);
+    canonical=JSON.parse(prepareState.canonical_truth_json);
+  } catch { return fail('CANONICAL_RESEARCH_NOT_AVAILABLE',409); }
+  const evidence=Array.isArray(canonical.canonical_evidence_registry)
+    ?canonical.canonical_evidence_registry:[];
   const {fingerprint,...safeBrief}=brief;
-  return json({ok:true,brief:projectFinalReplay(safeBrief)},200,{'Cache-Control':'private, no-store'});
+  const projected=projectFinalReplay(safeBrief,{evidenceRegistry:evidence});
+  const depth=assessCommercialBrief(safeBrief.payload.final_replay_v3);
+  projected.payload.commercial_depth={
+    status:depth.status,missing:depth.missing,
+    discovery_strategy:depth.discovery_strategy?.status||'UNKNOWN',
+    note:'Read-only deterministic depth assessment; not model certification'
+  };
+  return json({ok:true,brief:projected},200,{'Cache-Control':'private, no-store'});
 }
