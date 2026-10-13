@@ -6,6 +6,7 @@ import { deriveAcceptedProspectManifest } from '../../clarification-v1/server/ac
 import { json, parseJson, cookieValue } from './http.mjs';
 import { projectFinalReplay } from '../../brief-v5/replay-adapter.mjs';
 import { assessCommercialBrief } from '../../clarification-v1/server/commercial-brief-readiness.mjs';
+import { reviewDecisionQuality } from '../../clarification-v1/server/decision-quality-review.mjs';
 
 const OPPORTUNITY = 'claris_realistic_soc2_20261012_r1';
 const CONSULTANT = 'pilot_mehdi_medjahed_20260922';
@@ -185,10 +186,26 @@ async function load(request) {
   const {fingerprint,...safeBrief}=brief;
   const projected=projectFinalReplay(safeBrief,{evidenceRegistry:evidence});
   const depth=assessCommercialBrief(safeBrief.payload.final_replay_v3);
+  const review=reviewDecisionQuality(safeBrief.payload.final_replay_v3,{
+    trustedBookingText:booking.booking.verbatim_text
+  });
   projected.payload.commercial_depth={
-    status:depth.status,missing:depth.missing,
+    status:review.status,
+    baseline_status:depth.status,
+    missing:review.missing,
     discovery_strategy:depth.discovery_strategy?.status||'UNKNOWN',
-    note:'Read-only deterministic depth assessment; not model certification'
+    buyer_deliverable_fork:review.buyer_deliverable_fork,
+    auto_send_allowed:false,
+    note:'Read-only deterministic quality and decision-fork review; not commercial certification'
   };
+  if(review.buyer_deliverable_fork?.reviewer_question){
+    const suggestion=review.buyer_deliverable_fork.reviewer_question;
+    projected.payload.prepare.expandable_blocks.reasoning.unshift({
+      title:'Consultant review suggestion · buyer assurance deliverable',
+      observation:suggestion.question+' '+suggestion.rationale,
+      premises:suggestion.basis_ids,
+      not_a_claim_of:['An original FINALIZE-generated question','Verified buyer intent','A certified commercial diagnosis']
+    });
+  }
   return json({ok:true,brief:projected},200,{'Cache-Control':'private, no-store'});
 }
