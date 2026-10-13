@@ -113,7 +113,34 @@ export function projectFinalReplay(brief,{evidenceRegistry=[]}={}){
   const sourceLedger=providerLineage.filter(e=>!/^FAC-/.test(str(e.evidence_id||e.source_id))||admittedIds.has(str(e.evidence_id||e.source_id))).map(e=>({id:str(e.evidence_id||e.source_id),
     authority:str(e.source),description:str(e.description||e.usage)})).filter(x=>x.id);
   const scores=Object.keys(obj(raw.deterministic_metrics)).length?obj(raw.deterministic_metrics):obj(raw.engagement_metadata?.deterministic_metrics);
-  const scorecard={schema_version:'CLARIS_PRECALL_SCORECARD_V1',lead_fit:{grade:null,scorable_coverage:metric(scores.scorable_coverage),dimensions:[]},evidence_coverage:{score:metric(scores.evidence_completeness),dimensions:[]},call_readiness:{status:'OPEN',open_variables:openDims.length},strategy:{recommended_action:'Confirm assurance requirements, project scope and decision authority before recommending an engagement.'},source_status:'PROVISIONAL_PROVIDER_REPLAY_NOT_CERTIFIED'};
+  const sourceCoverage=Object.keys(obj(raw.completeness_classifications)).length?obj(raw.completeness_classifications):obj(raw.completeness_score_explanation);
+  const scorecard={
+    schema_version:'CLARIS_PRECALL_SCORECARD_V1',
+    lead_fit:{
+      grade:null,
+      supported_match:metric(scores.supported_match),
+      descriptor:'Provider-scored · ungraded',
+      scorable_coverage:metric(scores.scorable_coverage),
+      dimensions:Object.entries(matches).map(([key,v])=>({
+        label:title(key),status:str(v?.status)||'UNKNOWN',
+        reason:str(v?.reason||v?.reasoning)||'Provider did not state a reason',
+        basis_ids:list(v?.basis_ids)
+      }))
+    },
+    evidence_coverage:{
+      score:metric(scores.evidence_completeness),
+      score_origin:'FINALIZE_PROVIDER_METRIC',
+      validation_status:'NOT_INDEPENDENTLY_VERIFIED',
+      dimensions:Object.entries(sourceCoverage).map(([key,v])=>({
+        label:title(key),status:str(v?.status)||'UNKNOWN',
+        reason:str(v?.reason||v?.reasoning)||'Provider did not state a reason',
+        basis_ids:list(v?.basis_ids),points:metric(v?.score)
+      }))
+    },
+    call_readiness:{status:'OPEN',open_variables:openDims.length},
+    strategy:{recommended_action:'Confirm assurance requirements, project scope and decision authority before recommending an engagement.'},
+    source_status:'PROVISIONAL_PROVIDER_REPLAY_NOT_CERTIFIED'
+  };
   return {...brief,payload:{...brief.payload,prepare,discovery,scorecard,
     ...(snapshot(evidenceRegistry)?{company_snapshot:snapshot(evidenceRegistry)}:{}),
     replay_evidence:sourceLedger,replay_assessment:{
