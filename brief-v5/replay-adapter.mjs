@@ -74,8 +74,8 @@ export function projectFinalReplay(brief,{evidenceRegistry=[]}={}){
     .filter(x=>x.content)
     .map(x=>({
       title:'FINALIZE provider narrative · '+x.heading,
-      observation:x.content.replace(/\\*\\*/g,'').trim(),
-      premises:(x.content.match(/\\bFAC-\\d{3,}\\b/g)||[]).filter(id=>admittedIds.has(id)),
+      observation:x.content.replace(/\*\*/g,'').trim(),
+      premises:(x.content.match(/\bFAC-\d{3,}\b/g)||[]).filter(id=>admittedIds.has(id)),
       not_a_claim_of:['A fact independently verified from the provider narrative','A certified recommendation or guaranteed engagement outcome']
     }));
   const hypothesisNarrative=list(raw.consultant_only_context?.hypotheses)
