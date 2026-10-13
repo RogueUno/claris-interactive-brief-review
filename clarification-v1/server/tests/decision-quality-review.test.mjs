@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-import {reviewDecisionQuality} from './decision-quality-review.mjs';
+import {reviewDecisionQuality} from '../decision-quality-review.mjs';
 
 const fixture=JSON.parse(readFileSync(new URL('./tests/fixtures/oct10-finalize-live-actual.json',import.meta.url),'utf8'));
 const posthogLike={
