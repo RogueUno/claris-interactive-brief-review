@@ -169,9 +169,9 @@ function orientationMarkup(brief,context,companySnapshot){
         <div class="identity-meta"><span>${icon('lock','mini-icon')} Private opportunity intelligence</span></div>
       </article>
       <article class="meeting-card panel">
-        <span class="eyebrow">${icon('calendar','mini-icon')} The call</span>
+        <span class="eyebrow">${icon('calendar','mini-icon')} ${context.simulation_note?'Simulation':'The call'}</span>
         <strong class="call-time">${valid?esc(meeting.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})):'—'}</strong>
-        <span class="call-date">${valid?esc(meeting.toLocaleDateString([], {weekday:'short',day:'numeric',month:'short',year:'numeric'})):'Meeting time not attached'}</span>
+        <span class="call-date">${valid?esc(meeting.toLocaleDateString([], {weekday:'short',day:'numeric',month:'short',year:'numeric'})):(context.simulation_note?'No verified Calendly meeting time':'Meeting time unavailable')}</span>
         ${valid?`<div class="countdown" data-countdown="${esc(meeting.toISOString())}">${icon('timer','mini-icon')}<span>Calculating…</span></div>`:''}
         <div class="call-chips"><span>Private brief</span><span>Pre-call</span></div>
       </article>
@@ -239,13 +239,13 @@ function companySnapshotMarkup(snapshot){
   const metrics=keys
     .map(key=>({key,item:fields[key]||snapshot?.[key]||null}))
     .filter(entry=>entry.item?.supported===true&&entry.item?.display&&entry.item?.source_url);
-  if(metrics.length<3)return'';
+  if(!metrics.length)return'';
   const intro=snapshot?.intro?.supported===true?text(snapshot.intro.display):'';
   const lastRowStart=Math.floor((metrics.length-1)/2)*2;
   return `<aside class="company-snapshot-v52 panel" aria-label="Company snapshot">
     <div class="snapshot-v52-head">
       <div class="snapshot-v52-title"><span class="snapshot-v52-title-icon">${icon('building','small-icon')}</span><div class="snapshot-v52-title-copy"><span class="eyebrow">Company snapshot</span>${intro?`<p class="snapshot-v52-intro">${esc(intro)}</p>`:`<strong>Who this company is</strong>`}</div></div>
-      <span class="snapshot-v52-state">Public facts</span>
+      <span class="snapshot-v52-state">Source-reported profile</span>
     </div>
     <div class="snapshot-v52-metrics">
       ${metrics.map(({key,item},index)=>`<article class="snapshot-v52-metric ${key==='company_type'?'is-company-type ':''}${index>=lastRowStart?'is-last-row ':''}${metrics.length%2===1&&index===metrics.length-1?'is-wide-last':''}">
@@ -262,9 +262,9 @@ function companySnapshotMarkup(snapshot){
 function contextMarkup(prepare,known){
   const signals=contextSignals(prepare,known),visible=signals.slice(0,3),rest=signals.slice(3);
   const item=s=>`<article class="matter-card panel">
-    <div class="matter-head"><span class="truth-badge fact">${icon('fact','mini-icon')} Fact</span><span class="matter-icon">${icon('radar')}</span></div>
+    <div class="matter-head"><span class="truth-badge ${s.kind==='UNVERIFIED_HYPOTHESIS'?'hypothesis':'decision'}">${icon(s.kind==='UNVERIFIED_HYPOTHESIS'?'hypothesis':'question','mini-icon')} ${s.kind==='UNVERIFIED_HYPOTHESIS'?'Unverified hypothesis':'Provider assessment'}</span><span class="matter-icon">${icon('radar')}</span></div>
     <strong>${esc(s.signal)}</strong>
-    <p>${esc(s.observation)}</p>
+    <p>${esc(s.observation)}</p>${arr(s.basis_ids).length?`<small>Basis: ${esc(s.basis_ids.join(' · '))}</small>`:''}
     <div class="implication"><span>Call implication</span><p>${esc(s.call_implication)}</p></div>
   </article>`;
   return `<div class="matter-grid">${visible.map(item).join('')}</div>
@@ -281,6 +281,7 @@ function knownMarkup(known){
 function questionMap(discovery){return new Map(arr(discovery?.primary_questions).map(q=>[text(q.question_id),q]));}
 function dimensionMap(prepare){return new Map(arr(prepare?.open_dimensions).map(d=>[text(d.dimension_id),d]));}
 function questionForStep(step,index,questions){
+  const key=text(step?.question_id);if(key){const matched=questions.find(q=>text(q.question_id)===key);if(matched)return matched;}
   const m=text(step?.move).match(/\bQ\d+\b/i);
   if(m)return questions.find(q=>text(q.question_id).toUpperCase()===m[0].toUpperCase())||null;
   return index<questions.length?questions[index]:null;
@@ -328,7 +329,9 @@ function branchesMarkup(q){
   </details>`;
 }
 function routeLabel(step,index,q,dim,flowLength){
+  if(text(step?.label))return excerpt(step.label,46);
   if(dim?.label)return text(dim.label).replace(/^exact\s+/i,'');
+  if(q?.ask)return excerpt(q.ask,46);
   if(index===flowLength-1)return'Next step';
   const cleaned=cleanMove(step?.move,q?.question_id).replace(/[.?!].*$/,'');
   return excerpt(cleaned,28);
@@ -358,12 +361,12 @@ function runCallMarkup(discovery,prepare){
             <span class="phase-toggle">Open ${icon('arrow','mini-icon')}</span>
           </summary>
           <div class="phase-content phase-expanded">
-            <h3>${esc(cleanMove(step.move,q.question_id))}</h3>
+            ${text(step.move)?`<h3>${esc(cleanMove(step.move,q.question_id))}</h3>`:''}
             <div class="question-core"><span class="question-kicker">${icon('target','mini-icon')} Ask</span><blockquote>${esc(q.ask)}</blockquote></div>
-            <div class="listener-grid">
-              <section class="why-tile"><span class="sub-label">${icon('spark','mini-icon')} Why this matters</span><p>${esc(q.why_now)}</p></section>
-              <section class="listen-tile"><span class="sub-label">${icon('ear','mini-icon')} Listen for</span>${listenMarkup(q.listen_for)}</section>
-            </div>
+            ${text(q.why_now)||arr(q.listen_for).length?`<div class="listener-grid ${!arr(q.listen_for).length?'is-single':''}">
+              ${text(q.why_now)?`<section class="why-tile"><span class="sub-label">${icon('spark','mini-icon')} Why this matters</span><p>${esc(q.why_now)}</p></section>`:''}
+              ${arr(q.listen_for).length?`<section class="listen-tile"><span class="sub-label">${icon('ear','mini-icon')} Listen for</span>${listenMarkup(q.listen_for)}</section>`:''}
+            </div>`:''}
             ${branchesMarkup(q)}
             ${text(step.advance_when)?`<details class="done-when"><summary>${icon('check','mini-icon')} Done when</summary><p>${esc(step.advance_when)}</p></details>`:''}
           </div>
@@ -379,7 +382,7 @@ function runCallMarkup(discovery,prepare){
 }
 
 function nextMoveMarkup(scorecard,discovery){
-  const action=text(scorecard?.strategy?.recommended_action)||'Agree the next scoped action once the open variables are resolved.';
+  const action=text(scorecard?.strategy?.recommended_action)||'No approved next move — consultant review required.';
   const gate=discovery?.end_of_call_decision||{};
   return `<article class="next-move">
     <div class="decision-icon">${icon('arrow')}</div>
