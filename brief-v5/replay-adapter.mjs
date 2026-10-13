@@ -8,7 +8,42 @@ function excerpt(md,heading){
   if(i<0)return '';
   return source.slice(i+('### '+heading).length).split(/\n### /,1)[0].trim();
 }
-export function projectFinalReplay(brief){
+function admittedEvidence(records){
+  return list(records).filter(x=>x?.admission_status==='ADMITTED'
+    && x.sensitivity==='STANDARD'
+    && typeof x.evidence_id==='string'
+    && /^FAC-\d{3,}$/.test(x.evidence_id)
+    && typeof x.source_url==='string'
+    && /^https:\/\/[a-z0-9]/i.test(x.source_url));
+}
+function sourceCards(records){
+  return admittedEvidence(records).map(x=>({
+    claims:[str(x.source_title)||('Source '+x.evidence_id)],
+    used_for:['Public company and technical context ('+x.evidence_id+')'],
+    not_used_for:['Proof of current buyer intent, security posture or deal urgency'],
+    sources:[{url:x.source_url,source_type:x.authority==='THIRD_PARTY_REPORTED'?'THIRD_PARTY':'PUBLIC_SOURCE',
+      supports:x.evidence_id+' · '+(str(x.source_title)||'public source')}]
+  }));
+}
+function snapshot(records){
+  const admitted=admittedEvidence(records);
+  const two=admitted.find(x=>x.evidence_id==='FAC-002');
+  const three=admitted.find(x=>x.evidence_id==='FAC-003');
+  const make=(label,display,x)=>x?{label,display,supported:true,source_url:x.source_url,
+    source_label:'Third-party listing · not independently verified'}:null;
+  const fields={
+    founded_year:/founded in 2020/i.test(str(three?.source_excerpt))?make('Founded','2020 (reported)',three):null,
+    headquarters:/san francisco/i.test(str(three?.source_excerpt))?make('Headquarters','San Francisco (reported)',three):null,
+    employee_size:/51-200 employees/i.test(str(two?.source_excerpt))?make('Company size','51–200 (reported)',two):null,
+    company_type:/software development company/i.test(str(two?.source_excerpt))?make('Company type','Software development (reported)',two):null
+  };
+  const valid=Object.values(fields).filter(x=>x?.supported).length>=3;
+  return valid?{schema_version:'CLARIS_COMPANY_SNAPSHOT_V1',authority:'PRESENTATION_ONLY',
+    validation:{ok:true},coverage:{renderable:true},fields,
+    intro:{supported:true,display:'Public-source profile; figures not independently verified'}}:null;
+}
+
+export function projectFinalReplay(brief,{evidenceRegistry=[]}={}){
   const raw=obj(brief?.payload?.final_replay_v3);
   if(!Object.keys(raw).length)return brief;
   const matches=obj(raw.match_classifications);
@@ -35,7 +70,7 @@ export function projectFinalReplay(brief){
         call_implication:'Verify the supporting evidence and its limitations during discovery.'})),
     open_dimensions:openDims,
     expandable_blocks:{
-      evidence:[],
+      evidence:sourceCards(evidenceRegistry),
       reasoning:[...list(raw.intelligence_lineage).map(e=>({title:str(e.evidence_id)+' · '+str(e.source),observation:str(e.description),premises:[str(e.evidence_id)],not_a_claim_of:['Independently verified original source URL']})),...Object.entries(matches).map(([k,v])=>({title:title(k)+' · '+title(v?.status),observation:str(v?.reason),premises:list(v?.basis_ids),not_a_claim_of:['Independent verification of buyer intent']}))],
       unknowns:unknowns.map(([k,v])=>({title:title(k),why_unknown:str(v.reason),
         what_would_resolve_it:'Confirm directly with the prospect.'}))
@@ -54,6 +89,7 @@ export function projectFinalReplay(brief){
   const scores=obj(raw.deterministic_metrics);
   const scorecard={schema_version:'CLARIS_PRECALL_SCORECARD_V1',lead_fit:{grade:null,scorable_coverage:metric(scores.scorable_coverage),dimensions:[]},evidence_coverage:{score:metric(scores.evidence_completeness),dimensions:[]},call_readiness:{status:'OPEN',open_variables:openDims.length},strategy:{recommended_action:'Confirm assurance requirements, project scope and decision authority before recommending an engagement.'},source_status:'PROVISIONAL_PROVIDER_REPLAY_NOT_CERTIFIED'};
   return {...brief,payload:{...brief.payload,prepare,discovery,scorecard,
+    ...(snapshot(evidenceRegistry)?{company_snapshot:snapshot(evidenceRegistry)}:{}),
     replay_evidence:sourceLedger,replay_assessment:{
       supported_match:metric(raw.deterministic_metrics?.supported_match),
       evidence_completeness:metric(raw.deterministic_metrics?.evidence_completeness),
