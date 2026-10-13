@@ -4,6 +4,7 @@ import { clarificationServerContext } from '../../clarification-v1/server/api-sh
 import { extractPersistedBookingContext } from '../../clarification-v1/server/persisted-booking-discovery-gate.mjs';
 import { deriveAcceptedProspectManifest } from '../../clarification-v1/server/accepted-prospect-evidence.mjs';
 import { json, parseJson, cookieValue } from './http.mjs';
+import { projectFinalReplay } from '../../brief-v5/replay-adapter.mjs';
 
 const OPPORTUNITY = 'claris_realistic_soc2_20261012_r1';
 const CONSULTANT = 'pilot_mehdi_medjahed_20260922';
@@ -167,5 +168,5 @@ async function load(request) {
   if(!brief||brief.schema_version!==SCHEMA||brief.expires_at!==access.expires_at)
     return fail('PRIVATE_BRIEF_NOT_AVAILABLE',410);
   const {fingerprint,...safeBrief}=brief;
-  return json({ok:true,brief:safeBrief},200,{'Cache-Control':'private, no-store'});
+  return json({ok:true,brief:projectFinalReplay(safeBrief)},200,{'Cache-Control':'private, no-store'});
 }
