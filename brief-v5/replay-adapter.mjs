@@ -46,8 +46,8 @@ function snapshot(records){
 export function projectFinalReplay(brief,{evidenceRegistry=[]}={}){
   const raw=obj(brief?.payload?.final_replay_v3);
   if(!Object.keys(raw).length)return brief;
-  const matches=obj(raw.match_classifications);
-  const questions=list(raw.prospect_question_plan).filter(x=>str(x.text||x.question));
+  const matches=Object.keys(obj(raw.match_classifications)).length?obj(raw.match_classifications):obj(raw.match_score_explanation);
+  const questions=(list(raw.prospect_question_plan).length?list(raw.prospect_question_plan):list(raw.question_plan)).filter(x=>str(x.text||x.question));
   const unknowns=Object.entries(matches).filter(([,v])=>v?.status==='UNKNOWN');
   const openDims=[
     {dimension_id:'D_SCOPE',label:'Buyer requirement and systems in scope',
@@ -59,7 +59,7 @@ export function projectFinalReplay(brief,{evidenceRegistry=[]}={}){
   ].slice(0,7);
   const mappedQ=questions.map((q,i)=>({
     question_id:'Q'+(i+1),dimension_id:i===0?'D_SCOPE':'D_OWNER',
-    ask:str(q.text||q.question),why_now:str(q.strategy_alignment||q.intent),
+    ask:str(q.text||q.question),why_now:str(q.strategy_alignment||q.intent||q.rationale),
     listen_for:[],linked_service_paths:[],conditional_probes:[]
   }));
   const directory=admittedEvidence(evidenceRegistry).find(x=>x.evidence_id==='FAC-002');
@@ -69,7 +69,7 @@ export function projectFinalReplay(brief,{evidenceRegistry=[]}={}){
       observation:'A third-party directory (FAC-002) describes an existing SOC 2 posture while the accepted prospect response requests formal SOC 2 readiness. The listing may be stale or inaccurate; the mismatch is a hypothesis, not a verified fact.',
       call_implication:'Ask whether the buyer needs a current report, questionnaire support, a new or expanded audit boundary, or initial control readiness. Do not presume certification or a security gap.'}:null;
   const admittedIds=new Set(admittedEvidence(evidenceRegistry).map(x=>x.evidence_id));
-  const providerNarrative=['Strategic Guidance','Critical Context']
+  const providerNarrative=['Strategic Guidance','Critical Context','Strategic Overview','Critical Timing & Stakeholders','Primary Objectives']
     .map(heading=>({heading,content:excerpt(raw.preliminary_brief_markdown,heading).split('\n').filter(line=>(line.match(/\bFAC-\d{3,}\b/g)||[]).every(id=>admittedIds.has(id))).join('\n')}))
     .filter(x=>x.content)
     .map(x=>({
@@ -84,7 +84,7 @@ export function projectFinalReplay(brief,{evidenceRegistry=[]}={}){
       premises:list(x.basis_ids).filter(id=>id==='BOOK-001'||admittedIds.has(id)),
       not_a_claim_of:['A current security weakness','Buyer intent','Confirmed cause of the booking']}));
   const prepare={
-    executive_readout:excerpt(raw.preliminary_brief_markdown,'Executive Summary'),
+    executive_readout:excerpt(raw.preliminary_brief_markdown,'Executive Summary')||excerpt(raw.preliminary_brief_markdown,'Strategic Overview')||str(raw.preliminary_brief?.what_matters),
     call_strategy:{opening_move:'Clarify scope and decision authority before recommending work.'},
     signals_that_matter:[...(potentialSoc2Tension?[potentialSoc2Tension]:[]),...Object.entries(matches).filter(([,v])=>v?.status==='MATCH'&&list(v?.basis_ids).length)
       .map(([k,v])=>({signal:title(k),observation:str(v.reason),
@@ -107,14 +107,14 @@ export function projectFinalReplay(brief,{evidenceRegistry=[]}={}){
   };
   const sourceLedger=list(raw.intelligence_lineage).filter(e=>!/^FAC-/.test(str(e.evidence_id||e.source_id))||admittedIds.has(str(e.evidence_id||e.source_id))).map(e=>({id:str(e.evidence_id||e.source_id),
     authority:str(e.source),description:str(e.description||e.usage)})).filter(x=>x.id);
-  const scores=obj(raw.deterministic_metrics);
+  const scores=Object.keys(obj(raw.deterministic_metrics)).length?obj(raw.deterministic_metrics):obj(raw.engagement_metadata?.deterministic_metrics);
   const scorecard={schema_version:'CLARIS_PRECALL_SCORECARD_V1',lead_fit:{grade:null,scorable_coverage:metric(scores.scorable_coverage),dimensions:[]},evidence_coverage:{score:metric(scores.evidence_completeness),dimensions:[]},call_readiness:{status:'OPEN',open_variables:openDims.length},strategy:{recommended_action:'Confirm assurance requirements, project scope and decision authority before recommending an engagement.'},source_status:'PROVISIONAL_PROVIDER_REPLAY_NOT_CERTIFIED'};
   return {...brief,payload:{...brief.payload,prepare,discovery,scorecard,
     ...(snapshot(evidenceRegistry)?{company_snapshot:snapshot(evidenceRegistry)}:{}),
     replay_evidence:sourceLedger,replay_assessment:{
-      supported_match:metric(raw.deterministic_metrics?.supported_match),
-      evidence_completeness:metric(raw.deterministic_metrics?.evidence_completeness),
-      scorable_coverage:metric(raw.deterministic_metrics?.scorable_coverage),
+      supported_match:metric(scores.supported_match),
+      evidence_completeness:metric(scores.evidence_completeness),
+      scorable_coverage:metric(scores.scorable_coverage),
       raw_question_count:questions.length,
       source_assurance:brief.context?.source_assurance||'Internal audit only'
     }}};
