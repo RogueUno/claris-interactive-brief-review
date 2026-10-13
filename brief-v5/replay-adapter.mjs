@@ -68,6 +68,21 @@ export function projectFinalReplay(brief,{evidenceRegistry=[]}={}){
     ?{signal:'Possible assurance-scope mismatch — verify before diagnosing',
       observation:'A third-party directory (FAC-002) describes an existing SOC 2 posture while the accepted prospect response requests formal SOC 2 readiness. The listing may be stale or inaccurate; the mismatch is a hypothesis, not a verified fact.',
       call_implication:'Ask whether the buyer needs a current report, questionnaire support, a new or expanded audit boundary, or initial control readiness. Do not presume certification or a security gap.'}:null;
+  const admittedIds=new Set(admittedEvidence(evidenceRegistry).map(x=>x.evidence_id));
+  const providerNarrative=['Strategic Guidance','Critical Context']
+    .map(heading=>({heading,content:excerpt(raw.preliminary_brief_markdown,heading)}))
+    .filter(x=>x.content)
+    .map(x=>({
+      title:'FINALIZE provider narrative · '+x.heading,
+      observation:x.content.replace(/\\*\\*/g,'').trim(),
+      premises:(x.content.match(/\\bFAC-\\d{3,}\\b/g)||[]).filter(id=>admittedIds.has(id)),
+      not_a_claim_of:['A fact independently verified from the provider narrative','A certified recommendation or guaranteed engagement outcome']
+    }));
+  const hypothesisNarrative=list(raw.consultant_only_context?.hypotheses)
+    .filter(x=>str(x.description))
+    .map(x=>({title:'Consultant-only hypothesis · unverified',observation:str(x.description),
+      premises:list(x.basis_ids).filter(id=>id==='BOOK-001'||admittedIds.has(id)),
+      not_a_claim_of:['A current security weakness','Buyer intent','Confirmed cause of the booking']}));
   const prepare={
     executive_readout:excerpt(raw.preliminary_brief_markdown,'Executive Summary'),
     call_strategy:{opening_move:'Clarify scope and decision authority before recommending work.'},
@@ -77,7 +92,7 @@ export function projectFinalReplay(brief,{evidenceRegistry=[]}={}){
     open_dimensions:openDims,
     expandable_blocks:{
       evidence:sourceCards(evidenceRegistry),
-      reasoning:[...list(raw.intelligence_lineage).map(e=>({title:str(e.evidence_id)+' · '+str(e.source),observation:str(e.description),premises:[str(e.evidence_id)],not_a_claim_of:['Independently verified original source URL']})),...Object.entries(matches).map(([k,v])=>({title:title(k)+' · '+title(v?.status),observation:str(v?.reason),premises:list(v?.basis_ids),not_a_claim_of:['Independent verification of buyer intent']}))],
+      reasoning:[...providerNarrative,...hypothesisNarrative,...list(raw.intelligence_lineage).map(e=>({title:str(e.evidence_id)+' · '+str(e.source),observation:str(e.description),premises:[str(e.evidence_id)],not_a_claim_of:['Independently verified original source URL']})),...Object.entries(matches).map(([k,v])=>({title:title(k)+' · '+title(v?.status),observation:str(v?.reason),premises:list(v?.basis_ids),not_a_claim_of:['Independent verification of buyer intent']}))],
       unknowns:unknowns.map(([k,v])=>({title:title(k),why_unknown:str(v.reason),
         what_would_resolve_it:'Confirm directly with the prospect.'}))
     }
