@@ -1,0 +1,34 @@
+name: Make V2.3 commercial-intelligence candidate
+on:
+  push:
+    branches: [candidate/make-v23-commercial-intelligence-20261013]
+    paths:
+      - 'clarification-v1/server/**'
+      - '.github/workflows/make-v23-commercial-candidate-ci.yml'
+  workflow_dispatch:
+jobs:
+  commercial-intelligence:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Check changed modules compile
+        run: |
+          node --check clarification-v1/server/final-brief-renderer.mjs
+          node --check clarification-v1/server/model-prompts.mjs
+          node --check clarification-v1/server/decision-quality-review.mjs
+      - name: Regression contract suite
+        run: |
+          node --test clarification-v1/server/tests/real-v23-question-normalization.test.mjs
+          node --test clarification-v1/server/tests/decision-quality-review.test.mjs
+          node --test clarification-v1/server/tests/model-prompts.test.mjs
+          node --test clarification-v1/server/tests/commercial-brief-readiness.test.mjs
+          node --test clarification-v1/server/tests/final-brief-renderer.test.mjs
+          node --test clarification-v1/server/tests/oct10-finalize-schema-replay.test.mjs
+          node --test clarification-v1/server/tests/discovery-coverage.test.mjs
+          node --test clarification-v1/server/tests/discovery-prioritizer.test.mjs
+          node --test clarification-v1/server/tests/soc2-assurance-question-plan.test.mjs
+          node --test clarification-v1/server/tests/soc2-consultant-value-benchmark.test.mjs
+          node --test clarification-v1/server/tests/protocol.test.mjs
