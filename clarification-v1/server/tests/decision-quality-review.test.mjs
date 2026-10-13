@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {reviewDecisionQuality} from '../decision-quality-review.mjs';
 
-const fixture=JSON.parse(readFileSync(new URL('./tests/fixtures/oct10-finalize-live-actual.json',import.meta.url),'utf8'));
+const fixture=JSON.parse(readFileSync(new URL('./fixtures/oct10-finalize-live-actual.json',import.meta.url),'utf8'));
 const posthogLike={
  match_classifications:{service_need_alignment:{status:'MATCH',basis_ids:['PROS-001','SVC_SOC2'],reason:'Prospect chose formal readiness'},business_trigger:{status:'UNKNOWN',basis_ids:[],reason:'Exact buyer requirement open'}},
  prospect_question_plan:[
