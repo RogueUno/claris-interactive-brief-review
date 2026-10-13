@@ -18,7 +18,7 @@ function admittedEvidence(records){
 }
 function sourceCards(records){
   return admittedEvidence(records).map(x=>({
-    claims:[str(x.source_title)||('Source '+x.evidence_id)],
+    claims:[str(x.source_title)||('Source '+x.evidence_id),...(str(x.source_excerpt)?['Source excerpt (not independently verified): '+str(x.source_excerpt).replace(/\\n/g,' ').replace(/\s+/g,' ').slice(0,320)]:[])],
     used_for:['Public company and technical context ('+x.evidence_id+')'],
     not_used_for:['Proof of current buyer intent, security posture or deal urgency'],
     sources:[{url:x.source_url,source_type:x.authority==='THIRD_PARTY_REPORTED'?'THIRD_PARTY':'PUBLIC_SOURCE',
@@ -62,12 +62,18 @@ export function projectFinalReplay(brief,{evidenceRegistry=[]}={}){
     ask:str(q.text||q.question),why_now:str(q.strategy_alignment||q.intent),
     listen_for:[],linked_service_paths:[],conditional_probes:[]
   }));
+  const directory=admittedEvidence(evidenceRegistry).find(x=>x.evidence_id==='FAC-002');
+  const potentialSoc2Tension=directory && /\\bsoc\\s*2\\s+(certified|compliant)\\b/i.test(str(directory.source_excerpt))
+    && list(raw.potential_service_relevance).some(x=>x?.service_id==='SVC_SOC2')
+    ?{signal:'Possible assurance-scope mismatch — verify before diagnosing',
+      observation:'A third-party directory (FAC-002) describes an existing SOC 2 posture while the accepted prospect response requests formal SOC 2 readiness. The listing may be stale or inaccurate; the mismatch is a hypothesis, not a verified fact.',
+      call_implication:'Ask whether the buyer needs a current report, questionnaire support, a new or expanded audit boundary, or initial control readiness. Do not presume certification or a security gap.'}:null;
   const prepare={
     executive_readout:excerpt(raw.preliminary_brief_markdown,'Executive Summary'),
     call_strategy:{opening_move:'Clarify scope and decision authority before recommending work.'},
-    signals_that_matter:Object.entries(matches).filter(([,v])=>v?.status==='MATCH'&&list(v?.basis_ids).length)
+    signals_that_matter:[...(potentialSoc2Tension?[potentialSoc2Tension]:[]),...Object.entries(matches).filter(([,v])=>v?.status==='MATCH'&&list(v?.basis_ids).length)
       .map(([k,v])=>({signal:title(k),observation:str(v.reason),
-        call_implication:'Verify the supporting evidence and its limitations during discovery.'})),
+        call_implication:'Verify the supporting evidence and its limitations during discovery.'}))],
     open_dimensions:openDims,
     expandable_blocks:{
       evidence:sourceCards(evidenceRegistry),
