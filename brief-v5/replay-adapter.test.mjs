@@ -103,6 +103,8 @@ test('provider strategic narrative and qualified hypothesis survive without sens
   const critical=reasoning.find(x=>x.title.includes('Critical Context'));
   assert.ok(critical);
   assert.deepEqual(critical.premises,['FAC-002']);
+  assert.doesNotMatch(critical.observation,/FAC-007/,'sensitive historical source must be excluded from presentation');
+  assert.equal(projected.payload.replay_evidence.some(x=>x.id==='FAC-007'),false);
   const hypothesis=reasoning.find(x=>x.title.includes('Consultant-only hypothesis'));
   assert.deepEqual(hypothesis.premises,['FAC-004'],'sensitive source FAC-007 must not be elevated');
   assert.ok(hypothesis.not_a_claim_of.includes('A current security weakness'));
