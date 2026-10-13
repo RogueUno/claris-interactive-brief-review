@@ -2,6 +2,8 @@ const list=x=>Array.isArray(x)?x:[];
 const str=x=>typeof x==='string'?x.trim():'';
 const obj=x=>x&&typeof x==='object'&&!Array.isArray(x)?x:{};
 const title=x=>str(x).replaceAll('_',' ').replace(/\b\w/g,c=>c.toUpperCase());
+const justification=x=>str(x?.reason)||str(x?.reasoning);
+const admissibleStatus=new Set(['MATCH','PARTIAL_MATCH','UNKNOWN','MISMATCH']);
 const metric=x=>{const m=String(x??'').match(/^(\d+(?:\.\d+)?)/);return m?Number(m[1]):null;};
 function excerpt(md,heading){
   const source=str(md),i=source.indexOf('### '+heading);
@@ -26,21 +28,29 @@ function sourceCards(records){
   }));
 }
 function snapshot(records){
-  const admitted=admittedEvidence(records);
-  const two=admitted.find(x=>x.evidence_id==='FAC-002');
-  const three=admitted.find(x=>x.evidence_id==='FAC-003');
-  const make=(label,display,x)=>x?{label,display,supported:true,source_url:x.source_url,
-    source_label:'Third-party listing · not independently verified'}:null;
-  const fields={
-    founded_year:/founded in 2020/i.test(str(three?.source_excerpt))?make('Founded','2020 (reported)',three):null,
-    headquarters:/san francisco/i.test(str(three?.source_excerpt))?make('Headquarters','San Francisco (reported)',three):null,
-    employee_size:/51-200 employees/i.test(str(two?.source_excerpt))?make('Company size','51–200 (reported)',two):null,
-    company_type:/software development company/i.test(str(two?.source_excerpt))?make('Company type','Software development (reported)',two):null
+  // Extract only a source-explicit observation; never infer missing demographics.
+  const sources=admittedEvidence(records);
+  const fields={};
+  const add=(key,label,value,entry)=>{
+    if(!value||fields[key])return;
+    const reported=entry.authority!=='VERIFIED_PUBLIC_FACT';
+    fields[key]={label,display:value+(reported?' (reported)':''),supported:true,
+      source_url:entry.source_url,source_label:reported?'External listing · unverified':'Admitted public source'};
   };
-  const valid=Object.values(fields).filter(x=>x?.supported).length>=3;
-  return valid?{schema_version:'CLARIS_COMPANY_SNAPSHOT_V1',authority:'PRESENTATION_ONLY',
-    validation:{ok:true},coverage:{renderable:true},fields,
-    intro:{supported:true,display:'Public-source profile; figures not independently verified'}}:null;
+  for(const entry of sources){
+    const excerpt=str(entry.source_excerpt);
+    let m=excerpt.match(/\b(?:founded|established)\s+(?:in\s+)?((?:19|20)\d{2})\b/i);
+    if(m)add('founded_year','Founded',m[1],entry);
+    m=excerpt.match(/\b(?:headquartered|headquarters|based)\s+(?:in|at)\s+([A-Za-z][A-Za-z .-]{2,45})(?=[,.;]|\s+(?:and|with|founded|in)\b|$)/i);
+    if(m)add('headquarters','Headquarters',m[1].trim(),entry);
+    m=excerpt.match(/\b(\d{1,3}\s*[-–]\s*\d{2,5})\s+employees\b/i);
+    if(m)add('employee_size','Company size',m[1].replace(/\s/g,'').replace('-', '–')+' employees',entry);
+    if(/\bsoftware development company\b/i.test(excerpt))add('company_type','Company type','Software development',entry);
+  }
+  if(!Object.keys(fields).length)return null;
+  return {schema_version:'CLARIS_COMPANY_SNAPSHOT_V1',authority:'PRESENTATION_ONLY',
+    validation:{ok:true},coverage:{renderable:true,partial:Object.keys(fields).length<3},
+    fields,intro:{supported:true,display:'Available public-source facts · verify before use'}};
 }
 
 export function projectFinalReplay(brief,{evidenceRegistry=[]}={}){
@@ -49,24 +59,25 @@ export function projectFinalReplay(brief,{evidenceRegistry=[]}={}){
   const matches=Object.keys(obj(raw.match_classifications)).length?obj(raw.match_classifications):obj(raw.match_score_explanation);
   const questions=(list(raw.prospect_question_plan).length?list(raw.prospect_question_plan):list(raw.question_plan)).filter(x=>str(x.text||x.question));
   const unknowns=Object.entries(matches).filter(([,v])=>v?.status==='UNKNOWN');
-  const openDims=[
-    {dimension_id:'D_SCOPE',label:'Buyer requirement and systems in scope',
-     why_open:'The exact assurance deliverable, system coverage and audit boundary remain unconfirmed.'},
-    {dimension_id:'D_OWNER',label:'Decision authority and commercial constraints',
-     why_open:str(matches.buyer_stakeholder_fit?.reason)||'Internal authority, budget and dates are not established.'},
-    ...unknowns.filter(([k])=>!['buyer_stakeholder_fit','engagement_economics'].includes(k))
-      .map(([k,v])=>({dimension_id:'D_'+k.toUpperCase(),label:title(k),why_open:str(v.reason)}))
-  ].slice(0,7);
+  // Open dimensions and question purposes are independent. Never assign by position.
+  const openDims=unknowns.map(([key,v])=>({
+    dimension_id:'D_'+key.toUpperCase(),label:title(key),
+    why_open:justification(v)||'The provider has not established this dimension.',
+    origin:'FINALIZE_UNKNOWN',basis_ids:list(v?.basis_ids)
+  }));
   const mappedQ=questions.map((q,i)=>({
-    question_id:'Q'+(i+1),dimension_id:i===0?'D_SCOPE':'D_OWNER',
-    ask:str(q.text||q.question),why_now:str(q.strategy_alignment||q.intent||q.rationale),
-    listen_for:[],linked_service_paths:[],conditional_probes:[]
+    question_id:'Q'+(i+1),provider_question_id:str(q.question_id)||null,
+    dimension_id:null,ask:str(q.text||q.question),
+    why_now:str(q.strategy_alignment||q.intent||q.rationale),
+    listen_for:list(q.listen_for),conditional_probes:list(q.conditional_probes),
+    possible_service_paths:list(q.possible_service_paths),
+    origin:'FINALIZE_GENERATED_QUESTION'
   }));
   const directory=admittedEvidence(evidenceRegistry).find(x=>x.evidence_id==='FAC-002');
   const potentialSoc2Tension=directory && /\bsoc\s*2\s+(certified|compliant)\b/i.test(str(directory.source_excerpt))
     && list(raw.potential_service_relevance).some(x=>x?.service_id==='SVC_SOC2')
     ?{signal:'Possible assurance-scope mismatch — verify before diagnosing',
-      observation:'A third-party directory (FAC-002) describes an existing SOC 2 posture while the accepted prospect response requests formal SOC 2 readiness. The listing may be stale or inaccurate; the mismatch is a hypothesis, not a verified fact.',
+      observation:'A third-party directory (FAC-002) describes an existing SOC 2 posture while the simulated buyer requests assurance evidence. The listing may be stale or inaccurate; the mismatch is a hypothesis, not a verified fact.',
       call_implication:'Ask whether the buyer needs a current report, questionnaire support, a new or expanded audit boundary, or initial control readiness. Do not presume certification or a security gap.'}:null;
   const admittedIds=new Set(admittedEvidence(evidenceRegistry).map(x=>x.evidence_id));
   const providerLineage=list(raw.intelligence_lineage).flatMap(edge=>
@@ -88,27 +99,44 @@ export function projectFinalReplay(brief,{evidenceRegistry=[]}={}){
     .map(x=>({title:'Consultant-only hypothesis · unverified',observation:str(x.description),
       premises:list(x.basis_ids).filter(id=>id==='BOOK-001'||admittedIds.has(id)),
       not_a_claim_of:['A current security weakness','Buyer intent','Confirmed cause of the booking']}));
+  const signals=[
+    ...(potentialSoc2Tension?[{...potentialSoc2Tension,kind:'UNVERIFIED_HYPOTHESIS',basis_ids:['FAC-002']}]:[]),
+    ...Object.entries(matches)
+      .filter(([,v])=>['MATCH','PARTIAL_MATCH'].includes(v?.status)
+         && list(v?.basis_ids).length && justification(v))
+      .map(([key,v])=>({signal:title(key),observation:justification(v),
+        kind:'FINALIZE_PROVIDER_ASSESSMENT',status:v.status,basis_ids:list(v.basis_ids),
+        call_implication:'Use this provider assessment as a question to verify, not as independently established buyer intent.'}))
+  ];
   const prepare={
-    executive_readout:excerpt(raw.preliminary_brief_markdown,'Executive Summary')||excerpt(raw.preliminary_brief_markdown,'Strategic Overview')||str(raw.preliminary_brief?.what_matters),
-    call_strategy:{opening_move:'Clarify scope and decision authority before recommending work.'},
-    signals_that_matter:[...(potentialSoc2Tension?[potentialSoc2Tension]:[]),...Object.entries(matches).filter(([,v])=>v?.status==='MATCH'&&list(v?.basis_ids).length)
-      .map(([k,v])=>({signal:title(k),observation:str(v.reason),
-        call_implication:'Verify the supporting evidence and its limitations during discovery.'}))],
+    executive_readout:excerpt(raw.preliminary_brief_markdown,'Executive Summary')
+      ||excerpt(raw.preliminary_brief_markdown,'Strategic Overview')
+      ||str(raw.preliminary_brief?.what_matters),
+    call_strategy:{opening_move:str(raw.preliminary_brief?.opening_move)||null},
+    signals_that_matter:signals,
     open_dimensions:openDims,
     expandable_blocks:{
       evidence:sourceCards(evidenceRegistry),
-      reasoning:[...providerNarrative,...hypothesisNarrative,...providerLineage.filter(e=>!/^FAC-/.test(str(e.evidence_id))||admittedIds.has(str(e.evidence_id))).map(e=>({title:str(e.evidence_id)+' · '+str(e.source),observation:str(e.description),premises:[str(e.evidence_id)],not_a_claim_of:['Independently verified original source URL']})),...Object.entries(matches).map(([k,v])=>({title:title(k)+' · '+title(v?.status),observation:str(v?.reason),premises:list(v?.basis_ids),not_a_claim_of:['Independent verification of buyer intent']}))],
-      unknowns:unknowns.map(([k,v])=>({title:title(k),why_unknown:str(v.reason),
-        what_would_resolve_it:'Confirm directly with the prospect.'}))
+      reasoning:[...providerNarrative,...hypothesisNarrative,
+        ...providerLineage.filter(e=>!/^FAC-/.test(str(e.evidence_id))||admittedIds.has(str(e.evidence_id)))
+          .map(e=>({title:str(e.evidence_id)+' · '+str(e.source),
+            observation:str(e.description),premises:[str(e.evidence_id)],
+            not_a_claim_of:['An independently verified original source']})),
+        ...Object.entries(matches).map(([key,v])=>({title:title(key)+' · '+title(v?.status),
+          observation:justification(v),premises:list(v?.basis_ids),
+          not_a_claim_of:['Independent verification of buyer intent']}))],
+      unknowns:unknowns.map(([key,v])=>({title:title(key),
+        why_unknown:justification(v)||'The provider did not establish this dimension.',
+        what_would_resolve_it:'Ask the buyer for the missing information.'}))
     }
   };
   const discovery={
-    call_objective:'Clarify the buyer assurance requirement, project scope and decision authority.',
+    call_objective:excerpt(raw.preliminary_brief_markdown,'Primary Objectives')
+      ||str(raw.preliminary_brief?.call_objective)||null,
     primary_questions:mappedQ,
-    call_flow:mappedQ.map((q,i)=>({move:'Use '+q.question_id+' to resolve '+(i===0?'assurance scope':'decision ownership'),
-      advance_when:'Record a verified response or leave the variable open.'})),
+    call_flow:mappedQ.map(q=>({question_id:q.question_id,label:q.ask,move:null,advance_when:null})),
     do_not_ask:[],
-    end_of_call_decision:{ready_for_next_step_if:[],remain_in_discovery_if:[],disqualify_or_deprioritize_if:[]}
+    end_of_call_decision:null
   };
   const sourceLedger=providerLineage.filter(e=>!/^FAC-/.test(str(e.evidence_id||e.source_id))||admittedIds.has(str(e.evidence_id||e.source_id))).map(e=>({id:str(e.evidence_id||e.source_id),
     authority:str(e.source),description:str(e.description||e.usage)})).filter(x=>x.id);
@@ -138,7 +166,7 @@ export function projectFinalReplay(brief,{evidenceRegistry=[]}={}){
       }))
     },
     call_readiness:{status:'OPEN',open_variables:openDims.length},
-    strategy:{recommended_action:'Confirm assurance requirements, project scope and decision authority before recommending an engagement.'},
+    strategy:{recommended_action:str(raw.preliminary_brief?.recommended_action)||null,source:'FINALIZE_ONLY'},
     source_status:'PROVISIONAL_PROVIDER_REPLAY_NOT_CERTIFIED'
   };
   return {...brief,payload:{...brief.payload,prepare,discovery,scorecard,
