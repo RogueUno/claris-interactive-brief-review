@@ -110,3 +110,40 @@ test('provider strategic narrative and qualified hypothesis survive without sens
   assert.ok(hypothesis.not_a_claim_of.includes('A current security weakness'));
   assert.equal(projected.payload.discovery.primary_questions.length,2);
 });
+
+test('second live FINALIZE schema keeps question_plan, nested scores and claim edges without invented findings',()=>{
+  const rich={
+    preliminary_brief_markdown:[
+      '### Strategic Overview','Buyer acceptance criteria are unresolved.',
+      '### Critical Timing & Stakeholders','Security leadership signs off.',
+      '### Primary Objectives','Confirm evidence coverage before recommending readiness.'
+    ].join('\n'),
+    engagement_metadata:{deterministic_metrics:{supported_match:80,scorable_coverage:85,evidence_completeness:100}},
+    match_score_explanation:{
+      service_need_alignment:{status:'MATCH',basis_ids:['BOOK-001','PROS-001-A'],reasoning:'Buyer wants scoped assurance help'},
+      buyer_stakeholder_fit:{status:'UNKNOWN',basis_ids:['BOOK-001'],reasoning:'Commercial owner unidentified'}
+    },
+    question_plan:[
+      {question_id:'q1',text:'Who approves the consulting budget?',rationale:'No budget approved'},
+      {question_id:'q2',text:'Does the SOC 2 Type II report cover EU hosting?',rationale:'EU scope not verified'},
+      {question_id:'q3',text:'Who signs off the security questionnaire?',rationale:'Technical approver unknown'}
+    ],
+    intelligence_lineage:[
+      {insight:'Buyer paused contract for evidence',evidence_ids:['BOOK-001','PROS-001-A']},
+      {insight:'Public docs show API integration',evidence_ids:['FAC-004']}
+    ],
+    potential_service_relevance:[{service_id:'SVC_SOC2'}],
+    consultant_only_context:[{insight:'Unrelated historical ecosystem event',evidence_ids:['FAC-007']}]
+  };
+  const input={...base(),payload:{final_replay_v3:rich}};
+  const result=projectFinalReplay(input,{evidenceRegistry:records});
+  assert.equal(result.payload.discovery.primary_questions.length,3);
+  assert.equal(result.payload.discovery.primary_questions[1].why_now,'EU scope not verified');
+  assert.match(result.payload.prepare.executive_readout,/Buyer acceptance criteria are unresolved/);
+  assert.equal(result.payload.replay_assessment.supported_match,80);
+  assert.equal(result.payload.replay_assessment.evidence_completeness,100);
+  assert.equal(result.payload.scorecard.call_readiness.status,'OPEN');
+  assert.ok(result.payload.replay_evidence.some(x=>x.id==='PROS-001-A'));
+  assert.ok(result.payload.replay_evidence.some(x=>x.id==='FAC-004'));
+  assert.equal(result.payload.replay_evidence.some(x=>x.id==='FAC-007'),false);
+});
