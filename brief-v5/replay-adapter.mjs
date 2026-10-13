@@ -63,7 +63,7 @@ export function projectFinalReplay(brief,{evidenceRegistry=[]}={}){
     listen_for:[],linked_service_paths:[],conditional_probes:[]
   }));
   const directory=admittedEvidence(evidenceRegistry).find(x=>x.evidence_id==='FAC-002');
-  const potentialSoc2Tension=directory && /\\bsoc\\s*2\\s+(certified|compliant)\\b/i.test(str(directory.source_excerpt))
+  const potentialSoc2Tension=directory && /\bsoc\s*2\s+(certified|compliant)\b/i.test(str(directory.source_excerpt))
     && list(raw.potential_service_relevance).some(x=>x?.service_id==='SVC_SOC2')
     ?{signal:'Possible assurance-scope mismatch — verify before diagnosing',
       observation:'A third-party directory (FAC-002) describes an existing SOC 2 posture while the accepted prospect response requests formal SOC 2 readiness. The listing may be stale or inaccurate; the mismatch is a hypothesis, not a verified fact.',
