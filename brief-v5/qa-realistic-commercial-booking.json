@@ -1,0 +1,51 @@
+{
+  "schema_version": "claris_make_v23_realistic_test_case_v1",
+  "purpose": "Second controlled commercial-depth benchmark for Make-based CLARIS only. No remote execution or contact authorized by this fixture.",
+  "simulation": true,
+  "safety": {
+    "outbound_prospect_contact": false,
+    "prospect_email_alias_only": true,
+    "run_cost_cap": "one lifecycle, no retries, requires separate deliberate activation",
+    "no_production_workflow_mutation": true
+  },
+  "consultant_id": "pilot_mehdi_medjahed_20260922",
+  "company": "PostHog",
+  "domain": "https://posthog.com",
+  "prospect_first_name": "Avery",
+  "prospect_role": "Enterprise assurance coordinator (fictional)",
+  "booking_text": "An enterprise buyer has paused a proposed annual software contract pending acceptable assurance evidence for our SaaS product and its EU data-processing scope. Their security team asks whether an existing SOC 2 Type II report, a completed questionnaire, and supporting documentation cover the product analytics, event ingestion, API integrations and EU hosting they intend to use. We need independent help interpreting the buyer's actual acceptance criteria, mapping the available evidence and identifying any genuine assurance gap. We have public documentation and internal control owners but have not established which evidence satisfies this specific buyer. The buyer's assessment call is in three weeks. The prospect coordinates the response but security leadership owns technical sign-off. No consulting budget has yet been approved. We want to decide whether focused questionnaire support, a short scoped gap assessment or formal SOC 2 readiness work is warranted; please do not assume an existing control failure or that a fresh audit is required.",
+  "clarification_answer_intents": [
+    {
+      "intent": "buyer_deliverable",
+      "answer": "The requested deliverable is an acceptable SOC 2 Type II report or equivalently strong evidence plus questionnaire responses. Exact buyer acceptance criteria are not fully clear."
+    },
+    {
+      "intent": "scope",
+      "answer": "Product analytics, events ingestion, API integrations and EU data-residency claims appear in buyer's questionnaire. Confirm actual technical scope in the call."
+    },
+    {
+      "intent": "existing_evidence",
+      "answer": "There are existing internal compliance materials; current applicability and audit coverage have not been independently verified."
+    },
+    {
+      "intent": "deadline_or_ownership",
+      "answer": "Buyer security call is in three weeks; security leadership approves technical answer; commercial decision owner and consulting budget not yet confirmed."
+    }
+  ],
+  "acceptance": {
+    "preserve_truth_boundary": true,
+    "distinguish_reported_existing_certification_from_verified_certification": true,
+    "substantive_first_call_questions_min": 3,
+    "first_call_coverage_topics": [
+      "buyer_outcome",
+      "technical_scope",
+      "existing_evidence",
+      "stakeholder_authority"
+    ],
+    "evidence_backed_talking_points_min": 2,
+    "private_source_urls_required": true,
+    "explicit_provisional_quality_status_if_below_gate": true,
+    "no_generic_budget_or_timeline_question_without_case_specific_reason": true,
+    "private_link_and_session_required": true
+  }
+}
