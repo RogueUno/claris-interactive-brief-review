@@ -169,7 +169,9 @@ export function projectFinalReplay(brief,{evidenceRegistry=[]}={}){
     strategy:{recommended_action:str(raw.preliminary_brief?.recommended_action)||null,source:'FINALIZE_ONLY'},
     source_status:'PROVISIONAL_PROVIDER_REPLAY_NOT_CERTIFIED'
   };
-  return {...brief,payload:{...brief.payload,prepare,discovery,scorecard,
+  const {prepare:oldPrepare,discovery:oldDiscovery,scorecard:oldScorecard,company_snapshot:oldSnapshot,
+    replay_evidence:oldLedger,replay_assessment:oldAssessment,...originalPayload}=obj(brief.payload);
+  return {...brief,payload:{...originalPayload,prepare,discovery,scorecard,
     ...(snapshot(evidenceRegistry)?{company_snapshot:snapshot(evidenceRegistry)}:{}),
     replay_evidence:sourceLedger,replay_assessment:{
       supported_match:metric(scores.supported_match),
