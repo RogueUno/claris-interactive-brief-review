@@ -94,8 +94,12 @@ async function publish(request) {
   if(!booking.ok||!manifest.ok||!manifest.entries.length||
      i.booking_text!==booking.booking.verbatim_text)
     return fail('PERSISTED_BOOKING_AND_ACCEPTED_ANSWERS_REQUIRED',409);
-  const evidence=new Set(artifact.intelligence_lineage.map(x=>String(x.evidence_id||x.source_id||'')));
-  if(!evidence.has('BOOK-001') || !evidence.has('PROS-001'))
+  const evidence=new Set(artifact.intelligence_lineage.flatMap(x=>[
+    x.evidence_id,x.source_id,...(Array.isArray(x.evidence_ids)?x.evidence_ids:[])
+  ]).filter(Boolean).map(String));
+  const acceptedReference=manifest.entries.some(entry=>[...evidence].some(id=>
+    id===entry.evidence_id||id.startsWith(entry.evidence_id+'-')));
+  if(!evidence.has('BOOK-001') || !acceptedReference)
     return fail('FINALIZE_EVIDENCE_REFERENCES_MISSING',409);
   const metadata=authMetadata(i,identity);
   const payload={
