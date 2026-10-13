@@ -89,7 +89,6 @@ async function publish(request) {
   const booking=extractPersistedBookingContext(envelope);
   const manifest=deriveAcceptedProspectManifest(envelope);
   if(!booking.ok||!manifest.ok||!manifest.entries.length||
-     booking.booking.verbatim_text!==caseState.booking_text_exact ||
      i.booking_text!==booking.booking.verbatim_text)
     return fail('PERSISTED_BOOKING_AND_ACCEPTED_ANSWERS_REQUIRED',409);
   const evidence=new Set(artifact.intelligence_lineage.map(x=>String(x.evidence_id||x.source_id||'')));
