@@ -5,6 +5,8 @@ on:
     paths:
       - 'brief-v5/**'
       - 'clarification-v1/server/model-prompts.mjs'
+      - 'clarification-v1/server/final-brief-renderer.mjs'
+      - 'clarification-v1/server/tests/real-v23-question-normalization.test.mjs'
       - 'clarification-v1/server/decision-quality-review.mjs'
       - 'clarification-v1/server/tests/decision-quality-review.test.mjs'
       - 'calibration-v3/server/pilot-v5-private.mjs'
@@ -33,6 +35,8 @@ jobs:
         run: |
           node --test clarification-v1/server/tests/model-prompts.test.mjs
           node --test clarification-v1/server/tests/decision-quality-review.test.mjs
+          node --test clarification-v1/server/tests/real-v23-question-normalization.test.mjs
+          node --test clarification-v1/server/tests/oct10-finalize-schema-replay.test.mjs
           node --test clarification-v1/server/tests/commercial-brief-readiness.test.mjs
           node --test clarification-v1/server/tests/persisted-booking-discovery-gate.test.mjs
           node --test clarification-v1/server/tests/accepted-prospect-evidence.test.mjs
