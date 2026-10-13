@@ -77,3 +77,34 @@ test('no evidence means no fabricated snapshot or tension, and original data rem
  assert.equal(result.payload.prepare.signals_that_matter.some(x=>x.signal.includes('mismatch')),false);
  assert.equal(JSON.stringify(input),before);
 });
+
+test('provider strategic narrative and qualified hypothesis survive without sensitive source promotion',()=>{
+  const input=base();
+  input.payload.final_replay_v3=structuredClone(artifact);
+  input.payload.final_replay_v3.preliminary_brief_markdown=[
+    '### Executive Summary','Bounded diagnosis.',
+    '### Strategic Guidance',
+    '- **Talking Point:** Review official OAuth architecture (FAC-004).',
+    '- Confirm buyer acceptance criteria without assuming evidence is sufficient.',
+    '### Critical Context',
+    '- Third-party listing suggests an existing compliance posture (FAC-002).',
+    '- An unrelated historical signal FAC-007 must not be taken as current weakness.'
+  ].join('\\n');
+  input.payload.final_replay_v3.consultant_only_context={hypotheses:[
+    {description:'OAuth/API dependencies may shape scoping, but this is unverified.',
+     basis_ids:['FAC-004','FAC-007']}
+  ]};
+  const projected=projectFinalReplay(input,{evidenceRegistry:records});
+  const reasoning=projected.payload.prepare.expandable_blocks.reasoning;
+  const guidance=reasoning.find(x=>x.title.includes('Strategic Guidance'));
+  assert.ok(guidance);
+  assert.match(guidance.observation,/Review official OAuth architecture/);
+  assert.deepEqual(guidance.premises,['FAC-004']);
+  const critical=reasoning.find(x=>x.title.includes('Critical Context'));
+  assert.ok(critical);
+  assert.deepEqual(critical.premises,['FAC-002']);
+  const hypothesis=reasoning.find(x=>x.title.includes('Consultant-only hypothesis'));
+  assert.deepEqual(hypothesis.premises,['FAC-004'],'sensitive source FAC-007 must not be elevated');
+  assert.ok(hypothesis.not_a_claim_of.includes('A current security weakness'));
+  assert.equal(projected.payload.discovery.primary_questions.length,2);
+});
