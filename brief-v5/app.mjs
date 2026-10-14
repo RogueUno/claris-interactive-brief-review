@@ -294,19 +294,46 @@ function cleanMove(move,qid){
   }
   return s.charAt(0).toUpperCase()+s.slice(1);
 }
-function blindspotMarkup(prepare,discovery){
-  const qByDim=new Map(arr(discovery?.primary_questions).map(q=>[text(q.dimension_id),q]));
+function blindspotMarkup(prepare,discovery,commercialDepth){
   const dims=arr(prepare?.open_dimensions);
+  const fork=commercialDepth?.buyer_deliverable_fork||{};
+  const suggested=fork.open===true?fork.reviewer_question:null;
+  const review=suggested&&text(suggested.question)?[{
+    label:'Buyer-required assurance deliverable',
+    why_open:text(suggested.rationale)||'Buyer acceptance criteria remain unresolved.',
+    status:'REVIEW_REQUIRED',priority:'PRIMARY',
+    basis_ids:arr(suggested.basis_ids),
+    reviewer_question:text(suggested.question),
+    origin:'DETERMINISTIC_REVIEW_SUGGESTION'
+  }]:[];
+  const items=[...review,...dims].filter(d=>text(d.label)&&text(d.why_open));
+  if(!items.length)return'';
+  const primary=items.filter(x=>x.priority!=='SECONDARY');
+  const secondary=items.filter(x=>x.priority==='SECONDARY');
+  const questionMap=new Map(arr(discovery?.primary_questions)
+    .filter(q=>text(q.dimension_id))
+    .map(q=>[text(q.dimension_id),q]));
+  const entry=(d,i)=>{
+    const q=questionMap.get(text(d.dimension_id));
+    const status=d.status==='REVIEW_REQUIRED'?'Reviewer-identified gap'
+      :d.status==='PARTIALLY_ESTABLISHED'?'Partially established':'Not established';
+    const supporting=arr(d.basis_ids).filter(x=>text(x));
+    return `<article>
+      <div class="blindspot-node"><span>${String(i+1).padStart(2,'0')}</span>${icon('alert','mini-icon')}</div>
+      <div class="blindspot-copy">
+        <span class="unknown-badge">${esc(status)}</span>
+        <strong>${esc(d.label)}</strong>
+        <p>${esc(d.why_open)}</p>
+        ${supporting.length?`<small>Evidence reference: ${esc(supporting.join(' · '))}</small>`:''}
+        ${d.reviewer_question?`<p><b>Consultant review suggestion (not a FINALIZE question):</b> ${esc(d.reviewer_question)}</p>`:''}
+      </div>
+      ${q?`<a href="#phase-${esc(q.question_id)}">${icon('question','mini-icon')} Explore in question ${esc(q.question_id)}</a>`:''}
+    </article>`;
+  };
   return `<section class="blindspots panel">
     <div class="blindspot-heading">${icon('alert')}<div><span class="eyebrow">Critical blindspots</span><h3>What the call still has to resolve</h3></div></div>
-    <div class="blindspot-rail">${dims.map((d,i)=>{
-      const q=qByDim.get(text(d.dimension_id));
-      return `<article>
-        <div class="blindspot-node"><span>${String(i+1).padStart(2,'0')}</span>${icon('alert','mini-icon')}</div>
-        <div class="blindspot-copy"><span class="unknown-badge">Unknown</span><strong>${esc(d.label)}</strong><p>${esc(d.why_open)}</p></div>
-        ${q?`<a href="#phase-${esc(q.question_id)}">${icon('question','mini-icon')} Resolved by ${esc(q.question_id)}</a>`:''}
-      </article>`;
-    }).join('')}</div>
+    ${primary.length?`<div class="blindspot-rail">${primary.map(entry).join('')}</div>`:''}
+    ${secondary.length?`<details class="more-context"><summary>Other unconfirmed dimensions · ${secondary.length}</summary><div class="blindspot-rail">${secondary.map((d,i)=>entry(d,i+primary.length)).join('')}</div></details>`:''}
   </section>`;
 }
 
@@ -482,7 +509,7 @@ function render(brief){
       <div class="section-head"><div><span class="eyebrow">What matters</span><h2>Only what should change your behaviour on the call</h2></div><p>Fact first. Interpretation second. Everything else stays in evidence.</p></div>
       ${contextMarkup(prepare,known)}
       ${knownMarkup(known)}
-      ${blindspotMarkup(prepare,discovery)}
+      ${blindspotMarkup(prepare,discovery,brief?.payload?.commercial_depth)}
     </section>
 
     <section id="run" class="section run-section">
