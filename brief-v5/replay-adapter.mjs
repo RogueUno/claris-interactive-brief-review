@@ -5,6 +5,11 @@ const title=x=>str(x).replaceAll('_',' ').replace(/\b\w/g,c=>c.toUpperCase());
 const justification=x=>str(x?.reason)||str(x?.reasoning);
 const admissibleStatus=new Set(['MATCH','PARTIAL_MATCH','UNKNOWN','MISMATCH']);
 const metric=x=>{const m=String(x??'').match(/^(\d+(?:\.\d+)?)/);return m?Number(m[1]):null;};
+export const scoreToLetter=value=>{
+  const n=metric(value);
+  if(n===null||n<0||n>100)return null;
+  return n>=75?'A':n>=50?'B':n>=25?'C':'D';
+};
 function excerpt(md,heading){
   const source=str(md),i=source.indexOf('### '+heading);
   if(i<0)return '';
@@ -59,12 +64,17 @@ export function projectFinalReplay(brief,{evidenceRegistry=[]}={}){
   const matches=Object.keys(obj(raw.match_classifications)).length?obj(raw.match_classifications):obj(raw.match_score_explanation);
   const questions=(list(raw.prospect_question_plan).length?list(raw.prospect_question_plan):list(raw.question_plan)).filter(x=>str(x.text||x.question));
   const unknowns=Object.entries(matches).filter(([,v])=>v?.status==='UNKNOWN');
-  // Open dimensions and question purposes are independent. Never assign by position.
-  const openDims=unknowns.map(([key,v])=>({
-    dimension_id:'D_'+key.toUpperCase(),label:title(key),
-    why_open:justification(v)||'The provider has not established this dimension.',
-    origin:'FINALIZE_UNKNOWN',basis_ids:list(v?.basis_ids)
-  }));
+  // Unknown and partially-established buyer variables require different language.
+  // Expansion opportunities are not automatically critical to the first call.
+  const openDims=Object.entries(matches)
+    .filter(([key,v])=>['UNKNOWN','PARTIAL_MATCH','PARTIAL'].includes(v?.status))
+    .map(([key,v])=>({
+      dimension_id:'D_'+key.toUpperCase(),label:title(key),
+      why_open:justification(v)||'The provider did not establish the remaining information.',
+      status:v?.status==='UNKNOWN'?'NOT_ESTABLISHED':'PARTIALLY_ESTABLISHED',
+      priority:key==='expansion_potential'?'SECONDARY':'PRIMARY',
+      origin:'FINALIZE_CLASSIFICATION',basis_ids:list(v?.basis_ids)
+    }));
   const mappedQ=questions.map((q,i)=>({
     question_id:'Q'+(i+1),provider_question_id:str(q.question_id)||null,
     dimension_id:null,ask:str(q.text||q.question),
@@ -146,6 +156,8 @@ export function projectFinalReplay(brief,{evidenceRegistry=[]}={}){
     schema_version:'CLARIS_PRECALL_SCORECARD_V1',
     lead_fit:{
       grade:null,
+      provisional_grade:scoreToLetter(scores.supported_match),
+      grade_origin:'NUMERIC_RUBRIC_0_25_50_75_NOT_CERTIFIED',
       supported_match:metric(scores.supported_match),
       descriptor:'Provider-scored · ungraded',
       scorable_coverage:metric(scores.scorable_coverage),
@@ -157,6 +169,8 @@ export function projectFinalReplay(brief,{evidenceRegistry=[]}={}){
     },
     evidence_coverage:{
       score:metric(scores.evidence_completeness),
+      provisional_grade:scoreToLetter(scores.evidence_completeness),
+      grade_origin:'NUMERIC_RUBRIC_0_25_50_75_NOT_CERTIFIED',
       score_origin:'FINALIZE_PROVIDER_METRIC',
       validation_status:'NOT_INDEPENDENTLY_VERIFIED',
       dimensions:Object.entries(sourceCoverage).map(([key,v])=>({
