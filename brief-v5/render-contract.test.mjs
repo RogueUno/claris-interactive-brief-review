@@ -170,3 +170,32 @@ test('blindspot section does not create an empty panel when no open statuses exi
   const html=render(projectFinalReplay(b,{evidenceRegistry:research}));
   assert.doesNotMatch(html,/class="blindspots panel"/);
 });
+
+test('evidence score drawer explains why provider A/100 is held despite consistent arithmetic',()=>{
+  const brief=project();
+  brief.payload.evidence_score_review={
+    assurance:'SEMANTIC_REVIEW_REQUIRED',mathematically_consistent:true,review_required:true,
+    provider_score:100,independent_quality_score:null,independent_grade:null,
+    warnings:[
+      {code:'FULL_CRITICAL_COVERAGE_WITH_OPEN_BUYER_DECISION',
+        category:'critical_question_coverage',
+        explanation:'35/35 granted although the buyer-required assurance deliverable remains unresolved.'},
+      {code:'FULL_AMBIGUITY_CONTROL_WITH_OPEN_DECISION',
+        category:'conflict_ambiguity_control',
+        explanation:'Absence of conflicts does not resolve open buyer requirements.'}
+    ]
+  };
+  const html=render(brief);
+  assert.match(html,/Provider A · independent evidence review required/);
+  assert.match(html,/100\/100 · review required/);
+  const code=source.slice(0,entry)+"\nscoreDetail('evidence',globalThis.__score,globalThis.__review);";
+  const result=vm.runInNewContext(code,{
+    document:{getElementById:()=>({})},URL,URLSearchParams,Date,Math,Number,Set,Map,
+    String,Boolean,Intl,Array,RegExp,JSON,Error,
+    __score:brief.payload.scorecard,__review:brief.payload.evidence_score_review
+  },{timeout:2500});
+  assert.match(result.body,/five weighted completeness categories/);
+  assert.match(result.body,/Why this provider grade is under review/);
+  assert.match(result.body,/buyer-required assurance deliverable remains unresolved/);
+  assert.match(result.body,/Absence of conflicts does not resolve open buyer requirements/);
+});
