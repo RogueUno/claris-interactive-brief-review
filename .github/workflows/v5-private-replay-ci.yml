@@ -26,12 +26,14 @@ jobs:
         run: |
           node --check brief-v5/app.mjs
           node --check brief-v5/replay-adapter.mjs
+          node --check brief-v5/evidence-score-review.mjs
           node --check calibration-v3/server/pilot-v5-private.mjs
           node --check api/delivery/package.mjs
       - name: V5 evidence, question and safety contract
         run: |
           node --test brief-v5/replay-adapter.test.mjs
           node --test brief-v5/render-contract.test.mjs
+          node --test brief-v5/evidence-score-review.test.mjs
       - name: Install runtime dependencies
         run: npm install --omit=dev --no-audit --no-fund --package-lock=false
       - name: Existing commercialization depth and provenance contracts
