@@ -105,28 +105,46 @@ function readinessArc(ready,meaning='Prepared'){
   });
 }
 
-function scoreDetail(key,scorecard){
+function scoreDetail(key,scorecard,evidenceReview=null){
   const fit=scorecard?.lead_fit||{},ev=scorecard?.evidence_coverage||{},ready=scorecard?.call_readiness||{};
   if(key==='fit')return{
     title:'Lead fit',answer:fit.grade||((fit.provisional_grade&&fit.supported_match!=null)?`${esc(fit.provisional_grade)} · ${esc(fit.supported_match)}/100 (provisional)`:(fit.supported_match!=null?`${esc(fit.supported_match)}/100 (provisional)`:'—')),descriptor:fit.grade?fit.descriptor:'Rubric-derived provisional grade · not certified',icon:'spark',
     body:`<p>${fit.grade?`${esc(fit.scorable_coverage??0)} of 100 weighted fit criteria are currently scorable.`:fit.supported_match!=null?`Make FINALIZE calculated ${esc(fit.supported_match)}/100 supported match, with ${esc(fit.scorable_coverage??'unknown')}/100 criteria scorable. This is a provisional numerical signal, not a certified letter grade.`:`The lead has no validated numerical fit score. No letter grade has been certified.`}</p>
     <ul class="metric-list">${arr(fit.dimensions).map(x=>`<li><div><strong>${esc(x.label)}</strong><p>${esc(x.reason)}</p></div><span class="status ${statusTone(x.status)}">${esc(text(x.status).replaceAll('_',' '))}</span></li>`).join('')}</ul>`
   };
-  if(key==='evidence')return{
-    title:'Evidence coverage',answer:ev.score!=null&&ev.score_origin==='FINALIZE_PROVIDER_METRIC'?`${ev.provisional_grade?esc(ev.provisional_grade)+' · ':''}${esc(ev.score)}/100 (provider)` : evidenceLevel(ev.score).label,descriptor:ev.score_origin==='FINALIZE_PROVIDER_METRIC'?'Provider-scored provisional grade · unverified':'Source support and diagnostic coverage',icon:'shield',
-    body:`<p>Internal FINALIZE completeness: ${esc(ev.score??'—')}/100. ${ev.score_origin==='FINALIZE_PROVIDER_METRIC'?'The provider assigned points across its completeness categories. This is not an independent source validation or proof that the buyer’s exact acceptance criteria are resolved.':'This score measures evidence completeness, not lead fit.'}</p>
-    <ul class="metric-list">${arr(ev.dimensions).map(x=>`<li><div><strong>${esc(x.label)}</strong><p>${esc(x.reason)}</p></div><span class="status ${statusTone(x.status)}">${esc(text(x.status).replaceAll('_',' '))}</span></li>`).join('')}</ul>`
-  };
+  if(key==='evidence'){
+    const warnings=arr(evidenceReview?.warnings);
+    const high=warnings.filter(w=>[
+      'FULL_CRITICAL_COVERAGE_WITH_OPEN_BUYER_DECISION',
+      'FULL_AMBIGUITY_CONTROL_WITH_OPEN_DECISION',
+      'PERFECT_SCORE_NOT_INDEPENDENTLY_SUPPORTED',
+      'FAC_BASIS_NOT_ADMISSIBLE','PROSPECT_BASIS_UNBOUND'
+    ].includes(w.code));
+    const explain=high.length?high:warnings.slice(0,6);
+    const detail=explain.length
+      ?`<div class="evidence-assurance-detail"><p><strong>Why this provider grade is under review</strong></p><ul class="metric-list">${explain.map(w=>`<li><div><strong>${esc(w.category.replaceAll('_',' '))}</strong><p>${esc(w.explanation)}</p></div></li>`).join('')}</ul></div>`
+      :`<p>Independent semantic evidence quality has not been certified.</p>`;
+    return{
+      title:'Evidence coverage',
+      answer:ev.score!=null&&ev.score_origin==='FINALIZE_PROVIDER_METRIC'
+        ?`${ev.provisional_grade?esc(ev.provisional_grade)+' · ':''}${esc(ev.score)}/100 (provider)`
+        :evidenceLevel(ev.score).label,
+      descriptor:evidenceReview?.review_required?'Independent quality review required':'Provider completeness · not independently certified',
+      icon:'shield',
+      body:`<p>Make FINALIZE assigned <strong>${esc(ev.score??'—')}/100</strong> using five weighted completeness categories. This is not a verified external evidence-quality score. ${evidenceReview?.mathematically_consistent===true?'The category-weight calculation is consistent.':''}</p>${detail}<ul class="metric-list">${arr(ev.dimensions).map(x=>`<li><div><strong>${esc(x.label)}</strong><p>${esc(x.reason)}</p></div><span class="status ${statusTone(x.status)}">${esc(text(x.status).replaceAll('_',' '))}${x.points!=null?' · '+esc(x.points):''}</span></li>`).join('')}</ul>`
+    };
+  }
   return{
     title:'Call readiness',answer:text(ready.status||'—').replaceAll('_',' '),descriptor:ready.open_variables?`${ready.open_variables} material variable${ready.open_variables===1?'':'s'} mapped to the call`:'Diagnostic state',icon:'target',
     body:`<p>${ready.status==='READY'?'Each admitted variable has a primary question and the certification gates passed.':'One or more question-coverage or certification gates remain unresolved.'}</p>`
   };
 }
-function scoreMarkup(scorecard){
+function scoreMarkup(scorecard,evidenceReview=null){
   if(scorecard?.schema_version!=='CLARIS_PRECALL_SCORECARD_V1')return'';
   const fit=scorecard.lead_fit||{},ev=scorecard.evidence_coverage||{},ready=scorecard.call_readiness||{},eq=evidenceLevel(ev.score);
   const hasProviderFit=fit.supported_match!=null&&Number.isFinite(Number(fit.supported_match));
   const providerEvidence=ev.score_origin==='FINALIZE_PROVIDER_METRIC'&&ev.score!=null&&Number.isFinite(Number(ev.score));
+  const evidenceNeedsReview=evidenceReview?.review_required===true;
   return `<section class="signal-block instrument-deck panel">
     <div class="instrument-header">
       <div><span class="eyebrow">Decision instruments</span><strong>Lead grade · evidence score · readiness state</strong></div>
@@ -141,8 +159,8 @@ function scoreMarkup(scorecard){
       </button>
       <button class="signal instrument-tile" data-score="evidence" aria-expanded="false">
         <span class="signal-label">${icon('shield','small-icon')} Evidence coverage</span>
-        ${providerEvidence?arcInstrument({fill:Number(ev.score),display:ev.provisional_grade||String(Math.round(Number(ev.score))),caption:'Evidence · provider',tone:'accent',badge:`${esc(ev.score)}/100 · not verified`}):evidenceArc(ev.score,eq.label==='Very strong'?'Very strong':eq.label==='Strong'?'Strong':eq.label==='Usable'?'Usable':eq.label==='Thin'?'Thin':'Low')}
-        <span class="signal-desc">${providerEvidence?'A–D rubric · provider metric, not verified':'Source support & diagnostic coverage'}</span>
+        ${providerEvidence?arcInstrument({fill:Number(ev.score),display:ev.provisional_grade||String(Math.round(Number(ev.score))),caption:'Evidence · provider',tone:'accent',badge:`${esc(ev.score)}/100 · ${evidenceNeedsReview?'review required':'not verified'}`}):evidenceArc(ev.score,eq.label==='Very strong'?'Very strong':eq.label==='Strong'?'Strong':eq.label==='Usable'?'Usable':eq.label==='Thin'?'Thin':'Low')}
+        <span class="signal-desc">${evidenceNeedsReview?'Provider A · independent evidence review required':providerEvidence?'A–D rubric · provider metric, not verified':'Source support & diagnostic coverage'}</span>
         <span class="why">Why ${icon('arrow','mini-icon')}</span>
       </button>
       <button class="signal instrument-tile" data-score="ready" aria-expanded="false">
@@ -499,7 +517,7 @@ function render(brief){
 
     <section class="section overview">
       <div class="section-head compact"><span class="eyebrow">At a glance</span><h2>Opportunity signal</h2></div>
-      ${scoreMarkup(scorecard)}
+      ${scoreMarkup(scorecard,brief?.payload?.evidence_score_review)}
       ${bookingSnapshotMarkup(context.booking_text,snapshotMarkup)}
       <article class="call-focus panel"><div class="focus-icon">${icon('target')}</div><div><span class="eyebrow">Call focus</span><h2>${esc(excerpt(discovery.call_objective||prepare?.call_strategy?.opening_move||'Call objective not established — consultant review required.',220))}</h2>${callDirectionMarkup(prepare,discovery)}${prepare.executive_readout?`<details><summary>Working model</summary><p>${esc(prepare.executive_readout)}</p></details>`:''}</div></article>
       ${externalSignalMarkup(prepare)}
@@ -520,7 +538,7 @@ function render(brief){
     <section id="next" class="section"><div class="section-head compact"><span class="eyebrow">Next move</span><h2>Conditional decision</h2></div>${nextMoveMarkup(scorecard,discovery)}</section>
     <section id="evidence" class="section evidence-section">${proofMarkup(prepare,groups)}</section>
   `;
-  bindMotionPolish();bindQuestionPhases();bindBooking();bindScore(scorecard);bindCountdown();bindProof(groups);
+  bindMotionPolish();bindQuestionPhases();bindBooking();bindScore(scorecard,brief?.payload?.evidence_score_review);bindCountdown();bindProof(groups);
 }
 
 function bindMotionPolish(){
@@ -589,7 +607,7 @@ function bindBooking(){
     button.innerHTML=(expanded?'Read full request ':'Collapse ')+icon('arrow','mini-icon');
   });
 }
-function bindScore(scorecard){
+function bindScore(scorecard,evidenceReview=null){
   if(scorecard?.schema_version!=='CLARIS_PRECALL_SCORECARD_V1')return;
   const tray=root.querySelector('[data-score-tray]'),buttons=[...root.querySelectorAll('[data-score]')];
   buttons.forEach(button=>button.addEventListener('click',()=>{
@@ -597,7 +615,7 @@ function bindScore(scorecard){
     buttons.forEach(b=>{b.setAttribute('aria-expanded','false');b.classList.remove('is-active');});
     if(open){tray.hidden=true;tray.innerHTML='';return;}
     button.setAttribute('aria-expanded','true');button.classList.add('is-active');
-    const d=scoreDetail(button.dataset.score,scorecard);
+    const d=scoreDetail(button.dataset.score,scorecard,evidenceReview);
     tray.innerHTML=`<div class="score-tray-head">${icon(d.icon)}<div><span class="eyebrow">${esc(d.title)}</span><h3>${esc(d.answer)} · ${esc(d.descriptor)}</h3></div></div>${d.body}`;
     tray.hidden=false;
   }));
