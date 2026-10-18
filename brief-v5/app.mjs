@@ -302,7 +302,7 @@ function questionForStep(step,index,questions){
   const key=text(step?.question_id);if(key){const matched=questions.find(q=>text(q.question_id)===key);if(matched)return matched;}
   const m=text(step?.move).match(/\bQ\d+\b/i);
   if(m)return questions.find(q=>text(q.question_id).toUpperCase()===m[0].toUpperCase())||null;
-  return index<questions.length?questions[index]:null;
+  return null; // No positional guessing: unmatched source questions stay unbound.
 }
 function cleanMove(move,qid){
   let s=text(move);
@@ -484,14 +484,9 @@ function proofMarkup(prepare,groups){
 }
 
 function callDirectionMarkup(prepare,discovery){
-  const known=knownGoingIn(discovery);
-  const dims=arr(prepare?.open_dimensions).slice(0,3).map(d=>text(d.label)).filter(Boolean);
-  const hasBranches=arr(discovery?.primary_questions).some(q=>arr(q?.conditional_probes).length);
-  const parts=[];
-  if(known.length) parts.push(`Start from the established public baseline rather than reopening ${known.slice(0,2).map(x=>x.topic).filter(Boolean).join(' / ')}.`);
-  if(dims.length) parts.push(`Resolve ${dims.join(' → ')} in that order.`);
-  if(hasBranches) parts.push('Open secondary branches only when the prospect earns them.');
-  return parts.length?`<p class="call-direction"><span>Direction</span> ${esc(parts.join(' '))}</p>`:'';
+  // Never convert an unordered list of open variables into a prescribed call path.
+  const direction=text(prepare?.call_strategy?.opening_move);
+  return direction?`<p class="call-direction"><span>Provider direction</span> ${esc(direction)}</p>`:'';
 }
 
 function render(brief){
