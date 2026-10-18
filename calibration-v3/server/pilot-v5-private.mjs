@@ -7,6 +7,7 @@ import { json, parseJson, cookieValue } from './http.mjs';
 import { projectFinalReplay } from '../../brief-v5/replay-adapter.mjs';
 import { assessCommercialBrief } from '../../clarification-v1/server/commercial-brief-readiness.mjs';
 import { reviewDecisionQuality } from '../../clarification-v1/server/decision-quality-review.mjs';
+import { reviewEvidenceScore } from '../../brief-v5/evidence-score-review.mjs';
 
 const OPPORTUNITY = 'claris_realistic_soc2_20261013_r2';
 const CONSULTANT = 'pilot_mehdi_medjahed_20260922';
@@ -192,6 +193,9 @@ async function load(request) {
   const depth=assessCommercialBrief(safeBrief.payload.final_replay_v3);
   const review=reviewDecisionQuality(safeBrief.payload.final_replay_v3,{
     trustedBookingText:booking.booking.verbatim_text
+  });
+  projected.payload.evidence_score_review=reviewEvidenceScore(safeBrief.payload.final_replay_v3,{
+    evidenceRegistry:evidence,acceptedManifest:accepted,commercialReview:review
   });
   projected.payload.commercial_depth={
     status:review.status,

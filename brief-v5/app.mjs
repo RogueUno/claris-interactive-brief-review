@@ -105,28 +105,46 @@ function readinessArc(ready,meaning='Prepared'){
   });
 }
 
-function scoreDetail(key,scorecard){
+function scoreDetail(key,scorecard,evidenceReview=null){
   const fit=scorecard?.lead_fit||{},ev=scorecard?.evidence_coverage||{},ready=scorecard?.call_readiness||{};
   if(key==='fit')return{
-    title:'Lead fit',answer:fit.grade||((fit.supported_match!=null&&Number.isFinite(Number(fit.supported_match)))?`${esc(fit.supported_match)}/100 (provisional)`:'—'),descriptor:fit.grade?fit.descriptor:'Numerical fit · no certified grade',icon:'spark',
+    title:'Lead fit',answer:fit.grade||((fit.provisional_grade&&fit.supported_match!=null)?`${esc(fit.provisional_grade)} · ${esc(fit.supported_match)}/100 (provisional)`:(fit.supported_match!=null?`${esc(fit.supported_match)}/100 (provisional)`:'—')),descriptor:fit.grade?fit.descriptor:'Rubric-derived provisional grade · not certified',icon:'spark',
     body:`<p>${fit.grade?`${esc(fit.scorable_coverage??0)} of 100 weighted fit criteria are currently scorable.`:fit.supported_match!=null?`Make FINALIZE calculated ${esc(fit.supported_match)}/100 supported match, with ${esc(fit.scorable_coverage??'unknown')}/100 criteria scorable. This is a provisional numerical signal, not a certified letter grade.`:`The lead has no validated numerical fit score. No letter grade has been certified.`}</p>
     <ul class="metric-list">${arr(fit.dimensions).map(x=>`<li><div><strong>${esc(x.label)}</strong><p>${esc(x.reason)}</p></div><span class="status ${statusTone(x.status)}">${esc(text(x.status).replaceAll('_',' '))}</span></li>`).join('')}</ul>`
   };
-  if(key==='evidence')return{
-    title:'Evidence coverage',answer:ev.score!=null&&ev.score_origin==='FINALIZE_PROVIDER_METRIC'?`${esc(ev.score)}/100 (provider)` : evidenceLevel(ev.score).label,descriptor:ev.score_origin==='FINALIZE_PROVIDER_METRIC'?'Internal completeness metric · unverified':'Source support and diagnostic coverage',icon:'shield',
-    body:`<p>Internal FINALIZE completeness: ${esc(ev.score??'—')}/100. ${ev.score_origin==='FINALIZE_PROVIDER_METRIC'?'The provider assigned points across its completeness categories. This is not an independent source validation or proof that the buyer’s exact acceptance criteria are resolved.':'This score measures evidence completeness, not lead fit.'}</p>
-    <ul class="metric-list">${arr(ev.dimensions).map(x=>`<li><div><strong>${esc(x.label)}</strong><p>${esc(x.reason)}</p></div><span class="status ${statusTone(x.status)}">${esc(text(x.status).replaceAll('_',' '))}</span></li>`).join('')}</ul>`
-  };
+  if(key==='evidence'){
+    const warnings=arr(evidenceReview?.warnings);
+    const high=warnings.filter(w=>[
+      'FULL_CRITICAL_COVERAGE_WITH_OPEN_BUYER_DECISION',
+      'FULL_AMBIGUITY_CONTROL_WITH_OPEN_DECISION',
+      'PERFECT_SCORE_NOT_INDEPENDENTLY_SUPPORTED',
+      'FAC_BASIS_NOT_ADMISSIBLE','PROSPECT_BASIS_UNBOUND'
+    ].includes(w.code));
+    const explain=high.length?high:warnings.slice(0,6);
+    const detail=explain.length
+      ?`<div class="evidence-assurance-detail"><p><strong>Why this provider grade is under review</strong></p><ul class="metric-list">${explain.map(w=>`<li><div><strong>${esc(w.category.replaceAll('_',' '))}</strong><p>${esc(w.explanation)}</p></div></li>`).join('')}</ul></div>`
+      :`<p>Independent semantic evidence quality has not been certified.</p>`;
+    return{
+      title:'Evidence coverage',
+      answer:ev.score!=null&&ev.score_origin==='FINALIZE_PROVIDER_METRIC'
+        ?`${ev.provisional_grade?esc(ev.provisional_grade)+' · ':''}${esc(ev.score)}/100 (provider)`
+        :evidenceLevel(ev.score).label,
+      descriptor:evidenceReview?.review_required?'Independent quality review required':'Provider completeness · not independently certified',
+      icon:'shield',
+      body:`<p>Make FINALIZE assigned <strong>${esc(ev.score??'—')}/100</strong> using five weighted completeness categories. This is not a verified external evidence-quality score. ${evidenceReview?.mathematically_consistent===true?'The category-weight calculation is consistent.':''}</p>${detail}<ul class="metric-list">${arr(ev.dimensions).map(x=>`<li><div><strong>${esc(x.label)}</strong><p>${esc(x.reason)}</p></div><span class="status ${statusTone(x.status)}">${esc(text(x.status).replaceAll('_',' '))}${x.points!=null?' · '+esc(x.points):''}</span></li>`).join('')}</ul>`
+    };
+  }
   return{
     title:'Call readiness',answer:text(ready.status||'—').replaceAll('_',' '),descriptor:ready.open_variables?`${ready.open_variables} material variable${ready.open_variables===1?'':'s'} mapped to the call`:'Diagnostic state',icon:'target',
     body:`<p>${ready.status==='READY'?'Each admitted variable has a primary question and the certification gates passed.':'One or more question-coverage or certification gates remain unresolved.'}</p>`
   };
 }
-function scoreMarkup(scorecard){
+function scoreMarkup(scorecard,evidenceReview=null){
   if(scorecard?.schema_version!=='CLARIS_PRECALL_SCORECARD_V1')return'';
   const fit=scorecard.lead_fit||{},ev=scorecard.evidence_coverage||{},ready=scorecard.call_readiness||{},eq=evidenceLevel(ev.score);
   const hasProviderFit=fit.supported_match!=null&&Number.isFinite(Number(fit.supported_match));
   const providerEvidence=ev.score_origin==='FINALIZE_PROVIDER_METRIC'&&ev.score!=null&&Number.isFinite(Number(ev.score));
+  const evidenceNeedsReview=evidenceReview?.review_required===true;
   return `<section class="signal-block instrument-deck panel">
     <div class="instrument-header">
       <div><span class="eyebrow">Decision instruments</span><strong>Lead grade · evidence score · readiness state</strong></div>
@@ -135,14 +153,14 @@ function scoreMarkup(scorecard){
     <div class="signal-row">
       <button class="signal instrument-tile" data-score="fit" aria-expanded="false">
         <span class="signal-label">${icon('spark','small-icon')} Lead fit</span>
-        ${fit.grade?gradeArc(fit.grade,fit.descriptor):hasProviderFit?arcInstrument({fill:Number(fit.supported_match),display:String(Math.round(Number(fit.supported_match))),caption:'Provider /100',tone:'deep',badge:`${esc(fit.scorable_coverage??'—')}/100 scorable`}):gradeArc(null,'Unscored')}
-        <span class="signal-desc">${esc(fit.grade?fit.descriptor:hasProviderFit?'Provisional fit · grade not certified':'No supported fit score')}</span>
+        ${fit.grade?gradeArc(fit.grade,fit.descriptor):hasProviderFit?arcInstrument({fill:Number(fit.supported_match),display:fit.provisional_grade||String(Math.round(Number(fit.supported_match))),caption:'Fit · provisional',tone:'deep',badge:`${esc(fit.supported_match)}/100 · ${esc(fit.scorable_coverage??'—')}/100 scorable`}):gradeArc(null,'Unscored')}
+        <span class="signal-desc">${esc(fit.grade?fit.descriptor:hasProviderFit?'A–D rubric · provisional, not certified':'No supported fit score')}</span>
         <span class="why">Why ${icon('arrow','mini-icon')}</span>
       </button>
       <button class="signal instrument-tile" data-score="evidence" aria-expanded="false">
         <span class="signal-label">${icon('shield','small-icon')} Evidence coverage</span>
-        ${providerEvidence?arcInstrument({fill:Number(ev.score),display:String(Math.round(Number(ev.score))),caption:'Provider /100',tone:'accent',badge:'Not independently verified'}):evidenceArc(ev.score,eq.label==='Very strong'?'Very strong':eq.label==='Strong'?'Strong':eq.label==='Usable'?'Usable':eq.label==='Thin'?'Thin':'Low')}
-        <span class="signal-desc">${providerEvidence?'Internal completeness · not certified':'Source support & diagnostic coverage'}</span>
+        ${providerEvidence?arcInstrument({fill:Number(ev.score),display:ev.provisional_grade||String(Math.round(Number(ev.score))),caption:'Evidence · provider',tone:'accent',badge:`${esc(ev.score)}/100 · ${evidenceNeedsReview?'review required':'not verified'}`}):evidenceArc(ev.score,eq.label==='Very strong'?'Very strong':eq.label==='Strong'?'Strong':eq.label==='Usable'?'Usable':eq.label==='Thin'?'Thin':'Low')}
+        <span class="signal-desc">${evidenceNeedsReview?'Provider A · independent evidence review required':providerEvidence?'A–D rubric · provider metric, not verified':'Source support & diagnostic coverage'}</span>
         <span class="why">Why ${icon('arrow','mini-icon')}</span>
       </button>
       <button class="signal instrument-tile" data-score="ready" aria-expanded="false">
@@ -169,9 +187,9 @@ function orientationMarkup(brief,context,companySnapshot){
         <div class="identity-meta"><span>${icon('lock','mini-icon')} Private opportunity intelligence</span></div>
       </article>
       <article class="meeting-card panel">
-        <span class="eyebrow">${icon('calendar','mini-icon')} The call</span>
+        <span class="eyebrow">${icon('calendar','mini-icon')} ${context.simulation_note?'Simulation':'The call'}</span>
         <strong class="call-time">${valid?esc(meeting.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})):'—'}</strong>
-        <span class="call-date">${valid?esc(meeting.toLocaleDateString([], {weekday:'short',day:'numeric',month:'short',year:'numeric'})):'Meeting time not attached'}</span>
+        <span class="call-date">${valid?esc(meeting.toLocaleDateString([], {weekday:'short',day:'numeric',month:'short',year:'numeric'})):(context.simulation_note?'No verified Calendly meeting time':'Meeting time unavailable')}</span>
         ${valid?`<div class="countdown" data-countdown="${esc(meeting.toISOString())}">${icon('timer','mini-icon')}<span>Calculating…</span></div>`:''}
         <div class="call-chips"><span>Private brief</span><span>Pre-call</span></div>
       </article>
@@ -239,13 +257,13 @@ function companySnapshotMarkup(snapshot){
   const metrics=keys
     .map(key=>({key,item:fields[key]||snapshot?.[key]||null}))
     .filter(entry=>entry.item?.supported===true&&entry.item?.display&&entry.item?.source_url);
-  if(metrics.length<3)return'';
+  if(!metrics.length)return'';
   const intro=snapshot?.intro?.supported===true?text(snapshot.intro.display):'';
   const lastRowStart=Math.floor((metrics.length-1)/2)*2;
   return `<aside class="company-snapshot-v52 panel" aria-label="Company snapshot">
     <div class="snapshot-v52-head">
       <div class="snapshot-v52-title"><span class="snapshot-v52-title-icon">${icon('building','small-icon')}</span><div class="snapshot-v52-title-copy"><span class="eyebrow">Company snapshot</span>${intro?`<p class="snapshot-v52-intro">${esc(intro)}</p>`:`<strong>Who this company is</strong>`}</div></div>
-      <span class="snapshot-v52-state">Public facts</span>
+      <span class="snapshot-v52-state">Source-reported profile</span>
     </div>
     <div class="snapshot-v52-metrics">
       ${metrics.map(({key,item},index)=>`<article class="snapshot-v52-metric ${key==='company_type'?'is-company-type ':''}${index>=lastRowStart?'is-last-row ':''}${metrics.length%2===1&&index===metrics.length-1?'is-wide-last':''}">
@@ -262,9 +280,9 @@ function companySnapshotMarkup(snapshot){
 function contextMarkup(prepare,known){
   const signals=contextSignals(prepare,known),visible=signals.slice(0,3),rest=signals.slice(3);
   const item=s=>`<article class="matter-card panel">
-    <div class="matter-head"><span class="truth-badge fact">${icon('fact','mini-icon')} Fact</span><span class="matter-icon">${icon('radar')}</span></div>
+    <div class="matter-head"><span class="truth-badge ${s.kind==='UNVERIFIED_HYPOTHESIS'?'hypothesis':'decision'}">${icon(s.kind==='UNVERIFIED_HYPOTHESIS'?'hypothesis':'question','mini-icon')} ${s.kind==='UNVERIFIED_HYPOTHESIS'?'Unverified hypothesis':'Provider assessment'}</span><span class="matter-icon">${icon('radar')}</span></div>
     <strong>${esc(s.signal)}</strong>
-    <p>${esc(s.observation)}</p>
+    <p>${esc(s.observation)}</p>${arr(s.basis_ids).length?`<small>Basis: ${esc(s.basis_ids.join(' · '))}</small>`:''}
     <div class="implication"><span>Call implication</span><p>${esc(s.call_implication)}</p></div>
   </article>`;
   return `<div class="matter-grid">${visible.map(item).join('')}</div>
@@ -281,9 +299,10 @@ function knownMarkup(known){
 function questionMap(discovery){return new Map(arr(discovery?.primary_questions).map(q=>[text(q.question_id),q]));}
 function dimensionMap(prepare){return new Map(arr(prepare?.open_dimensions).map(d=>[text(d.dimension_id),d]));}
 function questionForStep(step,index,questions){
+  const key=text(step?.question_id);if(key){const matched=questions.find(q=>text(q.question_id)===key);if(matched)return matched;}
   const m=text(step?.move).match(/\bQ\d+\b/i);
   if(m)return questions.find(q=>text(q.question_id).toUpperCase()===m[0].toUpperCase())||null;
-  return index<questions.length?questions[index]:null;
+  return null; // No positional guessing: unmatched source questions stay unbound.
 }
 function cleanMove(move,qid){
   let s=text(move);
@@ -293,19 +312,46 @@ function cleanMove(move,qid){
   }
   return s.charAt(0).toUpperCase()+s.slice(1);
 }
-function blindspotMarkup(prepare,discovery){
-  const qByDim=new Map(arr(discovery?.primary_questions).map(q=>[text(q.dimension_id),q]));
+function blindspotMarkup(prepare,discovery,commercialDepth){
   const dims=arr(prepare?.open_dimensions);
+  const fork=commercialDepth?.buyer_deliverable_fork||{};
+  const suggested=fork.open===true?fork.reviewer_question:null;
+  const review=suggested&&text(suggested.question)?[{
+    label:'Buyer-required assurance deliverable',
+    why_open:text(suggested.rationale)||'Buyer acceptance criteria remain unresolved.',
+    status:'REVIEW_REQUIRED',priority:'PRIMARY',
+    basis_ids:arr(suggested.basis_ids),
+    reviewer_question:text(suggested.question),
+    origin:'DETERMINISTIC_REVIEW_SUGGESTION'
+  }]:[];
+  const items=[...review,...dims].filter(d=>text(d.label)&&text(d.why_open));
+  if(!items.length)return'';
+  const primary=items.filter(x=>x.priority!=='SECONDARY');
+  const secondary=items.filter(x=>x.priority==='SECONDARY');
+  const questionMap=new Map(arr(discovery?.primary_questions)
+    .filter(q=>text(q.dimension_id))
+    .map(q=>[text(q.dimension_id),q]));
+  const entry=(d,i)=>{
+    const q=questionMap.get(text(d.dimension_id));
+    const status=d.status==='REVIEW_REQUIRED'?'Reviewer-identified gap'
+      :d.status==='PARTIALLY_ESTABLISHED'?'Partially established':'Not established';
+    const supporting=arr(d.basis_ids).filter(x=>text(x));
+    return `<article>
+      <div class="blindspot-node"><span>${String(i+1).padStart(2,'0')}</span>${icon('alert','mini-icon')}</div>
+      <div class="blindspot-copy">
+        <span class="unknown-badge">${esc(status)}</span>
+        <strong>${esc(d.label)}</strong>
+        <p>${esc(d.why_open)}</p>
+        ${supporting.length?`<small>Evidence reference: ${esc(supporting.join(' · '))}</small>`:''}
+        ${d.reviewer_question?`<p><b>Consultant review suggestion (not a FINALIZE question):</b> ${esc(d.reviewer_question)}</p>`:''}
+      </div>
+      ${q?`<a href="#phase-${esc(q.question_id)}">${icon('question','mini-icon')} Explore in question ${esc(q.question_id)}</a>`:''}
+    </article>`;
+  };
   return `<section class="blindspots panel">
     <div class="blindspot-heading">${icon('alert')}<div><span class="eyebrow">Critical blindspots</span><h3>What the call still has to resolve</h3></div></div>
-    <div class="blindspot-rail">${dims.map((d,i)=>{
-      const q=qByDim.get(text(d.dimension_id));
-      return `<article>
-        <div class="blindspot-node"><span>${String(i+1).padStart(2,'0')}</span>${icon('alert','mini-icon')}</div>
-        <div class="blindspot-copy"><span class="unknown-badge">Unknown</span><strong>${esc(d.label)}</strong><p>${esc(d.why_open)}</p></div>
-        ${q?`<a href="#phase-${esc(q.question_id)}">${icon('question','mini-icon')} Resolved by ${esc(q.question_id)}</a>`:''}
-      </article>`;
-    }).join('')}</div>
+    ${primary.length?`<div class="blindspot-rail">${primary.map(entry).join('')}</div>`:''}
+    ${secondary.length?`<details class="more-context"><summary>Other unconfirmed dimensions · ${secondary.length}</summary><div class="blindspot-rail">${secondary.map((d,i)=>entry(d,i+primary.length)).join('')}</div></details>`:''}
   </section>`;
 }
 
@@ -328,7 +374,9 @@ function branchesMarkup(q){
   </details>`;
 }
 function routeLabel(step,index,q,dim,flowLength){
+  if(text(step?.label))return excerpt(step.label,46);
   if(dim?.label)return text(dim.label).replace(/^exact\s+/i,'');
+  if(q?.ask)return excerpt(q.ask,46);
   if(index===flowLength-1)return'Next step';
   const cleaned=cleanMove(step?.move,q?.question_id).replace(/[.?!].*$/,'');
   return excerpt(cleaned,28);
@@ -358,12 +406,12 @@ function runCallMarkup(discovery,prepare){
             <span class="phase-toggle">Open ${icon('arrow','mini-icon')}</span>
           </summary>
           <div class="phase-content phase-expanded">
-            <h3>${esc(cleanMove(step.move,q.question_id))}</h3>
+            ${text(step.move)?`<h3>${esc(cleanMove(step.move,q.question_id))}</h3>`:''}
             <div class="question-core"><span class="question-kicker">${icon('target','mini-icon')} Ask</span><blockquote>${esc(q.ask)}</blockquote></div>
-            <div class="listener-grid">
-              <section class="why-tile"><span class="sub-label">${icon('spark','mini-icon')} Why this matters</span><p>${esc(q.why_now)}</p></section>
-              <section class="listen-tile"><span class="sub-label">${icon('ear','mini-icon')} Listen for</span>${listenMarkup(q.listen_for)}</section>
-            </div>
+            ${text(q.why_now)||arr(q.listen_for).length?`<div class="listener-grid ${!arr(q.listen_for).length?'is-single':''}">
+              ${text(q.why_now)?`<section class="why-tile"><span class="sub-label">${icon('spark','mini-icon')} Why this matters</span><p>${esc(q.why_now)}</p></section>`:''}
+              ${arr(q.listen_for).length?`<section class="listen-tile"><span class="sub-label">${icon('ear','mini-icon')} Listen for</span>${listenMarkup(q.listen_for)}</section>`:''}
+            </div>`:''}
             ${branchesMarkup(q)}
             ${text(step.advance_when)?`<details class="done-when"><summary>${icon('check','mini-icon')} Done when</summary><p>${esc(step.advance_when)}</p></details>`:''}
           </div>
@@ -379,20 +427,23 @@ function runCallMarkup(discovery,prepare){
 }
 
 function nextMoveMarkup(scorecard,discovery){
-  const action=text(scorecard?.strategy?.recommended_action)||'Agree the next scoped action once the open variables are resolved.';
+  const action=text(scorecard?.strategy?.recommended_action);
   const gate=discovery?.end_of_call_decision||{};
+  const sections=[
+    {title:'Advance if',items:arr(gate.ready_for_next_step_if)},
+    {title:'Keep diagnosing if',items:arr(gate.remain_in_discovery_if)},
+    {title:'Only deprioritize if',items:arr(gate.disqualify_or_deprioritize_if)}
+  ].filter(s=>s.items.length);
   return `<article class="next-move">
-    <div class="decision-icon">${icon('arrow')}</div>
-    <div><span class="truth-badge decision">Decision</span><span class="eyebrow">Conditional next move</span><strong>${esc(action)}</strong>
-      <details><summary>Decision conditions</summary><div class="decision-conditions">
-        <section><h4>Advance if</h4><ul>${arr(gate.ready_for_next_step_if).map(x=>`<li>${esc(x)}</li>`).join('')}</ul></section>
-        <section><h4>Keep diagnosing if</h4><ul>${arr(gate.remain_in_discovery_if).map(x=>`<li>${esc(x)}</li>`).join('')}</ul></section>
-        <section><h4>Only deprioritize if</h4><ul>${arr(gate.disqualify_or_deprioritize_if).map(x=>`<li>${esc(x)}</li>`).join('')}</ul></section>
-      </div></details>
+    <div class="decision-icon">${icon(action?'arrow':'alert')}</div>
+    <div>
+      <span class="truth-badge ${action?'decision':'unknown'}">${action?'Provider recommendation · review before action':'Review required'}</span>
+      <span class="eyebrow">Conditional next move</span>
+      <strong>${esc(action||'No provider-supported next action is established for this opportunity.')}</strong>
+      ${sections.length?`<details><summary>Decision conditions</summary><div class="decision-conditions">${sections.map(s=>`<section><h4>${esc(s.title)}</h4><ul>${s.items.map(x=>`<li>${esc(x)}</li>`).join('')}</ul></section>`).join('')}</div></details>`:''}
     </div>
   </article>`;
 }
-
 function externalSignalMarkup(prepare){
   for(const evidence of arr(prepare?.expandable_blocks?.evidence)){
     const third=arr(evidence?.sources).find(source=>text(source?.source_type)==='THIRD_PARTY');
@@ -420,9 +471,9 @@ function sourceIndex(prepare){
   return [...groups.values()].map(g=>({...g,claims:uniq(g.claims),used:uniq(g.used),notUsed:uniq(g.notUsed),pages:[...new Map(g.pages.map(p=>[p.url,p])).values()]}));
 }
 function proofMarkup(prepare,groups){
-  const totalObs=groups.reduce((n,g)=>n+g.claims.length,0),totalPages=groups.reduce((n,g)=>n+g.pages.length,0);
+  const totalPages=groups.reduce((n,g)=>n+g.pages.length,0);
   return `<details class="proof-drawer">
-    <summary><div>${icon('file')}<span><span class="eyebrow">Audit layer</span><strong>Evidence & sources</strong></span></div><small>${totalObs} observations · ${totalPages} pages</small><span class="inspect">Inspect ${icon('arrow','mini-icon')}</span></summary>
+    <summary><div>${icon('file')}<span><span class="eyebrow">Audit layer</span><strong>Evidence & sources</strong></span></div><small>${totalPages} linked source pages · ${groups.length} domains</small><span class="inspect">Inspect ${icon('arrow','mini-icon')}</span></summary>
     <div class="proof-body">
       <div class="proof-tabs"><button class="is-active" data-proof-tab="evidence">Evidence</button><button data-proof-tab="reasoning">Reasoning</button><button data-proof-tab="unknowns">Unknowns</button></div>
       <div class="proof-panel is-active" data-proof-panel="evidence"><div class="source-pills">${groups.map((g,i)=>`<button class="source-pill${i===0?' is-active':''}" data-source="${esc(g.key)}">${icon('link','mini-icon')}<strong>${esc(g.key)}</strong><span>${g.claims.length} obs</span></button>`).join('')}</div><div class="source-tray" data-source-tray></div></div>
@@ -433,14 +484,9 @@ function proofMarkup(prepare,groups){
 }
 
 function callDirectionMarkup(prepare,discovery){
-  const known=knownGoingIn(discovery);
-  const dims=arr(prepare?.open_dimensions).slice(0,3).map(d=>text(d.label)).filter(Boolean);
-  const hasBranches=arr(discovery?.primary_questions).some(q=>arr(q?.conditional_probes).length);
-  const parts=[];
-  if(known.length) parts.push(`Start from the established public baseline rather than reopening ${known.slice(0,2).map(x=>x.topic).filter(Boolean).join(' / ')}.`);
-  if(dims.length) parts.push(`Resolve ${dims.join(' → ')} in that order.`);
-  if(hasBranches) parts.push('Open secondary branches only when the prospect earns them.');
-  return parts.length?`<p class="call-direction"><span>Direction</span> ${esc(parts.join(' '))}</p>`:'';
+  // Never convert an unordered list of open variables into a prescribed call path.
+  const direction=text(prepare?.call_strategy?.opening_move);
+  return direction?`<p class="call-direction"><span>Provider direction</span> ${esc(direction)}</p>`:'';
 }
 
 function render(brief){
@@ -448,17 +494,29 @@ function render(brief){
   const companySnapshot=brief?.payload?.company_snapshot||null;
   const known=knownGoingIn(discovery),groups=sourceIndex(prepare);
   const snapshotMarkup=companySnapshotMarkup(companySnapshot);
-  const replayNotice=brief?.payload?.final_replay_v3?'<section class="panel" role="note" style="margin:18px 0;padding:18px 22px;border-left:4px solid #9f825d"><span class="eyebrow">Controlled simulation · actual Make FINALIZE output</span><p>Fictional prospect, public PostHog research. Provider audit PASS; independent commercial certification not established. Scores are provisional and only actual generated questions are shown.</p></section>':'';
+  const depth=brief?.payload?.commercial_depth||{};
+  const held=depth.status==='HOLD_FOR_COMMERCIAL_REVIEW'||depth.status==='BOOKING_AUTHORITY_REQUIRED';
+  const gaps=arr(depth.missing).map(x=>text(x).replaceAll('_',' '));
+  const expiryTs=typeof brief?.expires_at==='string'?Date.parse(brief.expires_at):NaN;
+  const expiryCaption=Number.isFinite(expiryTs)?'Private · expires '+new Date(expiryTs).toLocaleDateString():'Private · expiration unavailable';
+  const replayNotice=brief?.payload?.final_replay_v3
+    ?`<section class="panel brief-quality-notice" role="status" aria-label="Commercial brief status">
+        <span class="eyebrow">Controlled Make.com simulation · original FINALIZE output</span>
+        <strong>${held?'Commercial review required':(text(depth.status)||'Commercial certification not established').replaceAll('_',' ')}</strong>
+        <p>Provider audit PASS only confirms its internal checks. Fit and evidence numbers remain provisional; this is not a certified buyer assessment.</p>
+        ${gaps.length?`<p class="quality-gaps"><b>Unresolved:</b> ${esc(gaps.join(' · '))}</p>`:''}
+      </section>`:'';
+
   root.innerHTML=`
-    <header class="topbar"><a class="brand" href="#top">${icon('spark','brand-icon')}<span>CLARIS</span></a><nav class="segmented-nav"><a href="#matters">${icon('radar','mini-icon')} What matters</a><a href="#run">${icon('route','mini-icon')} Run the call</a><a href="#next">${icon('arrow','mini-icon')} Next move</a><a href="#evidence">${icon('file','mini-icon')} Evidence</a></nav><span class="private">${icon('lock','mini-icon')} Private · expires ${esc(new Date(brief.expires_at).toLocaleDateString())}</span></header>
+    <header class="topbar"><a class="brand" href="#top">${icon('spark','brand-icon')}<span>CLARIS</span></a><nav class="segmented-nav"><a href="#matters">${icon('radar','mini-icon')} What matters</a><a href="#run">${icon('route','mini-icon')} Run the call</a><a href="#next">${icon('arrow','mini-icon')} Next move</a><a href="#evidence">${icon('file','mini-icon')} Evidence</a></nav><span class="private">${icon('lock','mini-icon')} ${esc(expiryCaption)}</span></header>
     ${replayNotice}
     <div id="top">${orientationMarkup(brief,context,companySnapshot)}</div>
 
     <section class="section overview">
       <div class="section-head compact"><span class="eyebrow">At a glance</span><h2>Opportunity signal</h2></div>
-      ${scoreMarkup(scorecard)}
+      ${scoreMarkup(scorecard,brief?.payload?.evidence_score_review)}
       ${bookingSnapshotMarkup(context.booking_text,snapshotMarkup)}
-      <article class="call-focus panel"><div class="focus-icon">${icon('target')}</div><div><span class="eyebrow">Call focus</span><h2>${esc(discovery.call_objective||prepare?.call_strategy?.opening_move||'Run a focused diagnostic conversation.')}</h2>${callDirectionMarkup(prepare,discovery)}${prepare.executive_readout?`<details><summary>Working model</summary><p>${esc(prepare.executive_readout)}</p></details>`:''}</div></article>
+      <article class="call-focus panel"><div class="focus-icon">${icon('target')}</div><div><span class="eyebrow">Call focus</span><h2>${esc(excerpt(discovery.call_objective||prepare?.call_strategy?.opening_move||'Call objective not established — consultant review required.',220))}</h2>${callDirectionMarkup(prepare,discovery)}${prepare.executive_readout?`<details><summary>Working model</summary><p>${esc(prepare.executive_readout)}</p></details>`:''}</div></article>
       ${externalSignalMarkup(prepare)}
     </section>
 
@@ -466,7 +524,7 @@ function render(brief){
       <div class="section-head"><div><span class="eyebrow">What matters</span><h2>Only what should change your behaviour on the call</h2></div><p>Fact first. Interpretation second. Everything else stays in evidence.</p></div>
       ${contextMarkup(prepare,known)}
       ${knownMarkup(known)}
-      ${blindspotMarkup(prepare,discovery)}
+      ${blindspotMarkup(prepare,discovery,brief?.payload?.commercial_depth)}
     </section>
 
     <section id="run" class="section run-section">
@@ -477,7 +535,7 @@ function render(brief){
     <section id="next" class="section"><div class="section-head compact"><span class="eyebrow">Next move</span><h2>Conditional decision</h2></div>${nextMoveMarkup(scorecard,discovery)}</section>
     <section id="evidence" class="section evidence-section">${proofMarkup(prepare,groups)}</section>
   `;
-  bindMotionPolish();bindQuestionPhases();bindBooking();bindScore(scorecard);bindCountdown();bindProof(groups);
+  bindMotionPolish();bindQuestionPhases();bindBooking();bindScore(scorecard,brief?.payload?.evidence_score_review);bindCountdown();bindProof(groups);
 }
 
 function bindMotionPolish(){
@@ -546,7 +604,7 @@ function bindBooking(){
     button.innerHTML=(expanded?'Read full request ':'Collapse ')+icon('arrow','mini-icon');
   });
 }
-function bindScore(scorecard){
+function bindScore(scorecard,evidenceReview=null){
   if(scorecard?.schema_version!=='CLARIS_PRECALL_SCORECARD_V1')return;
   const tray=root.querySelector('[data-score-tray]'),buttons=[...root.querySelectorAll('[data-score]')];
   buttons.forEach(button=>button.addEventListener('click',()=>{
@@ -554,7 +612,7 @@ function bindScore(scorecard){
     buttons.forEach(b=>{b.setAttribute('aria-expanded','false');b.classList.remove('is-active');});
     if(open){tray.hidden=true;tray.innerHTML='';return;}
     button.setAttribute('aria-expanded','true');button.classList.add('is-active');
-    const d=scoreDetail(button.dataset.score,scorecard);
+    const d=scoreDetail(button.dataset.score,scorecard,evidenceReview);
     tray.innerHTML=`<div class="score-tray-head">${icon(d.icon)}<div><span class="eyebrow">${esc(d.title)}</span><h3>${esc(d.answer)} · ${esc(d.descriptor)}</h3></div></div>${d.body}`;
     tray.hidden=false;
   }));

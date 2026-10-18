@@ -1,0 +1,36 @@
+name: Make CLARIS V5 offline browser QA
+on:
+  push:
+    branches: [repair/make-v5-semantic-contract-20261013]
+    paths:
+      - 'brief-v5/browser-qa.mjs'
+      - 'brief-v5/app.mjs'
+      - 'brief-v5/styles.css'
+      - 'brief-v5/evidence-score-review.test.mjs'
+      - 'brief-v5/replay-adapter.mjs'
+      - 'brief-v5/evidence-score-review.mjs'
+      - '.github/workflows/v5-browser-qa.yml'
+  workflow_dispatch:
+jobs:
+  chromium-visual-acceptance:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+      - name: Install browser runner only, no provider SDKs
+        run: npm install --no-save --no-package-lock --ignore-scripts playwright@1.56.0
+      - name: Install Chromium dependencies
+        run: npx playwright install --with-deps chromium
+      - name: Desktop, tablet and mobile interactive QA
+        run: node brief-v5/browser-qa.mjs
+      - name: Keep screenshots and diagnostic traces
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: make-claris-v5-offline-visual-qa
+          path: browser-qa-artifacts/
+          retention-days: 14
+          if-no-files-found: warn

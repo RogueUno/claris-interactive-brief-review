@@ -1667,3 +1667,39 @@ body{
   background:rgba(255,255,255,.075)!important;
   border-color:rgba(231,240,235,.13)!important
 }
+
+/* V5 browser-certified mobile overflow repair: keep the four nav actions usable
+   inside a scrollable header rail without widening the document. */
+@media(max-width:600px){
+  .topbar{min-width:0}
+  .topbar .segmented-nav{
+    display:flex!important;
+    width:100%;
+    max-width:100%;
+    min-width:0;
+    overflow-x:auto!important;
+    overflow-y:hidden;
+    justify-content:flex-start;
+    overscroll-behavior-x:contain;
+    -webkit-overflow-scrolling:touch;
+    scrollbar-width:none;
+  }
+  .topbar .segmented-nav::-webkit-scrollbar{display:none}
+  .topbar .segmented-nav a{flex:0 0 auto}
+}
+
+/* Browser-QA gauge label repair: preserve the half-circle and grade,
+   but place score provenance below the SVG rather than over the arc. */
+.instrument-deck .gauge .gauge-badge{
+  position:static!important;
+  display:table;
+  width:auto;
+  max-width:100%;
+  margin:2px auto 7px!important;
+  transform:none!important;
+  text-align:center;
+  white-space:normal;
+  font-size:10px!important;
+  line-height:1.25!important;
+  letter-spacing:0;
+}
