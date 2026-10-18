@@ -85,3 +85,39 @@ test('a structurally clean case still cannot claim independent certification',()
  assert.equal(x.commercial_certification,false);
  assert.equal(x.independent_quality_score,null);
 });
+
+test('October first PostHog 74.75/100 string score follows frozen weighted category arithmetic',()=>{
+  const early={
+    deterministic_metrics:{evidence_completeness:'74.75/100'},
+    completeness_classifications:{
+      critical_question_coverage:{status:'PARTIAL',basis_ids:['PROS-001','BOOK-001']},
+      source_authority:{status:'COMPLETE',basis_ids:['FAC-001','FAC-002','PROS-001']},
+      corroboration_depth:{status:'WEAK',basis_ids:['PROS-001']},
+      freshness:{status:'COMPLETE',basis_ids:['PROS-001']},
+      conflict_ambiguity_control:{status:'COMPLETE',basis_ids:['FAC-007']}
+    }
+  };
+  const facts=['FAC-001','FAC-002','FAC-007'].map(evidence_id=>({
+    evidence_id,admission_status:'ADMITTED',sensitivity:'STANDARD',source_url:'https://example.org/'+evidence_id
+  }));
+  // Fixture checks the scoring contract only; these records are synthetic,
+  // not claims that the historical source URLs or admissions were verified.
+  const outcome=reviewEvidenceScore(early,{
+    evidenceRegistry:facts,
+    acceptedManifest:{ok:true,entries:[{evidence_id:'PROS-001'}]},
+    commercialReview:{buyer_deliverable_fork:{open:true}}
+  });
+  assert.equal(outcome.provider_score,74.75);
+  assert.equal(outcome.mathematically_consistent,true);
+  assert.equal(outcome.scoring_dimensions.reduce((sum,x)=>sum+x.expected_points,0),74.75);
+  assert.ok(!outcome.warnings.some(w=>w.code==='PROVIDER_SCORE_INVALID'));
+  assert.equal(outcome.independent_quality_score,null);
+  assert.equal(outcome.commercial_certification,false);
+});
+test('malformed score text cannot be interpreted as a valid numeric metric',()=>{
+  for(const text of ['100/80','100 points','80%; approved','', 'NaN']){
+    const x=structuredClone(data);
+    x.engagement_metadata.deterministic_metrics.evidence_completeness=text;
+    assert.ok(check(x).warnings.some(w=>w.code==='PROVIDER_SCORE_INVALID'),text);
+  }
+});
