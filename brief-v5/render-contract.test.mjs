@@ -199,3 +199,15 @@ test('evidence score drawer explains why provider A/100 is held despite consiste
   assert.match(result.body,/buyer-required assurance deliverable remains unresolved/);
   assert.match(result.body,/Absence of conflicts does not resolve open buyer requirements/);
 });
+
+test('call direction appears only when provider authored it, not from unordered unknowns',()=>{
+  const ordinary=project();
+  const html=render(ordinary);
+  assert.doesNotMatch(html,/Resolve .* in that order/);
+  assert.doesNotMatch(html,/class="call-direction"/);
+  const explicit=structuredClone(ordinary);
+  explicit.payload.prepare.call_strategy.opening_move='Begin by confirming the exact buyer acceptance criteria.';
+  const sourced=render(explicit);
+  assert.match(sourced,/Provider direction/);
+  assert.match(sourced,/Begin by confirming the exact buyer acceptance criteria/);
+});
