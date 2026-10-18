@@ -502,6 +502,8 @@ function render(brief){
   const depth=brief?.payload?.commercial_depth||{};
   const held=depth.status==='HOLD_FOR_COMMERCIAL_REVIEW'||depth.status==='BOOKING_AUTHORITY_REQUIRED';
   const gaps=arr(depth.missing).map(x=>text(x).replaceAll('_',' '));
+  const expiryTs=typeof brief?.expires_at==='string'?Date.parse(brief.expires_at):NaN;
+  const expiryCaption=Number.isFinite(expiryTs)?'Private · expires '+new Date(expiryTs).toLocaleDateString():'Private · expiration unavailable';
   const replayNotice=brief?.payload?.final_replay_v3
     ?`<section class="panel brief-quality-notice" role="status" aria-label="Commercial brief status">
         <span class="eyebrow">Controlled Make.com simulation · original FINALIZE output</span>
@@ -511,7 +513,7 @@ function render(brief){
       </section>`:'';
 
   root.innerHTML=`
-    <header class="topbar"><a class="brand" href="#top">${icon('spark','brand-icon')}<span>CLARIS</span></a><nav class="segmented-nav"><a href="#matters">${icon('radar','mini-icon')} What matters</a><a href="#run">${icon('route','mini-icon')} Run the call</a><a href="#next">${icon('arrow','mini-icon')} Next move</a><a href="#evidence">${icon('file','mini-icon')} Evidence</a></nav><span class="private">${icon('lock','mini-icon')} Private · expires ${esc(new Date(brief.expires_at).toLocaleDateString())}</span></header>
+    <header class="topbar"><a class="brand" href="#top">${icon('spark','brand-icon')}<span>CLARIS</span></a><nav class="segmented-nav"><a href="#matters">${icon('radar','mini-icon')} What matters</a><a href="#run">${icon('route','mini-icon')} Run the call</a><a href="#next">${icon('arrow','mini-icon')} Next move</a><a href="#evidence">${icon('file','mini-icon')} Evidence</a></nav><span class="private">${icon('lock','mini-icon')} ${esc(expiryCaption)}</span></header>
     ${replayNotice}
     <div id="top">${orientationMarkup(brief,context,companySnapshot)}</div>
 
