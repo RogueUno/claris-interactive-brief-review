@@ -99,6 +99,8 @@ try{
     page.on('pageerror',e=>errors.push(e.message));
     await page.goto('http://127.0.0.1:'+port+'/brief-v5/',{waitUntil:'networkidle'});
     await page.locator('.signal-block').waitFor({state:'visible',timeout:12000});
+    assert.doesNotMatch(await page.locator('.topbar').innerText(),/Invalid Date/,name+' no bogus private expiry');
+    assert.match(await page.locator('.topbar').innerText(),/expiration unavailable/,name+' missing expiry is labeled');
     assert.equal(await page.locator('details.question-phase').count(),3,name+' questions');
     assert.equal(await page.locator('.blindspots').count(),1,name+' critical blindspots');
     assert.ok((await page.locator('.blindspots').innerText()).includes('Buyer-required assurance deliverable'),name+' buyer fork');
