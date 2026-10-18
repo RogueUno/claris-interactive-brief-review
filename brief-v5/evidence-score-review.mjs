@@ -2,7 +2,12 @@
 // DOES NOT revise a provider score, certify external facts or authorize delivery.
 const obj=x=>x&&typeof x==='object'&&!Array.isArray(x)?x:{};
 const arr=x=>Array.isArray(x)?x:[];
-const val=x=>typeof x==='number'&&Number.isFinite(x)?x:typeof x==='string'&&x.trim()!==''?Number(x):NaN;
+const val=x=>{
+  if(typeof x==='number')return Number.isFinite(x)?x:NaN;
+  if(typeof x!=='string')return NaN;
+  const match=x.trim().match(/^(-?\d+(?:\.\d+)?)(?:\s*\/\s*100)?$/);
+  return match?Number(match[1]):NaN;
+};
 const spec=[
   ['critical_question_coverage',35],
   ['source_authority',25],
