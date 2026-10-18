@@ -127,6 +127,16 @@ try{
     assert.ok(overflow.documentWidth<=overflow.viewportWidth+3,
       name+' horizontal overflow '+JSON.stringify(overflow));
     assert.deepEqual(errors,[],name+' browser runtime errors');
+    // The badge must not sit over the grade arc. This was visible in real screenshots.
+    const labelOverlaps=await page.locator('.instrument-deck .gauge').evaluateAll(items=>
+      items.flatMap((g,i)=>{
+        const svg=g.querySelector('svg'),badge=g.querySelector('.gauge-badge');
+        if(!svg||!badge)return[];
+        const a=svg.getBoundingClientRect(),b=badge.getBoundingClientRect();
+        return b.top < a.bottom-2 ?[{gauge:i,badgeTop:b.top,svgBottom:a.bottom}]:[];
+      }));
+    assert.deepEqual(labelOverlaps,[],name+' gauge badge overlays arc');
+    await page.evaluate(()=>window.scrollTo({top:0,behavior:'instant'}));
     const file=join(folder,name+'.png');
     await page.screenshot({path:file,fullPage:true,animations:'disabled'});
     results.push({name,width,height,questions:3,reviewHold:true,overflowPx:overflow.documentWidth-overflow.viewportWidth,
