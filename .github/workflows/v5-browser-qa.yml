@@ -5,6 +5,8 @@ on:
     paths:
       - 'brief-v5/browser-qa.mjs'
       - 'brief-v5/app.mjs'
+      - 'brief-v5/styles.css'
+      - 'brief-v5/evidence-score-review.test.mjs'
       - 'brief-v5/replay-adapter.mjs'
       - 'brief-v5/evidence-score-review.mjs'
       - '.github/workflows/v5-browser-qa.yml'
